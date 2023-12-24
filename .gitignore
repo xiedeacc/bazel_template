@@ -1,0 +1,7 @@
+MODULE.bazel.lock
+core.*
+.cache/*
+.cache
+.cache/
+nohup.out
+bazel-*

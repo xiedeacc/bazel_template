@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package bazel_template.proto;
+option java_package = "bazel_template.proto";
+option cc_generic_services = true;
+
+message Request {
+  string request_id = 1; 
+  string msg = 2;
+}
+
+message Response {
+  string request_id = 1;
+  string msg = 2;
+}
+
+message HttpRequest {}
+
+message HttpResponse {}
+
+service Service {
+  rpc Handle(Request) returns (Response);
+  rpc HttpHandle(HttpRequest) returns (HttpResponse);
+}

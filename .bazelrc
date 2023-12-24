@@ -1,0 +1,46 @@
+test -c opt
+test --copt='-g'
+test --copt='-O2'
+test --copt='-Wall'
+test --cxxopt='--std=c++17'
+test --strip='never'
+test --output_filter="^//"
+
+test --define=with_glog=true
+test:cpplint --test_tag_filters=cpplint
+test:cpplint --build_tests_only
+test:unit_test --test_tag_filters=-cpplint
+test:unit_test --test_env HEAPCHECK=normal
+test:coverage --test_tag_filters=-cpplint
+test:coverage --copt=--coverage
+test:coverage --cxxopt=--coverage
+test:coverage --cxxopt=-fprofile-arcs
+test:coverage --cxxopt=-ftest-coverage
+test:coverage --linkopt=-coverage
+test:coverage --linkopt=-lgcov
+test:coverage --linkopt=-lgcc
+test:coverage --linkopt=-lc
+test:coverage --nocache_test_results
+
+run -c opt
+run --copt='-g'
+run --copt='-O2'
+run --copt='-Wall'
+run --cxxopt='--std=c++17'
+run --strip='never'
+run --output_filter="^//"
+run --define=with_glog=true
+
+build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+build -c opt
+build --copt='-g'
+build --copt='-O2'
+build --copt='-Wall'
+build --copt=-march=native
+build --host_copt=-march=native
+build --cxxopt='--std=c++17'
+build --strip='never'
+build --output_filter="^//"
+build --define=with_glog=true
+#build --remote_cache=http://192.168.1.101/bazel_cache
+#build --keep_going

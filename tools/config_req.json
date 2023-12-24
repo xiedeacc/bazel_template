@@ -1,0 +1,4 @@
+{
+    "request_id": "test_echo",
+    "content": "Hello, I'm client~"
+}

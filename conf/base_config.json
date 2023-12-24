@@ -1,0 +1,8 @@
+{
+    "nacos_sdk_addr": "http://127.0.0.1:80",
+    "nacos_namespace": "wx-prod",
+    "nacos_service_name": "nads-bazel_template",
+    "nacos_cluster_name": "nads-bazel_template0",
+    "nacos_group_name": "nads-bazel_template",
+    "nacos_sdk_rcv_udp_port": 10005
+}

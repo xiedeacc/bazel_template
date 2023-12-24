@@ -1,0 +1,7 @@
+{
+    "nacos_sdk_addr": "http://127.0.0.1:80",
+    "nacos_namespace": "wx-pre",
+    "nacos_service_name": "nads-bazel_template",
+    "nacos_cluster_name": "nads-bazel_template0",
+    "nacos_group_name": "nads-bazel_template"
+}
