@@ -1,3 +1,5 @@
+##### less some binary
+
 config_setting(
     name = "linux_x86_64",
     constraint_values = [
@@ -6,14 +8,8 @@ config_setting(
     ],
 )
 
-alias(
-    name = "zstd",
-    actual = ":libzstd",
-    visibility = ["//visibility:public"],
-)
-
 cc_library(
-    name = "libzstd",
+    name = "zstd",
     srcs = glob(
         [
             "lib/common/*.h",
@@ -68,8 +64,8 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "@lz4//:liblz4",
-        "@lzma",
+        "@lz4",
+        "@xz//:lzma",
         "@zlib",
     ],
 )
@@ -87,14 +83,14 @@ cc_library(
         "-g",
     ],
     includes = [
-        "external/zlib",
+        #"external/zlib",
     ],
     linkopts = [
         "-pthread",
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":libzstd",
+        ":zstd",
     ],
 )
 
@@ -107,6 +103,7 @@ cc_library(
         "programs/dibio.c",
         "programs/fileio.c",
         "programs/fileio_asyncio.c",
+        "programs/lorem.c",
         "programs/timefn.c",
         "programs/util.c",
         "programs/zstdcli_trace.c",
@@ -120,6 +117,7 @@ cc_library(
         "programs/fileio_asyncio.h",
         "programs/fileio_common.h",
         "programs/fileio_types.h",
+        "programs/lorem.h",
         "programs/platform.h",
         "programs/timefn.h",
         "programs/util.h",
@@ -137,7 +135,7 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":libzstd",
+        ":zstd",
     ],
 )
 
@@ -149,7 +147,7 @@ cc_binary(
         "-g",
     ],
     deps = [
-        ":libzstd",
+        ":zstd",
         ":zstd_util",
     ],
 )

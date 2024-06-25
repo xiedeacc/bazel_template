@@ -44,8 +44,6 @@ cc_library(
     copts = select({
         "@platforms//os:windows": [],
         "//conditions:default": [
-            "-Wno-shift-negative-value",
-            "-march=native",
             "-O3",
             "-fPIC",
             "-g",
