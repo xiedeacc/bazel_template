@@ -22,35 +22,18 @@ git_repository(
 )
 
 git_repository(
-    name = "bazel_features",
-    remote = "git@github.com:bazel-contrib/bazel_features.git",
-    tag = "v1.12.0",
-)
-
-git_repository(
     name = "rules_cc",
     remote = "git@github.com:bazelbuild/rules_cc.git",
     tag = "0.0.9",
 )
 
 new_git_repository(
-    name = "jemalloc",
-    build_file = "//bazel_script:jemalloc.BUILD",
-    commit = "21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322",
-    remote = "git@github.com:jemalloc/jemalloc.git",
+    name = "libsodium",
+    build_file = "//bazel_script:libsodium.BUILD",
+    remote = "git@github.com:jedisct1/libsodium.git",
+    tag = "1.0.20-RELEASE",
 )
-
-#git_repository(
-#name = "jemalloc",
-#build_file = "//bazel_script:jemalloc.BUILD",
-#commit = "e63592f9cfa3e388978a3b19343649e408ca9bcf",
-#remote = "git@github.com:xiedeacc/jemalloc.git",
-#)
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("7.2.0")
-
-load("@bazel_features//:deps.bzl", "bazel_features_deps")
-
-bazel_features_deps()
