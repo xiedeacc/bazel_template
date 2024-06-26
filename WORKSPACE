@@ -253,6 +253,34 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("7.2.0")
 
+#load("@rules_cc//cc:repositories.bzl", "cc_toolchain_config")
+
+#cc_toolchain_config()
+
+register_toolchains(
+    "//toolchain:clang_toolchain",
+    #"//toolchain:gcc_toolchain",
+    #"//toolchain:clang_armv8_toolchain",
+    #"//toolchain:gcc_armv8_toolchain",
+)
+
+#cc_toolchain_suite(
+#name = "msvc_toolchain_suite",
+#toolchains = {
+#"msvc-cl": "//:msvc_cl_toolchain",
+#},
+#)
+
+#cc_toolchain_suite(
+#name = "linux_toolchain_suite",
+#toolchains = {
+#"clang": "//toolchain:clang_toolchain",
+#"gcc": "//toolchain:gcc_toolchain",
+#"clang-armv8": "//toolchain:clang_armv8_toolchain",
+#"gcc-armv8": "//toolchain:gcc_armv8_toolchain",
+#},
+#)
+
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
