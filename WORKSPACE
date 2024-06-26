@@ -22,15 +22,126 @@ git_repository(
 )
 
 git_repository(
+    name = "bazel_features",
+    remote = "git@github.com:bazel-contrib/bazel_features.git",
+    tag = "v1.12.0",
+)
+
+git_repository(
     name = "rules_cc",
     remote = "git@github.com:bazelbuild/rules_cc.git",
     tag = "0.0.9",
 )
 
 git_repository(
+    name = "rules_foreign_cc",
+    remote = "git@github.com:bazelbuild/rules_foreign_cc.git",
+    tag = "0.10.1",
+)
+
+git_repository(
     name = "rules_proto",
     remote = "git@github.com:bazelbuild/rules_proto.git",
     tag = "6.0.0",
+)
+
+git_repository(
+    name = "rules_perl",
+    remote = "git@github.com:bazelbuild/rules_perl.git",
+    tag = "0.2.3",
+)
+
+git_repository(
+    name = "rules_python",
+    remote = "git@github.com:bazelbuild/rules_python.git",
+    tag = "0.33.0",
+)
+
+git_repository(
+    name = "rules_java",
+    remote = "git@github.com:bazelbuild/rules_java.git",
+    tag = "7.6.1",
+)
+
+git_repository(
+    name = "build_bazel_rules_swift",
+    remote = "git@github.com:bazelbuild/rules_swift.git",
+    tag = "1.18.0",
+)
+
+git_repository(
+    name = "io_bazel_rules_go",
+    remote = "git@github.com:bazelbuild/rules_go.git",
+    tag = "v0.48.0",
+)
+
+git_repository(
+    name = "rules_pkg",
+    remote = "git@github.com:bazelbuild/rules_pkg.git",
+    tag = "1.0.0",
+)
+
+git_repository(
+    name = "io_bazel_rules_closure",
+    remote = "git@github.com:bazelbuild/rules_closure.git",
+    tag = "0.13.0",
+)
+
+git_repository(
+    name = "contrib_rules_jvm",
+    remote = "git@github.com:bazel-contrib/rules_jvm.git",
+    tag = "v0.27.0",
+)
+
+git_repository(
+    name = "rules_jvm_external",
+    remote = "git@github.com:bazelbuild/rules_jvm_external.git",
+    tag = "6.1",
+)
+
+git_repository(
+    name = "io_bazel_rules_docker",
+    remote = "git@github.com:bazelbuild/rules_docker.git",
+    tag = "v0.25.0",
+)
+
+git_repository(
+    name = "apple_rules_lint",
+    remote = "git@github.com:apple/apple_rules_lint.git",
+    tag = "0.3.2",
+)
+
+git_repository(
+    name = "build_bazel_rules_apple",
+    remote = "git@github.com:bazelbuild/rules_apple.git",
+    tag = "3.5.1",
+)
+
+git_repository(
+    name = "build_bazel_apple_support",
+    remote = "git@github.com:bazelbuild/apple_support.git",
+    tag = "1.15.1",
+)
+
+http_archive(
+    name = "nasm",
+    build_file = "//bazel_script:nasm.BUILD",
+    sha256 = "f5c93c146f52b4f1664fa3ce6579f961a910e869ab0dae431bd871bdd2584ef2",
+    strip_prefix = "nasm-2.15.05",
+    urls = [
+        "https://mirror.bazel.build/www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip",
+        "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip",
+    ],
+)
+
+http_archive(
+    name = "perl",
+    build_file = "//bazel_script:perl.BUILD",
+    sha256 = "aeb973da474f14210d3e1a1f942dcf779e2ae7e71e4c535e6c53ebabe632cc98",
+    urls = [
+        "https://mirror.bazel.build/strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip",
+        "https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip",
+    ],
 )
 
 new_git_repository(
@@ -68,11 +179,25 @@ new_git_repository(
     tag = "v1.5.6",
 )
 
+git_repository(
+    name = "brotli",
+    remote = "git@github.com:google/brotli.git",
+    tag = "v1.1.0",
+)
+
 new_git_repository(
     name = "libsodium",
     build_file = "//bazel_script:libsodium.BUILD",
     remote = "git@github.com:jedisct1/libsodium.git",
     tag = "1.0.20-RELEASE",
+)
+
+http_archive(
+    name = "openssl",
+    build_file = "//bazel_script:openssl.make.BUILD",
+    sha256 = "777cd596284c883375a2a7a11bf5d2786fc5413255efab20c50d6ffe6d020b7e",
+    strip_prefix = "openssl-3.3.1",
+    urls = ["https://github.com/openssl/openssl/releases/download/openssl-3.3.1/openssl-3.3.1.tar.gz"],
 )
 
 git_repository(
@@ -128,15 +253,45 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("7.2.0")
 
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
 load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
+load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
+load("@rules_perl//perl:deps.bzl", "perl_register_toolchains")
+load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
 load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
+load("@rules_python//python:repositories.bzl", "py_repositories")
+load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
 
-boost_deps()
+bazel_features_deps()
+
+rules_foreign_cc_dependencies()
+
+rules_java_dependencies()
+
+py_repositories()
+
+go_rules_dependencies()
+
+rules_pkg_dependencies()
 
 rules_proto_dependencies()
 
 rules_proto_toolchains()
+
+boost_deps()
+
+rules_java_toolchains()
+
+go_register_toolchains(version = "1.18")
+
+perl_register_toolchains()
+
+rules_closure_dependencies()
+
+rules_closure_toolchains()
 
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 load("@hedron_compile_commands//:workspace_setup_transitive.bzl", "hedron_compile_commands_setup_transitive")
