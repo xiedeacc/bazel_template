@@ -6,9 +6,7 @@ cc_binary(
     ],
     deps = [
         "@boost//:algorithm",
-        "@openssl//:openssl_lib",
-        #"@com_google_protobuf//:protobuf",
-        #"@libsodium//:sodium",
+        "@openssl",
     ],
 )
 

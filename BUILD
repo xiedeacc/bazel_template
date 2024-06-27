@@ -1,5 +1,4 @@
 load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
-load("@bazel_problem//bazel_script:common.bzl", "run_command")
 
 package(default_visibility = ["//visibility:public"])
 
