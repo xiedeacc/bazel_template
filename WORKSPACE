@@ -253,15 +253,8 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("7.2.0")
 
-#load("@rules_cc//cc:repositories.bzl", "cc_toolchain_config")
-
-#cc_toolchain_config()
-
 #register_toolchains(
-#"//toolchain:clang_toolchain",
-##"//toolchain:gcc_toolchain",
-##"//toolchain:clang_armv8_toolchain",
-##"//toolchain:gcc_armv8_toolchain",
+#"//toolchain:clang_toolchain_for_linux_x86_64",
 #)
 
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
