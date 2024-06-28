@@ -6,18 +6,6 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(name = "empty")
 
-#cc_toolchain_suite(
-#name = "toolchain",
-#toolchains = {
-#"k8|gcc": "@local_config_cc//:cc-compiler-k8",
-#"k8|clang": ":clang_linux_x86_64_toolchain",
-#"k8": ":clang_linux_x86_64_toolchain",
-##"k8": "@local_config_cc//:cc-compiler-k8",
-#"armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
-#"armeabi-v7a": ":cc-compiler-armeabi-v7a",
-#},
-#)
-
 toolchain(
     name = "clang_toolchain_for_linux_x86_64",
     exec_compatible_with = [
