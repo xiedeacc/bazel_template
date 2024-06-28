@@ -1,6 +1,7 @@
 load("@rules_cc//cc:defs.bzl", "cc_toolchain", "cc_toolchain_suite")
 load(":clang_linux_x86_64_cc_toolchain_config.bzl", "cc_toolchain_config")
 load(":armeabi_linux_x86_64_cc_toolchain_config.bzl", "armeabi_cc_toolchain_config")
+#load("@local_config_cc//:cc_toolchain_config.bzl", "cc_toolchain_config")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -31,20 +32,6 @@ toolchain(
         "@platforms//os:linux",
     ],
     toolchain = "@local_config_cc//:cc-compiler-k8",
-    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
-)
-
-toolchain(
-    name = "gcc_toolchain_for_linux_armeabi",
-    exec_compatible_with = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-    target_compatible_with = [
-        "@platforms//cpu:armv7",
-        "@platforms//os:linux",
-    ],
-    toolchain = ":cc-compiler-armeabi-v7a",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 

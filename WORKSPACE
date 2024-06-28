@@ -244,6 +244,12 @@ git_repository(
 )
 
 git_repository(
+    name = "toolchains_llvm",
+    remote = "git@github.com:bazel-contrib/toolchains_llvm.git",
+    tag = "1.0.0",
+)
+
+git_repository(
     name = "hedron_compile_commands",
     commit = "e43e8eaeed3e252ac7c02983f4b1792bdff2e2f0",
     remote = "git@github.com:xiedeacc/bazel-compile-commands-extractor.git",
@@ -252,12 +258,6 @@ git_repository(
 load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("7.2.0")
-
-register_toolchains(
-    "//toolchain:gcc_toolchain_for_linux_x86_64",
-    "//toolchain:clang_toolchain_for_linux_x86_64",
-    "//toolchain:gcc_toolchain_for_linux_armeabi",
-)
 
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
@@ -298,6 +298,26 @@ perl_register_toolchains()
 rules_closure_dependencies()
 
 rules_closure_toolchains()
+
+load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
+
+bazel_toolchain_dependencies()
+
+load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
+
+llvm_toolchain(
+    name = "llvm_toolchain",
+    llvm_version = "15.0.6",
+)
+
+load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+
+register_toolchains(
+    "//toolchain:clang_toolchain_for_linux_x86_64",
+    "//toolchain:gcc_toolchain_for_linux_x86_64",
+)
+
+llvm_register_toolchains()
 
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 load("@hedron_compile_commands//:workspace_setup_transitive.bzl", "hedron_compile_commands_setup_transitive")
