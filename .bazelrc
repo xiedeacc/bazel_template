@@ -32,5 +32,5 @@ build --output_filter="^//"
 #build --remote_cache=http://192.168.1.101/bazel_cache
 #build --keep_going
 
-build --crosstool_top=//toolchain:toolchain
-build --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+#build --crosstool_top=//toolchain:toolchain
+#build --host_crosstool_top=@bazel_tools//tools/cpp:toolchain

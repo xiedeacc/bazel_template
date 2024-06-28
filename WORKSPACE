@@ -253,11 +253,11 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("7.2.0")
 
-#register_toolchains(
-#"//toolchain:gcc_toolchain_for_linux_x86_64",
-#"//toolchain:clang_toolchain_for_linux_x86_64",
-#"//toolchain:gcc_toolchain_for_linux_armeabi",
-#)
+register_toolchains(
+    "//toolchain:gcc_toolchain_for_linux_x86_64",
+    "//toolchain:clang_toolchain_for_linux_x86_64",
+    "//toolchain:gcc_toolchain_for_linux_armeabi",
+)
 
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")

@@ -6,59 +6,59 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(name = "empty")
 
-cc_toolchain_suite(
-    name = "toolchain",
-    toolchains = {
-        "k8|gcc": "@local_config_cc//:cc-compiler-k8",
-        "k8|clang": ":clang_linux_x86_64_toolchain",
-        "k8": ":clang_linux_x86_64_toolchain",
-        #"k8": "@local_config_cc//:cc-compiler-k8",
-        "armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
-        "armeabi-v7a": ":cc-compiler-armeabi-v7a",
-    },
+#cc_toolchain_suite(
+#name = "toolchain",
+#toolchains = {
+#"k8|gcc": "@local_config_cc//:cc-compiler-k8",
+#"k8|clang": ":clang_linux_x86_64_toolchain",
+#"k8": ":clang_linux_x86_64_toolchain",
+##"k8": "@local_config_cc//:cc-compiler-k8",
+#"armeabi-v7a|compiler": ":cc-compiler-armeabi-v7a",
+#"armeabi-v7a": ":cc-compiler-armeabi-v7a",
+#},
+#)
+
+toolchain(
+    name = "clang_toolchain_for_linux_x86_64",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    toolchain = ":clang_linux_x86_64_toolchain",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 
-#toolchain(
-#name = "clang_toolchain_for_linux_x86_64",
-#exec_compatible_with = [
-#"@platforms//cpu:x86_64",
-#"@platforms//os:linux",
-#],
-#target_compatible_with = [
-#"@platforms//cpu:x86_64",
-#"@platforms//os:linux",
-#],
-#toolchain = ":clang_linux_x86_64_toolchain",
-#toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
-#)
+toolchain(
+    name = "gcc_toolchain_for_linux_x86_64",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    toolchain = "@local_config_cc//:cc-compiler-k8",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
 
-#toolchain(
-#name = "gcc_toolchain_for_linux_x86_64",
-#exec_compatible_with = [
-#"@platforms//cpu:x86_64",
-#"@platforms//os:linux",
-#],
-#target_compatible_with = [
-#"@platforms//cpu:x86_64",
-#"@platforms//os:linux",
-#],
-#toolchain = "@local_config_cc//:cc-compiler-k8",
-#toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
-#)
-
-#toolchain(
-#name = "gcc_toolchain_for_linux_armeabi",
-#exec_compatible_with = [
-#"@platforms//cpu:x86_64",
-#"@platforms//os:linux",
-#],
-#target_compatible_with = [
-#"@platforms//cpu:armv7",
-#"@platforms//os:linux",
-#],
-#toolchain = ":cc-compiler-armeabi-v7a",
-#toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
-#)
+toolchain(
+    name = "gcc_toolchain_for_linux_armeabi",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:armv7",
+        "@platforms//os:linux",
+    ],
+    toolchain = ":cc-compiler-armeabi-v7a",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
 
 cc_toolchain(
     name = "clang_linux_x86_64_toolchain",
