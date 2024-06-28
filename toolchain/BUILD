@@ -32,6 +32,34 @@ cc_toolchain_suite(
 #toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 #)
 
+#toolchain(
+#name = "gcc_toolchain_for_linux_x86_64",
+#exec_compatible_with = [
+#"@platforms//cpu:x86_64",
+#"@platforms//os:linux",
+#],
+#target_compatible_with = [
+#"@platforms//cpu:x86_64",
+#"@platforms//os:linux",
+#],
+#toolchain = "@local_config_cc//:cc-compiler-k8",
+#toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+#)
+
+#toolchain(
+#name = "gcc_toolchain_for_linux_armeabi",
+#exec_compatible_with = [
+#"@platforms//cpu:x86_64",
+#"@platforms//os:linux",
+#],
+#target_compatible_with = [
+#"@platforms//cpu:armv7",
+#"@platforms//os:linux",
+#],
+#toolchain = ":cc-compiler-armeabi-v7a",
+#toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+#)
+
 cc_toolchain(
     name = "clang_linux_x86_64_toolchain",
     all_files = ":empty",
