@@ -1,3 +1,5 @@
+#common --experimental_downloader_config=.bazel_downloader.cfg
+
 test:cpplint --test_tag_filters=cpplint
 test:cpplint --build_tests_only
 test:unit_test --test_tag_filters=-cpplint
@@ -14,6 +16,7 @@ test:coverage --linkopt=-lc
 test:coverage --nocache_test_results
 
 
+build --workspace_status_command=scripts/workspace_status.sh
 #build --features=-compiler_param_file
 #build --features=-layering_check
 #build --host_features=-compiler_param_file

@@ -1,4 +1,6 @@
 load("//bazel_script:common.bzl", "version_info")
+load("//tools:cpplint.bzl", "cpplint")
+load("//tools:build.bzl", "cc_test")
 
 cc_binary(
     name = "main",
@@ -61,3 +63,5 @@ cc_test(
 #copts = ["-std=c++17"],
 #deps = [":util"],
 #)
+
+cpplint()
