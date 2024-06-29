@@ -31,11 +31,6 @@ load(
     "with_feature_set",
 )
 
-def _target_os_version(ctx):
-    platform_type = ctx.fragments.apple.single_arch_platform.platform_type
-    xcode_config = ctx.attr._xcode_config[apple_common.XcodeVersionConfig]
-    return xcode_config.minimum_os_for_platform_type(platform_type)
-
 def layering_check_features(compiler, is_macos):
     if compiler != "clang":
         return []
@@ -1506,11 +1501,6 @@ cc_toolchain_config = rule(
         "coverage_link_flags": attr.string_list(),
         "supports_start_end_lib": attr.bool(),
         "builtin_sysroot": attr.string(),
-        "_xcode_config": attr.label(default = configuration_field(
-            fragment = "apple",
-            name = "xcode_config_label",
-        )),
     },
-    fragments = ["apple"],
     provides = [CcToolchainConfigInfo],
 )

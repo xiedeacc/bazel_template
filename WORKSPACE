@@ -243,10 +243,15 @@ git_repository(
     },
 )
 
-git_repository(
+#git_repository(
+#name = "toolchains_llvm",
+#remote = "git@github.com:xiedeacc/toolchains_llvm.git",
+#tag = "1.0.0",
+#)
+
+local_repository(
     name = "toolchains_llvm",
-    remote = "git@github.com:bazel-contrib/toolchains_llvm.git",
-    tag = "1.0.0",
+    path = "../toolchains_llvm",
 )
 
 git_repository(
@@ -307,14 +312,18 @@ load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
     name = "llvm_toolchain",
-    llvm_version = "15.0.6",
+    absolute_paths = True,
+    llvm_version = "18.1.8",
+    toolchain_roots = {"": "/usr/local/llvm-18"},
 )
 
 load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
 
+llvm_register_toolchains()
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_x86_64",
-    "//toolchain:gcc_toolchain_for_linux_x86_64",
+    #"//toolchain:gcc_toolchain_for_linux_x86_64",
 )
 
 llvm_register_toolchains()

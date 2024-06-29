@@ -24,13 +24,17 @@ build -c opt
 build --copt='-g'
 build --copt='-O2'
 build --copt='-Wall'
-build --copt='-march=native'
-build --host_copt='-march=native'
+#build --copt='-march=native'
+#build --host_copt='-march=native'
 build --cxxopt='-std=c++17'
 build --strip='never'
 build --output_filter="^//"
 #build --remote_cache=http://192.168.1.101/bazel_cache
 #build --keep_going
 
-build:clang --extra_toolchains=//toolchain:clang_toolchain_for_linux_x86_64 
-build:gcc --extra_toolchains=//toolchain:gcc_toolchain_for_linux_x86_64
+build:clang --extra_toolchains=//toolchain:clang_toolchain_for_linux_x86_64
+#build:gcc --extra_toolchains=//toolchain:gcc_toolchain_for_linux_x86_64
+build:openwrt-aarch64 --action_env=STAGING_DIR=/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64/toolchain-aarch64_generic_gcc-12.3.0_musl
+build:openwrt-aarch64 --extra_toolchains=//toolchain:gcc_toolchain_for_linux_aarch64
+build:openwrt-aarch64 --platforms=//toolchain:aarch64_target
+build:openwrt-aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
