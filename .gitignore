@@ -1,3 +1,5 @@
 bazel-*
 /.cache/
 MODULE.bazel.lock
+core.*
+nohup.out
