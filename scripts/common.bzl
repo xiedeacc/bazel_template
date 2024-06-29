@@ -108,7 +108,7 @@ def version_info(name, out, exec_tool):
             "@local_config_git//:gen/head",
             "@local_config_git//:gen/branch_ref",
         ],
-        arguments = "--generate \"$@\" --git_tag_override=${GIT_TAG_OVERRIDE:-}",
+        arguments = "--generate \"$@\"",
     )
 
 def os(repository_ctx):
@@ -161,7 +161,7 @@ exports_files(
     ))[:-len("BUILD")]
 
     python_script_path = repository_ctx.path(
-        Label("//bazel_script:gen_local_config_git.py"),
+        Label("//scripts:gen_local_config_git.py"),
     )
     generated_files_path = repository_ctx.path("gen")
 

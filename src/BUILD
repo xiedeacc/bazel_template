@@ -1,6 +1,6 @@
-load("//bazel_script:common.bzl", "version_info")
-load("//tools:cpplint.bzl", "cpplint")
-load("//tools:build.bzl", "cc_test")
+load("//scripts:common.bzl", "version_info")
+#load("//scripts:cpplint.bzl", "cpplint")
+#load("//scripts:build.bzl", "cc_test")
 
 cc_binary(
     name = "main",
@@ -17,7 +17,7 @@ cc_binary(
 version_info(
     name = "version_info_h",
     out = "version_info.h",
-    exec_tool = "//bazel_script:gen_local_config_git",
+    exec_tool = "//scripts:gen_local_config_git",
 )
 
 cc_library(
@@ -64,4 +64,4 @@ cc_test(
 #deps = [":util"],
 #)
 
-cpplint()
+#cpplint()

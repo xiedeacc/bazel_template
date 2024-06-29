@@ -1,6 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-load("//bazel_script:common.bzl", "extract_symbols", "template_rule")
+load("//scripts:common.bzl", "extract_symbols", "template_rule")
 
 template_rule(
     name = "ares_build_h",

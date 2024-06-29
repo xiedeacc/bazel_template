@@ -1,6 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-load("@bazel_problem//bazel_script:common.bzl", "extract_symbols", "template_rule")
+load("@bazel_problem//scripts:common.bzl", "extract_symbols", "template_rule")
 
 config_setting(
     name = "windows",

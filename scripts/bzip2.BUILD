@@ -1,5 +1,5 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@folly//bazel_script:common.bzl", "extract_symbols", "template_rule")
+load("@folly//scripts:common.bzl", "extract_symbols", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
