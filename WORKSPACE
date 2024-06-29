@@ -1,7 +1,9 @@
-workspace(name = "bazel_problem")
+workspace(name = "bazel_template")
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
+load("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository", "new_local_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("//bazel_script:common.bzl", "gen_local_config_git")
 
 git_repository(
     name = "bazel_skylib",
@@ -201,15 +203,21 @@ http_archive(
 )
 
 git_repository(
-    name = "com_github_glog_glog",
-    remote = "git@github.com:google/glog.git",
-    tag = "v0.7.1",
-)
-
-git_repository(
     name = "com_google_absl",
     remote = "git@github.com:abseil/abseil-cpp.git",
     tag = "20240116.2",
+)
+
+git_repository(
+    name = "com_github_gflags_gflags",
+    remote = "git@github.com:gflags/gflags.git",
+    tag = "v2.2.2",
+)
+
+git_repository(
+    name = "com_github_glog_glog",
+    remote = "git@github.com:google/glog.git",
+    tag = "v0.7.1",
 )
 
 git_repository(
@@ -252,6 +260,11 @@ git_repository(
 local_repository(
     name = "toolchains_llvm",
     path = "../toolchains_llvm",
+)
+
+new_local_repository(
+    name = "openwrt_aarch64_toolchain",
+    path = "/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64/toolchain-aarch64_generic_gcc-12.3.0_musl",
 )
 
 git_repository(
@@ -340,3 +353,5 @@ hedron_compile_commands_setup_transitive()
 hedron_compile_commands_setup_transitive_transitive()
 
 hedron_compile_commands_setup_transitive_transitive_transitive()
+
+gen_local_config_git(name = "local_config_git")

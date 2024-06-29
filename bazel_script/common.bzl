@@ -63,3 +63,129 @@ extract_symbols = rule(
         "awk_script": attr.label(allow_single_file = True),
     },
 )
+
+def _local_config_git_genrule_impl(ctx):
+    ctx.actions.run_shell(
+        outputs = [ctx.outputs.out],
+        inputs = [f for t in ctx.attr.srcs for f in t.files.to_list()],
+        tools = [ctx.executable.exec_tool],
+        arguments = [f.path for t in ctx.attr.srcs for f in t.files.to_list()] +
+                    [ctx.outputs.out.path],
+        command = "%s %s" % (ctx.executable.exec_tool.path, ctx.attr.arguments),
+        execution_requirements = {"no-remote-exec": ""},
+        use_default_shell_env = True,
+    )
+
+_local_config_git_genrule_internal = rule(
+    implementation = _local_config_git_genrule_impl,
+    attrs = {
+        "out": attr.output(),
+        "exec_tool": attr.label(
+            executable = True,
+            #cfg = _local_exec_transition,
+            cfg = "exec",
+            allow_files = True,
+        ),
+        "arguments": attr.string(),
+        "srcs": attr.label_list(
+            allow_files = True,
+        ),
+    },
+)
+
+def _local_config_git_genrule(**kwargs):
+    _local_config_git_genrule_internal(
+        **kwargs
+    )
+
+def version_info(name, out, exec_tool):
+    _local_config_git_genrule(
+        name = name,
+        out = out,
+        exec_tool = exec_tool,
+        srcs = [
+            "@local_config_git//:gen/spec.json",
+            "@local_config_git//:gen/head",
+            "@local_config_git//:gen/branch_ref",
+        ],
+        arguments = "--generate \"$@\" --git_tag_override=${GIT_TAG_OVERRIDE:-}",
+    )
+
+def os(repository_ctx):
+    name = repository_ctx.os.name
+    if name == "linux":
+        return "linux"
+    elif name == "mac os x":
+        return "darwin"
+    elif name.startswith("windows"):
+        return "windows"
+    fail("Unsupported OS: " + name)
+
+def _get_python_bin_path(repository_ctx):
+    if repository_ctx.attr.python_bin_path != "":
+        return repository_ctx.attr.python_bin_path
+    python_bin_path = repository_ctx.which("python3")
+    if python_bin_path != None:
+        return str(python_bin_path)
+    python_bin_path = repository_ctx.which("python")
+    if python_bin_path != None:
+        return str(python_bin_path)
+    fail("find python error, install python and put it into PATH")
+
+def _gen_local_config_git_impl(repository_ctx):
+    local_config_git_build = """
+# Description:
+# Exports generated files used to generate tensorflow/core/util/version_info.cc
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files(
+    glob(["gen/*"]),
+)
+    """
+
+    if repository_ctx.os.name.startswith("windows") == "windows":
+        repository_ctx.file("BUILD.bazel", executable = False)
+        return None
+    else:
+        repository_ctx.file(
+            "BUILD.bazel",
+            content = local_config_git_build,
+            executable = False,
+        )
+
+    workspace_root_path = str(repository_ctx.path(
+        Label("//:BUILD"),
+    ))[:-len("BUILD")]
+
+    python_script_path = repository_ctx.path(
+        Label("//bazel_script:gen_local_config_git.py"),
+    )
+    generated_files_path = repository_ctx.path("gen")
+
+    r = repository_ctx.execute(
+        ["test", "-f", "%s/.git/logs/HEAD" % workspace_root_path],
+    )
+    if r.return_code == 0:
+        unused_var = repository_ctx.path(Label("//:.git/HEAD"))  # pylint: disable=unused-variable
+
+    result = repository_ctx.execute([
+        _get_python_bin_path(repository_ctx),
+        python_script_path,
+        "--configure",
+        workspace_root_path,
+        "--gen_root_path",
+        generated_files_path,
+    ], quiet = False)
+
+    if not result.return_code == 0:
+        fail(result.stderr)
+
+gen_local_config_git = repository_rule(
+    implementation = _gen_local_config_git_impl,
+    attrs = {
+        "python_bin_path": attr.string(mandatory = False),
+    },
+)
