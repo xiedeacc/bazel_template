@@ -6,6 +6,22 @@ filegroup(
 )
 
 filegroup(
+    name = "header",
+    srcs = [
+        "aarch64-openwrt-linux-musl/include",
+        "aarch64-openwrt-linux-musl/sys-include",
+        "include/**",
+    ],
+)
+
+filegroup(
+    name = "lib",
+    srcs = [
+        "lib/**",
+    ],
+)
+
+filegroup(
     name = "ar",
     srcs = ["bin/aarch64-openwrt-linux-musl-ar"],
 )

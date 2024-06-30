@@ -4,6 +4,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_r
 load("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository", "new_local_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//scripts:common.bzl", "gen_local_config_git")
+load("//scripts:openwrt_toolchain.bzl", "openwrt_toolchain_setup")
 
 git_repository(
     name = "bazel_skylib",
@@ -262,10 +263,54 @@ local_repository(
     path = "../toolchains_llvm",
 )
 
-new_local_repository(
+local_repository(
     name = "openwrt_aarch64_toolchain",
     path = "/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64/toolchain-aarch64_generic_gcc-12.3.0_musl",
 )
+
+openwrt_toolchain_setup(
+    name = "openwrt_repo",
+    arch_sha256sum = {"aarch64": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3"},
+    arch_urls = {"aarch64": "https://downloads.openwrt.org/releases/23.05.3/targets/rockchip/armv8/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz"},
+)
+
+load("@openwrt_toolchain//:toolchains.bzl", "register_openwrt_toolchains")
+
+register_openwrt_toolchains()
+
+llvm_toolchain(
+    name = "llvm_toolchain",
+    absolute_paths = True,
+    llvm_version = "18.1.8",
+    toolchain_roots = {"": "/usr/local/llvm-18"},
+)
+
+load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+#new_local_repository(
+#name = "openwrt_aarch64_toolchain",
+#path = "/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64/toolchain-aarch64_generic_gcc-12.3.0_musl",
+#)
+
+load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
+
+llvm_toolchain(
+    name = "llvm_toolchain",
+    absolute_paths = True,
+    llvm_version = "18.1.8",
+    toolchain_roots = {"": "/usr/local/llvm-18"},
+)
+
+load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+
+llvm_register_toolchains()
+
+register_toolchains(
+    "//toolchain:gcc_toolchain_for_linux_aarch64",
+    #"//toolchain:clang_toolchain_for_linux_x86_64",
+    #"//toolchain:gcc_toolchain_for_linux_x86_64",
+)
+
+llvm_register_toolchains()
 
 git_repository(
     name = "hedron_compile_commands",
@@ -316,30 +361,6 @@ perl_register_toolchains()
 rules_closure_dependencies()
 
 rules_closure_toolchains()
-
-load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
-
-bazel_toolchain_dependencies()
-
-load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
-
-llvm_toolchain(
-    name = "llvm_toolchain",
-    absolute_paths = True,
-    llvm_version = "18.1.8",
-    toolchain_roots = {"": "/usr/local/llvm-18"},
-)
-
-load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
-
-llvm_register_toolchains()
-
-register_toolchains(
-    "//toolchain:clang_toolchain_for_linux_x86_64",
-    #"//toolchain:gcc_toolchain_for_linux_x86_64",
-)
-
-llvm_register_toolchains()
 
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 load("@hedron_compile_commands//:workspace_setup_transitive.bzl", "hedron_compile_commands_setup_transitive")
