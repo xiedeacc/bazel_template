@@ -1,5 +1,7 @@
+BZLMOD_ENABLED = "@@" in str(Label("//:unused"))
+
 def _is_absolute_path(path):
-    return val and val[0] == "/" and (len(val) == 1 or val[1] != "/")
+    return path and path[0] == "/" and (len(path) == 1 or path[1] != "/")
 
 def _download_openwrt(rctx):
     urls = [rctx.attr.url]
@@ -14,6 +16,7 @@ def _download_openwrt(rctx):
     return rctx.attr
 
 def _openwrt_toolchain_repo_impl(rctx):
+    print(rctx.attr)
     rctx.file(
         "BUILD.bazel",
         content = rctx.read(Label("//scripts:BUILD.openwrt_repo")),
@@ -26,22 +29,13 @@ def _openwrt_toolchain_repo_impl(rctx):
     return updated_attrs
 
 openwrt_toolchain_repo = repository_rule(
+    implementation = _openwrt_toolchain_repo_impl,
     attrs = {
-        "name": attr.string(
-            mandatory = True,
-        ),
-        "arch": attr.string(
-            mandatory = True,
-        ),
-        "url": attr.string(
-            mandatory = True,
-        ),
-        "sha256sum": attr.string(
-            mandatory = True,
-        ),
+        "arch": attr.string(mandatory = True),
+        "url": attr.string(mandatory = True),
+        "sha256sum": attr.string(mandatory = True),
     },
     local = False,
-    implementation = _openwrt_toolchain_repo_impl,
 )
 
 def _canonical_dir_path(path):
@@ -55,11 +49,32 @@ def _pkg_path_from_label(label):
     else:
         return label.package
 
+def _os(rctx):
+    name = rctx.os.name
+    if name == "linux":
+        return "linux"
+    elif name == "mac os x":
+        return "darwin"
+    elif name.startswith("windows"):
+        return "windows"
+    fail("Unsupported OS: " + name)
+
+def _arch(rctx):
+    arch = rctx.os.arch
+    if arch == "arm64":
+        return "aarch64"
+    if arch == "amd64":
+        return "x86_64"
+    return arch
+
+def _os_bzl(os):
+    return {"darwin": "osx", "linux": "linux"}[os]
+
 def _openwrt_toolchain_config_impl(rctx):
     system_llvm = False
     if _is_absolute_path(toolchain_root):
         system_llvm = True
-        toolchain_path_prefix = _canonical_dir_path(toolchain_root)
+    toolchain_path_prefix = _canonical_dir_path(toolchain_root)
     if not system_llvm:
         toolchain_root = ("@" if BZLMOD_ENABLED else "") + "@openwrt_toolchain_repo_%s//" % rctx.attr.name
     print(toolchain_root)
@@ -67,100 +82,90 @@ def _openwrt_toolchain_config_impl(rctx):
     if system_llvm:
         toolchain_path_prefix = _canonical_dir_path(toolchain_root)
     else:
-        llvm_dist_label = Label(toolchain_root + ":BUILD.bazel")  # Exact target does not matter.
-        toolchain_path_prefix = _canonical_dir_path(str(rctx.path(llvm_dist_label).dirname))
+        toolchain_repo_label = Label(toolchain_root + ":BUILD.bazel")  # Exact target does not matter.
+        toolchain_path_prefix = _canonical_dir_path(str(rctx.path(toolchain_repo_label).dirname))
         #toolchain_path_prefix = _pkg_path_from_label(llvm_dist_label)
 
-    llvm_dist_rel_path = toolchain_path_prefix
-    llvm_dist_label_prefix = toolchain_path_prefix
-    wrapper_bin_prefix = "bin/"
-    tools_path_prefix = toolchain_path_prefix + "bin/"
-    symlinked_tools_str = ""
+    print(rctx.name)
+    print(toolchain_path_prefix)
+    rctx.xxx()
+    #suffix
+    #cc_toolchain_config_bzl = "@bazel_template//scripts:openwrt_cc_toolchain_config.bzl",
+    #symlinked_tools
+    ##sysroot_label_str = "\"%s\"" % str(sysroot_label)
+    #sysroot_label_str = ""
+    #extra_compiler_files
+    #extra_files_str
 
-    workspace_name = rctx.name
-    toolchain_info = struct(
-        os = os,
-        arch = arch,
-        llvm_dist_label_prefix = llvm_dist_label_prefix,
-        toolchain_path_prefix = toolchain_path_prefix,
-        tools_path_prefix = tools_path_prefix,
-        wrapper_bin_prefix = wrapper_bin_prefix,
-        sysroot_paths_dict = sysroot_paths_dict,
-        sysroot_labels_dict = sysroot_labels_dict,
-        target_settings_dict = rctx.attr.target_settings,
-        additional_include_dirs_dict = rctx.attr.cxx_builtin_include_directories,
-        stdlib_dict = rctx.attr.stdlib,
-        cxx_standard_dict = rctx.attr.cxx_standard,
-        compile_flags_dict = rctx.attr.compile_flags,
-        cxx_flags_dict = rctx.attr.cxx_flags,
-        link_flags_dict = rctx.attr.link_flags,
-        archive_flags_dict = rctx.attr.archive_flags,
-        link_libs_dict = rctx.attr.link_libs,
-        opt_compile_flags_dict = rctx.attr.opt_compile_flags,
-        opt_link_flags_dict = rctx.attr.opt_link_flags,
-        dbg_compile_flags_dict = rctx.attr.dbg_compile_flags,
-        coverage_compile_flags_dict = rctx.attr.coverage_compile_flags,
-        coverage_link_flags_dict = rctx.attr.coverage_link_flags,
-        unfiltered_compile_flags_dict = rctx.attr.unfiltered_compile_flags,
-        llvm_version = llvm_version,
-        extra_compiler_files = rctx.attr.extra_compiler_files,
-    )
+    ##extra_files_str = "\":internal-use-files\""
+    #toolchain_path_prefix = toolchain_info.toolchain_path_prefix
+    #cxx_builtin_include_directories = [
+    #toolchain_path_prefix + "include",
+    #toolchain_path_prefix + "aarch64-openwrt-linux-musl/include/c++/12.3.0",
+    #toolchain_path_prefix + "aarch64-openwrt-linux-musl/sys-include",
+    #]
 
-   hcc_toolchains_str, toolchain_labels_str = _cc_toolchains_str(
-        rctx,
-        workspace_name,
-        toolchain_info,
-        use_absolute_paths_llvm,
-    )
+    #sysroot_path = ""
+    #sysroot_path = toolchain_info.toolchain_path_prefix
+    #sysroot_prefix = "%sysroot%"
+    #cxx_builtin_include_directories.extend([
+    #_join(sysroot_prefix, "/include"),
+    #_join(sysroot_prefix, "/usr/include"),
+    #_join(sysroot_prefix, "/usr/local/include"),
+    #])
 
-    convenience_targets_str = _convenience_targets_str(
-        rctx,
-        use_absolute_paths_llvm,
-        llvm_dist_rel_path,
-        llvm_dist_label_prefix,
-        exec_dl_ext,
-    )
+    #target_arch
+    #workspace_name = rctx.name
+    #target_settings = ""
+    #target_system_name= "aarch64-linux"
+    ##target_system_name= "armeabi-linux"
+    ##target_system_name= "armv7a-linux"
+    ##target_system_name= "armv7-linux"
+    #compile_flags
+    #cxx_flags
+    #link_flags
+    #archive_flags
+    #link_libs
+    #opt_compile_flags
+    #opt_link_flags
+    #dbg_compile_flags
+    #coverage_compile_flags
+    #coverage_link_flags
+    #unfiltered_compile_flags
 
-    # Convenience macro to register all generated toolchains.
-    rctx.template(
-        "toolchains.bzl",
-        rctx.attr._toolchains_bzl_tpl,
-        {
-            "%{toolchain_labels}": toolchain_labels_str,
-        },
-    )
+    #filenames = []
+    #for libname in _aliased_libs:
+    #filename = "lib/{}.{}".format(libname, exec_dl_ext)
+    #filenames.append(filename)
+    #for toolname in _aliased_tools:
+    #filename = "bin/{}".format(toolname)
+    #filenames.append(filename)
 
-    # BUILD file with all the generated toolchain definitions.
-    rctx.template(
-        "BUILD.bazel",
-        rctx.attr._build_toolchain_tpl,
-        {
-            "%{cc_toolchain_config_bzl}": str(rctx.attr._cc_toolchain_config_bzl),
-            "%{cc_toolchains}": cc_toolchains_str,
-            "%{symlinked_tools}": symlinked_tools_str,
-            "%{wrapper_bin_prefix}": wrapper_bin_prefix,
-            "%{convenience_targets}": convenience_targets_str,
-        },
-    )
+    #for filename in filenames:
+    #rctx.symlink(llvm_dist_rel_path + filename, filename)
 
-    # CC wrapper script; see comments near the definition of `wrapper_bin_prefix`.
-    if os == "darwin":
-        cc_wrapper_tpl = rctx.attr._darwin_cc_wrapper_sh_tpl
-    else:
-        cc_wrapper_tpl = rctx.attr._cc_wrapper_sh_tpl
-    rctx.template(
-        "bin/cc_wrapper.sh",
-        cc_wrapper_tpl,
-        {
-            "%{toolchain_path_prefix}": toolchain_path_prefix,
-        },
-    )
+    #rctx.template(
+    #"BUILD.bazel",
+    #rctx.attr._build_toolchain_tpl,
+    #{
+    #"%{suffix}": suffix,
+    #"%{cc_toolchain_config_bzl}": cc_toolchain_config_bzl,
+    #"%{target_settings}": target_settings,
+    #"%{target_os_bzl}": target_os_bzl,
+    #"%{sysroot_label_str}": sysroot_label_str,
+    #"%{sysroot_path}": sysroot_path,
+    #"%{toolchain_path_prefix}": toolchain_path_prefix,
+    #"%{cxx_builtin_include_directories}": cxx_builtin_include_directories,
+    #"%{cc_toolchain_config_bzl}": str(rctx.attr._cc_toolchain_config_bzl),
+    #"%{cc_toolchains}": cc_toolchains_str,
+    #"%{symlinked_tools}": symlinked_tools_str,
+    #"%{wrapper_bin_prefix}": wrapper_bin_prefix,
+    #"%{convenience_targets}": convenience_targets_str,
+    #},
+    #)
 
 openwrt_toolchain_config = repository_rule(
     attrs = {
-        "name": attr.string(
-            mandatory = True,
-        ),
         "arch": attr.string(
             mandatory = True,
         ),
@@ -179,19 +184,19 @@ openwrt_toolchain_config = repository_rule(
 def openwrt_toolchain_setup(name, **kwargs):
     if not kwargs.get("toolchains"):
         fail("must set toolchains")
-    toolchains = wargs.get("toolchains")
+    toolchains = kwargs.get("toolchains")
     for chip_model, chip_model_info in toolchains.items():
-        for chip_version, chip_version_info in chip_model_info:
+        for chip_version, chip_version_info in chip_model_info.items():
             if not chip_version_info.get("url"):
                 fail("must have url")
             if not chip_version_info.get("arch"):
                 fail("must have arch")
             if not _is_absolute_path(chip_version_info.get("url")) and not chip_version_info.get("sha256sum"):
                 fail("must have sha256sum unless url is a absolute path")
-            attr = {}
-            attr["name"] = "{}_{}".format(chip_model, chip_version)
-            atrr["url"] = chip_version_info.get("url")
-            atrr["arch"] = chip_version_info.get("arch")
-            atrr["sha256sum"] = chip_version_info.get("sha256sum")
-            openwrt_toolchain_repo(name = "openwrt_toolchain_repo_{}_{}".format(chip_model, chip_version), **atrr)
-            openwrt_toolchain_config(name = "openwrt_toolchain_config_{}_{}".format(chip_model, chip_version), **atrr)
+            aargs = dict()
+            aargs["name"] = "{}_{}".format(chip_model, chip_version)
+            aargs["url"] = chip_version_info.get("url")
+            aargs["arch"] = chip_version_info.get("arch")
+            aargs["sha256sum"] = chip_version_info.get("sha256sum")
+            openwrt_toolchain_repo(**aargs)
+            openwrt_toolchain_config(**aargs)
