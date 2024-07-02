@@ -4,7 +4,6 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_r
 load("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository", "new_local_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//scripts:common.bzl", "gen_local_config_git")
-load("//scripts:openwrt_toolchain.bzl", "openwrt_toolchain_setup")
 
 git_repository(
     name = "bazel_skylib",
@@ -276,17 +275,15 @@ llvm_toolchain(
     toolchain_roots = {"": "/usr/local/llvm-18"},
 )
 
-load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
-
-llvm_register_toolchains()
-
 local_repository(
-    name = "openwrt_aarch64_toolchain",
-    path = "/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64/toolchain-aarch64_generic_gcc-12.3.0_musl",
+    name = "toolchains_openwrt",
+    path = "../toolchains_openwrt",
 )
 
+load("@toolchains_openwrt//toolchain:toolchains_openwrt.bzl", "openwrt_toolchain_setup")
+
 openwrt_toolchain_setup(
-    name = "openwrt_repo",
+    name = "openwrt_repo_setup",
     toolchains = {
         "rockchip": {
             "armv8": {
@@ -298,6 +295,15 @@ openwrt_toolchain_setup(
             },
         },
     },
+)
+
+load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+
+llvm_register_toolchains()
+
+local_repository(
+    name = "openwrt_aarch64_toolchain",
+    path = "/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64/toolchain-aarch64_generic_gcc-12.3.0_musl",
 )
 
 #load("@openwrt_toolchain//:toolchains.bzl", "register_openwrt_toolchains")
