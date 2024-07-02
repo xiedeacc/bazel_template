@@ -11,7 +11,6 @@ cc_binary(
     deps = [
         "@boost//:algorithm",
         #"@openssl",
-        "@openwrt_toolchain_config_rockchip_armv8//:print_repo_name",
     ],
 )
 
