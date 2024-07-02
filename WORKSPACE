@@ -290,8 +290,6 @@ openwrt_toolchain_setup(
                 "arch": "aarch64",
                 "url": "/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64",
                 "sha256sum": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3",
-                #"strip_prefix": "openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64",
-                "strip_prefix": "",
             },
         },
     },
