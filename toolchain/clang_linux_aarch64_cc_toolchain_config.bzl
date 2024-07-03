@@ -796,7 +796,7 @@ def _impl(ctx):
             ),
         ],
     )
-
+    print(include_paths_feature)
     external_include_paths_feature = feature(
         name = "external_include_paths",
         flag_sets = [
