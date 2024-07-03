@@ -101,8 +101,8 @@ def write_version_info(filename, git_version):
 #ifndef BAZEL_AUTO_GENERATED_VERSION_INFO_H_
 #define BAZEL_AUTO_GENERATED_VERSION_INFO_H_
 
-#include <string_view>
-constexpr std::string_view git_version = "%s"
+#include <string>
+const std::string GIT_VERSION = "%s";
 
 #endif  // BAZEL_AUTO_GENERATED_VERSION_INFO_H_
 """ % git_version.decode("utf-8")

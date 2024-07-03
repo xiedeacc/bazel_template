@@ -1,6 +1,6 @@
+load("//scripts:build.bzl", "cc_test")
 load("//scripts:common.bzl", "version_info")
-#load("//scripts:cpplint.bzl", "cpplint")
-#load("//scripts:build.bzl", "cc_test")
+load("//scripts:cpplint.bzl", "cpplint")
 
 cc_binary(
     name = "main",
@@ -64,4 +64,4 @@ cc_test(
 #deps = [":util"],
 #)
 
-#cpplint()
+cpplint()

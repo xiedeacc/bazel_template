@@ -1,8 +1,8 @@
 workspace(name = "bazel_template")
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
-load("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository", "new_local_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository", "new_local_repository")
 load("//scripts:common.bzl", "gen_local_config_git")
 
 git_repository(
@@ -123,6 +123,13 @@ git_repository(
     name = "build_bazel_apple_support",
     remote = "git@github.com:bazelbuild/apple_support.git",
     tag = "1.15.1",
+)
+
+new_git_repository(
+    name = "cpplint",
+    build_file = "//scripts:cpplint.BUILD",
+    commit = "7b88b68187e3516540fab3caa900988d2179ed24",
+    remote = "git@github.com:cpplint/cpplint.git",
 )
 
 http_archive(
@@ -251,28 +258,10 @@ git_repository(
     },
 )
 
-#git_repository(
-#name = "toolchains_llvm",
-#remote = "git@github.com:xiedeacc/toolchains_llvm.git",
-#tag = "1.0.0",
-#)
-
-local_repository(
-    name = "toolchains_llvm",
-    path = "../toolchains_llvm",
-)
-
-load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
-
-llvm_toolchain(
-    name = "llvm_toolchain",
-    absolute_paths = True,
-    #llvm_versions = {
-    ##"": "15.0.6",
-    #"ubuntu-18.04-x86_64": "15.0.4",
-    #},
-    llvm_version = "18.1.8",
-    toolchain_roots = {"": "/usr/local/llvm-18"},
+register_toolchains(
+    "//toolchain:clang_toolchain_for_linux_x86_64",
+    "//toolchain:clang_toolchain_for_linux_aarch64",
+    #"//toolchain:gcc_toolchain_for_linux_x86_64",
 )
 
 local_repository(
@@ -297,14 +286,33 @@ openwrt_toolchain_setup(
 
 register_toolchains("@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8")
 
+#git_repository(
+#name = "toolchains_llvm",
+#remote = "git@github.com:xiedeacc/toolchains_llvm.git",
+#tag = "1.0.0",
+#)
+
+local_repository(
+    name = "toolchains_llvm",
+    path = "../toolchains_llvm",
+)
+
+load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
+
+llvm_toolchain(
+    name = "llvm_toolchain",
+    absolute_paths = True,
+    #llvm_versions = {
+    ##"": "15.0.6",
+    #"ubuntu-18.04-x86_64": "15.0.4",
+    #},
+    llvm_version = "18.1.8",
+    toolchain_roots = {"": "/usr/local/llvm-18"},
+)
+
 load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
-
-register_toolchains(
-    "//toolchain:clang_toolchain_for_linux_x86_64",
-    "//toolchain:gcc_toolchain_for_linux_x86_64",
-)
 
 git_repository(
     name = "hedron_compile_commands",
@@ -318,6 +326,7 @@ versions.check("7.2.0")
 
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
+load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
@@ -326,7 +335,6 @@ load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
 load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
 load("@rules_python//python:repositories.bzl", "py_repositories")
-load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
 
 bazel_features_deps()
 
