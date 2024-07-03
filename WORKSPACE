@@ -301,25 +301,10 @@ load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
 
-local_repository(
-    name = "openwrt_aarch64_toolchain",
-    path = "/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64/toolchain-aarch64_generic_gcc-12.3.0_musl",
+register_toolchains(
+    "//toolchain:clang_toolchain_for_linux_x86_64",
+    "//toolchain:gcc_toolchain_for_linux_x86_64",
 )
-
-#load("@openwrt_toolchain//:toolchains.bzl", "register_openwrt_toolchains")
-
-#register_openwrt_toolchains()
-
-#new_local_repository(
-#name = "openwrt_aarch64_toolchain",
-#path = "/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64/toolchain-aarch64_generic_gcc-12.3.0_musl",
-#)
-
-#register_toolchains(
-#"//toolchain:gcc_toolchain_for_linux_aarch64",
-#"//toolchain:clang_toolchain_for_linux_x86_64",
-#"//toolchain:gcc_toolchain_for_linux_x86_64",
-#)
 
 git_repository(
     name = "hedron_compile_commands",
