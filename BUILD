@@ -4,6 +4,14 @@ package(default_visibility = ["//visibility:public"])
 
 exports_files(["CPPLINT.cfg"])
 
+platform(
+    name = "aarch64_target",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
+    ],
+)
+
 refresh_compile_commands(
     name = "refresh_compile_commands",
     targets = {

@@ -223,8 +223,13 @@ git_repository(
 
 git_repository(
     name = "com_github_glog_glog",
-    remote = "git@github.com:google/glog.git",
-    tag = "v0.7.1",
+    #tag = "v0.7.1",
+    commit = "22011b1ac9a596508763b29ee740b0209d88676c",
+    #remote = "git@github.com:google/glog.git",
+    remote = "git@github.com:xiedeacc/glog.git",
+    repo_mapping = {
+        "@gflags": "@com_github_gflags_gflags",
+    },
 )
 
 git_repository(
@@ -258,11 +263,117 @@ git_repository(
     },
 )
 
-register_toolchains(
-    "//toolchain:clang_toolchain_for_linux_x86_64",
-    "//toolchain:clang_toolchain_for_linux_aarch64",
-    #"//toolchain:gcc_toolchain_for_linux_x86_64",
+new_local_repository(
+    name = "clang_sysroot",
+    build_file_content =
+        """
+filegroup(
+  name = "sysroot",
+  srcs = glob(["*/**"]),
+  visibility = ["//visibility:public"],
 )
+        """,
+    path = "/root/src/software/clang_sysroot",
+)
+
+new_local_repository(
+    name = "gcc_sysroot",
+    build_file_content =
+        """
+filegroup(
+  name = "sysroot",
+  srcs = glob(["*/**"]),
+  visibility = ["//visibility:public"],
+)
+        """,
+    path = "/root/src/software/gcc_sysroot",
+)
+
+#git_repository(
+#name = "toolchains_llvm",
+#remote = "git@github.com:xiedeacc/toolchains_llvm.git",
+#tag = "1.0.0",
+#)
+
+local_repository(
+    name = "toolchains_llvm",
+    path = "../toolchains_llvm",
+)
+
+load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
+
+llvm_toolchain(
+    name = "llvm_toolchain",
+    #absolute_paths = True,
+    compile_flags = {
+        "linux-x86_64": [
+            "-B/usr/local/llvm/18/bin",
+        ],
+        "linux-aarch64": [
+            "-B/usr/local/llvm/18/bin",
+            "-nobuiltininc",
+        ],
+    },
+    coverage_compile_flags = {
+        "linux-aarch64": [
+            "-nobuiltininc",
+        ],
+    },
+    #cxx_builtin_include_directories = {
+    #"linux-aarch64": [
+    #"%sysroot%/usr/sysinclude",
+    #],
+    #},
+    dbg_compile_flags = {
+        "linux-aarch64": [
+            "-nobuiltininc",
+        ],
+    },
+    link_flags = {
+        "linux-x86_64": [
+            "-L/usr/local/llvm/18/lib/x86_64-unknown-linux-gnu",
+            "-L/usr/local/llvm/18/lib",
+        ],
+        "linux-aarch64": [
+            "-B/usr/local/llvm/18/bin",
+            "-nobuiltininc",
+        ],
+    },
+    link_libs = {
+        "linux-x86_64": [
+            #"-lc++",
+            #"-lc++abi",
+        ],
+        "linux-aarch64": [
+            "-B/usr/local/llvm/18/bin",
+            "-nobuiltininc",
+        ],
+    },
+    llvm_versions = {
+        "linux-x86_64": "18.1.8",
+        "linux-aarch64": "18.1.8",
+    },
+    opt_compile_flags = {
+        "linux-aarch64": [
+            "-nobuiltininc",
+        ],
+    },
+    stdlib = {
+        "linux-x86_64": "builtin-libc++",
+        "linux-aarch64": "libc++",
+    },
+    sysroot = {
+        "linux-aarch64": "@clang_sysroot//:sysroot",
+    },
+    toolchain_roots = {
+        "linux-x86_64": "/usr/local/llvm/18",
+        "linux-aarch64": "/usr/local/llvm/18",
+    },
+)
+
+load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+
+llvm_register_toolchains()
 
 local_repository(
     name = "toolchains_openwrt",
@@ -285,34 +396,6 @@ openwrt_toolchain_setup(
 )
 
 register_toolchains("@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8")
-
-#git_repository(
-#name = "toolchains_llvm",
-#remote = "git@github.com:xiedeacc/toolchains_llvm.git",
-#tag = "1.0.0",
-#)
-
-local_repository(
-    name = "toolchains_llvm",
-    path = "../toolchains_llvm",
-)
-
-load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
-
-llvm_toolchain(
-    name = "llvm_toolchain",
-    absolute_paths = True,
-    #llvm_versions = {
-    ##"": "15.0.6",
-    #"ubuntu-18.04-x86_64": "15.0.4",
-    #},
-    llvm_version = "18.1.8",
-    toolchain_roots = {"": "/usr/local/llvm-18"},
-)
-
-load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
-
-llvm_register_toolchains()
 
 git_repository(
     name = "hedron_compile_commands",

@@ -35,15 +35,11 @@ build --output_filter="^//"
 #build --remote_cache=http://192.168.1.101/bazel_cache
 #build --keep_going
 
-build:clang --extra_toolchains=//toolchain:clang_toolchain_for_linux_x86_64
-build:clang_aarch64 --extra_toolchains=//toolchain:clang_toolchain_for_linux_x86_64
-build:clang_aarch64 --platforms=//toolchain:aarch64_target
+build:clang --extra_toolchains='@llvm_toolchain//:cc-toolchain-x86_64-linux'
+build:clang_aarch64 --platforms='//:aarch64_target'
+build:clang_aarch64 --extra_toolchains='@llvm_toolchain//:cc-toolchain-aarch64-linux'
+build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
 
-#build:gcc --extra_toolchains=//toolchain:gcc_toolchain_for_linux_x86_64
-#build:gcc_aarch --extra_toolchains=//toolchain:gcc_toolchain_for_linux_x86_64
-#build:gcc_aarch64 --platforms=//toolchain:aarch64_target
-
-build:openwrt-aarch64 --action_env=STAGING_DIR=/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64/toolchain-aarch64_generic_gcc-12.3.0_musl
-build:openwrt-aarch64 --extra_toolchains=//toolchain:gcc_toolchain_for_linux_aarch64
-build:openwrt-aarch64 --platforms=//toolchain:aarch64_target
-build:openwrt-aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+build:openwrt_aarch64 --extra_toolchains='@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8'
+build:openwrt_aarch64 --platforms='//:aarch64_target'
+build:openwrt_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'

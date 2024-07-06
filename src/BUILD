@@ -9,32 +9,32 @@ cc_binary(
         "-std=c++17",
     ],
     deps = [
-        "@boost//:algorithm",
+        #"@boost//:algorithm",
         #"@openssl",
     ],
 )
 
-version_info(
-    name = "version_info_h",
-    out = "version_info.h",
-    exec_tool = "//scripts:gen_local_config_git",
-)
+#version_info(
+#name = "version_info_h",
+#out = "version_info.h",
+#exec_tool = "//scripts:gen_local_config_git",
+#)
 
-cc_library(
-    name = "version_info",
-    hdrs = [":version_info_h"],
-    visibility = ["//visibility:public"],
-)
+#cc_library(
+#name = "version_info",
+#hdrs = [":version_info_h"],
+#visibility = ["//visibility:public"],
+#)
 
-cc_test(
-    name = "version_info_test",
-    srcs = ["version_info_test.cc"],
-    deps = [
-        ":version_info",
-        "@com_github_glog_glog//:glog",
-        "@com_google_googletest//:gtest",
-    ],
-)
+#cc_test(
+#name = "version_info_test",
+#srcs = ["version_info_test.cc"],
+#deps = [
+#":version_info",
+#"@com_github_glog_glog//:glog",
+#"@com_google_googletest//:gtest",
+#],
+#)
 
 #cc_library(
 #name = "util",
