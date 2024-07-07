@@ -9,8 +9,9 @@ cc_binary(
         "-std=c++17",
     ],
     deps = [
-        #"@boost//:algorithm",
-        #"@openssl",
+        "@boost//:algorithm",
+        "@curl",
+        "@openssl",
     ],
 )
 

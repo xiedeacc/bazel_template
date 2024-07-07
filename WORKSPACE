@@ -209,6 +209,20 @@ http_archive(
     urls = ["https://github.com/openssl/openssl/releases/download/openssl-3.3.1/openssl-3.3.1.tar.gz"],
 )
 
+new_git_repository(
+    name = "c-ares",
+    build_file = "//bazel_scripts:c-ares.BUILD",
+    commit = "5e1c3a7575e458ae51863da9b8d3d5d3ec6ffab8",
+    remote = "git@github.com:c-ares/c-ares.git",
+)
+
+new_git_repository(
+    name = "curl",
+    build_file = "//bazel_scripts:curl.BUILD",
+    commit = "2d5aea9c93bae110ffe5107ba2c118b8442b495d",
+    remote = "git@github.com:curl/curl.git",
+)
+
 git_repository(
     name = "com_google_absl",
     remote = "git@github.com:abseil/abseil-cpp.git",
@@ -236,12 +250,6 @@ git_repository(
     name = "com_google_googletest",
     remote = "git@github.com:google/googletest.git",
     tag = "v1.14.0",
-)
-
-new_git_repository(
-    name = "curl",
-    build_file = "//bazel_scripts:curl.BUILD",
-    remote = "git@github.com:curl/curl.git",
 )
 
 git_repository(

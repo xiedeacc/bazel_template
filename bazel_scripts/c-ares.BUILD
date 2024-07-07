@@ -1,24 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-load("//bazel_scripts:common.bzl", "extract_symbols", "template_rule")
-
-template_rule(
-    name = "ares_build_h",
-    src = "include/ares_build.h.in",
-    out = "include/ares_build.h",
-    substitutions = {
-        "@CARES_TYPEOF_ARES_SOCKLEN_T@": "socklen_t",
-        "@CARES_TYPEOF_ARES_SSIZE_T@": "ssize_t",
-        "#undef CARES_HAVE_SYS_TYPES_H": "#define CARES_HAVE_SYS_TYPES_H",
-        "#undef CARES_HAVE_SYS_SOCKET_H": "#define CARES_HAVE_SYS_SOCKET_H",
-        "#undef CARES_HAVE_SYS_SELECT_H": "#define CARES_HAVE_SYS_SELECT_H",
-        "#undef CARES_HAVE_WINDOWS_H": "/* #undef CARES_HAVE_WINDOWS_H */",
-        "#undef CARES_HAVE_WS2TCPIP_H": "/* #undef CARES_HAVE_WS2TCPIP_H */",
-        "#undef CARES_HAVE_WINSOCK2_H": "/* #undef CARES_HAVE_WINSOCK2_H */",
-        "#undef CARES_HAVE_ARPA_NAMESER_H": "#define CARES_HAVE_ARPA_NAMESER_H",
-        "#undef CARES_HAVE_ARPA_NAMESER_COMPAT_H": "#define CARES_HAVE_ARPA_NAMESER_COMPAT_H",
-    },
-)
+load("@bazel_template//bazel_scripts:common.bzl", "extract_symbols", "template_rule")
 
 template_rule(
     name = "ares_config_h",
@@ -180,6 +162,24 @@ template_rule(
         "#cmakedefine HAVE_PTHREAD_NP_H 1": "/* #undef HAVE_PTHREAD_NP_H */",
         "#cmakedefine CARES_THREADS 1": "#define CARES_THREADS 1",
         "#cmakedefine HAVE_PTHREAD_INIT 1": "/* #undef HAVE_PTHREAD_INIT */",
+    },
+)
+
+template_rule(
+    name = "ares_build_h",
+    src = "include/ares_build.h.in",
+    out = "include/ares_build.h",
+    substitutions = {
+        "@CARES_TYPEOF_ARES_SOCKLEN_T@": "socklen_t",
+        "@CARES_TYPEOF_ARES_SSIZE_T@": "ssize_t",
+        "#undef CARES_HAVE_SYS_TYPES_H": "#define CARES_HAVE_SYS_TYPES_H",
+        "#undef CARES_HAVE_SYS_SOCKET_H": "#define CARES_HAVE_SYS_SOCKET_H",
+        "#undef CARES_HAVE_SYS_SELECT_H": "#define CARES_HAVE_SYS_SELECT_H",
+        "#undef CARES_HAVE_WINDOWS_H": "/* #undef CARES_HAVE_WINDOWS_H */",
+        "#undef CARES_HAVE_WS2TCPIP_H": "/* #undef CARES_HAVE_WS2TCPIP_H */",
+        "#undef CARES_HAVE_WINSOCK2_H": "/* #undef CARES_HAVE_WINSOCK2_H */",
+        "#undef CARES_HAVE_ARPA_NAMESER_H": "#define CARES_HAVE_ARPA_NAMESER_H",
+        "#undef CARES_HAVE_ARPA_NAMESER_COMPAT_H": "#define CARES_HAVE_ARPA_NAMESER_COMPAT_H",
     },
 )
 
