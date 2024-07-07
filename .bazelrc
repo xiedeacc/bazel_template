@@ -41,10 +41,6 @@ build:clang_aarch64 --platforms='//:aarch64_target'
 build:clang_aarch64 --extra_toolchains='//toolchain:clang_toolchain_for_linux_aarch64'
 build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
 
-#build:clang_aarch64 --platforms='//:aarch64_target'
-#build:clang_aarch64 --extra_toolchains='@llvm_toolchain//:cc-toolchain-aarch64-linux'
-#build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
-
-#build:openwrt_aarch64 --extra_toolchains='@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8'
-#build:openwrt_aarch64 --platforms='//:aarch64_target'
-#build:openwrt_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+build:openwrt_aarch64 --extra_toolchains='@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8'
+build:openwrt_aarch64 --platforms='//:aarch64_target'
+build:openwrt_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
