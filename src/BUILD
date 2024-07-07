@@ -24,7 +24,7 @@ cc_binary(
         "@com_google_protobuf//:protobuf",
         "@curl",
         "@jemalloc",
-        "@libsodium//:sodium",
+        #"@libsodium//:sodium",
         "@openssl",
     ],
 )

@@ -264,29 +264,15 @@ git_repository(
     tag = "v0.6.0",
 )
 
-http_archive(
+git_repository(
     name = "com_google_protobuf",
-    remote_patch_strip = 1,
-    remote_patches = {
-        "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/modules/protobuf/23.1/patches/0007-bazel-Get-rid-of-exec_tools.-13401.patch": "sha256-Thj5ZYqMpgaUrjZv8XyWqyD+I6XQNcZjo4jI14a7QxE=",
+    remote = "git@github.com:protocolbuffers/protobuf.git",
+    repo_mapping = {
+        "@com_github_google_glog": "@com_github_glog_glog",
+        "@com_github_curl_curl": "@curl",
     },
-    sha256 = "dc167b7d23ec0d6e4a3d4eae1798de6c8d162e69fa136d39753aaeb7a6e1289d",
-    strip_prefix = "protobuf-23.1",
-    urls = [
-        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v23.1.tar.gz",
-        "https://github.com/protocolbuffers/protobuf/archive/v23.1.tar.gz",
-    ],
+    tag = "v23.1",
 )
-
-#git_repository(
-#name = "com_google_protobuf",
-#remote = "git@github.com:protocolbuffers/protobuf.git",
-#repo_mapping = {
-#"@com_github_google_glog": "@com_github_glog_glog",
-#"@com_github_curl_curl": "@curl",
-#},
-#tag = "v23.1",
-#)
 
 git_repository(
     name = "rules_proto",
@@ -504,7 +490,6 @@ rules_closure_dependencies()
 rules_closure_toolchains()
 
 protobuf_deps()
-
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 load("@hedron_compile_commands//:workspace_setup_transitive.bzl", "hedron_compile_commands_setup_transitive")
 load("@hedron_compile_commands//:workspace_setup_transitive_transitive.bzl", "hedron_compile_commands_setup_transitive_transitive")
@@ -520,7 +505,8 @@ hedron_compile_commands_setup_transitive_transitive_transitive()
 
 repo_mapping = {
     "@boringssl": "@openssl",
-    "@org_lzma_lzma": "@xz",
+    #"@org_lzma_lzma": "@xz",
+    "@xz": "@org_lzma_lzma",
     "@org_bzip_bzip2": "@bzip2",
 }
 

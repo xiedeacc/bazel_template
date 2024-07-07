@@ -4,4 +4,16 @@
 #
 # For more details, please check https://github.com/bazelbuild/bazel/issues/18958
 ###############################################################################
-bazel_dep(name = "protobuf", dev_dependency = True, repo_name = "com_google_protobuf", version = "27.2")
+#module(
+#name = "bazel_template",
+#version = "1.0.0",
+#)
+
+#bazel_dep(name = "protobuf", dev_dependency = True, repo_name = "com_google_protobuf", version = "27.2")
+
+#repo_mapping = {
+#"@boringssl": "@openssl",
+#"@xz": "@org_lzma_lzma",
+##"@org_lzma_lzma": "@xz",
+#"@org_bzip_bzip2": "@bzip2",
+#}

@@ -328,6 +328,7 @@ cc_library(
     ]),
     copts = COPTS + [
         "-Iexternal/c-ares/src/lib",
+        "-I$(BINDIR)/external/c-ares/src/lib",
     ],
     includes = [
         "include",
@@ -365,6 +366,7 @@ cc_binary(
     srcs = ["src/tools/adig.c"],
     copts = COPTS + [
         "-Iexternal/c-ares/src/lib",
+        "-I$(BINDIR)/external/c-ares/src/lib",
     ],
     local_defines = [
         "CARES_NO_DEPRECATED",
@@ -385,6 +387,7 @@ cc_binary(
     srcs = ["src/tools/ahost.c"],
     copts = COPTS + [
         "-Iexternal/c-ares/src/lib",
+        "-I$(BINDIR)/external/c-ares/src/lib",
     ],
     local_defines = [
         "CARES_NO_DEPRECATED",
