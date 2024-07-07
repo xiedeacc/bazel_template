@@ -792,8 +792,8 @@ def _impl(ctx):
                     ),
                     flag_group(
                         flags = [
-                            #"-isystem",
-                            #"%{system_include_paths}",
+                            "-isystem",
+                            "%{system_include_paths}",
                             "-internal-isystem",
                             "/root/src/software/clang_sysroot/include/aarch64-unknown-linux-gnu/c++/v1",
                             "-internal-isystem",
@@ -811,7 +811,7 @@ def _impl(ctx):
             ),
         ],
     )
-    print(include_paths_feature)
+
     external_include_paths_feature = feature(
         name = "external_include_paths",
         flag_sets = [
