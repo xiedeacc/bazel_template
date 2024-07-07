@@ -263,6 +263,10 @@ git_repository(
     },
 )
 
+register_toolchains(
+    "//toolchain:clang_toolchain_for_linux_aarch64",
+)
+
 new_local_repository(
     name = "clang_sysroot",
     build_file_content =
