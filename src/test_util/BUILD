@@ -1,5 +1,5 @@
-load("//scripts:build.bzl", "cc_test")
-load("//scripts:cpplint.bzl", "cpplint")
+load("//bazel_scripts:build.bzl", "cc_test")
+load("//bazel_scripts:cpplint.bzl", "cpplint")
 
 package(default_visibility = ["//visibility:public"])
 

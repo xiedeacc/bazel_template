@@ -1,6 +1,6 @@
-load("//scripts:build.bzl", "cc_test")
-load("//scripts:common.bzl", "version_info")
-load("//scripts:cpplint.bzl", "cpplint")
+load("//bazel_scripts:build.bzl", "cc_test")
+load("//bazel_scripts:common.bzl", "version_info")
+load("//bazel_scripts:cpplint.bzl", "cpplint")
 
 cc_binary(
     name = "main",
@@ -17,7 +17,7 @@ cc_binary(
 #version_info(
 #name = "version_info_h",
 #out = "version_info.h",
-#exec_tool = "//scripts:gen_local_config_git",
+#exec_tool = "//bazel_scripts:gen_local_config_git",
 #)
 
 #cc_library(

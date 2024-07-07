@@ -3,7 +3,7 @@ workspace(name = "bazel_template")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository", "new_local_repository")
-load("//scripts:common.bzl", "gen_local_config_git")
+load("//bazel_scripts:common.bzl", "gen_local_config_git")
 
 git_repository(
     name = "bazel_skylib",
@@ -127,14 +127,14 @@ git_repository(
 
 new_git_repository(
     name = "cpplint",
-    build_file = "//scripts:cpplint.BUILD",
+    build_file = "//bazel_scripts:cpplint.BUILD",
     commit = "7b88b68187e3516540fab3caa900988d2179ed24",
     remote = "git@github.com:cpplint/cpplint.git",
 )
 
 http_archive(
     name = "nasm",
-    build_file = "//scripts:nasm.BUILD",
+    build_file = "//bazel_scripts:nasm.BUILD",
     sha256 = "f5c93c146f52b4f1664fa3ce6579f961a910e869ab0dae431bd871bdd2584ef2",
     strip_prefix = "nasm-2.15.05",
     urls = [
@@ -145,7 +145,7 @@ http_archive(
 
 http_archive(
     name = "perl",
-    build_file = "//scripts:perl.BUILD",
+    build_file = "//bazel_scripts:perl.BUILD",
     sha256 = "aeb973da474f14210d3e1a1f942dcf779e2ae7e71e4c535e6c53ebabe632cc98",
     urls = [
         "https://mirror.bazel.build/strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip",
@@ -155,35 +155,35 @@ http_archive(
 
 new_git_repository(
     name = "xz",
-    build_file = "//scripts:xz.BUILD",
+    build_file = "//bazel_scripts:xz.BUILD",
     commit = "0232e66d5bc5b01a25a447c657e51747626488ab",
     remote = "git@github.com:tukaani-project/xz.git",
 )
 
 new_git_repository(
     name = "zlib",
-    build_file = "//scripts:zlib.BUILD",
+    build_file = "//bazel_scripts:zlib.BUILD",
     remote = "git@github.com:madler/zlib.git",
     tag = "v1.3.1",
 )
 
 new_git_repository(
     name = "bzip2",
-    build_file = "//scripts:bzip2.BUILD",
+    build_file = "//bazel_scripts:bzip2.BUILD",
     commit = "66c46b8c9436613fd81bc5d03f63a61933a4dcc3",
     remote = "https://gitlab.com/bzip2/bzip2.git",
 )
 
 new_git_repository(
     name = "lz4",
-    build_file = "//scripts:lz4.BUILD",
+    build_file = "//bazel_scripts:lz4.BUILD",
     commit = "5b0ccb8b62eba9f0ed4b46ff3680c442c3e58188",
     remote = "git@github.com:lz4/lz4.git",
 )
 
 new_git_repository(
     name = "zstd",
-    build_file = "//scripts:zstd.BUILD",
+    build_file = "//bazel_scripts:zstd.BUILD",
     remote = "git@github.com:facebook/zstd.git",
     tag = "v1.5.6",
 )
@@ -196,14 +196,14 @@ git_repository(
 
 new_git_repository(
     name = "libsodium",
-    build_file = "//scripts:libsodium.BUILD",
+    build_file = "//bazel_scripts:libsodium.BUILD",
     remote = "git@github.com:jedisct1/libsodium.git",
     tag = "1.0.20-RELEASE",
 )
 
 http_archive(
     name = "openssl",
-    build_file = "//scripts:openssl.make.BUILD",
+    build_file = "//bazel_scripts:openssl.make.BUILD",
     sha256 = "777cd596284c883375a2a7a11bf5d2786fc5413255efab20c50d6ffe6d020b7e",
     strip_prefix = "openssl-3.3.1",
     urls = ["https://github.com/openssl/openssl/releases/download/openssl-3.3.1/openssl-3.3.1.tar.gz"],
@@ -240,7 +240,7 @@ git_repository(
 
 new_git_repository(
     name = "curl",
-    build_file = "//scripts:curl.BUILD",
+    build_file = "//bazel_scripts:curl.BUILD",
     remote = "git@github.com:curl/curl.git",
 )
 

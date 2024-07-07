@@ -16,7 +16,7 @@ test:coverage --linkopt=-lc
 test:coverage --nocache_test_results
 
 
-build --workspace_status_command=scripts/workspace_status.sh
+build --workspace_status_command=bazel_scripts/workspace_status.sh
 #build --features=-compiler_param_file
 #build --features=-layering_check
 #build --host_features=-compiler_param_file

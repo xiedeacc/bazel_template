@@ -161,7 +161,7 @@ exports_files(
     ))[:-len("BUILD")]
 
     python_script_path = repository_ctx.path(
-        Label("//scripts:gen_local_config_git.py"),
+        Label("//bazel_scripts:gen_local_config_git.py"),
     )
     generated_files_path = repository_ctx.path("gen")
 
