@@ -36,6 +36,7 @@ build --output_filter="^//"
 #build --keep_going
 
 build:clang --extra_toolchains='@llvm_toolchain//:cc-toolchain-x86_64-linux'
+
 build:clang_aarch64 --platforms='//:aarch64_target'
 build:clang_aarch64 --extra_toolchains='//toolchain:clang_toolchain_for_linux_aarch64'
 build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'

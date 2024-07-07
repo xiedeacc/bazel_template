@@ -345,8 +345,8 @@ llvm_toolchain(
     },
     link_libs = {
         "linux-x86_64": [
-            #"-lc++",
-            #"-lc++abi",
+            "-lc++",
+            "-lc++abi",
         ],
         "linux-aarch64": [
             "-B/usr/local/llvm/18/bin",
