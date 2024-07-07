@@ -45,6 +45,7 @@ cc_library(
         "-fPIC",
         "-Iexternal/zstd/lib",
     ],
+    includes = ["lib"],
     linkopts = [
         "-pthread",
     ],

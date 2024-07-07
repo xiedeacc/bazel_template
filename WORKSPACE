@@ -252,31 +252,31 @@ git_repository(
     tag = "2024-07-02",
 )
 
-git_repository(
-    name = "bazelruby_rules_ruby",
-    remote = "git@github.com:bazelruby/rules_ruby.git",
-    tag = "v0.6.0",
-)
+#git_repository(
+#name = "bazelruby_rules_ruby",
+#remote = "git@github.com:bazelruby/rules_ruby.git",
+#tag = "v0.6.0",
+#)
 
-git_repository(
-    name = "rules_ruby",
-    remote = "git@github.com:protocolbuffers/rules_ruby.git",
-    tag = "v0.6.0",
-)
+#git_repository(
+#name = "rules_ruby",
+#remote = "git@github.com:protocolbuffers/rules_ruby.git",
+#tag = "v0.6.0",
+#)
 
-http_archive(
-    name = "com_google_protobuf",
-    remote_patch_strip = 1,
-    remote_patches = {
-        "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/modules/protobuf/23.1/patches/0007-bazel-Get-rid-of-exec_tools.-13401.patch": "sha256-Thj5ZYqMpgaUrjZv8XyWqyD+I6XQNcZjo4jI14a7QxE=",
-    },
-    sha256 = "dc167b7d23ec0d6e4a3d4eae1798de6c8d162e69fa136d39753aaeb7a6e1289d",
-    strip_prefix = "protobuf-23.1",
-    urls = [
-        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v23.1.tar.gz",
-        "https://github.com/protocolbuffers/protobuf/archive/v23.1.tar.gz",
-    ],
-)
+#http_archive(
+#name = "com_google_protobuf",
+#remote_patch_strip = 1,
+#remote_patches = {
+#"https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/modules/protobuf/23.1/patches/0007-bazel-Get-rid-of-exec_tools.-13401.patch": "sha256-Thj5ZYqMpgaUrjZv8XyWqyD+I6XQNcZjo4jI14a7QxE=",
+#},
+#sha256 = "dc167b7d23ec0d6e4a3d4eae1798de6c8d162e69fa136d39753aaeb7a6e1289d",
+#strip_prefix = "protobuf-23.1",
+#urls = [
+#"https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v23.1.tar.gz",
+#"https://github.com/protocolbuffers/protobuf/archive/v23.1.tar.gz",
+#],
+#)
 
 #git_repository(
 #name = "com_google_protobuf",
@@ -488,7 +488,7 @@ load("@rules_perl//perl:deps.bzl", "perl_register_toolchains")
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
 load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+#load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 bazel_features_deps()
 
@@ -516,7 +516,7 @@ rules_closure_dependencies()
 
 rules_closure_toolchains()
 
-protobuf_deps()
+#protobuf_deps()
 
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 load("@hedron_compile_commands//:workspace_setup_transitive.bzl", "hedron_compile_commands_setup_transitive")

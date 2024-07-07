@@ -22,10 +22,10 @@ cc_binary(
         "@com_google_absl//absl/time",
         "@com_google_googletest//:gtest",
         "@com_google_protobuf//:protobuf",
-        "@curl",
+        #"@curl",
         #"@jemalloc",
         #"@libsodium//:sodium",
-        "@openssl",
+        #"@openssl",
     ],
 )
 
