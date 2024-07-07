@@ -326,10 +326,11 @@ cc_library(
         "include/*.h",
         "src/lib/*.h",
     ]),
-    copts = COPTS,
+    copts = COPTS + [
+        "-Iexternal/c-ares/src/lib",
+    ],
     includes = [
         "include",
-        "src/lib",
     ],
     local_defines = [
         "CARES_BUILDING_LIBRARY",
@@ -362,9 +363,8 @@ cc_library(
 cc_binary(
     name = "adig",
     srcs = ["src/tools/adig.c"],
-    copts = COPTS,
-    includes = [
-        "src/lib",
+    copts = COPTS + [
+        "-Iexternal/c-ares/src/lib",
     ],
     local_defines = [
         "CARES_NO_DEPRECATED",
@@ -383,9 +383,8 @@ cc_binary(
 cc_binary(
     name = "ahost",
     srcs = ["src/tools/ahost.c"],
-    copts = COPTS,
-    includes = [
-        "src/lib",
+    copts = COPTS + [
+        "-Iexternal/c-ares/src/lib",
     ],
     local_defines = [
         "CARES_NO_DEPRECATED",

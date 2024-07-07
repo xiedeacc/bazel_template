@@ -166,11 +166,8 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
-        "//conditions:default": COMMON_COTPS,
+        "//conditions:default": COMMON_COTPS + ["Iexternal/libsodium/src/libsodium/include/sodium"],
     }),
-    includes = [
-        "src/libsodium/include/sodium",
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -295,11 +292,8 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
-        "//conditions:default": COMMON_COTPS,
+        "//conditions:default": COMMON_COTPS + ["Iexternal/libsodium/src/libsodium/include/sodium"],
     }),
-    includes = [
-        "src/libsodium/include/sodium",
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -324,8 +318,6 @@ cc_library(
             "-mrdrnd",
         ] + COMMON_COTPS,
     }),
-    includes = [
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -354,8 +346,6 @@ cc_library(
             "-msse2",
         ] + COMMON_COTPS,
     }),
-    includes = [
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -385,8 +375,6 @@ cc_library(
             "-mssse3",
         ] + COMMON_COTPS,
     }),
-    includes = [
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -417,8 +405,6 @@ cc_library(
             "-mssse3",
         ] + COMMON_COTPS,
     }),
-    includes = [
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -452,8 +438,6 @@ cc_library(
             "-mpclmul",
         ] + COMMON_COTPS,
     }),
-    includes = [
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -483,8 +467,6 @@ cc_library(
             "-msse4.1",
         ] + COMMON_COTPS,
     }),
-    includes = [
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -519,8 +501,6 @@ cc_library(
             "-mavx2",
         ] + COMMON_COTPS,
     }),
-    includes = [
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -553,8 +533,6 @@ cc_library(
             "-mavx512f",
         ] + COMMON_COTPS,
     }),
-    includes = [
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -586,8 +564,6 @@ cc_library(
             "-mssse3",
         ] + COMMON_COTPS,
     }),
-    includes = [
-    ],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [

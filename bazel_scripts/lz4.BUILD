@@ -36,10 +36,8 @@ cc_library(
         "-Wundef",
         "-Wextra",
         "-Wall",
+        "-Iexternal/lz4/lib",
         "-pedantic-errors",
-    ],
-    includes = [
-        "lib",
     ],
     linkopts = [],
     local_defines = [
@@ -76,8 +74,9 @@ cc_library(
     ],
     copts = [
         "-O3",
+        "-Iexternal/lz4/programs",
+        "-Iexternal/lz4/lib",
     ],
-    includes = ["programs"],
     local_defines = [
         "XXH_NAMESPACE=LZ4_",
         "LZ4IO_MULTITHREAD",
@@ -95,8 +94,9 @@ cc_binary(
     ],
     copts = [
         "-O3",
+        "-Iexternal/lz4/programs",
+        "-Iexternal/lz4/lib",
     ],
-    includes = ["programs"],
     local_defines = [
         "XXH_NAMESPACE=LZ4_",
         "LZ4IO_MULTITHREAD",

@@ -43,8 +43,8 @@ cc_library(
         "-O3",
         "-g",
         "-fPIC",
+        "-I/external/zstd/lib",
     ],
-    includes = ["lib"],
     linkopts = [
         "-pthread",
     ],
@@ -81,9 +81,6 @@ cc_library(
     copts = [
         "-O3",
         "-g",
-    ],
-    includes = [
-        #"external/zlib",
     ],
     linkopts = [
         "-pthread",
@@ -126,9 +123,7 @@ cc_library(
     copts = [
         "-O3",
         "-g",
-    ],
-    includes = [
-        "programs",
+        "-I/external/zstd/programs",
     ],
     linkopts = [
         "-pthread",
