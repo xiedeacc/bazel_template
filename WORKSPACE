@@ -307,6 +307,22 @@ git_repository(
     },
 )
 
+http_archive(
+    name = "boost",
+    build_file = "@com_github_nelhage_rules_boost//:boost.BUILD",
+    patch_cmds = ["rm -f doc/pdf/BUILD"],
+    patch_cmds_win = ["Remove-Item -Force doc/pdf/BUILD"],
+    repo_mapping = {
+        "@boringssl": "@openssl",
+        "@org_lzma_lzma": "@xz",
+        "@org_bzip_bzip2": "@bzip2",
+        "@com_github_facebook_zstd": "@zstd",
+    },
+    sha256 = "b62bd839ea6c28265af9a1f68393eda37fab3611425d3b28882d8e424535ec9d",
+    strip_prefix = "boost-1.82.0",
+    url = "https://github.com/boostorg/boost/releases/download/boost-1.82.0/boost-1.82.0.tar.gz",
+)
+
 new_git_repository(
     name = "jemalloc",
     build_file = "//bazel_scripts:jemalloc.BUILD",
@@ -464,7 +480,6 @@ versions.check("7.2.0")
 
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
-load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
 load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@rules_python//python:repositories.bzl", "py_repositories")
@@ -491,8 +506,6 @@ rules_proto_dependencies()
 
 rules_proto_toolchains()
 
-boost_deps()
-
 rules_java_toolchains()
 
 go_register_toolchains(version = "1.18")
@@ -517,11 +530,5 @@ hedron_compile_commands_setup_transitive()
 hedron_compile_commands_setup_transitive_transitive()
 
 hedron_compile_commands_setup_transitive_transitive_transitive()
-
-repo_mapping = {
-    "@boringssl": "@openssl",
-    "@org_lzma_lzma": "@xz",
-    "@org_bzip_bzip2": "@bzip2",
-}
 
 gen_local_config_git(name = "local_config_git")
