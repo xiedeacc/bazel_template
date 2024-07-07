@@ -1,6 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-load("@bazel_problem//bazel_scripts:common.bzl", "extract_symbols", "template_rule")
+load("@bazel_template//bazel_scripts:common.bzl", "extract_symbols", "template_rule")
 
 config_setting(
     name = "windows",
@@ -332,7 +332,6 @@ cc_library(
             "-Wl,-z,relro",
             "-Wl,-z,now",
             "-Wl,-z,noexecstack",
-            "-export-dynamic",
         ],
     }),
     local_defines = COMMON_DEFINES,
@@ -363,7 +362,6 @@ cc_library(
             "-Wl,-z,relro",
             "-Wl,-z,now",
             "-Wl,-z,noexecstack",
-            "-export-dynamic",
         ],
     }),
     local_defines = COMMON_DEFINES,
@@ -395,7 +393,6 @@ cc_library(
             "-Wl,-z,relro",
             "-Wl,-z,now",
             "-Wl,-z,noexecstack",
-            "-export-dynamic",
         ],
     }),
     local_defines = COMMON_DEFINES,
@@ -428,7 +425,6 @@ cc_library(
             "-Wl,-z,relro",
             "-Wl,-z,now",
             "-Wl,-z,noexecstack",
-            "-export-dynamic",
         ],
     }),
     local_defines = COMMON_DEFINES,
@@ -464,7 +460,6 @@ cc_library(
             "-Wl,-z,relro",
             "-Wl,-z,now",
             "-Wl,-z,noexecstack",
-            "-export-dynamic",
         ],
     }),
     local_defines = COMMON_DEFINES,
@@ -496,7 +491,6 @@ cc_library(
             "-Wl,-z,relro",
             "-Wl,-z,now",
             "-Wl,-z,noexecstack",
-            "-export-dynamic",
         ],
     }),
     local_defines = COMMON_DEFINES,
@@ -533,7 +527,6 @@ cc_library(
             "-Wl,-z,relro",
             "-Wl,-z,now",
             "-Wl,-z,noexecstack",
-            "-export-dynamic",
         ],
     }),
     local_defines = COMMON_DEFINES,
@@ -568,7 +561,6 @@ cc_library(
             "-Wl,-z,relro",
             "-Wl,-z,now",
             "-Wl,-z,noexecstack",
-            "-export-dynamic",
         ],
     }),
     local_defines = COMMON_DEFINES,
@@ -602,7 +594,6 @@ cc_library(
             "-Wl,-z,relro",
             "-Wl,-z,now",
             "-Wl,-z,noexecstack",
-            "-export-dynamic",
         ],
     }),
     local_defines = COMMON_DEFINES,

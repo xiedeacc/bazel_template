@@ -42,12 +42,6 @@ git_repository(
 )
 
 git_repository(
-    name = "rules_proto",
-    remote = "git@github.com:bazelbuild/rules_proto.git",
-    tag = "6.0.0",
-)
-
-git_repository(
     name = "rules_perl",
     remote = "git@github.com:bazelbuild/rules_perl.git",
     tag = "0.2.3",
@@ -252,14 +246,22 @@ git_repository(
     tag = "v1.14.0",
 )
 
+#git_repository(
+#name = "com_google_protobuf",
+#remote = "git@github.com:protocolbuffers/protobuf.git",
+#repo_mapping = {
+#"@com_github_google_glog": "@com_github_glog_glog",
+#"@com_github_curl_curl": "@curl",
+#},
+#tag = "v27.2",
+#)
+
 git_repository(
-    name = "com_google_protobuf",
-    remote = "git@github.com:protocolbuffers/protobuf.git",
-    repo_mapping = {
-        "@com_github_google_glog": "@com_github_glog_glog",
-        "@com_github_curl_curl": "@curl",
-    },
-    tag = "v27.1",
+    name = "rules_proto",
+    #commit = "11a4a27e199e795ffd042f7ea9074c08e3d98046",
+    remote = "git@github.com:bazelbuild/rules_proto.git",
+    tag = "6.0.2",
+    #remote = "git@github.com:xiedeacc/rules_proto.git",
 )
 
 git_repository(
@@ -269,6 +271,13 @@ git_repository(
     repo_mapping = {
         "@boringssl": "@openssl",
     },
+)
+
+new_git_repository(
+    name = "jemalloc",
+    build_file = "//bazel_scripts:jemalloc.BUILD",
+    commit = "21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322",
+    remote = "git@github.com:jemalloc/jemalloc.git",
 )
 
 register_toolchains(
@@ -420,16 +429,16 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 versions.check("7.2.0")
 
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
+load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
 load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
+load("@rules_python//python:repositories.bzl", "py_repositories")
 load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
 load("@rules_perl//perl:deps.bzl", "perl_register_toolchains")
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
 load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
-load("@rules_python//python:repositories.bzl", "py_repositories")
 
 bazel_features_deps()
 
