@@ -43,7 +43,7 @@ cc_library(
         "-O3",
         "-g",
         "-fPIC",
-        "-I/external/zstd/lib",
+        "-Iexternal/zstd/lib",
     ],
     linkopts = [
         "-pthread",
@@ -81,6 +81,8 @@ cc_library(
     copts = [
         "-O3",
         "-g",
+        "-Iexternal/zstd/lib",
+        "-isystem external/zlib",
     ],
     linkopts = [
         "-pthread",
@@ -88,6 +90,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":zstd",
+        "@zlib",
     ],
 )
 
@@ -123,7 +126,7 @@ cc_library(
     copts = [
         "-O3",
         "-g",
-        "-I/external/zstd/programs",
+        "-Iexternal/zstd/programs",
     ],
     linkopts = [
         "-pthread",
