@@ -124,7 +124,11 @@ configure_make(
     args = ["-j"],
     configure_command = "config",
     configure_in_place = True,
-    configure_options = CONFIGURE_OPTIONS,
+    configure_options = select({
+                            "@platforms//cpu:aarch64": ["linux-aarch64"],
+                            "//conditions:default": [],
+                        }) +
+                        CONFIGURE_OPTIONS,
     lib_name = LIB_NAME,
     lib_source = ":all_srcs",
     linkopts = ["-ldl"],

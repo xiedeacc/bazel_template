@@ -25,7 +25,7 @@ cc_binary(
         #"@curl",
         #"@jemalloc",
         #"@libsodium//:sodium",
-        #"@openssl",
+        "@openssl",
     ],
 )
 
