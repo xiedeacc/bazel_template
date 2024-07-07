@@ -57,7 +57,7 @@ clang_linux_aarch64_cc_toolchain_config(
         "-Wunused-but-set-parameter",
         "-Wno-free-nonheap-object",
         "-fno-omit-frame-pointer",
-        #"-I/root/src/software/clang_sysroot/usr/sysinclude",
+        "-static",
     ],
     compiler = "clang",
     conly_flags = [],
@@ -93,7 +93,6 @@ clang_linux_aarch64_cc_toolchain_config(
         "-Wl,-rpath=/root/src/software/clang_sysroot/lib/aarch64-unknown-linux-gnu",
         "-Wl,-no-as-needed",
         "-Wl,-z,relro,-z,now",
-        "-nostdlib",
         "-stdlib=libc++",
     ],
     link_libs = [
