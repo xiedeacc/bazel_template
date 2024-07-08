@@ -1,4 +1,4 @@
-##### less some binary
+package(default_visibility = ["//visibility:public"])
 
 config_setting(
     name = "linux_x86_64",

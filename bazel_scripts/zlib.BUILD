@@ -1,18 +1,18 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 
-licenses(["notice"])  # BSD/MIT-like license (for zlib)
+package(default_visibility = ["//visibility:public"])
 
 alias(
     name = "zlib",
     actual = selects.with_or({
         ("@platforms//os:android", "@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): ":zlib_system",
-        "//conditions:default": ":zlib_source",
+        "//conditions:default": ":z",
     }),
     visibility = ["//visibility:public"],
 )
 
 cc_library(
-    name = "zlib_source",
+    name = "z",
     srcs = [
         "adler32.c",
         "compress.c",

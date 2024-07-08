@@ -132,7 +132,10 @@ configure_make(
     lib_name = LIB_NAME,
     lib_source = ":all_srcs",
     linkopts = ["-ldl"],
-    out_lib_dir = "lib64",
+    out_lib_dir = select({
+        "@platforms//cpu:aarch64": "lib",
+        "//conditions:default": "lib64",
+    }),
     out_static_libs = [
         "libcrypto.a",
         "libssl.a",
@@ -143,7 +146,7 @@ configure_make(
         "@brotli//:brotlicommon",
         "@brotli//:brotlidec",
         "@brotli//:brotlienc",
-        "@zlib",
+        "@zlib//:z",
         "@zstd",
     ],
 )

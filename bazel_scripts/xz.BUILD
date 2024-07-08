@@ -1,7 +1,7 @@
-##### less some binary
-
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//lib:selects.bzl", "selects")
+
+package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "lzma",

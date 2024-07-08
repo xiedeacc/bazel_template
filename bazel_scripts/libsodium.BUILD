@@ -69,17 +69,51 @@ COMMON_DEFINES = [
     "PACKAGE_URL=\\\"https://libsodium.org\\\"",
     "PACKAGE=\\\"libsodium\\\"",
     "VERSION=\\\"1.0.20\\\"",
+    "ASM_HIDE_SYMBOL=.hidden",
+    "CONFIGURED=1",
+    "HAVE_ALLOCA=1",
+    "HAVE_ALLOCA_H=1",
+    "HAVE_ATOMIC_OPS=1",
+    "HAVE_C11_MEMORY_FENCES=1",
+    "HAVE_CLOCK_GETTIME=1",
+    "HAVE_C_VARARRAYS=1",
+    "HAVE_DLFCN_H=1",
+    "HAVE_EXPLICIT_BZERO=1",
+    "HAVE_GCC_MEMORY_FENCES=1",
+    "HAVE_GETAUXVAL=1",
+    "HAVE_GETENTROPY=1",
+    "HAVE_GETPID=1",
+    "HAVE_GETRANDOM=1",
+    "HAVE_INLINE_ASM=1",
+    "HAVE_INTTYPES_H=1",
+    "HAVE_MADVISE=1",
+    "HAVE_MLOCK=1",
+    "HAVE_MMAP=1",
+    "HAVE_MPROTECT=1",
+    "HAVE_NANOSLEEP=1",
+    "HAVE_POSIX_MEMALIGN=1",
+    "HAVE_PTHREAD=1",
+    "HAVE_PTHREAD_PRIO_INHERIT=1",
+    "HAVE_RAISE=1",
+    "HAVE_STDINT_H=1",
     "HAVE_STDIO_H=1",
     "HAVE_STDLIB_H=1",
-    "HAVE_STRING_H=1",
-    "HAVE_INTTYPES_H=1",
-    "HAVE_STDINT_H=1",
     "HAVE_STRINGS_H=1",
+    "HAVE_STRING_H=1",
+    "HAVE_SYSCONF=1",
+    "HAVE_SYS_AUXV_H=1",
+    "HAVE_SYS_MMAN_H=1",
+    "HAVE_SYS_PARAM_H=1",
+    "HAVE_SYS_RANDOM_H=1",
     "HAVE_SYS_STAT_H=1",
     "HAVE_SYS_TYPES_H=1",
+    "HAVE_TI_MODE=1",
     "HAVE_UNISTD_H=1",
     "HAVE_WCHAR_H=1",
+    "HAVE_WEAK_SYMBOLS=1",
+    "NATIVE_LITTLE_ENDIAN=1",
     "STDC_HEADERS=1",
+    "TLS=_Thread_local",
     "_ALL_SOURCE=1",
     "_DARWIN_C_SOURCE=1",
     "_GNU_SOURCE=1",
@@ -87,6 +121,8 @@ COMMON_DEFINES = [
     "_NETBSD_SOURCE=1",
     "_OPENBSD_SOURCE=1",
     "_POSIX_PTHREAD_SEMANTICS=1",
+    "_TANDEM_SOURCE=1",
+    "__EXTENSIONS__=1",
     "__STDC_WANT_IEC_60559_ATTRIBS_EXT__=1",
     "__STDC_WANT_IEC_60559_BFP_EXT__=1",
     "__STDC_WANT_IEC_60559_DFP_EXT__=1",
@@ -95,63 +131,33 @@ COMMON_DEFINES = [
     "__STDC_WANT_IEC_60559_TYPES_EXT__=1",
     "__STDC_WANT_LIB_EXT2__=1",
     "__STDC_WANT_MATH_SPEC_FUNCS__=1",
-    "_TANDEM_SOURCE=1",
-    "__EXTENSIONS__=1",
-    "HAVE_PTHREAD_PRIO_INHERIT=1",
-    "HAVE_PTHREAD=1",
-    "HAVE_C_VARARRAYS=1",
-    "HAVE_CATCHABLE_SEGV=1",
+]
+
+X86_64_DEFINES = [
+    "HAVE_AMD64_ASM=1",
+    "HAVE_AMD64_ASM_V=1",
+    "HAVE_AVX2INTRIN_H=1",
     "HAVE_CATCHABLE_ABRT=1",
-    "TLS=_Thread_local",
-    "HAVE_DLFCN_H=1",
-    "HAVE_MMINTRIN_H=1",
+    "HAVE_CPUID=1",
     "HAVE_EMMINTRIN_H=1",
+    "HAVE_MMINTRIN_H=1",
     "HAVE_PMMINTRIN_H=1",
+    "HAVE_RDRAND=1",
+    "HAVE_TI_MODE_V=1",
+    "HAVE_WMMINTRIN_H=1",
     "HAVE_TMMINTRIN_H=1",
     "HAVE_SMMINTRIN_H=1",
-    "HAVE_AVXINTRIN_H=1",
-    "HAVE_AVX2INTRIN_H=1",
-    "HAVE_AVX512FINTRIN_H=1",
-    "HAVE_WMMINTRIN_H=1",
-    "HAVE_RDRAND=1",
-    "HAVE_SYS_MMAN_H=1",
-    "HAVE_SYS_PARAM_H=1",
-    "HAVE_SYS_RANDOM_H=1",
-    "HAVE_SYS_AUXV_H=1",
-    "HAVE_CET_H=1",
-    "NATIVE_LITTLE_ENDIAN=1",
-    "HAVE_INLINE_ASM=1",
-    "HAVE_AMD64_ASM_V=1",
-    "HAVE_AVX_ASM_V=1",
     "HAVE_CPUID_V=1",
-    "HAVE_TI_MODE_V=1",
-    "HAVE_AMD64_ASM=1",
+    "HAVE_CATCHABLE_SEGV=1",
+    "HAVE_CET_H=1",
+    "HAVE_AVX512FINTRIN_H=1",
+    "HAVE_AVXINTRIN_H=1",
     "HAVE_AVX_ASM=1",
-    "HAVE_TI_MODE=1",
-    "HAVE_CPUID=1",
-    "ASM_HIDE_SYMBOL=.hidden",
-    "HAVE_WEAK_SYMBOLS=1",
-    "HAVE_ATOMIC_OPS=1",
-    "HAVE_C11_MEMORY_FENCES=1",
-    "HAVE_GCC_MEMORY_FENCES=1",
-    #"CPU_UNALIGNED_ACCESS=1",
-    "HAVE_ALLOCA_H=1",
-    "HAVE_ALLOCA=1",
-    "HAVE_MMAP=1",
-    "HAVE_MLOCK=1",
-    "HAVE_MADVISE=1",
-    "HAVE_MPROTECT=1",
-    "HAVE_RAISE=1",
-    "HAVE_SYSCONF=1",
-    "HAVE_GETRANDOM=1",
-    "HAVE_GETENTROPY=1",
-    "HAVE_GETPID=1",
-    "HAVE_GETAUXVAL=1",
-    "HAVE_POSIX_MEMALIGN=1",
-    "HAVE_NANOSLEEP=1",
-    "HAVE_CLOCK_GETTIME=1",
-    "HAVE_EXPLICIT_BZERO=1",
-    "CONFIGURED=1",
+    "HAVE_AVX_ASM_V=1",
+]
+
+AARCH64_DEFINES = [
+    "HAVE_ARMCRYPTO=1",
 ]
 
 cc_library(
@@ -166,14 +172,18 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
-        "//conditions:default": COMMON_COTPS + ["Iexternal/libsodium/src/libsodium/include/sodium"],
-    }),
+        "@platforms//cpu:aarch64": [],
+        "//conditions:default": [],
+    }) + COMMON_COTPS + ["-I$(BINDIR)/external/libsodium/src/libsodium/include/sodium"],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
 )
 
@@ -292,14 +302,18 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
-        "//conditions:default": COMMON_COTPS + ["Iexternal/libsodium/src/libsodium/include/sodium"],
-    }),
+        "@platforms//cpu:aarch64": [],
+        "//conditions:default": [],
+    }) + COMMON_COTPS + ["-Iexternal/libsodium/src/libsodium/include/sodium"],
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
     deps = [":utils"],
 )
@@ -314,10 +328,11 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
+        "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-mrdrnd",
-        ] + COMMON_COTPS,
-    }),
+        ],
+    }) + COMMON_COTPS,
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -326,7 +341,10 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
     deps = [":common"],
 )
@@ -342,10 +360,11 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
+        "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
-        ] + COMMON_COTPS,
-    }),
+        ],
+    }) + COMMON_COTPS,
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -354,7 +373,10 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
 )
 
@@ -370,11 +392,12 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
+        "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
             "-mssse3",
-        ] + COMMON_COTPS,
-    }),
+        ],
+    }) + COMMON_COTPS,
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -383,7 +406,10 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
     deps = [":common"],
 )
@@ -400,11 +426,12 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
+        "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
             "-mssse3",
-        ] + COMMON_COTPS,
-    }),
+        ],
+    }) + COMMON_COTPS,
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -413,7 +440,10 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
     deps = [":common"],
 )
@@ -430,14 +460,15 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
+        "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
             "-mssse3",
             "-mavx",
             "-maes",
             "-mpclmul",
-        ] + COMMON_COTPS,
-    }),
+        ],
+    }) + COMMON_COTPS,
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -446,7 +477,10 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
     deps = [":common"],
 )
@@ -461,12 +495,13 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
+        "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
             "-mssse3",
             "-msse4.1",
-        ] + COMMON_COTPS,
-    }),
+        ],
+    }) + COMMON_COTPS,
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -475,7 +510,10 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
     deps = [":common"],
 )
@@ -493,14 +531,15 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
+        "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
             "-mssse3",
             "-msse4.1",
             "-mavx",
             "-mavx2",
-        ] + COMMON_COTPS,
-    }),
+        ],
+    }) + COMMON_COTPS,
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -509,7 +548,10 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
     deps = [":common"],
 )
@@ -524,6 +566,7 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
+        "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
             "-mssse3",
@@ -531,8 +574,8 @@ cc_library(
             "-mavx",
             "-mavx2",
             "-mavx512f",
-        ] + COMMON_COTPS,
-    }),
+        ],
+    }) + COMMON_COTPS,
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -541,7 +584,10 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
     deps = [":common"],
 )
@@ -559,11 +605,12 @@ cc_library(
     ]),
     copts = select({
         ":windows": [],
+        "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
             "-mssse3",
-        ] + COMMON_COTPS,
-    }),
+        ],
+    }) + COMMON_COTPS,
     linkopts = select({
         ":windows": [],
         "//conditions:default": [
@@ -572,7 +619,10 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = COMMON_DEFINES,
+    local_defines = select({
+        "@platforms//cpu:aarch64": AARCH64_DEFINES,
+        "//conditions:default": X86_64_DEFINES,
+    }) + COMMON_DEFINES,
     visibility = ["//visibility:public"],
     deps = [
         ":aesni",
