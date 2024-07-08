@@ -3,11 +3,14 @@ TODO
 2. header and library std and system search not perfect in //toolchain:clang_toolchain_for_linux_aarch64
 3. let toolchains_openwrt support gcc and clang and openwrt
 4. swig
-5. grpctoolchains_openwrt
+5. grpc
+6. curl缺少quic + ngquic
 
 
 
 ```
+CC=aarch64-linux-gnu-gcc ./configure --enable-shared=no --host=aarch64-unknown-linux-gnu
+
 /usr/local/llvm/18/bin/clang++ -v --target=aarch64-unknown-linux-gnu \
   --sysroot=/root/src/software/clang_sysroot \
   -I/root/src/software/clang_sysroot/include/aarch64-unknown-linux-gnu/c++/v1 \
