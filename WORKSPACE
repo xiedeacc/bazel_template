@@ -330,6 +330,20 @@ new_git_repository(
     remote = "git@github.com:jemalloc/jemalloc.git",
 )
 
+new_git_repository(
+    name = "libdwarf",
+    build_file = "//bazel_scripts:libdwarf.BUILD",
+    remote = "git@github.com:davea42/libdwarf-code.git",
+    tag = "v0.10.1",
+)
+
+new_git_repository(
+    name = "libunwind",
+    build_file = "//bazel_scripts:libunwind.BUILD",
+    remote = "git@github.com:libunwind/libunwind.git",
+    tag = "v1.8.1",
+)
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )

@@ -9,6 +9,10 @@ TODO
 
 
 ```
+cmake \
+  -DCMAKE_INCLUDE_PATH=/alt/include/path1:/alt/include/path2 \
+  -DCMAKE_LIBRARY_PATH=/alt/lib/path1:/alt/lib/path2 ...
+
 CC=aarch64-linux-gnu-gcc ./configure --enable-shared=no --host=aarch64-unknown-linux-gnu
 
 /usr/local/llvm/18/bin/clang++ -v --target=aarch64-unknown-linux-gnu \
