@@ -340,9 +340,16 @@ new_git_repository(
 new_git_repository(
     name = "libunwind",
     build_file = "//bazel_scripts:libunwind.BUILD",
+    #commit = "3c47821d681777e3cff33edb25c804d93102e1c6",
     remote = "git@github.com:libunwind/libunwind.git",
     tag = "v1.8.1",
 )
+
+#new_local_repository(
+#name = "libunwind",
+#build_file = "//bazel_scripts:libunwind.BUILD",
+#path = "/root/src/library/backup/libunwind",
+#)
 
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",

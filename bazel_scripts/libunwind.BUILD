@@ -26,6 +26,7 @@ COPTS = [
     "-fexceptions",
     "-Wall",
     "-Wsign-compare",
+    "-isystem external/zlib",
     "-Iexternal/libunwind/src",
     "-I$(BINDIR)/external/libunwind/include",
     "-Iexternal/libunwind/include",
@@ -50,6 +51,34 @@ LOCAL_DEFINES = [
     "NDEBUG",
     "__EXTENSIONS__",
 ]
+
+template_rule(
+    name = "libunwind_h",
+    src = "include/libunwind.h.in",
+    out = "include/libunwind.h",
+    substitutions = select({
+        ":linux_x86_64": {
+            "@arch@": "x86_64",
+        },
+        ":linux_aarch64": {
+            "@arch@": "aarch64",
+        },
+    }),
+)
+
+template_rule(
+    name = "tdep_libunwind_i_h",
+    src = "include/tdep/libunwind_i.h.in",
+    out = "include/tdep/libunwind_i.h",
+    substitutions = select({
+        ":linux_x86_64": {
+            "@arch@": "x86_64",
+        },
+        ":linux_aarch64": {
+            "@arch@": "aarch64",
+        },
+    }),
+)
 
 genrule(
     name = "config_h",
@@ -322,24 +351,6 @@ genrule(
 )
 
 template_rule(
-    name = "libunwind_h",
-    src = "include/libunwind.h.in",
-    out = "include/libunwind.h",
-    substitutions = {
-        "@arch@": "x86_64",
-    },
-)
-
-template_rule(
-    name = "tdep_libunwind_i_h",
-    src = "include/tdep/libunwind_i.h.in",
-    out = "include/tdep/libunwind_i.h",
-    substitutions = {
-        "@arch@": "x86_64",
-    },
-)
-
-template_rule(
     name = "libunwind-common_h",
     src = "include/libunwind-common.h.in",
     out = "include/libunwind-common.h",
@@ -448,7 +459,9 @@ cc_library(
             "include/tdep-aarch64/dwarf-config.h",
             "include/tdep-aarch64/libunwind_i.h",
             "include/tdep-aarch64/jmpbuf.h",
-        ],
+        ] + glob(
+            ["src/aarch64/G*.c"],
+        ),
     }),
     # buildifier: leave-alone
     visibility = ["//visibility:private"],
@@ -601,6 +614,25 @@ cc_library(
     ],
 )
 
+#sh_binary(
+#name = "aarch64_preprocess",
+#srcs = ["@bazel_template//bazel_scripts:aarch64_preprocess.sh"],
+#)
+
+#genrule(
+#name = "preprocessed_setcontext",
+#srcs = [
+#"src/aarch64/setcontext.S",
+#"src/aarch64/ucontext_i.h",
+#],
+#outs = [
+#"src/aarch64/setcontext.i",
+##"src/aarch64/setcontext.o",
+#],
+#cmd = "$(location :aarch64_preprocess) $(location src/aarch64/setcontext.S)",
+#tools = [":aarch64_preprocess"],
+#)
+
 cc_library(
     name = "context",
     srcs = select({
@@ -611,17 +643,27 @@ cc_library(
             "src/x86_64/siglongjmp.S",
         ],
         ":linux_aarch64": [
-            "src/aarch64/getcontext.S",
-            "src/aarch64/longjmp.S",
-            "src/aarch64/setcontext.S",
-            "src/aarch64/siglongjmp.S",
+            #"src/aarch64/getcontext.S",
+            #"src/aarch64/longjmp.S",
+            #"src/aarch64/setcontext.S",
+            #"src/aarch64/siglongjmp.S",
         ],
     }),
     copts = COPTS + select({
         ":linux_x86_64": LINUX_X86_64_COPTS,
         ":linux_aarch64": LINUX_AARCH64_COPTS,
     }),
-    local_defines = LOCAL_DEFINES,
+    local_defines = [
+        "HAVE_CONFIG_H",
+    ],
+    textual_hdrs = select({
+        ":linux_x86_64": [
+            "src/x86_64/ucontext_i.h",
+        ],
+        ":linux_aarch64": [
+            "src/aarch64/ucontext_i.h",
+        ],
+    }),
     visibility = ["//visibility:public"],
     deps = [":invisible_header"],
 )
@@ -686,6 +728,48 @@ cc_library(
     ],
 )
 
+alias(
+    name = "unwind-arch",
+    actual = select({
+        ":linux_x86_64": ":unwind-x86_64",
+        ":linux_aarch64": ":unwind-aarch64",
+    }),
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "unwind-aarch64",
+    srcs = [
+        "src/mi/flush_cache.c",
+        "src/mi/init.c",
+        "src/mi/mempool.c",
+        "src/mi/strerror.c",
+        "src/os-linux.c",
+        "src/aarch64/init.h",
+        "src/aarch64/is_fpreg.c",
+        "src/aarch64/regname.c",
+    ] + glob(
+        [
+            "src/mi/G*.c",
+            "src/aarch64/G*.c",
+        ],
+        exclude = [
+            "src/aarch64/Gos-freebsd.c",
+            "src/aarch64/Gos-solaris.c",
+            "src/aarch64/Gos-qnx.c",
+        ],
+    ),
+    copts = COPTS + select({
+        ":linux_x86_64": LINUX_X86_64_COPTS,
+        ":linux_aarch64": LINUX_AARCH64_COPTS,
+    }),
+    local_defines = LOCAL_DEFINES,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":unwind-dwarf-generic",
+    ],
+)
+
 cc_library(
     name = "unwind-x86_64",
     srcs = [
@@ -717,4 +801,22 @@ cc_library(
     deps = [
         ":unwind-dwarf-generic",
     ],
+)
+
+cc_library(
+    name = "unwind-all",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":unwind",
+        ":context",
+        ":unwind-dwarf-generic",
+        ":unwind-dwarf-common",
+        ":unwind-setjmp",
+        ":unwind-coredump",
+        ":unwind-ptrace",
+        ":unwind-elf64",
+    ] + select({
+        ":linux_x86_64": [":unwind-x86_64"],
+        ":linux_aarch64": ["unwind-aarch64"],
+    }),
 )
