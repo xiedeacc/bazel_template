@@ -83,7 +83,7 @@ genrule(
         "#define FOLLY_HAVE_MALLOC_USABLE_SIZE 1",
         "/* #undef FOLLY_HAVE_INT128_T */",
         "#define FOLLY_HAVE_WCHAR_SUPPORT 1",
-        "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1",
+        "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 0",
         "#define HAVE_VSNPRINTF_ERRORS 1",
         "",
         "#define FOLLY_HAVE_LIBUNWIND 1",
