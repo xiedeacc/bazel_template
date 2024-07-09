@@ -160,8 +160,8 @@ cc_library(
         ],
     }),
     copts = [
-        "-isystem .",
-        "-isystem $(BINDIR)",
+        "-isystem external/folly",
+        "-isystem $(BINDIR)/external/folly",
         "-isystem external/double-conversion",
         "-isystem external/libdwarf/src/lib/libdwarf",
         "-isystem external/lz4/lib",

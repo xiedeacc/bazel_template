@@ -245,9 +245,21 @@ git_repository(
 )
 
 git_repository(
+    name = "com_github_google_snappy",
+    remote = "git@github.com:google/snappy.git",
+    tag = "1.2.1",
+)
+
+git_repository(
     name = "com_googlesource_code_re2",
     remote = "git@github.com:google/re2.git",
     tag = "2024-07-02",
+)
+
+git_repository(
+    name = "double-conversion",
+    remote = "git@github.com:google/double-conversion.git",
+    tag = "v3.3.0",
 )
 
 #git_repository(
@@ -332,7 +344,7 @@ new_git_repository(
     name = "fmt",
     build_file = "//bazel_scripts:fmt.BUILD",
     remote = "git@github.com:fmtlib/fmt.git",
-    tag = "11.0.1",
+    tag = "9.1.0",
 )
 
 new_git_repository(
@@ -345,7 +357,6 @@ new_git_repository(
 new_git_repository(
     name = "libunwind",
     build_file = "//bazel_scripts:libunwind.BUILD",
-    commit = "3c47821d681777e3cff33edb25c804d93102e1c6",
     remote = "git@github.com:libunwind/libunwind.git",
     tag = "v1.8.1",
 )
