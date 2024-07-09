@@ -728,70 +728,50 @@ cc_library(
     ],
 )
 
-alias(
+cc_library(
     name = "unwind-arch",
-    actual = select({
-        ":linux_x86_64": ":unwind-x86_64",
-        ":linux_aarch64": ":unwind-aarch64",
+    srcs = select({
+        ":linux_x86_64": [
+            "src/mi/flush_cache.c",
+            "src/mi/init.c",
+            "src/mi/mempool.c",
+            "src/mi/strerror.c",
+            "src/os-linux.c",
+            "src/x86_64/init.h",
+            "src/x86_64/is_fpreg.c",
+            "src/x86_64/regname.c",
+        ] + glob(
+            [
+                "src/mi/G*.c",
+                "src/x86_64/G*.c",
+            ],
+            exclude = [
+                "src/x86_64/Gos-freebsd.c",
+                "src/x86_64/Gos-solaris.c",
+                "src/x86_64/Gos-qnx.c",
+            ],
+        ),
+        ":linux_aarch64": [
+            "src/mi/flush_cache.c",
+            "src/mi/init.c",
+            "src/mi/mempool.c",
+            "src/mi/strerror.c",
+            "src/os-linux.c",
+            "src/aarch64/init.h",
+            "src/aarch64/is_fpreg.c",
+            "src/aarch64/regname.c",
+        ] + glob(
+            [
+                "src/mi/G*.c",
+                "src/aarch64/G*.c",
+            ],
+            exclude = [
+                "src/aarch64/Gos-freebsd.c",
+                "src/aarch64/Gos-solaris.c",
+                "src/aarch64/Gos-qnx.c",
+            ],
+        ),
     }),
-    visibility = ["//visibility:public"],
-)
-
-cc_library(
-    name = "unwind-aarch64",
-    srcs = [
-        "src/mi/flush_cache.c",
-        "src/mi/init.c",
-        "src/mi/mempool.c",
-        "src/mi/strerror.c",
-        "src/os-linux.c",
-        "src/aarch64/init.h",
-        "src/aarch64/is_fpreg.c",
-        "src/aarch64/regname.c",
-    ] + glob(
-        [
-            "src/mi/G*.c",
-            "src/aarch64/G*.c",
-        ],
-        exclude = [
-            "src/aarch64/Gos-freebsd.c",
-            "src/aarch64/Gos-solaris.c",
-            "src/aarch64/Gos-qnx.c",
-        ],
-    ),
-    copts = COPTS + select({
-        ":linux_x86_64": LINUX_X86_64_COPTS,
-        ":linux_aarch64": LINUX_AARCH64_COPTS,
-    }),
-    local_defines = LOCAL_DEFINES,
-    visibility = ["//visibility:public"],
-    deps = [
-        ":unwind-dwarf-generic",
-    ],
-)
-
-cc_library(
-    name = "unwind-x86_64",
-    srcs = [
-        "src/mi/flush_cache.c",
-        "src/mi/init.c",
-        "src/mi/mempool.c",
-        "src/mi/strerror.c",
-        "src/os-linux.c",
-        "src/x86_64/init.h",
-        "src/x86_64/is_fpreg.c",
-        "src/x86_64/regname.c",
-    ] + glob(
-        [
-            "src/mi/G*.c",
-            "src/x86_64/G*.c",
-        ],
-        exclude = [
-            "src/x86_64/Gos-freebsd.c",
-            "src/x86_64/Gos-solaris.c",
-            "src/x86_64/Gos-qnx.c",
-        ],
-    ),
     copts = COPTS + select({
         ":linux_x86_64": LINUX_X86_64_COPTS,
         ":linux_aarch64": LINUX_AARCH64_COPTS,
@@ -807,16 +787,14 @@ cc_library(
     name = "unwind-all",
     visibility = ["//visibility:public"],
     deps = [
-        ":unwind",
         ":context",
-        ":unwind-dwarf-generic",
-        ":unwind-dwarf-common",
-        ":unwind-setjmp",
+        ":unwind",
+        ":unwind-arch",
         ":unwind-coredump",
-        ":unwind-ptrace",
+        ":unwind-dwarf-common",
+        ":unwind-dwarf-generic",
         ":unwind-elf64",
-    ] + select({
-        ":linux_x86_64": [":unwind-x86_64"],
-        ":linux_aarch64": ["unwind-aarch64"],
-    }),
+        ":unwind-ptrace",
+        ":unwind-setjmp",
+    ],
 )

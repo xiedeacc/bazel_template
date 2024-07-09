@@ -1,18 +1,27 @@
 package(default_visibility = ["//visibility:public"])
 
 config_setting(
-    name = "linux_x86_64",
+    name = "windows_x86_64",
     constraint_values = [
-        "@platforms//os:linux",
+        "@platforms//os:windows",
         "@platforms//cpu:x86_64",
     ],
+    visibility = ["//visibility:public"],
 )
 
 config_setting(
     name = "linux_aarch64",
     constraint_values = [
-        "@platforms//os:linux",
         "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
+    ],
+)
+
+config_setting(
+    name = "linux_x86_64",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
     ],
 )
 
@@ -90,7 +99,9 @@ genrule(
         "#define FOLLY_HAVE_DWARF 1",
         "#define FOLLY_HAVE_ELF 1",
         "#define FOLLY_HAVE_SWAPCONTEXT 1",
+        "#ifdef __GLIBC__",
         "#define FOLLY_HAVE_BACKTRACE 1",
+        "#endif",
         "#define FOLLY_USE_SYMBOLIZER 1",
         "#define FOLLY_DEMANGLE_MAX_SYMBOL_SIZE 1024",
         "",
@@ -108,6 +119,9 @@ genrule(
         "/* #undef FOLLY_SUPPORT_SHARED_LIBRARY */",
         "",
         "#define FOLLY_HAVE_LIBRT 0",
+        "#ifdef __aarch64__ ",
+        "#define FOLLY_HAVE_RECVMMSG 1",
+        "#endif",
         "EOF",
     ]),
 )
@@ -160,6 +174,8 @@ cc_library(
         ],
     }),
     copts = [
+        "-isystem external/zlib",
+        "-isystem external/zstd/lib",
         "-isystem external/folly",
         "-isystem $(BINDIR)/external/folly",
         "-isystem external/double-conversion",
@@ -187,11 +203,16 @@ cc_library(
         "-fopenmp",
         "-faligned-new",
         "-fcoroutines",
-        "-msse4.2",
-        "-mpclmul",
-        "-mavx",
-        "-mavx2",
-    ],
+    ] + select({
+        ":linux_aarch64": [
+        ],
+        ":linux_x86_64": [
+            "-msse4.2",
+            "-mpclmul",
+            "-mavx",
+            "-mavx2",
+        ],
+    }),
     linkopts = [
         "-pthread",
         "-ldl",
@@ -204,14 +225,23 @@ cc_library(
         ":linux_x86_64": [
         ],
         ":linux_aarch64": [
-            "-DFOLLY_MEMCPY_IS_MEMCPY",
-            "-DFOLLY_MEMSET_IS_MEMSET",
+            "FOLLY_MEMCPY_IS_MEMCPY",
+            "FOLLY_MEMSET_IS_MEMSET",
         ],
     }),
     deps = [
+        "@boost//:bind",
+        "@boost//:core",
+        "@boost//:crc",
+        "@boost//:filesystem",
+        "@boost//:mpl",
+        "@boost//:multi_index",
+        "@boost//:preprocessor",
+        "@boost//:utility",
         "@com_github_gflags_gflags//:gflags",
         "@com_github_glog_glog//:glog",
         "@com_github_google_snappy//:snappy",
+        "@com_google_googletest//:gtest",
         "@double-conversion//:double-conversion",
         "@fmt",
         "@jemalloc",
