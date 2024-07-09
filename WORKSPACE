@@ -231,13 +231,11 @@ git_repository(
 
 git_repository(
     name = "com_github_glog_glog",
-    #tag = "v0.7.1",
-    commit = "22011b1ac9a596508763b29ee740b0209d88676c",
-    #remote = "git@github.com:google/glog.git",
-    remote = "git@github.com:xiedeacc/glog.git",
+    remote = "git@github.com:google/glog.git",
     repo_mapping = {
         "@gflags": "@com_github_gflags_gflags",
     },
+    tag = "v0.5.0",
 )
 
 git_repository(
@@ -331,6 +329,13 @@ new_git_repository(
 )
 
 new_git_repository(
+    name = "fmt",
+    build_file = "//bazel_scripts:fmt.BUILD",
+    remote = "git@github.com:fmtlib/fmt.git",
+    tag = "11.0.1",
+)
+
+new_git_repository(
     name = "libdwarf",
     build_file = "//bazel_scripts:libdwarf.BUILD",
     remote = "git@github.com:davea42/libdwarf-code.git",
@@ -340,16 +345,39 @@ new_git_repository(
 new_git_repository(
     name = "libunwind",
     build_file = "//bazel_scripts:libunwind.BUILD",
-    #commit = "3c47821d681777e3cff33edb25c804d93102e1c6",
+    commit = "3c47821d681777e3cff33edb25c804d93102e1c6",
     remote = "git@github.com:libunwind/libunwind.git",
     tag = "v1.8.1",
 )
 
-#new_local_repository(
-#name = "libunwind",
-#build_file = "//bazel_scripts:libunwind.BUILD",
-#path = "/root/src/library/backup/libunwind",
-#)
+new_git_repository(
+    name = "mbedtls",
+    build_file = "//bazel_scripts:mbedtls.BUILD",
+    remote = "git@github.com:Mbed-TLS/mbedtls.git",
+    tag = "v3.6.0",
+)
+
+new_git_repository(
+    name = "libevent",
+    build_file = "//bazel_scripts:libevent.BUILD",
+    commit = "90b9520f3ca04dd1278c831e61a82859e3be090e",
+    remote = "git@github.com:libevent/libevent.git",
+)
+
+http_archive(
+    name = "libiberty",
+    build_file = "//bazel_scripts:libiberty.BUILD",
+    sha256 = "f6e4d41fd5fc778b06b7891457b3620da5ecea1006c6a4a41ae998109f85a800",
+    strip_prefix = "binutils-2.42",
+    url = "https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.xz",
+)
+
+new_git_repository(
+    name = "folly",
+    build_file = "//bazel_scripts:folly.BUILD",
+    remote = "git@github.com:facebook/folly.git",
+    tag = "v2024.07.01.00",
+)
 
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",

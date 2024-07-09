@@ -5,6 +5,10 @@ TODO
 4. swig
 5. grpc
 6. curl缺少quic + ngquic
+7. glog external处理
+8. include what you want
+9. revocate
+10. include检查
 
 
 
@@ -12,6 +16,15 @@ TODO
 cmake \
   -DCMAKE_INCLUDE_PATH=/alt/include/path1:/alt/include/path2 \
   -DCMAKE_LIBRARY_PATH=/alt/lib/path1:/alt/lib/path2 ...
+
+
+mbedtls
+cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DENABLE_TESTING=OFF -DUSE_SHARED_MBEDTLS_LIBRARY=ON ..
+
+
+libevent
+cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DEVENT__DISABLE_TESTS:BOOL=ON -DEVENT__ENABLE_VERBOSE_DEBUG:BOOL=OFF ..
+
 
 CC=aarch64-linux-gnu-gcc ./configure --enable-shared=no --host=aarch64-unknown-linux-gnu
 
