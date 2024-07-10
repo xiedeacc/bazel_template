@@ -390,6 +390,14 @@ new_git_repository(
 )
 
 http_archive(
+    name = "libev",
+    build_file = "//bazel_scripts:libev.BUILD",
+    sha256 = "507eb7b8d1015fbec5b935f34ebed15bf346bed04a11ab82b8eee848c4205aea",
+    strip_prefix = "libev-4.33",
+    url = "http://dist.schmorp.de/libev/libev-4.33.tar.gz",
+)
+
+http_archive(
     name = "libiberty",
     build_file = "//bazel_scripts:libiberty.BUILD",
     sha256 = "f6e4d41fd5fc778b06b7891457b3620da5ecea1006c6a4a41ae998109f85a800",
@@ -400,8 +408,7 @@ http_archive(
 new_git_repository(
     name = "folly",
     build_file = "//bazel_scripts:folly.BUILD",
-    #tag = "v2024.07.01.00",
-    commit = "b0d11fa422d9715fbd2936932a0ad61e10efcaf3",
+    commit = "ea3b5497256e0687e162535df82c84c48eecdbc2",
     patch_args = ["-p1"],
     patches = ["//bazel_scripts:folly.patch"],
     remote = "git@github.com:facebook/folly.git",
