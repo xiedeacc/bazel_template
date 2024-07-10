@@ -407,6 +407,13 @@ new_git_repository(
     remote = "git@github.com:facebook/folly.git",
 )
 
+new_git_repository(
+    name = "fizz",
+    build_file = "//bazel_scripts:fizz.BUILD",
+    commit = "61177224258b20476b1259a418d57d02e9cec52d",
+    remote = "git@github.com:facebookincubator/fizz.git",
+)
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )
