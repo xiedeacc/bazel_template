@@ -5,7 +5,6 @@ TODO
 4. swig
 5. grpc
 6. curl缺少quic + ngquic
-7. glog external处理
 8. include what you want
 9. revocate
 10. include检查
