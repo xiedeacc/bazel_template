@@ -16,7 +16,13 @@ TODO
 cmake \
   -DCMAKE_INCLUDE_PATH=/alt/include/path1:/alt/include/path2 \
   -DCMAKE_LIBRARY_PATH=/alt/lib/path1:/alt/lib/path2 ...
-
+liuring
+./configure \
+ --cc=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-12.3.0 \
+ --cxx=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-g++.bin  \
+ --includedir=/root/src/software/openwrt/toolchain/include \
+ --libdir=/root/src/software/openwrt/toolchain/lib \
+ --libdevdir=/root/src/software/openwrt/toolchain/lib
 
 mbedtls
 cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DENABLE_TESTING=OFF -DUSE_SHARED_MBEDTLS_LIBRARY=ON ..

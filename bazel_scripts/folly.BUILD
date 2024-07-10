@@ -1,27 +1,26 @@
 package(default_visibility = ["//visibility:public"])
 
 config_setting(
-    name = "windows_x86_64",
+    name = "linux_x86_64",
     constraint_values = [
-        "@platforms//os:windows",
+        "@platforms//os:linux",
         "@platforms//cpu:x86_64",
     ],
-    visibility = ["//visibility:public"],
 )
 
 config_setting(
     name = "linux_aarch64",
     constraint_values = [
-        "@platforms//cpu:aarch64",
         "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
     ],
 )
 
-config_setting(
-    name = "linux_x86_64",
+platform(
+    name = "linux_aarch64_platform",
     constraint_values = [
-        "@platforms//cpu:x86_64",
         "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
     ],
 )
 
@@ -92,7 +91,7 @@ genrule(
         "#define FOLLY_HAVE_MALLOC_USABLE_SIZE 1",
         "/* #undef FOLLY_HAVE_INT128_T */",
         "#define FOLLY_HAVE_WCHAR_SUPPORT 1",
-        "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 0",
+        "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1",
         "#define HAVE_VSNPRINTF_ERRORS 1",
         "",
         "#define FOLLY_HAVE_LIBUNWIND 1",
@@ -119,9 +118,6 @@ genrule(
         "/* #undef FOLLY_SUPPORT_SHARED_LIBRARY */",
         "",
         "#define FOLLY_HAVE_LIBRT 0",
-        "#ifdef __aarch64__ ",
-        "#define FOLLY_HAVE_RECVMMSG 1",
-        "#endif",
         "EOF",
     ]),
 )
@@ -174,17 +170,25 @@ cc_library(
         ],
     }),
     copts = [
-        "-isystem external/zlib",
-        "-isystem external/zstd/lib",
+        # buildifier: leave-alone
         "-isystem external/folly",
         "-isystem $(BINDIR)/external/folly",
+        "-isystem external/zlib",
+        "-isystem external/zstd/lib",
         "-isystem external/double-conversion",
-        "-isystem external/libdwarf/src/lib/libdwarf",
         "-isystem external/lz4/lib",
+        "-isystem external/bzip2",
         "-isystem external/com_github_google_snappy",
         "-isystem external/libsodium/src/libsodium/include",
         "-Iexternal/libsodium/src/libsodium/include/sodium",
         "-isystem $(BINDIR)/external/libsodium/src/libsodium/include",
+        "-isystem $(BINDIR)/external/libunwind/include",
+        "-Iexternal/libunwind/src",
+        "-Iexternal/libunwind/include",
+        "-I$(BINDIR)/external/libunwind/include/tdep",
+        "-Iexternal/libunwind/include/tdep",
+        "-Iexternal/libunwind/src/mi",
+        # buildifier: leave-alone
         "-Wall",
         "-Wno-deprecated",
         "-Wno-deprecated-declarations",
@@ -203,6 +207,7 @@ cc_library(
         "-fopenmp",
         "-faligned-new",
         "-fcoroutines",
+        "-D_LARGEFILE64_SOURCE",
     ] + select({
         ":linux_aarch64": [
         ],
@@ -230,14 +235,19 @@ cc_library(
         ],
     }),
     deps = [
+        "@boost//:algorithm",
         "@boost//:bind",
+        "@boost//:context",
+        "@boost//:conversion",
         "@boost//:core",
         "@boost//:crc",
         "@boost//:filesystem",
         "@boost//:mpl",
         "@boost//:multi_index",
         "@boost//:preprocessor",
+        "@boost//:program_options",
         "@boost//:utility",
+        "@bzip2",
         "@com_github_gflags_gflags//:gflags",
         "@com_github_glog_glog//:glog",
         "@com_github_google_snappy//:snappy",
@@ -245,6 +255,7 @@ cc_library(
         "@double-conversion//:double-conversion",
         "@fmt",
         "@jemalloc",
+        "@libaio//:aio",
         "@libdwarf//:dwarf",
         "@libevent//:event",
         "@libevent//:event_openssl",
@@ -252,6 +263,7 @@ cc_library(
         "@libiberty//:iberty",
         "@libsodium//:sodium",
         "@libunwind//:unwind-all",
+        "@liburing//:liburing-ffi",
         "@openssl//:ssl",
         "@xz",
         "@zlib",

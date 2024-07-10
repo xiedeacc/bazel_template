@@ -126,6 +126,20 @@ new_git_repository(
     remote = "git@github.com:cpplint/cpplint.git",
 )
 
+new_git_repository(
+    name = "liburing",
+    build_file = "//bazel_scripts:liburing.BUILD",
+    commit = "7b3245583069bd481190c9da18f22e9fc8c3a805",
+    remote = "git@github.com:axboe/liburing.git",
+)
+
+new_git_repository(
+    name = "libaio",
+    build_file = "//bazel_scripts:libaio.BUILD",
+    commit = "b8eadc9f89e8f7ab0338eacda9f98a6caea76883",
+    remote = "https://pagure.io/libaio.git",
+)
+
 http_archive(
     name = "nasm",
     build_file = "//bazel_scripts:nasm.BUILD",
@@ -386,8 +400,11 @@ http_archive(
 new_git_repository(
     name = "folly",
     build_file = "//bazel_scripts:folly.BUILD",
+    #tag = "v2024.07.01.00",
+    commit = "b0d11fa422d9715fbd2936932a0ad61e10efcaf3",
+    patch_args = ["-p1"],
+    patches = ["//bazel_scripts:folly.patch"],
     remote = "git@github.com:facebook/folly.git",
-    tag = "v2024.07.01.00",
 )
 
 register_toolchains(
