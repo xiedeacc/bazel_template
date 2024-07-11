@@ -13,7 +13,7 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
-platform(
+config_setting(
     name = "linux_aarch64",
     constraint_values = [
         "@platforms//cpu:aarch64",
@@ -21,8 +21,24 @@ platform(
     ],
 )
 
-platform(
+config_setting(
     name = "linux_x86_64",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+)
+
+platform(
+    name = "linux_aarch64_platform",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
+    ],
+)
+
+platform(
+    name = "linux_x86_64_platform",
     constraint_values = [
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",

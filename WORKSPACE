@@ -428,6 +428,13 @@ new_git_repository(
     remote = "git@github.com:facebook/mvfst.git",
 )
 
+new_git_repository(
+    name = "wangle",
+    build_file = "//bazel_scripts:wangle.BUILD",
+    commit = "c77ced72e979f0804462ed4848ca51b392671fab",
+    remote = "git@github.com:facebook/wangle.git",
+)
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )

@@ -1,30 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "windows_x86_64",
-    constraint_values = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-platform(
-    name = "linux_aarch64",
-    constraint_values = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:linux",
-    ],
-)
-
-platform(
-    name = "linux_x86_64",
-    constraint_values = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-)
-
 genrule(
     name = "fizz-config_h",
     outs = ["fizz/fizz-config.h"],
