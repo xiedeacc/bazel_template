@@ -276,48 +276,21 @@ git_repository(
     tag = "v3.3.0",
 )
 
-#git_repository(
-#name = "bazelruby_rules_ruby",
-#remote = "git@github.com:bazelruby/rules_ruby.git",
-#tag = "v0.6.0",
-#)
-
-#git_repository(
-#name = "rules_ruby",
-#remote = "git@github.com:protocolbuffers/rules_ruby.git",
-#tag = "v0.6.0",
-#)
-
-#http_archive(
-#name = "com_google_protobuf",
-#remote_patch_strip = 1,
-#remote_patches = {
-#"https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/modules/protobuf/23.1/patches/0007-bazel-Get-rid-of-exec_tools.-13401.patch": "sha256-Thj5ZYqMpgaUrjZv8XyWqyD+I6XQNcZjo4jI14a7QxE=",
-#},
-#sha256 = "dc167b7d23ec0d6e4a3d4eae1798de6c8d162e69fa136d39753aaeb7a6e1289d",
-#strip_prefix = "protobuf-23.1",
-#urls = [
-#"https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v23.1.tar.gz",
-#"https://github.com/protocolbuffers/protobuf/archive/v23.1.tar.gz",
-#],
-#)
-
-#git_repository(
-#name = "com_google_protobuf",
-#remote = "git@github.com:protocolbuffers/protobuf.git",
-#repo_mapping = {
-#"@com_github_google_glog": "@com_github_glog_glog",
-#"@com_github_curl_curl": "@curl",
-#},
-#tag = "v23.1",
-#)
-
 git_repository(
     name = "rules_proto",
-    #commit = "11a4a27e199e795ffd042f7ea9074c08e3d98046",
+    commit = "557db790e7a71993ff85bf523099dfd25060ae2f",
     remote = "git@github.com:bazelbuild/rules_proto.git",
-    tag = "6.0.2",
-    #remote = "git@github.com:xiedeacc/rules_proto.git",
+    #tag = "6.0.2",
+)
+
+git_repository(
+    name = "com_google_protobuf",
+    remote = "git@github.com:protocolbuffers/protobuf.git",
+    repo_mapping = {
+        "@com_github_google_glog": "@com_github_glog_glog",
+        "@com_github_curl_curl": "@curl",
+    },
+    tag = "v27.1",
 )
 
 git_repository(
@@ -395,6 +368,13 @@ http_archive(
     sha256 = "507eb7b8d1015fbec5b935f34ebed15bf346bed04a11ab82b8eee848c4205aea",
     strip_prefix = "libev-4.33",
     url = "http://dist.schmorp.de/libev/libev-4.33.tar.gz",
+)
+
+new_git_repository(
+    name = "libuv",
+    build_file = "//bazel_scripts:libuv.BUILD",
+    remote = "git@github.com:libuv/libuv.git",
+    tag = "v1.48.0",
 )
 
 http_archive(
@@ -593,7 +573,7 @@ load("@rules_perl//perl:deps.bzl", "perl_register_toolchains")
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
 load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
-#load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 bazel_features_deps()
 
@@ -607,10 +587,6 @@ go_rules_dependencies()
 
 rules_pkg_dependencies()
 
-rules_proto_dependencies()
-
-rules_proto_toolchains()
-
 rules_java_toolchains()
 
 go_register_toolchains(version = "1.18")
@@ -621,7 +597,11 @@ rules_closure_dependencies()
 
 rules_closure_toolchains()
 
-#protobuf_deps()
+rules_proto_dependencies()
+
+rules_proto_toolchains()
+
+protobuf_deps()
 
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 load("@hedron_compile_commands//:workspace_setup_transitive.bzl", "hedron_compile_commands_setup_transitive")

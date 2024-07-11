@@ -10,10 +10,3 @@
 #)
 
 bazel_dep(name = "protobuf", dev_dependency = True, repo_name = "com_google_protobuf", version = "27.2")
-
-#repo_mapping = {
-#"@boringssl": "@openssl",
-#"@xz": "@org_lzma_lzma",
-##"@org_lzma_lzma": "@xz",
-#"@org_bzip_bzip2": "@bzip2",
-#}
