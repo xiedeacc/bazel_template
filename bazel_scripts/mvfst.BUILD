@@ -59,6 +59,10 @@ cc_library(
     ),
     copts = [
         "-isystem external/mvfst",
+        "-isystem external/libsodium/src/libsodium/include",
+        "-Iexternal/libsodium/src/libsodium/include/sodium",
+        "-isystem $(BINDIR)/external/libsodium/src/libsodium/include",
+        "-isystem external/double-conversion",
         "-isystem $(BINDIR)/external/folly",
         "-isystem external/folly",
         "-isystem $(BINDIR)/external/fizz",
