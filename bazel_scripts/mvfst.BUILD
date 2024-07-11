@@ -11,7 +11,7 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
-platform(
+config_setting(
     name = "linux_aarch64",
     constraint_values = [
         "@platforms//cpu:aarch64",
@@ -19,20 +19,12 @@ platform(
     ],
 )
 
-platform(
+config_setting(
     name = "linux_x86_64",
     constraint_values = [
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
-)
-
-refresh_compile_commands(
-    name = "refresh_compile_commands",
-    targets = {
-        "//...": "",
-        #"//:my_output_1": "--important_flag1 --important_flag2=true",
-    },
 )
 
 cc_library(
@@ -42,12 +34,18 @@ cc_library(
             "quic/**/*.cpp",
         ],
         exclude = [
+            "quic/api/QuicBatchWriterFactoryMobile.cpp",
+            "quic/server/QuicServerBackendIoUring.cpp",
+            "quic/server/QuicServerBackend.cpp",
             "quic/samples/**",
             "quic/**/test/**",
             "quic/docs/**",
             "quic/tools/tperf/**/*.cpp",
         ],
-    ),
+    ) + select({
+        ":linux_x86_64": ["quic/server/QuicServerBackendIoUring.cpp"],
+        ":linux_aarch64": ["quic/server/QuicServerBackendIoUring.cpp"],
+    }),
     hdrs = glob(
         [
             "quic/**/*.h",
@@ -60,7 +58,7 @@ cc_library(
         ],
     ),
     copts = [
-        "-isystem .",
+        "-isystem external/mvfst",
         "-isystem $(BINDIR)/external/folly",
         "-isystem external/folly",
         "-isystem $(BINDIR)/external/fizz",

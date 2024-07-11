@@ -421,6 +421,13 @@ new_git_repository(
     remote = "git@github.com:facebookincubator/fizz.git",
 )
 
+new_git_repository(
+    name = "mvfst",
+    build_file = "//bazel_scripts:mvfst.BUILD",
+    commit = "987475eb44e897628d6ad1dbb15d78403442695c",
+    remote = "git@github.com:facebook/mvfst.git",
+)
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )
