@@ -13,6 +13,17 @@ TODO
 
 
 ```
+
+mstch_cpp2:no_metadata,include_prefix=thrift/lib/thrift
+mstch_cpp2:templates,no_metadata,include_prefix=thrift/lib/thrift
+mstch_cpp2:json,no_metadata,include_prefix=thrift/lib/thrift
+mstch_cpp2:include_prefix=thrift/lib/thrift
+
+cd /root/src/library/fbthrift && /root/src/library/fbthrift/bazel-bin/thrift1 --gen mstch_cpp2:no_metadata,include_prefix=thrift/conformance/if \
+-o thrift/conformance/if \
+-I /root/src/library/fbthrift thrift/conformance/if/serialization.thrift
+
+
 cmake \
   -DCMAKE_INCLUDE_PATH=/alt/include/path1:/alt/include/path2 \
   -DCMAKE_LIBRARY_PATH=/alt/lib/path1:/alt/lib/path2 ...
