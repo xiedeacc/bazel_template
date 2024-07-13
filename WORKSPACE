@@ -388,31 +388,38 @@ http_archive(
 new_git_repository(
     name = "folly",
     build_file = "//bazel_scripts:folly.BUILD",
-    commit = "ea3b5497256e0687e162535df82c84c48eecdbc2",
     patch_args = ["-p1"],
     patches = ["//bazel_scripts:folly.patch"],
     remote = "git@github.com:facebook/folly.git",
+    tag = "v2024.07.08.00",
 )
 
 new_git_repository(
     name = "fizz",
     build_file = "//bazel_scripts:fizz.BUILD",
-    commit = "61177224258b20476b1259a418d57d02e9cec52d",
     remote = "git@github.com:facebookincubator/fizz.git",
+    tag = "v2024.07.08.00",
 )
 
 new_git_repository(
     name = "mvfst",
     build_file = "//bazel_scripts:mvfst.BUILD",
-    commit = "987475eb44e897628d6ad1dbb15d78403442695c",
     remote = "git@github.com:facebook/mvfst.git",
+    tag = "v2024.07.08.00",
 )
 
 new_git_repository(
     name = "wangle",
     build_file = "//bazel_scripts:wangle.BUILD",
-    commit = "c77ced72e979f0804462ed4848ca51b392671fab",
     remote = "git@github.com:facebook/wangle.git",
+    tag = "v2024.07.08.00",
+)
+
+new_git_repository(
+    name = "fbthrift",
+    build_file = "//bazel_scripts:fbthrift.BUILD",
+    remote = "git@github.com:facebook/fbthrift.git",
+    tag = "v2024.07.08.00",
 )
 
 register_toolchains(
@@ -564,16 +571,16 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 versions.check("7.2.0")
 
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
-load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-load("@rules_python//python:repositories.bzl", "py_repositories")
+load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
 load("@rules_perl//perl:deps.bzl", "perl_register_toolchains")
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
 load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+load("@rules_python//python:repositories.bzl", "py_repositories")
 
 bazel_features_deps()
 
