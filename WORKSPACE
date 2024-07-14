@@ -416,6 +416,26 @@ new_git_repository(
 )
 
 new_git_repository(
+    name = "fatal",
+    build_file = "//bazel_scripts:fatal.BUILD",
+    remote = "git@github.com:facebook/fatal.git",
+    tag = "v2024.07.08.00",
+)
+
+new_git_repository(
+    name = "xxhash",
+    build_file = "//bazel_scripts:xxhash.BUILD",
+    commit = "d5fe4f54c47bc8b8e76c6da9146c32d5c720cd79",
+    remote = "git@github.com:Cyan4973/xxHash.git",
+)
+
+git_repository(
+    name = "yaml-cpp",
+    commit = "1d8ca1f35eb3a9c9142462b28282a848e5d29a91",
+    remote = "git@github.com:jbeder/yaml-cpp.git",
+)
+
+new_git_repository(
     name = "fbthrift",
     build_file = "//bazel_scripts:fbthrift.BUILD",
     remote = "git@github.com:facebook/fbthrift.git",
