@@ -443,6 +443,13 @@ new_git_repository(
     #tag = "v2024.07.08.00",
 )
 
+new_git_repository(
+    name = "fb303",
+    build_file = "//bazel_scripts:fb303.BUILD",
+    remote = "git@github.com:facebook/fb303.git",
+    tag = "v2024.07.08.00",
+)
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )
