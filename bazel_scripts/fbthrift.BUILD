@@ -1,4 +1,4 @@
-load("@bazel_template//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen")
+load("@fb303//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -288,6 +288,42 @@ cc_binary(
         "@wangle",
     ],
 )
+
+filegroup(
+    name = "fbthrift_libraries",
+    srcs = [
+        "thrift/annotation/cpp.thrift",
+        "thrift/annotation/hack.thrift",
+        "thrift/annotation/java.thrift",
+        "thrift/annotation/python.thrift",
+        "thrift/annotation/scope.thrift",
+        "thrift/annotation/thrift.thrift",
+        "thrift/lib/thrift/id.thrift",
+        "thrift/lib/thrift/protocol.thrift",
+        "thrift/lib/thrift/protocol_detail.thrift",
+        "thrift/lib/thrift/schema.thrift",
+        "thrift/lib/thrift/standard.thrift",
+        "thrift/lib/thrift/type.thrift",
+        "thrift/lib/thrift/type_rep.thrift",
+    ],
+)
+
+#fbthrift_cpp_gen(
+#name = "lib_rocket_thrift_cpp",
+#srcs = [
+##"thrift/lib/thrift/RocketUpgrade.thrift",
+#"thrift/lib/thrift/id.thrift",
+#],
+#data = [":fbthrift_libraries"],
+#gen_para = "mstch_cpp2:no_metadata,include_prefix=thrift/lib/thrift",
+#includes = [
+### buildifier: leave-alone
+#"-I",
+#".",
+### buildifier: leave-alone
+#],
+#out_dir = "thrift/lib/thrift",
+#)
 
 cc_library(
     name = "lib",
