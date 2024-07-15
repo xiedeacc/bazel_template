@@ -267,6 +267,9 @@ git_repository(
 git_repository(
     name = "com_googlesource_code_re2",
     remote = "git@github.com:google/re2.git",
+    repo_mapping = {
+        "@abseil-cpp": "@com_google_absl",
+    },
     tag = "2024-07-02",
 )
 

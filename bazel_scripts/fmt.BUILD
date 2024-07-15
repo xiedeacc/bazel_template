@@ -5,11 +5,11 @@ cc_library(
         "-g",
         "-O3",
     ],
+    defines = [
+        "FMT_HEADER_ONLY",
+    ],
     includes = [
         "include",
-    ],
-    local_defines = [
-        "FMT_HEADER_ONLY",
     ],
     visibility = ["//visibility:public"],
 )

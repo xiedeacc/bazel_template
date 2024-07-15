@@ -1,3 +1,5 @@
+load("@bazel_template//bazel_scripts:rules_fbthrift_dir.bzl", "fbthrift_cpp_gen")
+
 package(default_visibility = ["//visibility:public"])
 
 config_setting(
@@ -42,11 +44,13 @@ platform(
 )
 
 COPTS = [
-    "-isystem .",
+    "-isystem external/fb303",
+    "-isystem $(BINDIR)/external/fb303",
     "-isystem external/double-conversion",
     "-isystem external/xxhash",
     "-isystem external/com_googlesource_code_re2",
     "-isystem external/fatal",
+    "-isystem external/fbthrift",
     "-isystem $(BINDIR)/external/folly",
     "-isystem $(BINDIR)/external/fizz",
     "-isystem external/folly",
@@ -61,9 +65,27 @@ LOCAL_DEFINES = [
     "NDEBUG",
 ]
 
+fbthrift_cpp_gen(
+    name = "fb303_core_thrift_cpp",
+    srcs = [
+        "fb303/thrift/fb303_core.thrift",
+    ],
+    data = ["@fbthrift//:fbthrift_libraries"],
+    gen_para = "mstch_cpp2:include_prefix=fb303/thrift",
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        ".",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "fb303/thrift",
+)
+
 cc_library(
     name = "fb303",
-    srcs = glob(
+    srcs = [
+        ":fb303_core_thrift_cpp",
+    ] + glob(
         [
             "fb303/**/*.cpp",
         ],
@@ -72,6 +94,7 @@ cc_library(
         ],
     ),
     hdrs = [
+        ":fb303_core_thrift_cpp",
     ] + glob(
         [
             "fb303/**/*.h",

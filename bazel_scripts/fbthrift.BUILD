@@ -1,4 +1,4 @@
-load("@fb303//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen")
+load("@bazel_template//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
 
