@@ -453,6 +453,13 @@ new_git_repository(
     tag = "v2024.07.08.00",
 )
 
+new_git_repository(
+    name = "proxygen",
+    build_file = "//bazel_scripts:proxygen.BUILD",
+    remote = "git@github.com:facebook/proxygen.git",
+    tag = "v2024.07.08.00",
+)
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )
