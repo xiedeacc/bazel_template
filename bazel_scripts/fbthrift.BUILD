@@ -1,49 +1,11 @@
-load("@bazel_template//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "configure_make", "configure_make_variant")
+load("//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen", "fbthrift_service_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "windows_x86_64",
-    constraint_values = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "linux_aarch64",
-    constraint_values = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:linux",
-    ],
-)
-
-config_setting(
-    name = "linux_x86_64",
-    constraint_values = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-)
-
-platform(
-    name = "linux_aarch64_platform",
-    constraint_values = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:linux",
-    ],
-)
-
-platform(
-    name = "linux_x86_64_platform",
-    constraint_values = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-)
-
 COPTS = [
+    "-isystem external/fbthrift",
+    "-isystem $(BINDIR)/external/fbthrift",
     "-isystem external/double-conversion",
     "-isystem external/xxhash",
     "-isystem external/com_googlesource_code_re2",
@@ -54,7 +16,6 @@ COPTS = [
     "-isystem external/fizz",
     "-isystem external/wangle",
     "-isystem external/mvfst",
-    "-isystem external/fbthrift",
     "-std=c++17",
     "-fsized-deallocation",
 ]
@@ -291,43 +252,193 @@ cc_binary(
 
 filegroup(
     name = "fbthrift_libraries",
+    srcs = glob([
+        "thrift/annotation/*.thrift",
+        "thrift/lib/thrift/*.thrift",
+    ]),
+)
+
+fbthrift_cpp_gen(
+    name = "lib_meta_thrift_cpp",
+    srcs = [
+        "thrift/lib/thrift/frozen.thrift",
+        "thrift/lib/thrift/metadata.thrift",
+    ],
+    data = [":fbthrift_libraries"],
+    gen_para = ["include_prefix=thrift/lib/thrift"],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        ".",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "thrift/lib/thrift",
+    out_files = {
+        "thrift/lib/thrift/frozen.thrift": "frozen",
+        "thrift/lib/thrift/metadata.thrift": "metadata",
+    },
+    plugin = "mstch_cpp2",
+)
+
+fbthrift_cpp_gen(
+    name = "annotation_thrift_cpp",
     srcs = [
         "thrift/annotation/cpp.thrift",
+        "thrift/annotation/go.thrift",
         "thrift/annotation/hack.thrift",
         "thrift/annotation/java.thrift",
         "thrift/annotation/python.thrift",
-        "thrift/annotation/scope.thrift",
         "thrift/annotation/thrift.thrift",
+    ],
+    data = [":fbthrift_libraries"],
+    gen_para = [
+        "templates",
+        "no_metadata",
+        "include_prefix=thrift/annotation",
+    ],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        ".",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "thrift/annotation",
+    out_files = {
+        "thrift/annotation/cpp.thrift": "cpp",
+        "thrift/annotation/go.thrift": "go",
+        "thrift/annotation/hack.thrift": "hack",
+        "thrift/annotation/java.thrift": "java",
+        "thrift/annotation/python.thrift": "python",
+        "thrift/annotation/thrift.thrift": "thrift",
+    },
+    plugin = "mstch_cpp2",
+)
+
+fbthrift_cpp_gen(
+    name = "lib_reflection_thrift_cpp",
+    srcs = [
+        "thrift/lib/thrift/reflection.thrift",
+    ],
+    data = [":fbthrift_libraries"],
+    gen_para = [
+        "templates",
+        "no_metadata",
+        "include_prefix=thrift/lib/thrift",
+    ],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        ".",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "thrift/lib/thrift",
+    out_files = {
+        "thrift/lib/thrift/reflection.thrift": "reflection",
+    },
+    plugin = "mstch_cpp2",
+)
+
+fbthrift_cpp_gen(
+    name = "lib_json_thrift_cpp",
+    srcs = [
+        "thrift/lib/thrift/RpcMetadata.thrift",
+        "thrift/lib/thrift/serverdbginfo.thrift",
+    ],
+    data = [":fbthrift_libraries"],
+    gen_para = [
+        "json",
+        "no_metadata",
+        "include_prefix=thrift/lib/thrift",
+    ],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        ".",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "thrift/lib/thrift",
+    out_files = {
+        "thrift/lib/thrift/RpcMetadata.thrift": "RpcMetadata",
+        "thrift/lib/thrift/serverdbginfo.thrift": "serverdbginfo",
+    },
+)
+
+fbthrift_cpp_gen(
+    name = "lib_rocket_thrift_cpp",
+    srcs = [
+        "thrift/lib/thrift/RocketUpgrade.thrift",
+        "thrift/lib/thrift/any_rep.thrift",
+        "thrift/lib/thrift/field_mask.thrift",
         "thrift/lib/thrift/id.thrift",
+        "thrift/lib/thrift/patch.thrift",
+        "thrift/lib/thrift/patch_op.thrift",
         "thrift/lib/thrift/protocol.thrift",
         "thrift/lib/thrift/protocol_detail.thrift",
-        "thrift/lib/thrift/schema.thrift",
         "thrift/lib/thrift/standard.thrift",
         "thrift/lib/thrift/type.thrift",
         "thrift/lib/thrift/type_rep.thrift",
     ],
+    data = [":fbthrift_libraries"],
+    gen_para = [
+        "no_metadata",
+        "include_prefix=thrift/lib/thrift",
+    ],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        ".",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "thrift/lib/thrift",
+    out_files = {
+        "thrift/lib/thrift/RocketUpgrade.thrift": "RocketUpgrade",
+        "thrift/lib/thrift/any_rep.thrift": "any_rep",
+        "thrift/lib/thrift/field_mask.thrift": "field_mask",
+        "thrift/lib/thrift/id.thrift": "id",
+        "thrift/lib/thrift/patch.thrift": "patch",
+        "thrift/lib/thrift/patch_op.thrift": "patch_op",
+        "thrift/lib/thrift/protocol.thrift": "protocol",
+        "thrift/lib/thrift/protocol_detail.thrift": "protocol_detail",
+        "thrift/lib/thrift/standard.thrift": "standard",
+        "thrift/lib/thrift/type.thrift": "type",
+        "thrift/lib/thrift/type_rep.thrift": "type_rep",
+    },
 )
 
-#fbthrift_cpp_gen(
-#name = "lib_rocket_thrift_cpp",
-#srcs = [
-##"thrift/lib/thrift/RocketUpgrade.thrift",
-#"thrift/lib/thrift/id.thrift",
-#],
-#data = [":fbthrift_libraries"],
-#gen_para = "mstch_cpp2:no_metadata,include_prefix=thrift/lib/thrift",
-#includes = [
-### buildifier: leave-alone
-#"-I",
-#".",
-### buildifier: leave-alone
-#],
-#out_dir = "thrift/lib/thrift",
-#)
+fbthrift_service_cpp_gen(
+    name = "lib_rocket_service_thrift_cpp",
+    srcs = [
+        "thrift/lib/thrift/RocketUpgrade.thrift",
+        "thrift/lib/thrift/metadata.thrift",
+    ],
+    data = [":fbthrift_libraries"],
+    gen_para = [
+        "no_metadata",
+        "include_prefix=thrift/lib/thrift",
+    ],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        ".",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "thrift/lib/thrift",
+    out_files = {
+        "thrift/lib/thrift/RocketUpgrade.thrift": "RocketUpgrade",
+        "thrift/lib/thrift/metadata.thrift": "ThriftMetadataService",
+    },
+)
 
 cc_library(
     name = "lib",
-    srcs = glob(
+    srcs = [
+        ":annotation_thrift_cpp",
+        ":lib_json_thrift_cpp",
+        ":lib_meta_thrift_cpp",
+        ":lib_reflection_thrift_cpp",
+        ":lib_rocket_service_thrift_cpp",
+        ":lib_rocket_thrift_cpp",
+    ] + glob(
         [
             "thrift/annotation/**/*.cpp",
             "thrift/lib/cpp/**/*.cpp",
