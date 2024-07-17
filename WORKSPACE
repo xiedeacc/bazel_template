@@ -455,9 +455,9 @@ new_git_repository(
 new_git_repository(
     name = "proxygen",
     build_file = "//bazel_scripts:proxygen.BUILD",
-    #tag = "v2024.07.08.00",
-    commit = "8f2ab5a0b7a84984c4e4b246a00a82ef5434035b",
-    remote = "git@github.com:xiedeacc/proxygen.git",
+    #commit = "8f2ab5a0b7a84984c4e4b246a00a82ef5434035b",
+    remote = "git@github.com:facebook/proxygen.git",
+    tag = "v2024.07.08.00",
 )
 
 register_toolchains(
