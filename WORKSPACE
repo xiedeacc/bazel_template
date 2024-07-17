@@ -441,9 +441,8 @@ git_repository(
 new_git_repository(
     name = "fbthrift",
     build_file = "//bazel_scripts:fbthrift.BUILD",
-    commit = "c3d88f75df858398911fee5ed68884ced7f45472",
-    remote = "git@github.com:xiedeacc/fbthrift.git",
-    #tag = "v2024.07.08.00",
+    remote = "git@github.com:facebook/fbthrift.git",
+    tag = "v2024.07.08.00",
 )
 
 new_git_repository(

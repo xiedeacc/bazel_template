@@ -5,6 +5,11 @@ def list_to_set(lst):
 def element_in_set(set_dict, element):
     return element in set_dict
 
+def remove_prefix(s, prefix):
+    if s.startswith(prefix):
+        return s[len(prefix):]
+    return s
+
 def _fbthrift_cpp_gen_impl(ctx):
     suffixs = [
         "_clients.h",
@@ -25,6 +30,7 @@ def _fbthrift_cpp_gen_impl(ctx):
         "_visitation.h",
     ]
 
+    print(ctx.label.workspace_name)
     gen_para_dict = list_to_set(ctx.attr.gen_para)
     if not element_in_set(gen_para_dict, "no_metadata"):
         suffixs.append("_metadata.cpp")
@@ -34,7 +40,7 @@ def _fbthrift_cpp_gen_impl(ctx):
     if len(ctx.attr.out_files) != len(ctx.files.srcs):
         fail("output_files size not equal to srcs")
     for thrift_file in ctx.files.srcs:
-        file_name = ctx.attr.out_files[thrift_file.path]
+        file_name = ctx.attr.out_files[remove_prefix(thrift_file.path, "external/{}/".format(ctx.label.workspace_name))]
         outputs = []
         for suffix in suffixs:
             output_file = ctx.actions.declare_file("{}/gen-cpp2/{}{}".format(ctx.attr.out_dir, file_name, suffix))
@@ -47,7 +53,7 @@ def _fbthrift_cpp_gen_impl(ctx):
                 "--gen",
                 gen_para,
                 "-o",
-                "{}/{}".format(outputs[0].root.path, ctx.attr.out_dir),
+                "{}/external/{}/{}".format(outputs[0].root.path, ctx.label.workspace_name, ctx.attr.out_dir),
             ] + ctx.attr.includes + [
                 thrift_file.path,
             ],
@@ -87,7 +93,7 @@ def _fbthrift_service_cpp_gen_impl(ctx):
     if len(ctx.attr.out_files) != len(ctx.files.srcs):
         fail("output_files size not equal to srcs")
     for thrift_file in ctx.files.srcs:
-        file_name = ctx.attr.out_files[thrift_file.path]
+        file_name = ctx.attr.out_files[remove_prefix(thrift_file.path, "external/{}/".format(ctx.label.workspace_name))]
         outputs = []
         for suffix in suffixs:
             output_file = ctx.actions.declare_file("{}/gen-cpp2/{}{}".format(ctx.attr.out_dir, file_name, suffix))
@@ -100,7 +106,7 @@ def _fbthrift_service_cpp_gen_impl(ctx):
                 "--gen",
                 gen_para,
                 "-o",
-                "{}/{}".format(outputs[0].root.path, ctx.attr.out_dir),
+                "{}/external/{}/{}".format(outputs[0].root.path, ctx.label.workspace_name, ctx.attr.out_dir),
             ] + ctx.attr.includes + [
                 thrift_file.path,
             ],

@@ -1,5 +1,4 @@
-load("@rules_foreign_cc//foreign_cc:defs.bzl", "configure_make", "configure_make_variant")
-load("//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen", "fbthrift_service_cpp_gen")
+load("@bazel_template//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen", "fbthrift_service_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -269,7 +268,7 @@ fbthrift_cpp_gen(
     includes = [
         ## buildifier: leave-alone
         "-I",
-        ".",
+        "external/fbthrift",
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/lib/thrift",
@@ -299,7 +298,7 @@ fbthrift_cpp_gen(
     includes = [
         ## buildifier: leave-alone
         "-I",
-        ".",
+        "external/fbthrift",
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/annotation",
@@ -328,7 +327,7 @@ fbthrift_cpp_gen(
     includes = [
         ## buildifier: leave-alone
         "-I",
-        ".",
+        "external/fbthrift",
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/lib/thrift",
@@ -353,7 +352,7 @@ fbthrift_cpp_gen(
     includes = [
         ## buildifier: leave-alone
         "-I",
-        ".",
+        "external/fbthrift",
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/lib/thrift",
@@ -386,7 +385,7 @@ fbthrift_cpp_gen(
     includes = [
         ## buildifier: leave-alone
         "-I",
-        ".",
+        "external/fbthrift",
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/lib/thrift",
@@ -419,13 +418,81 @@ fbthrift_service_cpp_gen(
     includes = [
         ## buildifier: leave-alone
         "-I",
-        ".",
+        "external/fbthrift",
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/lib/thrift",
     out_files = {
         "thrift/lib/thrift/RocketUpgrade.thrift": "RocketUpgrade",
         "thrift/lib/thrift/metadata.thrift": "ThriftMetadataService",
+    },
+)
+
+fbthrift_cpp_gen(
+    name = "conformance_thrift_cpp",
+    srcs = [
+        "thrift/conformance/if/any.thrift",
+        "thrift/conformance/if/conformance.thrift",
+        "thrift/conformance/if/patch_data.thrift",
+        "thrift/conformance/if/protocol.thrift",
+        "thrift/conformance/if/serialization.thrift",
+        "thrift/conformance/if/type.thrift",
+    ],
+    data = [":fbthrift_libraries"] + [
+        "thrift/conformance/if/any.thrift",
+        "thrift/conformance/if/conformance.thrift",
+        "thrift/conformance/if/patch_data.thrift",
+        "thrift/conformance/if/protocol.thrift",
+        "thrift/conformance/if/serialization.thrift",
+        "thrift/conformance/if/type.thrift",
+    ],
+    gen_para = [
+        "no_metadata",
+        "include_prefix=thrift/conformance/if",
+    ],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        "external/fbthrift",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "thrift/conformance/if",
+    out_files = {
+        "thrift/conformance/if/any.thrift": "any",
+        "thrift/conformance/if/conformance.thrift": "conformance",
+        "thrift/conformance/if/patch_data.thrift": "patch_data",
+        "thrift/conformance/if/protocol.thrift": "protocol",
+        "thrift/conformance/if/serialization.thrift": "serialization",
+        "thrift/conformance/if/type.thrift": "type",
+    },
+)
+
+fbthrift_service_cpp_gen(
+    name = "conformance_service_thrift_cpp",
+    srcs = [
+        "thrift/conformance/if/conformance.thrift",
+    ],
+    data = [":fbthrift_libraries"] + [
+        "thrift/conformance/if/any.thrift",
+        "thrift/conformance/if/conformance.thrift",
+        "thrift/conformance/if/patch_data.thrift",
+        "thrift/conformance/if/protocol.thrift",
+        "thrift/conformance/if/serialization.thrift",
+        "thrift/conformance/if/type.thrift",
+    ],
+    gen_para = [
+        "no_metadata",
+        "include_prefix=thrift/conformance/if",
+    ],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        "external/fbthrift",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "thrift/conformance/if",
+    out_files = {
+        "thrift/conformance/if/conformance.thrift": "ConformanceService",
     },
 )
 
@@ -438,6 +505,8 @@ cc_library(
         ":lib_reflection_thrift_cpp",
         ":lib_rocket_service_thrift_cpp",
         ":lib_rocket_thrift_cpp",
+        ":conformance_thrift_cpp",
+        ":conformance_service_thrift_cpp",
     ] + glob(
         [
             "thrift/annotation/**/*.cpp",
@@ -479,7 +548,6 @@ cc_library(
             "thrift/conformance/cpp2/AnySerializer.cpp",
             "thrift/conformance/cpp2/Protocol.cpp",
             "thrift/conformance/cpp2/ThriftTypeInfo.cpp",
-            "thrift/conformance/if/gen-cpp2/*.cpp",
         ],
         exclude = [
             "thrift/lib/cpp2/protocol/Patch.cpp",  # conflict with fmt
@@ -519,8 +587,6 @@ cc_library(
             "thrift/lib/cpp/**/*.h",
             "thrift/lib/thrift/**/*.h",
             "thrift/lib/thrift/**/*.tcc",
-            "thrift/conformance/if/gen-cpp2/*.h",
-            "thrift/conformance/if/gen-cpp2/*.tcc",
         ],
         exclude = [
             "thrift/**/test/**",
