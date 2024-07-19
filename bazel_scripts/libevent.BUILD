@@ -8,7 +8,6 @@ COPTS = [
     "-Wdeclaration-after-statement",
     "-Wfloat-equal",
     "-Winit-self",
-    "-Wlogical-op",
     "-Wmissing-declarations",
     "-Wmissing-field-initializers",
     "-Wmissing-prototypes",
@@ -121,7 +120,7 @@ genrule(
         "#define EVENT__HAVE_EPOLL_CREATE1 1",
         "",
         "/* Define to 1 if you have the `epoll_pwait2' function. */",
-        "#define EVENT__HAVE_EPOLL_PWAIT2 1",
+        #"#define EVENT__HAVE_EPOLL_PWAIT2 1", #not work for cross_compiling
         "",
         "/* Define if your system supports the wepoll module */",
         "/* #undef EVENT__HAVE_WEPOLL */",

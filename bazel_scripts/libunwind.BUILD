@@ -437,7 +437,7 @@ cc_library(
         "src/setjmp/setjmp_i.h",
         "src/coredump/ucd_file_table.h",
         "src/coredump/_UCD_internal.h",
-        "src/coredump/_UCD_lib.h",
+        #"src/coredump/_UCD_lib.h",
     ] + glob([
         "src/dwarf/G*.c",
         "src/mi/G*.c",

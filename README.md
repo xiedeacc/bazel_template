@@ -9,6 +9,7 @@ TODO
 8. revocate
 9. fizz lack of aegis, liboqs
 10. proxygen lack dns
+11. jemalloc
 
 
 

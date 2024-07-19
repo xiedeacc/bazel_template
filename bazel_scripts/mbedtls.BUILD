@@ -13,18 +13,6 @@ cc_library(
     copts = [
         "-Wall",
         "-Wextra",
-        "-Wwrite-strings",
-        "-Wformat=2",
-        "-Wno-format-nonliteral",
-        "-Wvla",
-        "-Wlogical-op",
-        "-Wshadow",
-        "-Wformat-signedness",
-        "-Wformat-overflow=2",
-        "-Wformat-truncation",
-        "-Werror",
-        "-Wmissing-declarations",
-        "-Wmissing-prototypes",
     ],
     includes = [
         "include",

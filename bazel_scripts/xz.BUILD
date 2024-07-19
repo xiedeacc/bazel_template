@@ -187,7 +187,6 @@ cc_library(
             "-Wdate-time",
             "-Wsign-conversion",
             "-Wfloat-conversion",
-            "-Wlogical-op",
             "-Waggregate-return",
             "-Wstrict-prototypes",
             "-Wold-style-definition",

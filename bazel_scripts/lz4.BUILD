@@ -37,7 +37,6 @@ cc_library(
         "-Wextra",
         "-Wall",
         "-Iexternal/lz4/lib",
-        "-pedantic-errors",
     ],
     linkopts = [],
     local_defines = [
