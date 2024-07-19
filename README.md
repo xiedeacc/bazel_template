@@ -1,14 +1,14 @@
 TODO
-1. toolchains_llvm not works well for coss compiling
-2. header and library std and system search not perfect in //toolchain:clang_toolchain_for_linux_aarch64
+1. toolchains_llvm not works well for coss compiling, need update
+2. toolchains_openwrt need download from remote
 3. let toolchains_openwrt support gcc and clang and openwrt
 4. swig
 5. grpc
 6. curl缺少quic + ngquic
-8. include what you want
-9. revocate
-10. include检查
-11. fizz aegis, liboqs
+7. include what you want
+8. revocate
+9. fizz lack of aegis, liboqs
+10. proxygen lack dns
 
 
 

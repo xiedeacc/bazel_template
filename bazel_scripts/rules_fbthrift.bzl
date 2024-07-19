@@ -30,7 +30,6 @@ def _fbthrift_cpp_gen_impl(ctx):
         "_visitation.h",
     ]
 
-    print(ctx.label.workspace_name)
     gen_para_dict = list_to_set(ctx.attr.gen_para)
     if not element_in_set(gen_para_dict, "no_metadata"):
         suffixs.append("_metadata.cpp")

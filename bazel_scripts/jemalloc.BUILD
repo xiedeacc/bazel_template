@@ -1,7 +1,6 @@
-package(default_visibility = ["//visibility:public"])
+load("@bazel_template//bazel_scripts:common.bzl", "extract_symbols", "template_rule")
 
-load("@fbthrift//bazel_scripts:common.bzl", "extract_symbols", "template_rule")
-load("@bazel_skylib//lib:selects.bzl", "selects")
+package(default_visibility = ["//visibility:public"])
 
 SRCS = [
     "src/arena.c",
