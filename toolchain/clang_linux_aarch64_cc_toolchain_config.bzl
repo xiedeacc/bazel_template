@@ -262,7 +262,7 @@ def _impl(ctx):
                     flag_group(
                         # Security hardening requires optimization.
                         # We need to undef it as some distributions now have it enabled by default.
-                        flags = ["-U_FORTIFY_SOURCE"],
+                        flags = ["-D_FORTIFY_SOURCE=1"],
                     ),
                 ],
                 with_features = [
