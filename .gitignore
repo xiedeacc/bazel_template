@@ -3,3 +3,4 @@ bazel-*
 MODULE.bazel.lock
 core.*
 nohup.out
+external

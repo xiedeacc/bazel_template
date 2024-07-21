@@ -3,6 +3,7 @@ load("@bazel_template//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen", "f
 package(default_visibility = ["//visibility:public"])
 
 COPTS = [
+    "-isystem external/zlib",
     "-isystem external/libsodium/src/libsodium/include",
     "-isystem external/fbthrift",
     "-isystem $(BINDIR)/external/fbthrift",
@@ -18,6 +19,7 @@ COPTS = [
     "-isystem external/mvfst",
     "-std=c++17",
     "-fsized-deallocation",
+    "-D_LARGEFILE64_SOURCE",
 ]
 
 LOCAL_DEFINES = [
