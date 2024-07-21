@@ -1,6 +1,6 @@
-package(default_visibility = ["//visibility:public"])
-
 load("@bazel_template//bazel_scripts:common.bzl", "extract_symbols", "template_rule")
+
+package(default_visibility = ["//visibility:public"])
 
 config_setting(
     name = "windows_x86_64",
