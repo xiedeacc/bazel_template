@@ -196,8 +196,9 @@ new_git_repository(
     tag = "v1.5.6",
 )
 
-git_repository(
+new_git_repository(
     name = "brotli",
+    build_file = "//bazel_scripts:brotli.BUILD",
     remote = "git@github.com:google/brotli.git",
     tag = "v1.1.0",
 )
@@ -347,8 +348,9 @@ new_git_repository(
 new_git_repository(
     name = "libunwind",
     build_file = "//bazel_scripts:libunwind.BUILD",
+    #tag = "v1.8.2",
+    commit = "3c47821d681777e3cff33edb25c804d93102e1c6",
     remote = "git@github.com:libunwind/libunwind.git",
-    tag = "v1.8.1",
 )
 
 new_git_repository(

@@ -45,7 +45,6 @@ cc_library(
         "@platforms//os:windows": [],
         "//conditions:default": [
             "-O3",
-            "-fPIC",
             "-g",
         ],
     }),

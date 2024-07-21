@@ -26,7 +26,6 @@ cc_binary(
         #"@jemalloc",
         "@libsodium//:sodium",
         "@openssl",
-        #"@fbthrift//:lib",
         "@proxygen",
     ],
 )

@@ -25,7 +25,6 @@ cc_library(
     ],
     copts = [
         "-O3",
-        "-fPIC",
         "-Wpointer-arith",
         "-Wstrict-prototypes",
         "-Wdeclaration-after-statement",
@@ -37,7 +36,6 @@ cc_library(
         "-Wextra",
         "-Wall",
         "-Iexternal/lz4/lib",
-        "-pedantic-errors",
     ],
     linkopts = [],
     local_defines = [

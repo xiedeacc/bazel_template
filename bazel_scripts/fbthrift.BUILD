@@ -90,7 +90,7 @@ cc_library(
         "@mvfst",
         "@wangle",
     ],
-    alwayslink = True,
+    #alwayslink = True,
 )
 
 cc_library(
@@ -501,13 +501,13 @@ cc_library(
     name = "lib",
     srcs = [
         ":annotation_thrift_cpp",
-        ":conformance_service_thrift_cpp",
-        ":conformance_thrift_cpp",
         ":lib_json_thrift_cpp",
         ":lib_meta_thrift_cpp",
         ":lib_reflection_thrift_cpp",
         ":lib_rocket_service_thrift_cpp",
         ":lib_rocket_thrift_cpp",
+        ":conformance_thrift_cpp",
+        ":conformance_service_thrift_cpp",
     ] + glob(
         [
             "thrift/annotation/**/*.cpp",
