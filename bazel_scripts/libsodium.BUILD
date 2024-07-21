@@ -27,7 +27,6 @@ COMMON_COTPS = [
     "-g3",
     "-pthread",
     "-fvisibility=hidden",
-    "-fPIC",
     "-fno-strict-aliasing",
     "-fno-strict-overflow",
     "-fstack-protector",

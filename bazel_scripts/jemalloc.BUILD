@@ -653,15 +653,12 @@ cc_library(
         "-Wimplicit-fallthrough",
         "-Wdeprecated-declarations",
         "-O3",
-        "-fPIC",
-        "-DPIC",
         "-c",
     ],
     includes = ["include"],
     linkopts = [
         "-lpthread",
         "-lm",
-        "-lstdc++",
     ],
     local_defines = [
         "JEMALLOC_NO_PRIVATE_NAMESPACE",

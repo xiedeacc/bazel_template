@@ -25,7 +25,6 @@ cc_library(
     ],
     copts = [
         "-O3",
-        "-fPIC",
         "-Wpointer-arith",
         "-Wstrict-prototypes",
         "-Wdeclaration-after-statement",

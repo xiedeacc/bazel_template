@@ -186,7 +186,6 @@ template_rule(
 COPTS = [
     "-Wall",
     "-Wextra",
-    "-fPIC",
     "-std=c11",
     "-c",
     "-g",

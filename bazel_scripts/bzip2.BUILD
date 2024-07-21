@@ -21,7 +21,6 @@ alias(
 COPTS = [
     "-O3",
     "-g",
-    "-fPIC",
     "-Wall",
 ]
 

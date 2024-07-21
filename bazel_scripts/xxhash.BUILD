@@ -6,7 +6,6 @@ cc_library(
     hdrs = ["xxhash.h"],
     copts = [
         "-O3",
-        "-fPIC",
         "-g",
     ],
 )

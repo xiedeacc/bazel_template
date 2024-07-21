@@ -42,7 +42,6 @@ cc_library(
     copts = [
         "-O3",
         "-g",
-        "-fPIC",
         "-Iexternal/zstd/lib",
     ],
     includes = ["lib"],

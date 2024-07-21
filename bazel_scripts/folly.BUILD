@@ -198,6 +198,7 @@ cc_library(
         "-Wunused-result",
         "-Wuninitialized",
         "-faligned-new",
+        "-Wshadow-compatible-local",
         "-Wno-noexcept-type",
         "-std=c++17",
         "-fPIC",

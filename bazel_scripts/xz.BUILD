@@ -174,7 +174,6 @@ cc_library(
             "-std=gnu11",
             "-g",
             "-O3",
-            "-fPIC",
             "-fvisibility=hidden",
             "-Iexternal/xz/src/common",
             "-Iexternal/xz/src/liblzma/api",

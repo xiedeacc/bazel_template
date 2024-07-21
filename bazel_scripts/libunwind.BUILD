@@ -21,7 +21,6 @@ config_setting(
 COPTS = [
     "-g",
     "-O3",
-    "-fPIC",
     "-fexceptions",
     "-Wall",
     "-Wsign-compare",
