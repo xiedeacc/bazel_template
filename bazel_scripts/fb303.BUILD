@@ -1,49 +1,10 @@
-load("@bazel_template//bazel_scripts:rules_fbthrift_dir.bzl", "fbthrift_cpp_gen")
+load("@bazel_template//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen", "fbthrift_service_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "windows_x86_64",
-    constraint_values = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "linux_aarch64",
-    constraint_values = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:linux",
-    ],
-)
-
-config_setting(
-    name = "linux_x86_64",
-    constraint_values = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-)
-
-platform(
-    name = "linux_aarch64_platform",
-    constraint_values = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:linux",
-    ],
-)
-
-platform(
-    name = "linux_x86_64_platform",
-    constraint_values = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-)
-
 COPTS = [
+    "-isystem external/fbthrift",
+    "-isystem $(BINDIR)/external/fbthrift",
     "-isystem external/fb303",
     "-isystem $(BINDIR)/external/fb303",
     "-isystem external/double-conversion",
@@ -67,24 +28,43 @@ LOCAL_DEFINES = [
 
 fbthrift_cpp_gen(
     name = "fb303_core_thrift_cpp",
-    srcs = [
-        "fb303/thrift/fb303_core.thrift",
-    ],
+    srcs = ["fb303/thrift/fb303_core.thrift"],
     data = ["@fbthrift//:fbthrift_libraries"],
-    gen_para = "mstch_cpp2:include_prefix=fb303/thrift",
+    gen_para = ["include_prefix=fb303/thrift"],
     includes = [
         ## buildifier: leave-alone
         "-I",
-        ".",
+        "external/fb303",
         ## buildifier: leave-alone
     ],
     out_dir = "fb303/thrift",
+    out_files = {
+        "fb303/thrift/fb303_core.thrift": "fb303_core",
+    },
+)
+
+fbthrift_service_cpp_gen(
+    name = "fb303_core_thrift_service_cpp",
+    srcs = ["fb303/thrift/fb303_core.thrift"],
+    data = ["@fbthrift//:fbthrift_libraries"],
+    gen_para = ["include_prefix=fb303/thrift"],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        "external/fb303",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "fb303/thrift",
+    out_files = {
+        "fb303/thrift/fb303_core.thrift": "BaseService",
+    },
 )
 
 cc_library(
     name = "fb303",
     srcs = [
         ":fb303_core_thrift_cpp",
+        ":fb303_core_thrift_service_cpp",
     ] + glob(
         [
             "fb303/**/*.cpp",

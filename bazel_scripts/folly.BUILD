@@ -70,7 +70,7 @@ genrule(
         "",
         "#define FOLLY_HAVE_LIBGLOG 1",
         "",
-        #"#define FOLLY_USE_JEMALLOC 0",
+        #"#define FOLLY_USE_JEMALLOC 1",
         "",
         "#if __has_include(<features.h>)",
         "#include <features.h>",
@@ -142,14 +142,14 @@ cc_library(
         ],
     ) + select({
         ":linux_x86_64": [
-            "folly/memset.S",
             "folly/memcpy.S",
+            "folly/memset.S",
         ],
         ":linux_aarch64": [
             "folly/external/aor/memcpy-advsimd.S",
-            "folly/external/aor/memset-advsimd.S",
             "folly/external/aor/memcpy-armv8.S",
             "folly/external/aor/memcpy_sve.S",
+            "folly/external/aor/memset-advsimd.S",
         ],
     }),
     hdrs = ["folly-config_h"] + glob(

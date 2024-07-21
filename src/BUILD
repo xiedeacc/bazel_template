@@ -23,9 +23,11 @@ cc_binary(
         "@com_google_googletest//:gtest",
         "@com_google_protobuf//:protobuf",
         "@curl",
-        "@jemalloc",
+        #"@jemalloc",
         "@libsodium//:sodium",
         "@openssl",
+        #"@fbthrift//:lib",
+        "@proxygen",
     ],
 )
 

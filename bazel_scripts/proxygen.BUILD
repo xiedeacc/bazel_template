@@ -1,49 +1,14 @@
+load("@bazel_template//bazel_scripts:proxygen.bzl", "is_external", "proxygen_cpp_gen")
+
 package(default_visibility = ["//visibility:public"])
-
-config_setting(
-    name = "windows_x86_64",
-    constraint_values = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "linux_aarch64",
-    constraint_values = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:linux",
-    ],
-)
-
-config_setting(
-    name = "linux_x86_64",
-    constraint_values = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-)
-
-platform(
-    name = "linux_aarch64_platform",
-    constraint_values = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:linux",
-    ],
-)
-
-platform(
-    name = "linux_x86_64_platform",
-    constraint_values = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-)
 
 COPTS = [
     "-isystem external/proxygen",
+    "-isystem $(BINDIR)/external/proxygen",
+    "-isystem external/fbthrift",
+    "-isystem $(BINDIR)/external/fbthrift",
     "-isystem external/fb303",
+    "-isystem $(BINDIR)/external/fb303",
     "-isystem external/double-conversion",
     "-isystem external/xxhash",
     "-isystem external/com_googlesource_code_re2",
@@ -67,25 +32,71 @@ sh_binary(
     srcs = ["proxygen/lib/http/gen_HTTPCommonHeaders.sh"],
 )
 
-#genrule(
-#name = "HTTPCommonHeaders",
-#srcs = [
-#"proxygen/lib/utils/perfect_hash_table_template.h",
-#"proxygen/lib/utils/perfect_hash_table_template.cpp.gperf",
-#"proxygen/lib/http/HTTPCommonHeaders.txt",
-#"proxygen/lib/utils/gen_perfect_hash_table.sh",
-#],
-#outs = [
-#"proxygen/lib/http/HTTPCommonHeaders.h",
-#"proxygen/lib/http/HTTPCommonHeaders.cpp",
-#],
-#cmd = "$(location :gen_HTTPCommonHeaders_sh) $(location :proxygen/lib/http/HTTPCommonHeaders.txt) . proxygen/lib/http",
-#tools = [":gen_HTTPCommonHeaders_sh"],
-#)
+proxygen_cpp_gen(
+    name = "common_headers",
+    data = [
+        "proxygen/lib/http/HTTPCommonHeaders.txt",
+        "proxygen/lib/utils/gen_perfect_hash_table.sh",
+        "proxygen/lib/utils/perfect_hash_table_template.cpp.gperf",
+        "proxygen/lib/utils/perfect_hash_table_template.h",
+    ],
+    is_external = is_external(),
+    out_files = [
+        "proxygen/lib/http/HTTPCommonHeaders.h",
+        "proxygen/lib/http/HTTPCommonHeaders.cpp",
+    ],
+    tool = ":gen_HTTPCommonHeaders_sh",
+    txt_file = "proxygen/lib/http/HTTPCommonHeaders.txt",
+)
+
+sh_binary(
+    name = "gen_StatsWrapper_sh",
+    srcs = ["proxygen/lib/stats/gen_StatsWrapper.sh"],
+)
+
+proxygen_cpp_gen(
+    name = "stats_headers",
+    data = [
+        "proxygen/lib/stats/BaseStats.h",
+    ],
+    is_external = is_external(),
+    out_files = [
+        "proxygen/lib/stats/StatsWrapper.h",
+    ],
+    tool = ":gen_StatsWrapper_sh",
+)
+
+genrule(
+    name = "trace",
+    srcs = [
+        "proxygen/lib/utils/samples/TraceEventType.txt",
+        "proxygen/lib/utils/samples/TraceFieldType.txt",
+        "proxygen/lib/utils/gen_trace_event_constants.py",
+    ],
+    outs = [
+        "proxygen/lib/utils/TraceFieldType.h",
+        "proxygen/lib/utils/TraceEventType.h",
+        "proxygen/lib/utils/TraceFieldType.cpp",
+        "proxygen/lib/utils/TraceEventType.cpp",
+    ],
+    cmd = """
+/usr/bin/python3 $(location :proxygen/lib/utils/gen_trace_event_constants.py) \
+--output_type=cpp \
+--input_files=$(location :proxygen/lib/utils/samples/TraceEventType.txt),$(location :proxygen/lib/utils/samples/TraceFieldType.txt) \
+--output_scope=proxygen \
+--header_path=proxygen/lib/utils \
+--install_dir=$(BINDIR)/external/proxygen/proxygen/lib/utils \
+--fbcode_dir=external/proxygen
+""",
+)
 
 cc_library(
     name = "proxygen",
-    srcs = glob(
+    srcs = [
+        ":stats_headers",
+        ":common_headers",
+        ":trace",
+    ] + glob(
         [
             "proxygen/**/*.cpp",
         ],
