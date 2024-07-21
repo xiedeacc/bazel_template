@@ -90,7 +90,7 @@ cc_library(
         "@mvfst",
         "@wangle",
     ],
-    #alwayslink = True,
+    alwayslink = True,
 )
 
 cc_library(
