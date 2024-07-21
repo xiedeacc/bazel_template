@@ -451,6 +451,25 @@ def _impl(ctx):
         ],
     )
 
+    static_libc_runtime_feature = feature(
+        name = "static_libc_runtime",
+        enabled = True,
+        flag_sets = [
+            flag_set(
+                actions = [
+                    ACTION_NAMES.cpp_link_executable,
+                    ACTION_NAMES.cpp_link_dynamic_library,
+                    ACTION_NAMES.lto_index_for_executable,
+                    ACTION_NAMES.lto_index_for_dynamic_library,
+                ],
+                flag_groups = [flag_group(flags = ["-static-libc++"])],
+                with_features = [
+                    with_feature_set(features = ["static_link_cpp_runtimes"]),
+                ],
+            ),
+        ],
+    )
+
     pic_feature = feature(
         name = "pic",
         enabled = True,
@@ -1408,6 +1427,7 @@ def _impl(ctx):
         libraries_to_link_feature,
         user_link_flags_feature,
         default_link_libs_feature,
+        static_libc_runtime_feature,
         fdo_optimize_feature,
         supports_dynamic_linker_feature,
         dbg_feature,
