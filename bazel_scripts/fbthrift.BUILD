@@ -3,6 +3,7 @@ load("@bazel_template//bazel_scripts:rules_fbthrift.bzl", "fbthrift_cpp_gen", "f
 package(default_visibility = ["//visibility:public"])
 
 COPTS = [
+    "-isystem external/libsodium/src/libsodium/include",
     "-isystem external/fbthrift",
     "-isystem $(BINDIR)/external/fbthrift",
     "-isystem external/double-conversion",
