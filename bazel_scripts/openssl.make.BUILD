@@ -129,15 +129,9 @@ configure_make(
                             "//conditions:default": [],
                         }) +
                         CONFIGURE_OPTIONS,
-    copts = [
-        "-static",
-    ],
     lib_name = LIB_NAME,
     lib_source = ":all_srcs",
-    linkopts = [
-        "-ldl",
-        "-static",
-    ],
+    linkopts = ["-ldl"],
     out_lib_dir = select({
         "@platforms//cpu:aarch64": "lib",
         "//conditions:default": "lib64",
