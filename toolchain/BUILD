@@ -47,7 +47,7 @@ clang_linux_x86_64_cc_toolchain_config(
         "-Wunused-but-set-parameter",
         "-Wno-free-nonheap-object",
         "-fno-omit-frame-pointer",
-        "-stdlib=c++",
+        "-stdlib=libc++",
         "-rtlib=compiler-rt",
     ],
     compiler = "clang",
@@ -79,6 +79,9 @@ clang_linux_x86_64_cc_toolchain_config(
         "-Wl,-z,relro,-z,now",
     ],
     link_libs = [
+        "-Wl,--push-state,-as-needed",
+        "{}/lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.builtins.a".format(clang_linux_x86_64_toolchain_root),
+        "-Wl,--pop-state",
     ],
     opt_compile_flags = [
         "-g0",
@@ -170,7 +173,7 @@ clang_linux_aarch64_cc_toolchain_config(
         "/root/src/software/clang_sysroot/lib/clang/18/include",
         "-isystem",
         "/root/src/software/clang_sysroot/usr/include",
-        "-stdlib=c++",
+        "-stdlib=libc++",
         "-rtlib=compiler-rt",
     ],
     compiler = "clang",
