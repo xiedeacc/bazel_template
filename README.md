@@ -10,8 +10,90 @@ TODO
 9. fizz lack of aegis, liboqs
 10. proxygen lack dns
 11. jemalloc
+todo:
+1. openwrt remote, 多版本,全部注册
+2. toolchains_llvm 交叉编译aarch64，直接用代码里面的，不要用toolchains_llvm了
+3. openssl, curl....
+4. 代码风格检查，内存泄漏检查
+5. url rewrite
+6. rules_proto实现
+7. proto插件自动生成
+8. swig
 
 
+future todo: 
+1. include what you want
+2. renovate.json
+3. module map
+4. -compiler_param_file
+5. -layering_check
+6. aspect用法
+7. transitive用法
+```
+/usr/local/llvm-18/bin/clang++ -E -x c++ - -v < /dev/null
+
+bazel build \
+  --platforms=@toolchains_llvm//platforms:linux-x86_64 \
+  --extra_execution_platforms=@toolchains_llvm//platforms:linux-x86_64 \
+  --extra_toolchains=@llvm_toolchain_linux_exec//:cc-toolchain-x86_64-linux \
+  //...
+
+3.2 单测与代码格式
+bazel test //... --test_tag_filters=cpplint    #只跑cpplint检查
+bazel test //... --test_tag_filters=-cpplint   #不跑cpplint检查
+bazel test //... --test_tag_filters=unit_test  #只跑单测
+bazel test --config=unit_test //...  #根据.bazelrc配置文件，跑单测和内存泄露检查，不跑cpplint检查
+
+3.3 覆盖率分析
+bazel coverage //... --test_tag_filters=-cpplint
+genhtml bazel-out/_coverage/_coverage_report.dat -o test_coverage
+genhtml --ignore-errors source bazel-out/_coverage/_coverage_report.dat -o test_coverage
+
+3.4 内存泄露分析
+bazel test --config=unit_test //... #检测到内存泄露单测将失败，并查询详细日志即可
+bazel test --test_env=HEAPCHECK=normal //...
+bazel test --test_env=HEAPCHECK=normal --test_env=PPROF_PATH=/usr/local/bin/pprof //... #同时内存泄露检查和性能分析
+
+3.5 cpu和内存性能分析
+go install github.com/google/pprof@latest
+bazel test --test_env="CPUPROFILE=prof.out" //src/common:barrier_test #需使用test --spawn_strategy=standalone
+
+CPUPROFILE=prof.out bazel-bin/src/common/barrier_test
+
+需要调用的是HeapProfilerStart和HeapProfilerStop
+env HEAPPROFILE=heap.out bazel-bin/src/common/barrier_test
+
+CPUPROFILE=prof.out LD_PRELOAD=/usr/local/lib/libtcmalloc_and_profiler.a bazel-bin/src/common/barrier_test
+HEAPPROFILE=heap.out LD_PRELOAD=/usr/local/lib/libtcmalloc_and_profiler.a bazel-bin/src/common/barrier_test
+
+google-pprof --web bazel-bin/src/common/barrier_test prof.out
+pprof --text ./bazel-bin/src/common/barrier_test prof.out
+pprof --pdf ./bazel-bin/src/common/barrier_test prof.out > profile.pdf
+pprof ./bazel-bin/src/common/barrier_test "heap.prof" --inuse_objects --lines --heapcheck --edgefraction=1e-10 --nodefraction=1e-10 --gv
+pprof ./bazel-bin/src/common/barrier_test "heap.prof" --inuse_objects --lines --heapcheck --edgefraction=1e-10 --nodefraction=1e-10 --pdf > profile.pdf
+
+perf record -F 99 -g bazel-bin/src/demo 10000
+perf script | /data/software/FlameGraph/stackcollapse-perf.pl | /data/software/FlameGraph/flamegraph.pl > flamegraph.svg
+
+https://gperftools.github.io/gperftools/heapprofile.html
+https://gperftools.github.io/gperftools/cpuprofile.html
+https://gperftools.github.io/gperftools/heap_checker.html
+https://gperftools.github.io/gperftools/tcmalloc.html
+
+3.6 依赖图等查询
+bazel query --notool_deps --noimplicit_deps "deps(//main:hello-world)" --output graph
+bazel query 'attr(visibility, "//visibility:public", //:*)'
+bazel query "deps(//src/context:process_context)"
+bazel query 'deps(//:main)' --output graph > graph.in
+bazel query --noimplicit_deps 'deps(//:main)' --output graph > simplified_graph.in
+dot -Tpng < graph.in > graph.png
+
+3.7 系统调用分析
+cat /proc/self/stack
+cat /proc/21880/stack
+strace -Ff -tt -p 56509 2>&1 | tee strace.log
+pstack 56509
+```
 
 ```
 openssl
@@ -31,6 +113,19 @@ cd /root/src/library/fbthrift && /root/src/library/fbthrift/bazel-bin/thrift1 --
 -o thrift/conformance/if \
 -I /root/src/library/fbthrift thrift/conformance/if/serialization.thrift
 
+cmake -G "Unix Makefiles" ../llvm \
+    -DCMAKE_INSTALL_PREFIX=/usr/local/llvm/18 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_ENABLE_PROJECTS="bolt;clang;clang-tools-extra;libclc;lld;lldb;mlir;polly;openmp" \
+    -DLLVM_ENABLE_RUNTIMES="libc;libunwind;libcxxabi;pstl;libcxx;compiler-rt" \
+    -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
+    -DCLANG_DEFAULT_RTLIB=compiler-rt \
+    -DCLANG_DEFAULT_LINKER=lld \
+    -DMLIR_INCLUDE_INTEGRATION_TESTS=OFF \
+    -DLLVM_INCLUDE_TESTS=OFF \
+    -DLLVM_BUILD_TESTS=OFF \
+    -DLLDB_INCLUDE_TESTS=OFF \
+    -DCLANG_INCLUDE_TESTS=OFF
 
 cmake \
   -DCMAKE_INCLUDE_PATH=/alt/include/path1:/alt/include/path2 \
