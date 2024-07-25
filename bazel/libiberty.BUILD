@@ -1,4 +1,4 @@
-load("@bazel_template//bazel_scripts:common.bzl", "extract_symbols", "template_rule")
+load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 

@@ -1,4 +1,4 @@
-#include "src/util.h"
+#include "src/util/util.h"
 
 int main(int argc, char **argv) {
   if (argc != 2) {

@@ -1,4 +1,4 @@
-load("@bazel_template//bazel_scripts:proxygen.bzl", "is_external", "proxygen_cpp_gen")
+load("@bazel_template//bazel:proxygen.bzl", "is_external", "proxygen_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
 

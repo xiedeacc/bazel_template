@@ -1,4 +1,4 @@
-#include "src/version_info.h"
+#include "src/server/version_info.h"
 
 #include <iostream>
 #include <string>

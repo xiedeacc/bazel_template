@@ -1,4 +1,4 @@
-load("@bazel_template//bazel_scripts:common.bzl", "extract_symbols", "template_rule")
+load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -614,7 +614,7 @@ cc_library(
 
 #sh_binary(
 #name = "aarch64_preprocess",
-#srcs = ["@bazel_template//bazel_scripts:aarch64_preprocess.sh"],
+#srcs = ["@bazel_template//bazel:aarch64_preprocess.sh"],
 #)
 
 #genrule(
