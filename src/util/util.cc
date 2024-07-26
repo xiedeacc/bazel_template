@@ -23,8 +23,9 @@
 #include "glog/logging.h"
 #include "google/protobuf/util/json_util.h"
 #include "openssl/md5.h"
+#include "src/MurmurHash2.h"
 #include "src/MurmurHash3.h"
-#include "src/util/ip_address.h"
+#include "src/common/ip_address.h"
 
 using absl::FormatTime;
 using absl::FromUnixMillis;
@@ -45,8 +46,8 @@ const char *Util::kPathDelimeter = "/";
 const string Util::server_ip = Util::GetServerIp();
 
 string Util::GetServerIp() {
-  IPAddress ip_address;
-  if (!IPAddress::GetFirstPrivateAddress(&ip_address)) {
+  common::IPAddress ip_address;
+  if (!common::IPAddress::GetFirstPrivateAddress(&ip_address)) {
     LOG(ERROR) << "Failed to get local ip address";
     return "";
   }
@@ -768,6 +769,10 @@ string Util::Hash(const string &str) {
   MurmurHash3_x86_32(str.c_str(), str.length(), 0, &res);
   res = abs(res);
   return std::to_string(res);
+}
+
+int64_t Util::Hash64(const string &str) {
+  return MurmurHash64A(str.c_str(), str.length(), 42L);
 }
 
 void Util::PrintProtoMessage(const google::protobuf::Message &msg) {

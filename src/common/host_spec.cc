@@ -3,7 +3,7 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/util/host_spec.h"
+#include "src/common/host_spec.h"
 
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
@@ -19,7 +19,7 @@ using std::string;
 using std::vector;
 
 namespace bazel_template {
-namespace util {
+namespace common {
 
 HostSpec::HostSpec() : port_(0) {}
 
@@ -67,5 +67,5 @@ bool HostSpecSameWith::operator()(const HostSpec &host) {
   return host_ == host;
 }
 
-}  // namespace util
+}  // namespace common
 }  // namespace bazel_template

@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package bazel_template.proto;
+
+service Service {
+  rpc ServerStatus(ServerStatusRequest) returns (ServerStatusResponse);
+  rpc IpInfo(IpInfoRequest) returns (IpInfoResponse);
+}
+
+message RequestConfig {
+  string name = 1;
+}
+
+message ServerStatusRequest {
+  string request_id = 1;
+  RequestConfig config = 2;
+}
+
+message ServerStatusResponse {
+  string msg = 1;
+}
+
+message IpInfoRequest {
+  string request_id = 1;
+  RequestConfig config = 2;
+}
+
+message IpInfoResponse {
+  string msg = 1;
+}

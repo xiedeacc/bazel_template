@@ -5,30 +5,42 @@ load("//bazel:cpplint.bzl", "cpplint")
 package(default_visibility = ["//visibility:public"])
 
 cc_binary(
-    name = "main",
-    srcs = ["main.cc"],
-    copts = [
-        "-std=c++17",
+    name = "grpc_server",
+    srcs = ["grpc_server.cc"],
+    deps = [
+        ":grpc_server_impl",
+        #"@jemalloc",
+        ":version_info",
+    ],
+)
+
+cc_library(
+    name = "grpc_server_impl",
+    srcs = ["grpc_server_impl.cc"],
+    hdrs = ["grpc_server_impl.h"],
+    deps = [
+        ":grpc_server_impl_base",
+        "//src/common:blocking_list",
+        "//src/common:garbage_collector",
+        "//src/context:grpc_context",
+        "//src/context:server_run_info",
+        "//src/grpc_server_impl/call_tags",
+        "//src/util",
+        "//src/util:config_manager",
+    ],
+)
+
+cc_library(
+    name = "grpc_server_impl_base",
+    hdrs = [
+        "grpc_server_impl_base.h",
     ],
     deps = [
+        "//src/common/grpc_framework:grpc_server_impl",
         "@boost//:algorithm",
-        "@boost//:beast",
-        "@boost//:filesystem",
-        "@boost//:iostreams",
-        "@brotli",
-        "@c-ares",
         "@com_github_gflags_gflags//:gflags",
-        "@com_github_glog_glog//:glog",
         "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",
-        "@com_google_googletest//:gtest",
-        "@com_google_protobuf//:protobuf",
-        "@curl",
-        #"@jemalloc",
-        "@libsodium//:sodium",
-        "@openssl",
-        "@proxygen",
     ],
 )
 

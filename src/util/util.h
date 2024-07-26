@@ -159,6 +159,8 @@ class Util final {
 
   static std::string UInt64ToHexStr(const uint64_t in);
 
+  static int64_t Hash64(const std::string &str);
+
   static std::string Hash(const std::string &str);
 
   static void PrintProtoMessage(const google::protobuf::Message &msg);

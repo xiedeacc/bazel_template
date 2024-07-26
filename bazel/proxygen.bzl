@@ -14,7 +14,7 @@ def _proxygen_cpp_gen_impl(ctx):
     else:
         repo_dir = "."
 
-    print("{}/{}".format(ctx.bin_dir.path, repo_dir))
+    # print("{}/{}".format(ctx.bin_dir.path, repo_dir))
     if ctx.attr.txt_file:
         ctx.actions.run_shell(
             inputs = ctx.files.data,

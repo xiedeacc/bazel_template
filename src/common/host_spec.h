@@ -3,13 +3,13 @@
  * All rights reserved.
  *******************************************************************************/
 
-#ifndef BAZEL_TEMPLATE_UTIL_HOST_SPEC_H
-#define BAZEL_TEMPLATE_UTIL_HOST_SPEC_H
+#ifndef BAZEL_TEMPLATE_COMMON_HOST_SPEC_H
+#define BAZEL_TEMPLATE_COMMON_HOST_SPEC_H
 
-#include "src/util/ip_address.h"
+#include "src/common/ip_address.h"
 
 namespace bazel_template {
-namespace util {
+namespace common {
 
 class HostSpec {
  public:
@@ -37,7 +37,7 @@ struct HostSpecSameWith {
   HostSpec host_;
 };
 
-}  // namespace util
+}  // namespace common
 }  // namespace bazel_template
 
-#endif /* BAZEL_TEMPLATE_UTIL_HOST_SPEC_H */
+#endif  // BAZEL_TEMPLATE_COMMON_HOST_SPEC_H

@@ -3,7 +3,7 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/util/ip_address.h"
+#include "src/common/ip_address.h"
 
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -19,7 +19,7 @@ using std::string;
 using std::vector;
 
 namespace bazel_template {
-namespace util {
+namespace common {
 
 IPAddress::IPAddress(const char *src) {
   if (!Assign(src)) {
@@ -154,5 +154,5 @@ bool IPAddress::GetFirstPublicAddress(IPAddress *ip_address) {
   return false;
 }
 
-}  // namespace util
+}  // namespace common
 }  // namespace bazel_template

@@ -3,12 +3,12 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/util/host_spec.h"
+#include "src/common/host_spec.h"
 
 #include "gtest/gtest.h"
 
 namespace bazel_template {
-namespace util {
+namespace common {
 
 TEST(HostSpec, Equal) {
   HostSpec host_spec1("1.2.3.4", 56);
@@ -78,5 +78,5 @@ TEST(HostSpec, FromBadString) {
   EXPECT_EQ(0, host_spec.GetPort());
 }
 
-}  // namespace util
+}  // namespace common
 }  // namespace bazel_template

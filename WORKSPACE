@@ -468,6 +468,73 @@ new_git_repository(
     remote = "git@github.com:aappleby/smhasher.git",
 )
 
+git_repository(
+    name = "com_google_googleapis",
+    commit = "ba245fa19c1e6f1f2a13055a437f0c815c061867",
+    remote = "git@github.com:googleapis/googleapis.git",
+)
+
+http_archive(
+    name = "opencensus_proto",
+    sha256 = "e3d89f7f9ed84c9b6eee818c2e9306950519402bf803698b15c310b77ca2f0f3",
+    strip_prefix = "opencensus-proto-0.4.1/src",
+    urls = ["https://github.com/census-instrumentation/opencensus-proto/archive/v0.4.1.tar.gz"],
+)
+
+git_repository(
+    name = "envoy_api",
+    commit = "4118c17a2905aaf20554d0154bb8d0cd424163c4",
+    remote = "git@github.com:envoyproxy/data-plane-api.git",
+)
+
+git_repository(
+    name = "com_envoyproxy_protoc_gen_validate",
+    remote = "git@github.com:envoyproxy/protoc-gen-validate.git",
+    tag = "v1.0.4",
+)
+
+git_repository(
+    name = "cel-spec",
+    remote = "git@github.com:google/cel-spec.git",
+    tag = "v0.15.0",
+)
+
+git_repository(
+    name = "com_github_cncf_xds",
+    commit = "024c85f92f20cab567a83acc50934c7f9711d124",
+    remote = "git@github.com:cncf/xds.git",
+    repo_mapping = {
+        "@dev_cel": "@cel-spec",
+    },
+)
+
+load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
+
+switched_rules_by_language(
+    name = "com_google_googleapis_imports",
+    cc = True,
+    grpc = True,
+)
+
+git_repository(
+    name = "com_github_grpc_grpc",
+    remote = "https://github.com/grpc/grpc.git",
+    repo_mapping = {
+        "@com_github_cares_cares": "@c-ares",
+        "@boringssl": "@openssl",
+    },
+    tag = "v1.65.1",
+)
+
+new_git_repository(
+    name = "gperftools",
+    #build_file = "//bazel:gperftools.make.BUILD",
+    build_file = "//bazel:gperftools.BUILD",
+    #tag = "gperftools-2.15",
+    commit = "285908e8c7cfa98659127a23532c060f8dcbd148",
+    remote = "git@github.com:gperftools/gperftools.git",
+)
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )
@@ -497,92 +564,6 @@ filegroup(
         """,
     path = "/root/src/software/gcc_sysroot",
 )
-
-#git_repository(
-#name = "toolchains_llvm",
-#remote = "git@github.com:xiedeacc/toolchains_llvm.git",
-#tag = "1.0.0",
-#)
-
-#local_repository(
-#name = "toolchains_llvm",
-#path = "../toolchains_llvm",
-#)
-
-#load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
-
-#llvm_toolchain(
-#name = "llvm_toolchain",
-##absolute_paths = True,
-#compile_flags = {
-#"linux-x86_64": [
-#"-B/usr/local/llvm/18/bin",
-#],
-#"linux-aarch64": [
-#"-B/usr/local/llvm/18/bin",
-#"-nobuiltininc",
-#],
-#},
-#coverage_compile_flags = {
-#"linux-aarch64": [
-#"-nobuiltininc",
-#],
-#},
-##cxx_builtin_include_directories = {
-##"linux-aarch64": [
-##"%sysroot%/usr/sysinclude",
-##],
-##},
-#dbg_compile_flags = {
-#"linux-aarch64": [
-#"-nobuiltininc",
-#],
-#},
-#link_flags = {
-#"linux-x86_64": [
-#"-L/usr/local/llvm/18/lib/x86_64-unknown-linux-gnu",
-#"-L/usr/local/llvm/18/lib",
-#],
-#"linux-aarch64": [
-#"-B/usr/local/llvm/18/bin",
-#"-nobuiltininc",
-#],
-#},
-#link_libs = {
-#"linux-x86_64": [
-#"-lc++",
-#"-lc++abi",
-#],
-#"linux-aarch64": [
-#"-B/usr/local/llvm/18/bin",
-#"-nobuiltininc",
-#],
-#},
-#llvm_versions = {
-#"linux-x86_64": "18.1.8",
-#"linux-aarch64": "18.1.8",
-#},
-#opt_compile_flags = {
-#"linux-aarch64": [
-#"-nobuiltininc",
-#],
-#},
-#stdlib = {
-#"linux-x86_64": "builtin-libc++",
-#"linux-aarch64": "libc++",
-#},
-#sysroot = {
-#"linux-aarch64": "@clang_sysroot//:sysroot",
-#},
-#toolchain_roots = {
-#"linux-x86_64": "/usr/local/llvm/18",
-#"linux-aarch64": "/usr/local/llvm/18",
-#},
-#)
-
-#load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
-
-#llvm_register_toolchains()
 
 local_repository(
     name = "toolchains_openwrt",
@@ -616,19 +597,14 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("7.2.0")
 
-load("@bazel_features//:deps.bzl", "bazel_features_deps")
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
 load("@rules_perl//perl:deps.bzl", "perl_register_toolchains")
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
 load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
 load("@rules_python//python:repositories.bzl", "py_repositories")
-
-bazel_features_deps()
 
 rules_foreign_cc_dependencies()
 
@@ -642,7 +618,7 @@ rules_pkg_dependencies()
 
 rules_java_toolchains()
 
-go_register_toolchains(version = "1.18")
+go_register_toolchains(version = "1.22.1")
 
 perl_register_toolchains()
 
@@ -650,11 +626,7 @@ rules_closure_dependencies()
 
 rules_closure_toolchains()
 
-rules_proto_dependencies()
-
 rules_proto_toolchains()
-
-protobuf_deps()
 
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 load("@hedron_compile_commands//:workspace_setup_transitive.bzl", "hedron_compile_commands_setup_transitive")

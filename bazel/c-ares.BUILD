@@ -192,6 +192,12 @@ COPTS = [
     "-O3",
 ]
 
+alias(
+    name = "ares",
+    actual = "c-ares",
+    visibility = ["//visibility:public"],
+)
+
 cc_library(
     name = "c-ares",
     srcs = [

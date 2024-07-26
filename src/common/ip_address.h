@@ -3,8 +3,8 @@
  * All rights reserved.
  *******************************************************************************/
 
-#ifndef BAZEL_TEMPLATE_UTIL_IP_ADDRESS_H
-#define BAZEL_TEMPLATE_UTIL_IP_ADDRESS_H
+#ifndef BAZEL_TEMPLATE_COMMON_IP_ADDRESS_H
+#define BAZEL_TEMPLATE_COMMON_IP_ADDRESS_H
 
 #include <arpa/inet.h>
 
@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace bazel_template {
-namespace util {
+namespace common {
 
 class IPAddress {
   typedef unsigned char BytesType[4];
@@ -183,7 +183,7 @@ inline bool operator>=(const IPAddress &lhs, const IPAddress &rhs) {
   return lhs.ToLocalInt() >= rhs.ToLocalInt();
 }
 
-}  // namespace util
+}  // namespace common
 }  // namespace bazel_template
 
-#endif /* BAZEL_TEMPLATE_UTIL_IP_ADDRESS_H */
+#endif  // BAZEL_TEMPLATE_COMMON_IP_ADDRESS_H

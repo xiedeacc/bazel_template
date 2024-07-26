@@ -1,6 +1,13 @@
 load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
 
 package(default_visibility = ["//visibility:public"])
+
+cc_grpc_library(
+    name = "cc_service",
+    srcs = ["service.proto"],
+    deps = [],
+)
 
 cc_proto_library(
     name = "cc_config",
@@ -17,14 +24,20 @@ cc_proto_library(
 )
 
 proto_library(
-    name = "data_proto",
-    srcs = ["data.proto"],
+    name = "service_proto",
+    srcs = ["service.proto"],
     deps = [],
 )
 
 proto_library(
     name = "config_proto",
     srcs = ["config.proto"],
+    deps = [],
+)
+
+proto_library(
+    name = "data_proto",
+    srcs = ["data.proto"],
     deps = [],
 )
 
