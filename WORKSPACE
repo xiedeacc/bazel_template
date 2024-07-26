@@ -461,6 +461,13 @@ new_git_repository(
     tag = "v2024.07.08.00",
 )
 
+new_git_repository(
+    name = "smhasher",
+    build_file = "//bazel:smhasher.BUILD",
+    commit = "61a0530f28277f2e850bfc39600ce61d02b518de",
+    remote = "git@github.com:aappleby/smhasher.git",
+)
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )

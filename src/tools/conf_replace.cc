@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
   std::filesystem::path final_file = argv[2];
   std::string out;
 
-  Util::ConfReplace(origin_file, final_file, &out);
+  bazel_template::util::Util::ConfReplace(origin_file, final_file, &out);
 
   std::cout << out << std::endl;
   return 0;

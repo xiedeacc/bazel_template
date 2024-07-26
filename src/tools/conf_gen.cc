@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
   std::filesystem::path origin_file = argv[1];
   std::string out;
 
-  Util::ConfGen(origin_file, &out);
+  bazel_template::util::Util::ConfGen(origin_file, &out);
 
   std::cout << out << std::endl;
   return 0;

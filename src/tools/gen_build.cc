@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "src/util/util.h"
 
 int main(int argc, char **argv) {
@@ -31,7 +33,7 @@ int main(int argc, char **argv) {
       if (result[0] == "replace") {
         std::filesystem::path origin_file = result[1];
         std::filesystem::path final_file = result[2];
-        Util::ConfReplace(origin_file, final_file, &rule);
+        bazel_template::util::Util::ConfReplace(origin_file, final_file, &rule);
       } else {
         std::cerr << "unsupport type: " << line << std::endl;
         continue;
@@ -41,7 +43,7 @@ int main(int argc, char **argv) {
       boost::algorithm::trim(result[1]);
       if (result[0] == "gen") {
         std::filesystem::path origin_file = result[1];
-        Util::ConfGen(origin_file, &rule);
+        bazel_template::util::Util::ConfGen(origin_file, &rule);
       } else {
         std::cerr << "unsupport type: " << line << std::endl;
         continue;

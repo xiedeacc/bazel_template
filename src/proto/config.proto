@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package bazel_template.proto;
+
+message BaseConfig {
+  string nacos_sdk_addr = 1;
+  string nacos_namespace = 2;
+  string nacos_service_name = 3;
+  string nacos_cluster_name = 4;
+  string nacos_group_name = 5;
+  uint32 nacos_sdk_rcv_udp_port = 6;
+}

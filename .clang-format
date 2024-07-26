@@ -1,3 +1,7 @@
 BasedOnStyle: Google
 Language: Cpp
 Standard: Cpp11
+---
+Language: Proto
+BasedOnStyle: Google
+IndentWidth: 2
