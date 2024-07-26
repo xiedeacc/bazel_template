@@ -5,6 +5,7 @@ package bazel_template.proto;
 service Service {
   rpc ServerStatus(ServerStatusRequest) returns (ServerStatusResponse);
   rpc IpInfo(IpInfoRequest) returns (IpInfoResponse);
+  rpc PostIpInfo(stream PostIpInfoRequest) returns (PostIpInfoResponse) {}
 }
 
 message RequestConfig {
@@ -27,4 +28,14 @@ message IpInfoRequest {
 
 message IpInfoResponse {
   string msg = 1;
+}
+
+message PostIpInfoRequest {
+  RequestConfig config = 1;
+  IpInfo ip_info = 2;
+}
+
+message PostIpInfoResponse {
+  error.ErrorCode ret_code = 1;
+  string ret_msg = 2;
 }
