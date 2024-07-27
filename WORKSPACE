@@ -535,6 +535,16 @@ new_git_repository(
     remote = "git@github.com:gperftools/gperftools.git",
 )
 
+#git_repository(
+#name = "async_grpc",
+##build_file = "//bazel:async_grpc.BUILD",
+#commit = "1ef0e59db98dc761f58a13bcb848197b9147a78f",
+#remote = "git@github.com:cartographer-project/async_grpc.git",
+#repo_mapping = {
+#"@com_google_glog": "@com_github_glog_glog",
+#},
+#)
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )

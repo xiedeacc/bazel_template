@@ -17,30 +17,19 @@ cc_binary(
 cc_library(
     name = "grpc_server_impl",
     srcs = ["grpc_server_impl.cc"],
-    hdrs = ["grpc_server_impl.h"],
+    hdrs = [
+        "grpc_server_impl.h",
+        "grpc_service_handlers.h",
+    ],
     deps = [
-        ":grpc_server_impl_base",
         "//src/common:blocking_list",
         "//src/common:garbage_collector",
-        "//src/context:grpc_context",
+        #"//src/context:grpc_context",
+        "//src/proto:cc_service",
         "//src/context:server_run_info",
-        "//src/grpc_server_impl/call_tags",
         "//src/util",
         "//src/util:config_manager",
-    ],
-)
-
-cc_library(
-    name = "grpc_server_impl_base",
-    hdrs = [
-        "grpc_server_impl_base.h",
-    ],
-    deps = [
-        "//src/common/grpc_framework:grpc_server_impl",
-        "@boost//:algorithm",
-        "@com_github_gflags_gflags//:gflags",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
+        "//src/async_grpc",
     ],
 )
 

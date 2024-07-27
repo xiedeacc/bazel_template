@@ -2,7 +2,7 @@
 #include "glog/logging.h"
 // #include "gperftools/profiler.h"
 #include "src/common/module.h"
-#include "src/server/server_impl.h"
+#include "src/server/grpc_server_impl.h"
 #include "src/util/config_manager.h"
 
 int main(int argc, char **argv) {
@@ -11,13 +11,12 @@ int main(int argc, char **argv) {
   // google::InitGoogleLogging(argv[0]);
   // gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  bazel_template::common::InitAllModules(&argc, &argv);
+  common::InitAllModules(&argc, &argv);
 
-  bazel_template::util::ConfigUtil::Instance().Init();
+  util::ConfigUtil::Instance().Init();
 
-  bazel_template::server::GrpcServer server(
-      bazel_template::util::ConfigUtil::Instance()->GrpcPort());
-  server.Run();
+  server::GrpcServer server(util::ConfigUtil::Instance()->GrpcPort());
+  server.WaitForShutdown();
 
   // ProfilerStop();
   return 0;

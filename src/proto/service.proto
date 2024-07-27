@@ -2,10 +2,18 @@ syntax = "proto3";
 
 package bazel_template.proto;
 
-service Service {
-  rpc ServerStatus(ServerStatusRequest) returns (ServerStatusResponse);
-  rpc IpInfo(IpInfoRequest) returns (IpInfoResponse);
-  rpc PostIpInfo(stream PostIpInfoRequest) returns (PostIpInfoResponse) {}
+// service Service {
+// rpc ServerStatus(ServerStatusRequest) returns (ServerStatusResponse);
+// rpc IpInfo(IpInfoRequest) returns (IpInfoResponse);
+// rpc PostIpInfo(stream PostIpInfoRequest) returns (PostIpInfoResponse) {}
+//}
+
+service Math {
+  rpc GetSum(stream GetSumRequest) returns (GetSumResponse);
+  rpc GetSquare(GetSquareRequest) returns (GetSquareResponse);
+  rpc GetRunningSum(stream GetSumRequest) returns (stream GetSumResponse);
+  rpc GetEcho(GetEchoRequest) returns (GetEchoResponse);
+  rpc GetSequence(GetSequenceRequest) returns (stream GetSequenceResponse);
 }
 
 message RequestConfig {
@@ -30,12 +38,36 @@ message IpInfoResponse {
   string msg = 1;
 }
 
-message PostIpInfoRequest {
-  RequestConfig config = 1;
-  IpInfo ip_info = 2;
+message GetSumRequest {
+  int32 input = 1;
 }
 
-message PostIpInfoResponse {
-  error.ErrorCode ret_code = 1;
-  string ret_msg = 2;
+message GetSumResponse {
+  int32 output = 1;
 }
+
+message GetSquareRequest {
+  int32 input = 1;
+}
+
+message GetSquareResponse {
+  int32 output = 1;
+}
+
+message GetEchoRequest {
+  int32 input = 1;
+}
+
+message GetEchoResponse {
+  int32 output = 1;
+}
+
+message GetSequenceRequest {
+  int32 input = 1;
+}
+
+message GetSequenceResponse {
+  int32 output = 1;
+}
+
+// Provides information about the gRPC server.

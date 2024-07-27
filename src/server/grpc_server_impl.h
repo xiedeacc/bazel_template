@@ -3,28 +3,25 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include <boost/thread/future.hpp>
 #include <functional>
 #include <shared_mutex>
 #include <string>
 #include <thread>
 
-#include "bazel_template/bazel_template_service.pb.h"
-#include "call_tags/ip_info_call.h"
-#include "grpcpp/grpcpp.h"
-#include "src/context/grpc_context.h"
+#include "src/async_grpc/server.h"
+// #include "src/context/grpc_context.h"
+#include "src/common/blocking_list.h"
+#include "src/common/garbage_collector.h"
 #include "src/context/server_run_info.h"
-#include "src/server/call_tags/call_tags.h"
-#include "src/server/server_base.h"
-#include "src/util/blocking_list.h"
-#include "src/util/common_util.h"
-#include "src/util/config_util.h"
-#include "src/util/garbage_collector.h"
+#include "src/proto/service.pb.h"
+#include "src/server/grpc_service_handlers.h"
+#include "src/util/config_manager.h"
+#include "src/util/util.h"
 
 namespace bazel_template {
 namespace server {
 
-class GrpcServer final : public GrpcServerBase {
+class GrpcServer final {
  public:
   GrpcServer(int port)
       : GrpcServerBase(port), terminated(false), working_thread_in_pool(0) {
@@ -39,54 +36,38 @@ class GrpcServer final : public GrpcServerBase {
     auto task = std::bind(&GrpcServer::ScanList, this);
     thread_pool_->submit(task);
     server_run_info->MarkedServerInitedDone();
+
+    Server::Builder server_builder;
+    server_builder.SetServerAddress(kServerAddress);
+    server_builder.SetNumGrpcThreads(kNumThreads);
+    server_builder.SetNumEventThreads(kNumThreads);
+    server_builder.RegisterHandler<GetSumHandler>();
+    server_builder.RegisterHandler<GetRunningSumHandler>();
+    server_ = server_builder.Build();
+    server_->SetExecutionContext(common::make_unique<MathServerContext>());
+    server_->Start();
   };
 
-  virtual void OnRun(grpc::ServerCompletionQueue *request_queue,
-                     grpc::ServerCompletionQueue *response_queue) override {
-    new server::call_tags::IpInfoCall(this, request_queue, response_queue);
-    new server::call_tags::ServerStatusCall(this, request_queue,
-                                            response_queue);
-  };
+ public:
+  void WaitForShutdown() { server_->WaitForShutdown(); }
 
-  virtual void OnExit() override {};
+  // grpc::Status ServerStatus(
+  // const tbox::grpc_server::ServerStatusRequest *request,
+  // tbox::grpc_server::ServerStatusResponse *response);
 
-  virtual void OnServerStatusRead(
-      const server::ServerStatusRequest *request,
-      server::ServerStatusResponse *response) override {
-    LOG(INFO) << "OnServerStatusRead";
-    LOG(INFO) << "request: \n"
-              << util::CommonUtil::MessageToJsonString(*request);
-    grpc::Status status = ServerStatus(request, response);
-  }
+  // void DoServerStatus(const tbox::grpc_server::ServerStatusRequest *request,
+  // tbox::grpc_server::ServerStatusResponse *response,
+  // tbox::context::GrpcContext *grpc_context);
 
-  grpc::Status ServerStatus(const server::ServerStatusRequest *request,
-                            server::ServerStatusResponse *response);
-
-  void DoServerStatus(const server::ServerStatusRequest *request,
-                      server::ServerStatusResponse *response,
-                      context::GrpcContext *grpc_context);
-
-  virtual void OnIpInfoRead(const server::IpInfoRequest *request,
-                            server::IpInfoResponse *response) override {
-    LOG(INFO) << "OnIpInfoRead";
-    LOG(INFO) << "request: \n"
-              << util::CommonUtil::MessageToJsonString(*request);
-    server::IpInfo *ip_info = response->add_ip_infos();
-    ip_info->set_update_timestamp(absl::ToUnixNanos(absl::Now()));
-    ip_info->set_location("aws");
-    ip_info->set_ip_addr("192.168.1.1");
-    ip_info->set_mac_addr("xxxxxx");
-    ip_info->set_ip_addr_v6("xxxxxx");
-  }
-
-  void ScanList();
-  void RequestFastFail(context::GrpcContext *grpc_context);
-  void BuildDefaultResponse(const server::ServerStatusRequest *request,
-                            server::ServerStatusResponse *response);
+  // void ScanList();
+  // void RequestFastFail(tbox::context::GrpcContext *grpc_context);
+  // void BuildDefaultResponse(
+  // const tbox::grpc_server::ServerStatusRequest *request,
+  // tbox::grpc_server::ServerStatusResponse *response);
 
  private:
   std::atomic<int64_t> next_log_info_time_;
-  common::BlockingList<context::GrpcContext *> request_pending_queue_;
+  // common::BlockingList<context::GrpcContext *> request_pending_queue_;
   int64_t fast_fail_one_scope_limit_ = 10;
   std::shared_ptr<boost::executors::basic_thread_pool> thread_pool_;
 
@@ -96,6 +77,7 @@ class GrpcServer final : public GrpcServerBase {
   absl::Mutex working_thread_mu_;
   int64_t working_thread_limit = 6;
   std::shared_ptr<context::ServerRunInfo> server_run_info;
+  std::unique_ptr<async_grpc::Server> server_;
 };
 
 }  // namespace server

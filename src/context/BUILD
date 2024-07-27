@@ -10,20 +10,20 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "grpc_context",
-    srcs = [
-        "grpc_context.cc",
-    ],
-    hdrs = [
-        "grpc_context.h",
-    ],
-    deps = [
-        "//src/proto:cc_service",
-        "//src/util",
-        "//src/util:config_manager",
-        "@com_google_absl//absl/synchronization",
-    ],
-)
+#cc_library(
+#name = "grpc_context",
+#srcs = [
+#"grpc_context.cc",
+#],
+#hdrs = [
+#"grpc_context.h",
+#],
+#deps = [
+#"//src/proto:cc_service",
+#"//src/util",
+#"//src/util:config_manager",
+#"@com_google_absl//absl/synchronization",
+#],
+#)
 
 cpplint()
