@@ -70,7 +70,7 @@ BlockingList<T>::BlockingList() : sync_(new sync()), size_(0) {}
 
 template <typename T>
 void BlockingList<T>::push_front(const T& t) {
-  std::mutex::scoped_lock lock(sync_->mutex_);
+  std::unique_lock lock(sync_->mutex_);
   list_.push_front(t);
   ++size_;
   sync_->condition_.notify_one();
@@ -78,7 +78,7 @@ void BlockingList<T>::push_front(const T& t) {
 
 template <typename T>
 void BlockingList<T>::push_back(const T& t) {
-  std::mutex::scoped_lock lock(sync_->mutex_);
+  std::unique_lock lock(sync_->mutex_);
   list_.push_back(t);
   ++size_;
   sync_->condition_.notify_one();
@@ -86,7 +86,7 @@ void BlockingList<T>::push_back(const T& t) {
 
 template <typename T>
 bool BlockingList<T>::try_peek_back(T* t) {
-  std::mutex::scoped_lock lock(sync_->mutex_);
+  std::unique_lock lock(sync_->mutex_);
 
   if (list_.empty()) {
     return false;
@@ -98,7 +98,7 @@ bool BlockingList<T>::try_peek_back(T* t) {
 
 template <typename T>
 bool BlockingList<T>::try_peek_front(T* t) {
-  std::mutex::scoped_lock lock(sync_->mutex_);
+  std::unique_lock lock(sync_->mutex_);
 
   if (list_.empty()) {
     return false;
@@ -110,7 +110,7 @@ bool BlockingList<T>::try_peek_front(T* t) {
 
 template <typename T>
 bool BlockingList<T>::try_pop_back(T* t) {
-  std::mutex::scoped_lock lock(sync_->mutex_);
+  std::unique_lock lock(sync_->mutex_);
 
   if (list_.empty()) {
     return false;
@@ -124,7 +124,7 @@ bool BlockingList<T>::try_pop_back(T* t) {
 
 template <typename T>
 bool BlockingList<T>::try_pop_front(T* t) {
-  std::mutex::scoped_lock lock(sync_->mutex_);
+  std::unique_lock lock(sync_->mutex_);
 
   if (list_.empty()) {
     return false;
@@ -139,7 +139,7 @@ bool BlockingList<T>::try_pop_front(T* t) {
 
 template <typename T>
 T BlockingList<T>::pop_back() {
-  std::mutex::scoped_lock lock(sync_->mutex_);
+  std::unique_lock lock(sync_->mutex_);
 
   while (list_.empty()) {
     sync_->condition_.wait(lock);
@@ -153,7 +153,7 @@ T BlockingList<T>::pop_back() {
 
 template <typename T>
 void BlockingList<T>::wait_until_not_empty() {
-  std::mutex::scoped_lock lock(sync_->mutex_);
+  std::unique_lock lock(sync_->mutex_);
 
   while (list_.empty()) {
     sync_->condition_.wait(lock);
@@ -162,7 +162,7 @@ void BlockingList<T>::wait_until_not_empty() {
 
 template <typename T>
 T BlockingList<T>::pop_front() {
-  std::mutex::scoped_lock lock(sync_->mutex_);
+  std::unique_lock lock(sync_->mutex_);
 
   while (list_.empty()) {
     sync_->condition_.wait(lock);
