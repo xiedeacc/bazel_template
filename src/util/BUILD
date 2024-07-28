@@ -26,6 +26,8 @@ cc_library(
     deps = [
         "//src/common:net",
         "@boost//:algorithm",
+        "@boost//:beast",
+        "@boost//:iostreams",
         "@com_github_glog_glog//:glog",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",

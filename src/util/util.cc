@@ -549,27 +549,27 @@ std::string Util::ToString(const map<string, string> &vars) {
 
 string Util::StandardBase64Encode(const string &input) {
   string output;
-  try {
-    output.resize(boost::beast::detail::base64::encoded_size(input.size()));
-    auto const ret = boost::beast::detail::base64::encode(
-        output.data(), input.data(), input.size());
-    output.resize(ret);
-  } catch (exception &e) {
-    LOG(INFO) << "Base64 encode error";
-  }
+  //try {
+    //output.resize(boost::beast::detail::base64::encoded_size(input.size()));
+    //auto const ret = boost::beast::detail::base64::encode(
+        //output.data(), input.data(), input.size());
+    //output.resize(ret);
+  //} catch (exception &e) {
+    //LOG(INFO) << "Base64 encode error";
+  //}
   return output;
 }
 
 string Util::StandardBase64Decode(const string &input) {
   string output;
-  try {
-    output.resize(boost::beast::detail::base64::decoded_size(input.size()));
-    auto const ret = boost::beast::detail::base64::decode(
-        output.data(), input.data(), input.size());
-    output.resize(ret.first);
-  } catch (exception &e) {
-    LOG(INFO) << "Base64 decode error";
-  }
+  //try {
+    //output.resize(boost::beast::detail::base64::decoded_size(input.size()));
+    //auto const ret = boost::beast::detail::base64::decode(
+        //output.data(), input.data(), input.size());
+    //output.resize(ret.first);
+  //} catch (exception &e) {
+    //LOG(INFO) << "Base64 decode error";
+  //}
   return output;
 }
 

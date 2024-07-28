@@ -325,9 +325,9 @@ http_archive(
         "@org_bzip_bzip2": "@bzip2",
         "@com_github_facebook_zstd": "@zstd",
     },
-    sha256 = "b62bd839ea6c28265af9a1f68393eda37fab3611425d3b28882d8e424535ec9d",
-    strip_prefix = "boost-1.82.0",
-    url = "https://github.com/boostorg/boost/releases/download/boost-1.82.0/boost-1.82.0.tar.gz",
+    sha256 = "0c6049764e80aa32754acd7d4f179fd5551d8172a83b71532ae093e7384e98da",
+    strip_prefix = "boost-1.83.0",
+    url = "https://github.com/boostorg/boost/releases/download/boost-1.83.0/boost-1.83.0.tar.gz",
 )
 
 new_git_repository(
