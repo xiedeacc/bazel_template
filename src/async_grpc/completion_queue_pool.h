@@ -40,17 +40,20 @@ class CompletionQueue {
   };
 
  public:
-  CompletionQueue() = default;
+  CompletionQueue()
+      : completion_queue_(std::make_shared<grpc::CompletionQueue>()) {}
 
   void Start();
   void Shutdown();
 
-  ::grpc::CompletionQueue* completion_queue() { return &completion_queue_; }
+  ::grpc::CompletionQueue* completion_queue() {
+    return completion_queue_.get();
+  }
 
  private:
   void RunCompletionQueue();
 
-  ::grpc::CompletionQueue completion_queue_;
+  std::shared_ptr<grpc::CompletionQueue> completion_queue_;
   std::unique_ptr<std::thread> thread_;
 };
 

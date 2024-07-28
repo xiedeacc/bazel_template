@@ -6,17 +6,15 @@
 
 #include "src/server/grpc_server_impl.h"
 
-using context::GrpcContext;
-using context::ScopeDecrementContextCounter;
-using grpc::Status;
-using server::ServerStatusRequest;
-using server::ServerStatusResponse;
-using util::CommonUtil;
-using util::ConfigUtil;
-using util::GCEntry;
-
 namespace bazel_template {
 namespace server {
+
+// using context::GrpcContext;
+// using context::ScopeDecrementContextCounter;
+// using common::GCEntry;
+using grpc::Status;
+using util::ConfigManager;
+using util::Util;
 
 class WorkingThreadInPoolDecrementCounter {
  public:

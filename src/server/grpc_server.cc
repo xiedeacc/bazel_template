@@ -11,11 +11,13 @@ int main(int argc, char **argv) {
   // google::InitGoogleLogging(argv[0]);
   // gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  common::InitAllModules(&argc, &argv);
+  bazel_template::common::InitAllModules(&argc, &argv);
 
-  util::ConfigUtil::Instance().Init();
+  bazel_template::util::ConfigManager::Instance()->Init(
+      "./conf/base_config.json");
 
-  server::GrpcServer server(util::ConfigUtil::Instance()->GrpcPort());
+  bazel_template::server::GrpcServer server(
+      bazel_template::util::ConfigManager::Instance()->GrpcServerPort());
   server.WaitForShutdown();
 
   // ProfilerStop();

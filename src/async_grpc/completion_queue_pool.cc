@@ -38,14 +38,14 @@ void CompletionQueue::Start() {
 void CompletionQueue::Shutdown() {
   CHECK(thread_) << "CompletionQueue not yet started.";
   LOG(INFO) << "Shutting down client completion queue " << this;
-  completion_queue_.Shutdown();
+  completion_queue_->Shutdown();
   thread_->join();
 }
 
 void CompletionQueue::RunCompletionQueue() {
   bool ok;
   void* tag;
-  while (completion_queue_.Next(&tag, &ok)) {
+  while (completion_queue_->Next(&tag, &ok)) {
     auto* client_event = static_cast<ClientEvent*>(tag);
     client_event->ok = ok;
     client_event->async_client->HandleEvent(*client_event);

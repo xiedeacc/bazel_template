@@ -29,6 +29,7 @@ future todo:
 5. -layering_check
 6. aspect用法
 7. transitive用法
+8. use baze aspect find the most possible relative search path
 ```
 /usr/local/llvm-18/bin/clang++ -E -x c++ - -v < /dev/null
 
