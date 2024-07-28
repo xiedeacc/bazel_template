@@ -256,6 +256,9 @@ git_repository(
 git_repository(
     name = "com_google_googletest",
     remote = "git@github.com:google/googletest.git",
+    repo_mapping = {
+        "@abseil-cpp": "@com_google_absl",
+    },
     tag = "v1.14.0",
 )
 
@@ -281,13 +284,6 @@ git_repository(
 )
 
 git_repository(
-    name = "rules_proto",
-    commit = "557db790e7a71993ff85bf523099dfd25060ae2f",
-    remote = "git@github.com:bazelbuild/rules_proto.git",
-    #tag = "6.0.2",
-)
-
-git_repository(
     name = "com_google_protobuf",
     remote = "git@github.com:protocolbuffers/protobuf.git",
     repo_mapping = {
@@ -295,6 +291,16 @@ git_repository(
         "@com_github_curl_curl": "@curl",
     },
     tag = "v27.1",
+)
+
+git_repository(
+    name = "rules_proto",
+    remote = "git@github.com:bazelbuild/rules_proto.git",
+    repo_mapping = {
+        "@abseil-cpp": "@com_google_absl",
+        "@protobuf": "@com_google_protobuf",
+    },
+    tag = "6.0.2",
 )
 
 git_repository(
@@ -438,6 +444,9 @@ git_repository(
     name = "yaml-cpp",
     commit = "1d8ca1f35eb3a9c9142462b28282a848e5d29a91",
     remote = "git@github.com:jbeder/yaml-cpp.git",
+    repo_mapping = {
+        "@abseil-cpp": "@com_google_absl",
+    },
 )
 
 new_git_repository(
@@ -533,6 +542,9 @@ new_git_repository(
     #tag = "gperftools-2.15",
     commit = "285908e8c7cfa98659127a23532c060f8dcbd148",
     remote = "git@github.com:gperftools/gperftools.git",
+    repo_mapping = {
+        "@abseil-cpp": "@com_google_absl",
+    },
 )
 
 register_toolchains(
@@ -597,6 +609,7 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("7.2.0")
 
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
 load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
@@ -605,6 +618,8 @@ load("@rules_perl//perl:deps.bzl", "perl_register_toolchains")
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
 load("@rules_python//python:repositories.bzl", "py_repositories")
+
+bazel_features_deps()
 
 rules_foreign_cc_dependencies()
 
