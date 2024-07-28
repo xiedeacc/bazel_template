@@ -4,7 +4,8 @@ def cc_test(
         **kwargs):
     test_main = []
     test_deps = [
-        "@gperftools//:tcmalloc_debug",
+        "@gperftools//:tcmalloc_debug_and_profiler",
+        "@libunwind//:unwind-all",
         "@com_google_googletest//:gtest",
     ]
     if autolink_main:

@@ -21,10 +21,16 @@ cc_library(
     name = "module",
     srcs = ["module.cc"],
     hdrs = ["module.h"],
+    copts = [
+        "-isystem external/double-conversion",
+        "-isystem external/folly",
+        "-isystem $(GENDIR)/external/folly",
+    ],
     deps = [
         ":dependency_map",
         "@com_github_gflags_gflags//:gflags",
         "@com_github_glog_glog//:glog",
+        "@folly",
     ],
 )
 
@@ -33,6 +39,11 @@ cc_library(
     srcs = ["garbage_collector.cc"],
     hdrs = [
         "garbage_collector.h",
+    ],
+    copts = [
+        "-isystem external/double-conversion",
+        "-isystem external/folly",
+        "-isystem $(GENDIR)/external/folly",
     ],
     defines = [
         "BOOST_THREAD_BUILD_LIB=1",

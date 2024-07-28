@@ -7,10 +7,22 @@ package(default_visibility = ["//visibility:public"])
 cc_binary(
     name = "grpc_server",
     srcs = ["grpc_server.cc"],
+    copts = [
+        "-isystem external/double-conversion",
+        "-isystem external/folly",
+        "-isystem $(GENDIR)/external/folly",
+    ],
+    linkopts = [
+        "-lssl",
+        "-lcrypto",
+    ],
     deps = [
         ":grpc_server_impl",
         #"@jemalloc",
+        "@libunwind//:unwind-all",
         ":version_info",
+        "@openssl//:ssl",
+        "@openssl//:crypto",
     ],
 )
 
@@ -20,6 +32,11 @@ cc_library(
     hdrs = [
         "grpc_server_impl.h",
         "grpc_service_handlers.h",
+    ],
+    copts = [
+        "-isystem external/double-conversion",
+        "-isystem external/folly",
+        "-isystem $(GENDIR)/external/folly",
     ],
     defines = [
         "BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION=1",

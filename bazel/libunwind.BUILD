@@ -562,76 +562,6 @@ cc_library(
 )
 
 cc_library(
-    name = "unwind-dwarf-common",
-    srcs = [
-        "src/dwarf/global.c",
-    ],
-    copts = COPTS + select({
-        ":linux_x86_64": LINUX_X86_64_COPTS,
-        ":linux_aarch64": LINUX_AARCH64_COPTS,
-        "//conditions:default": [],
-    }),
-    local_defines = LOCAL_DEFINES,
-    visibility = ["//visibility:public"],
-    deps = [
-        ":unwind-elf64",
-    ],
-)
-
-cc_library(
-    name = "unwind-dwarf-generic",
-    srcs = glob([
-        "src/dwarf/G*.c",
-    ]),
-    copts = COPTS + select({
-        ":linux_x86_64": LINUX_X86_64_COPTS,
-        ":linux_aarch64": LINUX_AARCH64_COPTS,
-    }),
-    local_defines = LOCAL_DEFINES,
-    visibility = ["//visibility:public"],
-    deps = [
-        ":unwind-dwarf-common",
-        ":unwind-elf64",
-    ],
-)
-
-cc_library(
-    name = "unwind-dwarf-local",
-    srcs = glob([
-        "src/dwarf/L*.c",
-    ]),
-    copts = COPTS + select({
-        ":linux_x86_64": LINUX_X86_64_COPTS,
-        ":linux_aarch64": LINUX_AARCH64_COPTS,
-    }),
-    local_defines = LOCAL_DEFINES,
-    visibility = ["//visibility:public"],
-    deps = [
-        ":unwind-dwarf-common",
-        ":unwind-elf64",
-    ],
-)
-
-#sh_binary(
-#name = "aarch64_preprocess",
-#srcs = ["@bazel_template//bazel:aarch64_preprocess.sh"],
-#)
-
-#genrule(
-#name = "preprocessed_setcontext",
-#srcs = [
-#"src/aarch64/setcontext.S",
-#"src/aarch64/ucontext_i.h",
-#],
-#outs = [
-#"src/aarch64/setcontext.i",
-##"src/aarch64/setcontext.o",
-#],
-#cmd = "$(location :aarch64_preprocess) $(location src/aarch64/setcontext.S)",
-#tools = [":aarch64_preprocess"],
-#)
-
-cc_library(
     name = "context",
     srcs = select({
         ":linux_x86_64": [
@@ -679,9 +609,12 @@ cc_library(
         "src/mi/mempool.c",
         "src/mi/strerror.c",
         "src/os-linux.c",
+        "src/dwarf/global.c",
     ] + glob(
         [
             "src/mi/L*.c",
+            "src/dwarf/L*.c",
+            "src/dwarf/G*.c",
             "src/unwind/*.c",
         ],
         exclude = ["src/mi/Ldyn-remote.c"],
@@ -719,7 +652,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":context",
-        ":unwind-dwarf-local",
         ":unwind-elf64",
     ],
 )
@@ -775,7 +707,7 @@ cc_library(
     local_defines = LOCAL_DEFINES,
     visibility = ["//visibility:public"],
     deps = [
-        ":unwind-dwarf-generic",
+        ":unwind",
     ],
 )
 
@@ -787,8 +719,6 @@ cc_library(
         ":unwind",
         ":unwind-arch",
         ":unwind-coredump",
-        ":unwind-dwarf-common",
-        ":unwind-dwarf-generic",
         ":unwind-elf64",
         ":unwind-ptrace",
         ":unwind-setjmp",

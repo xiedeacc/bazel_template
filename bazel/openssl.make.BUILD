@@ -131,14 +131,14 @@ configure_make(
                         CONFIGURE_OPTIONS,
     lib_name = LIB_NAME,
     lib_source = ":all_srcs",
-    linkopts = ["-ldl"],
+    #linkopts = ["-ldl"],
     out_lib_dir = select({
         "@platforms//cpu:aarch64": "lib",
         "//conditions:default": "lib64",
     }),
     out_static_libs = [
-        "libcrypto.a",
         "libssl.a",
+        "libcrypto.a",
     ],
     targets = MAKE_TARGETS,
     toolchains = ["@rules_perl//:current_toolchain"],

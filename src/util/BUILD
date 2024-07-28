@@ -7,6 +7,11 @@ cc_library(
     name = "config_manager",
     srcs = ["config_manager.cc"],
     hdrs = ["config_manager.h"],
+    copts = [
+        "-isystem external/double-conversion",
+        "-isystem external/folly",
+        "-isystem $(GENDIR)/external/folly",
+    ],
     deps = [
         ":util",
         "//src/proto:cc_config",
@@ -26,6 +31,7 @@ cc_library(
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",
         "@com_google_protobuf//:protobuf",
+        "@fmt",
         "@smhasher",
     ],
 )
