@@ -3,7 +3,6 @@ load("@bazel_template//bazel:rules_fbthrift.bzl", "fbthrift_cpp_gen", "fbthrift_
 package(default_visibility = ["//visibility:public"])
 
 COPTS = [
-    "-isystem external/zlib",
     "-isystem external/libsodium/src/libsodium/include",
     "-isystem external/fbthrift",
     "-isystem $(BINDIR)/external/fbthrift",
@@ -503,13 +502,13 @@ cc_library(
     name = "lib",
     srcs = [
         ":annotation_thrift_cpp",
+        ":conformance_service_thrift_cpp",
+        ":conformance_thrift_cpp",
         ":lib_json_thrift_cpp",
         ":lib_meta_thrift_cpp",
         ":lib_reflection_thrift_cpp",
         ":lib_rocket_service_thrift_cpp",
         ":lib_rocket_thrift_cpp",
-        ":conformance_thrift_cpp",
-        ":conformance_service_thrift_cpp",
     ] + glob(
         [
             "thrift/annotation/**/*.cpp",

@@ -236,6 +236,7 @@ git_repository(
     name = "com_google_absl",
     remote = "git@github.com:abseil/abseil-cpp.git",
     tag = "20240116.2",
+    #tag = "20230802.2",
 )
 
 git_repository(
@@ -599,7 +600,7 @@ openwrt_toolchain_setup(
         "rockchip": {
             "armv8": {
                 "arch": "aarch64",
-                "url": "/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64",
+                "url": "/root/src/software/openwrt/toolchain",
                 "sha256sum": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3",
             },
         },

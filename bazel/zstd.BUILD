@@ -82,7 +82,6 @@ cc_library(
         "-O3",
         "-g",
         "-Iexternal/zstd/lib",
-        "-isystem external/zlib",
     ],
     linkopts = [
         "-pthread",

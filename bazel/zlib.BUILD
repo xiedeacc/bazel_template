@@ -36,11 +36,13 @@ cc_library(
         "trees.c",
         "trees.h",
         "uncompr.c",
-        "zconf.h",
         "zutil.c",
         "zutil.h",
     ],
-    hdrs = ["zlib.h"],
+    hdrs = [
+        "zconf.h",
+        "zlib.h",
+    ],
     copts = select({
         "@platforms//os:windows": [],
         "//conditions:default": [
@@ -48,6 +50,7 @@ cc_library(
             "-g",
         ],
     }),
+    includes = ["."],
     local_defines = select({
         "@platforms//os:windows": [],
         "//conditions:default": [

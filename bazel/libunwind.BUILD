@@ -24,7 +24,6 @@ COPTS = [
     "-fexceptions",
     "-Wall",
     "-Wsign-compare",
-    "-isystem external/zlib",
     "-Iexternal/libunwind/src",
     "-I$(BINDIR)/external/libunwind/include",
     "-Iexternal/libunwind/include",
@@ -472,12 +471,12 @@ cc_library(
         "src/mi/init.c",
     ],
     hdrs = [
-        "include/unwind.h",
-        ":libunwind_h",
-        ":libunwind-common_h",
         "include/libunwind-coredump.h",
         "include/libunwind-dynamic.h",
         "include/libunwind-ptrace.h",
+        "include/unwind.h",
+        ":libunwind-common_h",
+        ":libunwind_h",
     ] + select({
         ":linux_x86_64": [
             "include/libunwind-x86_64.h",
@@ -598,6 +597,7 @@ cc_library(
     name = "unwind",
     srcs = [
         "src/dl-iterate-phdr.c",
+        "src/dwarf/global.c",
         "src/mi/_ReadSLEB.c",
         "src/mi/_ReadULEB.c",
         "src/mi/backtrace.c",
@@ -609,7 +609,6 @@ cc_library(
         "src/mi/mempool.c",
         "src/mi/strerror.c",
         "src/os-linux.c",
-        "src/dwarf/global.c",
     ] + glob(
         [
             "src/mi/L*.c",
@@ -680,14 +679,14 @@ cc_library(
             ],
         ),
         ":linux_aarch64": [
+            "src/aarch64/init.h",
+            "src/aarch64/is_fpreg.c",
+            "src/aarch64/regname.c",
             "src/mi/flush_cache.c",
             "src/mi/init.c",
             "src/mi/mempool.c",
             "src/mi/strerror.c",
             "src/os-linux.c",
-            "src/aarch64/init.h",
-            "src/aarch64/is_fpreg.c",
-            "src/aarch64/regname.c",
         ] + glob(
             [
                 "src/mi/G*.c",

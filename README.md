@@ -9,6 +9,7 @@ TODO
 8. 文档
 
 future todo:
+1. 学习boost的virtual include
 1. use baze aspect find the most possible relative search path
 2. curl缺少quic + ngquic
 3. module map, -compiler_param_file, -layering_check
@@ -115,6 +116,32 @@ cmake -G "Unix Makefiles" ../llvm \
     -DLLVM_BUILD_TESTS=OFF \
     -DLLDB_INCLUDE_TESTS=OFF \
     -DCLANG_INCLUDE_TESTS=OFF
+
+TARGET=aarch64-linux-gnu cmake \
+   -DCMAKE_C_FLAGS="--sysroot=/root/src/software/openwrt/toolchain/" \
+   -DCMAKE_CXX_FLAGS="--sysroot=/root/src/software/openwrt/toolchain/" \
+   -DCMAKE_C_COMPILER=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-12.3.0 \
+   -DCMAKE_CXX_COMPILER=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-g++.bin  \
+   -DCMAKE_LINKER=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-ld.bin \
+   -DCMAKE_AR=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-ar \
+   -DCMAKE_ASM_COMPILER=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-as.bin \
+   -DCMAKE_RANLIB=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-ranlib \
+   -DCMAKE_NM=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-nm \
+   -DCMAKE_STRIP=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-strip \
+   -DCMAKE_SYSROOT=/root/src/software/openwrt/toolchain \
+   -DCMAKE_INCLUDE_PATH=":" \
+   -DCMAKE_LIBRARY_PATH="/root/src/software/openwrt/toolchain/lib" \
+   -DCMAKE_INSTALL_RPATH="/root/src/software/openwrt/toolchain/lib" \
+   -DCMAKE_SHARED_LINKER_FLAGS="--sysroot=/root/src/software/openwrt/toolchain" \
+   ..
+
+CC=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-12.3.0 \
+CXX=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-g++.bin \
+CCAS=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-as.bin \
+CXXFLAGS="--sysroot=/root/src/software/openwrt/toolchain -isystem /root/src/software/openwrt/toolchain/aarch64-openwrt-linux-musl/include/c++/12.3.0" \
+CFLAGS="--sysroot=/root/src/software/openwrt/toolchain -isystem /root/src/software/openwrt/toolchain/include" \
+LDFLAGS="--sysroot=/root/src/software/openwrt/toolchain -L/root/src/software/openwrt/toolchain/lib" ./configure --host=aarch64-unknown-linux-gnu
+
 
 cmake \
   -DCMAKE_INCLUDE_PATH=/alt/include/path1:/alt/include/path2 \

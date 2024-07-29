@@ -12,10 +12,6 @@ cc_binary(
         "-isystem external/folly",
         "-isystem $(GENDIR)/external/folly",
     ],
-    linkopts = [
-        "-lssl",
-        "-lcrypto",
-    ],
     deps = [
         ":grpc_server_impl",
         ":version_info",

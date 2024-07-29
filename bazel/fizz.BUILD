@@ -45,7 +45,6 @@ cc_library(
     copts = [
         "-isystem external/fizz",
         "-isystem $(BINDIR)/external/fizz",
-        "-isystem external/zlib",
         "-isystem external/zstd/lib",
         "-isystem external/double-conversion",
         "-isystem external/lz4/lib",

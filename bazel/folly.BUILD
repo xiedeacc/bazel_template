@@ -173,7 +173,6 @@ cc_library(
         # buildifier: leave-alone
         "-isystem external/folly",
         "-isystem $(BINDIR)/external/folly",
-        "-isystem external/zlib",
         "-isystem external/zstd/lib",
         "-isystem external/double-conversion",
         "-isystem external/lz4/lib",

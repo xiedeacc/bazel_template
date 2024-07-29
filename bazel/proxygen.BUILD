@@ -3,7 +3,6 @@ load("@bazel_template//bazel:proxygen.bzl", "is_external", "proxygen_cpp_gen")
 package(default_visibility = ["//visibility:public"])
 
 COPTS = [
-    "-isystem external/zlib",
     "-isystem external/libsodium/src/libsodium/include",
     "-isystem external/proxygen",
     "-isystem $(BINDIR)/external/proxygen",
@@ -95,8 +94,8 @@ genrule(
 cc_library(
     name = "proxygen",
     srcs = [
-        ":stats_headers",
         ":common_headers",
+        ":stats_headers",
         ":trace",
     ] + glob(
         [

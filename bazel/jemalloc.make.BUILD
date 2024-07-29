@@ -16,7 +16,10 @@ configure_make_variant(
     configure_in_place = True,
     configure_options = [
         "--enable-static",
-    ],
+    ] + select({
+        "@platforms//cpu:aarch64": ["--host=aarch64-unknown-linux-gnu"],
+        "//conditions:default": [],
+    }),
     lib_name = "jemalloc",
     lib_source = ":all",
     out_static_libs = ["libjemalloc.a"],

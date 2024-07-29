@@ -1,3 +1,5 @@
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+
 config_setting(
     name = "ca_bundle_style_is_debian",
     define_values = {
@@ -250,7 +252,6 @@ cc_library(
         "include/curl/websockets.h",
     ],
     copts = [
-        "-isystem external/zlib",
         "-Iexternal/curl/lib",
         #"-Ilib",
         "-D_GNU_SOURCE",
@@ -277,18 +278,16 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "@zlib",
-        "@c-ares",
         ":define-ca-bundle-location",
-        "@openssl//:ssl",
+        "@c-ares",
         "@openssl//:crypto",
+        "@openssl//:ssl",
+        "@zlib",
     ] + select({
         "//conditions:default": [
         ],
     }),
 )
-
-load("@bazel_skylib//rules:write_file.bzl", "write_file")
 
 write_file(
     name = "curl_config_h",

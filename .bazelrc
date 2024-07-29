@@ -50,3 +50,4 @@ build:clang_aarch64 --compiler=clang
 build:openwrt_aarch64 --extra_toolchains='@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8'
 build:openwrt_aarch64 --platforms='//:linux_aarch64_platform'
 build:openwrt_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+build:openwrt_aarch64 --cpu='aarch64'
