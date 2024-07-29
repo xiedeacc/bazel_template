@@ -18,11 +18,12 @@ cc_binary(
     ],
     deps = [
         ":grpc_server_impl",
-        #"@jemalloc",
-        "@libunwind//:unwind-all",
         ":version_info",
-        "@openssl//:ssl",
+        "@jemalloc",
+        "@libunwind//:unwind-all",
         "@openssl//:crypto",
+        "@openssl//:ssl",
+        "@proxygen",
     ],
 )
 

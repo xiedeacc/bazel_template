@@ -38,7 +38,7 @@ git_repository(
 git_repository(
     name = "rules_foreign_cc",
     remote = "git@github.com:bazelbuild/rules_foreign_cc.git",
-    tag = "0.10.1",
+    tag = "0.11.1",
 )
 
 git_repository(
@@ -74,7 +74,7 @@ git_repository(
 git_repository(
     name = "rules_pkg",
     remote = "git@github.com:bazelbuild/rules_pkg.git",
-    tag = "1.0.0",
+    tag = "1.0.1",
 )
 
 git_repository(
@@ -330,12 +330,21 @@ http_archive(
     url = "https://github.com/boostorg/boost/releases/download/boost-1.83.0/boost-1.83.0.tar.gz",
 )
 
-new_git_repository(
+http_archive(
     name = "jemalloc",
-    build_file = "//bazel:jemalloc.BUILD",
-    commit = "21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322",
-    remote = "git@github.com:jemalloc/jemalloc.git",
+    build_file = "//bazel:jemalloc.make.BUILD",
+    sha256 = "2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa",
+    strip_prefix = "jemalloc-5.3.0",
+    url = "https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2",
 )
+
+#new_git_repository(
+#    name = "jemalloc",
+#    build_file = "//bazel:jemalloc.make.BUILD",
+#    remote = "git@github.com:jemalloc/jemalloc.git",
+#    #commit = "21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322",
+#    tag = "5.3.0",
+#)
 
 new_git_repository(
     name = "fmt",
