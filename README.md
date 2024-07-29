@@ -1,35 +1,23 @@
 TODO
-1. toolchains_llvm not works well for coss compiling, need update
-2. toolchains_openwrt need download from remote
-3. let toolchains_openwrt support gcc and clang and openwrt
-4. swig
-5. grpc
-6. curl缺少quic + ngquic
-7. include what you want
-8. revocate
-9. fizz lack of aegis, liboqs
-10. proxygen lack dns
-11. jemalloc
-todo:
-1. openwrt remote, 多版本,全部注册
-2. toolchains_llvm 交叉编译aarch64，直接用代码里面的，不要用toolchains_llvm了
-3. openssl, curl....
-4. 代码风格检查，内存泄漏检查
-5. url rewrite
-6. rules_proto实现
-7. proto插件自动生成
-8. swig
+1. url rewrite
+2. proto插件自动生成
+3. swig
+4. brpc example
+5. proxygen
+6. 代码风格检查，cpu性能分析，内存泄漏检查, gperftools + asnr, 单测覆盖度分析
+7. toolchains_openwrt need download from remote, support gcc, clang, openwrt, 多版本,全部注册
+8. 文档
 
+future todo:
+1. use baze aspect find the most possible relative search path
+2. curl缺少quic + ngquic
+3. module map, -compiler_param_file, -layering_check
+4. aspect用法
+5. transitive用法
+6. include what you want
+7. renovate.json
+8. fizz lack of aegis, liboqs
 
-future todo: 
-1. include what you want
-2. renovate.json
-3. module map
-4. -compiler_param_file
-5. -layering_check
-6. aspect用法
-7. transitive用法
-8. use baze aspect find the most possible relative search path
 ```
 /usr/local/llvm-18/bin/clang++ -E -x c++ - -v < /dev/null
 
