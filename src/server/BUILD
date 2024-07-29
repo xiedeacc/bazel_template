@@ -16,6 +16,7 @@ cc_binary(
         ":grpc_server_impl",
         ":version_info",
         "@jemalloc",
+        "@libunwind//:unwind",
         "@libunwind//:unwind-all",
         "@openssl//:crypto",
         "@openssl//:ssl",

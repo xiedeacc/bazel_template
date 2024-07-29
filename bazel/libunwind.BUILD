@@ -77,8 +77,8 @@ template_rule(
 )
 
 genrule(
-    name = "config_h",
-    outs = ["include/config.h"],
+    name = "config_h_in",
+    outs = ["include/config.h.in"],
     cmd = "\n".join([
         "cat <<'EOF' >$@",
         "/* include/config.h.  Generated from config.h.in by configure.  */",
@@ -347,13 +347,29 @@ genrule(
 )
 
 template_rule(
+    name = "config_h",
+    src = "config_h_in",
+    out = "include/config.h",
+    substitutions =
+        select({
+            ":linux_x86_64": {
+            },
+            ":linux_aarch64": {
+                "#define HAVE_ASM_VSYSCALL_H 1": "/* #undef HAVE_ASM_VSYSCALL_H */",
+                "#define HAVE_EXECINFO_H 1": "/* #undef HAVE_EXECINFO_H */",
+                "/* #undef HAVE_STRUCT_DL_PHDR_INFO_DLPI_SUBS */": "#define HAVE_STRUCT_DL_PHDR_INFO_DLPI_SUBS 1",
+            },
+        }),
+)
+
+template_rule(
     name = "libunwind-common_h",
     src = "include/libunwind-common.h.in",
     out = "include/libunwind-common.h",
     substitutions = {
-        "#define UNW_VERSION_MAJOR      @PKG_MAJOR@": "#define UNW_VERSION_MAJOR        1",
-        "#define UNW_VERSION_MINOR      @PKG_MINOR@": "#define UNW_VERSION_MINOR        9",
-        "#define UNW_VERSION_EXTRA      @PKG_EXTRA@": "#define UNW_VERSION_EXTRA        -pre",
+        "@PKG_MAJOR@": "1",
+        "@PKG_MINOR@": "9",
+        "@PKG_EXTRA@": "-pre",
         "#define UNW_VERSION_CODE(maj,min)      (((maj) << 16) | (min))": "#define UNW_VERSION_CODE(maj,min)    (((maj) << 16) | (min))",
         "#define UNW_VERSION    UNW_VERSION_CODE(UNW_VERSION_MAJOR, UNW_VERSION_MINOR)": "#define UNW_VERSION   UNW_VERSION_CODE(UNW_VERSION_MAJOR, UNW_VERSION_MINOR)",
         "#ifdef __sun": "#ifdef __sun",
@@ -548,7 +564,13 @@ cc_library(
         "src/mi/init.c",
         "src/setjmp/longjmp.c",
         "src/setjmp/siglongjmp.c",
-    ],
+    ] + select({
+        ":linux_x86_64": [],
+        ":linux_aarch64": [
+            #"aarch64/longjmp.c",
+            #"aarch64/siglongjmp.c",
+        ],
+    }),
     copts = COPTS + select({
         ":linux_x86_64": LINUX_X86_64_COPTS,
         ":linux_aarch64": LINUX_AARCH64_COPTS,
@@ -556,6 +578,7 @@ cc_library(
     local_defines = LOCAL_DEFINES,
     visibility = ["//visibility:public"],
     deps = [
+        ":unwind",
         ":unwind-elf64",
     ],
 )
@@ -570,10 +593,10 @@ cc_library(
             "src/x86_64/siglongjmp.S",
         ],
         ":linux_aarch64": [
-            #"src/aarch64/getcontext.S",
-            #"src/aarch64/longjmp.S",
+            "src/aarch64/getcontext.S",
+            "src/aarch64/longjmp.S",
             #"src/aarch64/setcontext.S",
-            #"src/aarch64/siglongjmp.S",
+            "src/aarch64/siglongjmp.S",
         ],
     }),
     copts = COPTS + select({
