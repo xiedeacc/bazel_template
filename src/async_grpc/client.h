@@ -69,7 +69,7 @@ class Client<RpcServiceMethodConcept, ::grpc::internal::RpcMethod::NORMAL_RPC> {
     ::grpc::Status internal_status;
     common::optional<std::chrono::system_clock::time_point> deadline;
     if (timeout_.has_value()) {
-      deadline = std::chrono::system_clock::now() + timeout_.value();
+      deadline = std::chrono::system_clock::now() + std::chrono::duration_cast<std::chrono::system_clock::duration>(timeout_.value());
     }
     client_context_ = ResetContext(deadline);
     bool result = RetryWithStrategy(
