@@ -400,7 +400,7 @@ std::istream &Util::GetLine(std::istream &is, std::string *line) {
 
 string Util::LoadContent(const string &file_name) {
   ifstream in(file_name);
-  if (!in) {
+  if (!in || !in.is_open()) {
     LOG(ERROR) << "Fail to open " << file_name;
     return "";
   }
@@ -549,26 +549,26 @@ std::string Util::ToString(const map<string, string> &vars) {
 
 string Util::StandardBase64Encode(const string &input) {
   string output;
-  //try {
-    //output.resize(boost::beast::detail::base64::encoded_size(input.size()));
-    //auto const ret = boost::beast::detail::base64::encode(
-        //output.data(), input.data(), input.size());
-    //output.resize(ret);
+  // try {
+  // output.resize(boost::beast::detail::base64::encoded_size(input.size()));
+  // auto const ret = boost::beast::detail::base64::encode(
+  // output.data(), input.data(), input.size());
+  // output.resize(ret);
   //} catch (exception &e) {
-    //LOG(INFO) << "Base64 encode error";
+  // LOG(INFO) << "Base64 encode error";
   //}
   return output;
 }
 
 string Util::StandardBase64Decode(const string &input) {
   string output;
-  //try {
-    //output.resize(boost::beast::detail::base64::decoded_size(input.size()));
-    //auto const ret = boost::beast::detail::base64::decode(
-        //output.data(), input.data(), input.size());
-    //output.resize(ret.first);
+  // try {
+  // output.resize(boost::beast::detail::base64::decoded_size(input.size()));
+  // auto const ret = boost::beast::detail::base64::decode(
+  // output.data(), input.data(), input.size());
+  // output.resize(ret.first);
   //} catch (exception &e) {
-    //LOG(INFO) << "Base64 decode error";
+  // LOG(INFO) << "Base64 decode error";
   //}
   return output;
 }

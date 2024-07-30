@@ -19,13 +19,13 @@ namespace proto_plugin {
 
 class PBCodeGenerator : public google::protobuf::compiler::CodeGenerator {
  public:
-  explicit PBCodeGenerator(const std::string& template_dir_);
+  explicit PBCodeGenerator();
 
  public:
   bool Generate(const google::protobuf::FileDescriptor* file,
                 const std::string& parameter,
                 google::protobuf::compiler::GeneratorContext* generator_context,
-                std::string* error) const;
+                std::string* error) const override;
 
  private:
   bool Generate() const;
@@ -37,10 +37,11 @@ class PBCodeGenerator : public google::protobuf::compiler::CodeGenerator {
  private:
   const mutable google::protobuf::FileDescriptor* file_;
   mutable google::protobuf::compiler::GeneratorContext* generator_context_;
-  std::string template_dir_;
+  mutable std::string template_dir_;
+  mutable std::string out_path_;
 };
 
-}  // namespace data
+}  // namespace proto_plugin
 }  // namespace bazel_template
 
-#endif // BAZEL_TEMPLATE_PROTO_PLUGIN_PB_CODE_GENERATOR
+#endif  // BAZEL_TEMPLATE_PROTO_PLUGIN_PB_CODE_GENERATOR

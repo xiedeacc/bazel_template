@@ -19,10 +19,10 @@ cc_binary(
 )
 
 cc_proto_plugin(
-    name = "pb_code_generator_plugin",
+    name = "print_proto_message_name",
     src = "//src/proto:service.proto",
     outs = [
-        "proto_plugin/print_proto_message_name.cc",
+        "print_proto_message_name.cc",
     ],
     data = [
         "//src/proto_plugin/template:print_proto_message_name.cc",
@@ -31,9 +31,20 @@ cc_proto_plugin(
     proto_deps = [
         "//src/proto:error.proto",
     ],
-    proto_path = "src/proto",
     protoc = "@com_google_protobuf//:protoc",
+    template_dir = "src/proto_plugin/template",
     deps = [
+        ":print_proto_message_name_header",
+    ],
+)
+
+cc_library(
+    name = "print_proto_message_name_header",
+    hdrs = [
+        "print_proto_message_name.h",
+    ],
+    deps = [
+        "@com_github_glog_glog//:glog",
     ],
 )
 
