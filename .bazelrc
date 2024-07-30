@@ -35,6 +35,7 @@ build --output_filter="^//"
 #build --remote_cache=http://192.168.1.101/bazel_cache
 #build --keep_going
 build --noenable_bzlmod
+common --experimental_downloader_config=.bazel_downloader.cfg
 
 build:clang --extra_toolchains='//toolchain:clang_toolchain_for_linux_x86_64'
 build:gcc --extra_toolchains='@local_config_cc_toolchains//:cc-toolchain-k8'

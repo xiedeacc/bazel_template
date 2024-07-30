@@ -537,7 +537,7 @@ switched_rules_by_language(
 
 git_repository(
     name = "com_github_grpc_grpc",
-    remote = "https://github.com/grpc/grpc.git",
+    remote = "git@github.com:grpc/grpc.git",
     repo_mapping = {
         "@com_github_cares_cares": "@c-ares",
         "@boringssl": "@openssl",
