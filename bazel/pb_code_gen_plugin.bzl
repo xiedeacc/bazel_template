@@ -1,14 +1,15 @@
 def _get_external_root(ctx):
     gendir = ctx.var["GENDIR"] + "/"
     external_roots = []
-    path = ctx.attr.src.files.to_list()[0].path
-    if path.startswith(gendir):
-        path = path[len(gendir):]
-    path = path.split("/")
-    if path[0] == "external":
-        external_roots += ["/".join(path[0:2])]
+    for file in ctx.files.src:
+        path = file.path
+        if path.startswith(gendir):
+            path = path[len(gendir):]
+        path = path.split("/")
+        if path[0] == "external":
+            external_roots += ["/".join(path[0:2])]
     roots = depset(external_roots)
-    n = len(roots.to_list())
+    n = len(external_roots)
     if n > 1:
         fail("""
            You are attempting simultaneous compilation of protobuf source files that span multiple workspaces (%s).
@@ -54,48 +55,49 @@ def _get_offset_path(root, path):
 def _proto_generate_impl(ctx):
     execdir = _get_external_root(ctx)
     print(execdir)
-    #if _check_if_protos_are_generated(ctx):
-    #external = "" if execdir == "." else "/" + execdir
-    #execdir = ctx.var["GENDIR"] + external
-    #protoc = _get_offset_path(execdir, ctx.executable.protoc.path)
-    #plugin = _get_offset_path(execdir, ctx.executable.plugin.path)
-    #dir_out = _get_offset_path(execdir, ctx.executable.plugin.dirname)
+    if _check_if_protos_are_generated(ctx):
+        external = "" if execdir == "." else "/" + execdir
+        execdir = ctx.var["GENDIR"] + external
+    print(execdir)
 
-    #out_files = [ctx.actions.declare_file(out) for out in ctx.attr.outs]
-    #path = _get_offset_path(execdir, ctx.files.src[0].path)
+    protoc = _get_offset_path(execdir, ctx.executable.protoc.path)
+    plugin = _get_offset_path(execdir, ctx.executable.plugin.path)
+    dir_out = _get_offset_path(execdir, ctx.executable.plugin.dirname)
 
-    #all_files = ctx.attr.src.files.to_list()
-    #protoc_cmd = [protoc]
-    #protoc_cmd += ["--proto_path=" + ctx.attr.proto_path]
-    #protoc_cmd += ["--proto_path=" + "."]
-    #all_inputs = []
+    out_files = [ctx.actions.declare_file(out) for out in ctx.attr.outs]
+    path = _get_offset_path(execdir, ctx.files.src[0].path)
 
-    #for dep in ctx.attr.proto_deps:
-    #for pfile in dep.files.to_list():
-    #all_inputs = all_inputs + [pfile]
-    #ppath = _get_offset_path(execdir, pfile.path)
-    #rpath = "/".join(ppath.split("/")[4:])
-    #if rpath == "":
-    #continue
-    #protoc_cmd += ["-I" + rpath + "=" + ppath]
+    all_files = ctx.attr.src.files.to_list()
+    protoc_cmd = [protoc]
+    protoc_cmd += ["--proto_path=" + ctx.attr.proto_path]
+    protoc_cmd += ["--proto_path=" + "."]
+    all_inputs = []
 
-    #protoc_cmd += ["--plugin=protoc-gen-PLUGIN=" + plugin]
+    for dep in ctx.attr.proto_deps:
+        for pfile in dep.files.to_list():
+            all_inputs = all_inputs + [pfile]
+            ppath = _get_offset_path(execdir, pfile.path)
+            rpath = "/".join(ppath.split("/")[4:])
+            if rpath == "":
+                continue
+            protoc_cmd += ["-I" + rpath + "=" + ppath]
 
-    #protoc_cmd += ["--PLUGIN_out=" + dir_out]
-    #protoc_cmd += [path]
+    protoc_cmd += ["--plugin=protoc-gen-PLUGIN=" + plugin]
+    protoc_cmd += ["--PLUGIN_out=" + dir_out]
+    protoc_cmd += [path]
 
-    #cmds = []
-    #if execdir != ".":
-    #cmds += ["cd %s" % execdir]
-    #cmds += [" ".join(protoc_cmd)]
+    cmds = []
+    if execdir != ".":
+        cmds += ["cd %s" % execdir]
+        cmds += [" ".join(protoc_cmd)]
 
-    #print(cmds)
-    #print(all_inputs)
-    #ctx.actions.run_shell(
-    #inputs = all_inputs + [ctx.executable.plugin] + [ctx.executable.protoc],
-    #outputs = out_files,
-    #command = " && ".join(cmds),
-    #)
+    print(cmds)
+    print(all_inputs)
+    ctx.actions.run_shell(
+        inputs = all_inputs + [ctx.executable.plugin] + [ctx.executable.protoc],
+        outputs = out_files,
+        command = " && ".join(cmds),
+    )
     return struct(files = depset(out_files))
 
 _proto_generate = rule(

@@ -3,7 +3,7 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/data/pb_code_generator.h"
+#include "src/proto_plugin/pb_code_generator.h"
 
 #include <algorithm>
 #include <map>
@@ -15,7 +15,7 @@
 #include "google/protobuf/io/zero_copy_stream.h"
 #include "src/util/util.h"
 
-using adserver::util::Util;
+using bazel_template::util::Util;
 using google::protobuf::Descriptor;
 using google::protobuf::FieldDescriptor;
 using google::protobuf::FileDescriptor;
