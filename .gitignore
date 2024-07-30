@@ -4,3 +4,5 @@ MODULE.bazel.lock
 core.*
 nohup.out
 external
+#src/proto/*.h
+#src/proto/*.cc
