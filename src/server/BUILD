@@ -46,7 +46,7 @@ cc_library(
         "//src/common:blocking_list",
         "//src/common:garbage_collector",
         #"//src/context:grpc_context",
-        "//src/proto:cc_service",
+        "//src/proto:cc_grpc_service",
         "//src/context:server_run_info",
         "@boost//:thread",
         "//src/util",

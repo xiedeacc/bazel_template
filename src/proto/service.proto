@@ -1,6 +1,6 @@
 syntax = "proto3";
-
 package bazel_template.proto;
+import "src/proto/error.proto";
 
 // service Service {
 // rpc ServerStatus(ServerStatusRequest) returns (ServerStatusResponse);
@@ -44,6 +44,7 @@ message GetSumRequest {
 
 message GetSumResponse {
   int32 output = 1;
+  ErrCode err_code = 2;
 }
 
 message GetSquareRequest {
