@@ -1,5 +1,4 @@
 TODO
-1. url rewrite
 2. proto插件自动生成
 3. swig
 4. proxygen
