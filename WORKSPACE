@@ -563,8 +563,15 @@ new_git_repository(
     build_file = "//bazel:swig.BUILD",
     patch_args = ["-p1"],
     patches = ["//bazel:swig.patch"],
-    remote = "git@github.com:swig/swig.git",
+    remote = "git@code.xiamu.com:swig/swig.git",
     tag = "v4.1.1",
+)
+
+new_git_repository(
+    name = "pcre2",
+    build_file = "//bazel:pcre2.BUILD",
+    remote = "git@code.xiamu.com:PCRE2Project/pcre2.git",
+    tag = "pcre2-10.42",
 )
 
 register_toolchains(
@@ -623,13 +630,6 @@ git_repository(
     name = "hedron_compile_commands",
     commit = "e43e8eaeed3e252ac7c02983f4b1792bdff2e2f0",
     remote = "git@code.xiamu.com:xiedeacc/bazel-compile-commands-extractor.git",
-)
-
-new_git_repository(
-    name = "pcre2",
-    build_file = "//bazel:pcre2.BUILD",
-    remote = "git@github.com:PCRE2Project/pcre2.git",
-    tag = "pcre2-10.42",
 )
 
 gen_local_config_git(name = "local_config_git")
