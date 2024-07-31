@@ -65,7 +65,8 @@ def _proto_generate_impl(ctx):
     src_proto_path = _get_offset_path(execdir, ctx.files.src[0].path)
 
     protoc_cmd = [protoc]
-    protoc_cmd += ["--proto_path=" + "."]
+    for path in ctx.attr.proto_paths:
+        protoc_cmd += ["--proto_path=" + path]
 
     all_inputs = [ctx.file.src]
     for dep in ctx.attr.proto_deps:
@@ -75,7 +76,7 @@ def _proto_generate_impl(ctx):
             rpath = "/".join(ppath.split("/")[4:])
             if rpath == "":
                 continue
-            protoc_cmd += ["-I" + rpath + "=" + ppath]
+            protoc_cmd += ["--proto_path" + rpath + "=" + ppath]
 
     all_inputs += ctx.files.data
 
@@ -118,6 +119,8 @@ _proto_generate = rule(
         "proto_deps": attr.label_list(
             allow_files = True,
         ),
+        "proto_paths": attr.string_list(
+        ),
         "deps": attr.label_list(
             allow_files = True,
         ),
@@ -136,7 +139,7 @@ _proto_generate = rule(
     implementation = _proto_generate_impl,
 )
 
-def proto_generate(name, src, outs, data, plugin, proto_deps, template_dir, protoc):
+def proto_generate(name, src, outs, data, plugin, proto_deps, proto_paths, template_dir, protoc):
     args = {}
     args.update({
         "name": name,
@@ -145,6 +148,7 @@ def proto_generate(name, src, outs, data, plugin, proto_deps, template_dir, prot
         "data": data,
         "plugin": plugin,
         "proto_deps": proto_deps,
+        "proto_paths": proto_paths,
         "template_dir": template_dir,
         "protoc": protoc,
     })
@@ -157,12 +161,13 @@ def cc_proto_plugin(
         data,
         plugin,
         proto_deps,
+        proto_paths,
         template_dir,
         protoc,
         deps = [],
         **kwargs):
     proto_name = name + "_proto"
-    proto_generate(proto_name, src, outs, data, plugin, proto_deps, template_dir, protoc)
+    proto_generate(proto_name, src, outs, data, plugin, proto_deps, proto_paths, template_dir, protoc)
     native.cc_library(
         name = name,
         srcs = [proto_name],

@@ -31,6 +31,9 @@ cc_proto_plugin(
     proto_deps = [
         "//src/proto:error.proto",
     ],
+    proto_paths = [
+        ".",
+    ],
     protoc = "@com_google_protobuf//:protoc",
     template_dir = "src/proto_plugin/template",
     deps = [
