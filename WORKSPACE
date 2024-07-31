@@ -558,6 +558,15 @@ new_git_repository(
     },
 )
 
+new_git_repository(
+    name = "swig",
+    build_file = "//bazel:swig.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:swig.patch"],
+    remote = "git@github.com:swig/swig.git",
+    tag = "v4.1.1",
+)
+
 register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )
@@ -616,6 +625,15 @@ git_repository(
     remote = "git@code.xiamu.com:xiedeacc/bazel-compile-commands-extractor.git",
 )
 
+new_git_repository(
+    name = "pcre2",
+    build_file = "//bazel:pcre2.BUILD",
+    remote = "git@github.com:PCRE2Project/pcre2.git",
+    tag = "pcre2-10.42",
+)
+
+gen_local_config_git(name = "local_config_git")
+
 load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("7.2.0")
@@ -624,7 +642,6 @@ load("@bazel_features//:deps.bzl", "bazel_features_deps")
 load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
-load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
 load("@rules_perl//perl:deps.bzl", "perl_register_toolchains")
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
@@ -634,15 +651,11 @@ bazel_features_deps()
 
 rules_foreign_cc_dependencies()
 
-rules_java_dependencies()
-
 py_repositories()
 
 go_rules_dependencies()
 
 rules_pkg_dependencies()
-
-rules_java_toolchains()
 
 go_register_toolchains(version = "1.22.1")
 
@@ -654,6 +667,51 @@ rules_closure_toolchains()
 
 rules_proto_toolchains()
 
+#################### java ####################
+load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
+
+rules_java_dependencies()
+
+rules_java_toolchains()
+
+load("@rules_jvm_external//:repositories.bzl", "rules_jvm_external_deps")
+
+rules_jvm_external_deps()
+
+load("@rules_jvm_external//:setup.bzl", "rules_jvm_external_setup")
+
+rules_jvm_external_setup()
+
+JUNIT_PLATFORM_VERSION = "1.9.2"
+
+JUNIT_JUPITER_VERSION = "5.9.2"
+
+load("@rules_jvm_external//:defs.bzl", "maven_install")
+
+maven_install(
+    artifacts = [
+        "net.java.dev.jna:jna:aar:5.13.0",
+        "com.google.truth:truth:0.32",
+        "org.junit.platform:junit-platform-launcher:%s" % JUNIT_PLATFORM_VERSION,
+        "org.junit.platform:junit-platform-reporting:%s" % JUNIT_PLATFORM_VERSION,
+        "org.junit.jupiter:junit-jupiter-api:%s" % JUNIT_JUPITER_VERSION,
+        "org.junit.jupiter:junit-jupiter-params:%s" % JUNIT_JUPITER_VERSION,
+        "org.junit.jupiter:junit-jupiter-engine:%s" % JUNIT_JUPITER_VERSION,
+    ],
+    repositories = [
+        "https://maven.aliyun.com/repository/central",
+    ],
+)
+
+load("@contrib_rules_jvm//:repositories.bzl", "contrib_rules_jvm_deps")
+
+contrib_rules_jvm_deps()
+
+load("@contrib_rules_jvm//:setup.bzl", "contrib_rules_jvm_setup")
+
+contrib_rules_jvm_setup()
+
+#################### hedron_compile_commands ####################
 load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 load("@hedron_compile_commands//:workspace_setup_transitive.bzl", "hedron_compile_commands_setup_transitive")
 load("@hedron_compile_commands//:workspace_setup_transitive_transitive.bzl", "hedron_compile_commands_setup_transitive_transitive")
@@ -666,5 +724,3 @@ hedron_compile_commands_setup_transitive()
 hedron_compile_commands_setup_transitive_transitive()
 
 hedron_compile_commands_setup_transitive_transitive_transitive()
-
-gen_local_config_git(name = "local_config_git")

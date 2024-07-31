@@ -5,8 +5,6 @@
 
 #include "src/util/config_manager.h"
 
-#include "src/util/util.h"
-
 namespace bazel_template {
 namespace util {
 

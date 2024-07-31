@@ -11,6 +11,7 @@
 #include "folly/Singleton.h"
 #include "folly/init/Init.h"
 #include "src/proto/config.pb.h"
+#include "src/util/util.h"
 
 namespace bazel_template {
 namespace util {
@@ -35,6 +36,12 @@ class ConfigManager {
   uint32_t DiscardRatio() { return base_config_.discard_ratio(); }
   uint32_t ThreadPoolSize() { return base_config_.thread_pool_size(); }
 
+  std::string ToString() {
+    std::string json;
+    Util::PrintProtoMessage(base_config_, &json);
+    return json;
+  }
+
  private:
   bazel_template::proto::BaseConfig base_config_;
 };
@@ -44,4 +51,4 @@ static folly::Singleton<ConfigManager> config_manager;
 }  // namespace util
 }  // namespace bazel_template
 
-#endif /* BAZEL_TEMPLATE_UTIL_CONFIG_MANAGER_H */
+#endif  // BAZEL_TEMPLATE_UTIL_CONFIG_MANAGER_H

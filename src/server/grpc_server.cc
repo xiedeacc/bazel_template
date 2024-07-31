@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2024  xiedeacc.com.
+ * All rights reserved.
+ *******************************************************************************/
+
 #include "gflags/gflags.h"
 #include "glog/logging.h"
 // #include "gperftools/profiler.h"
