@@ -5,6 +5,34 @@ load("//bazel:cpplint.bzl", "cpplint")
 package(default_visibility = ["//visibility:public"])
 
 cc_binary(
+    name = "http_server",
+    srcs = ["http_server.cc"],
+    copts = [
+        "-isystem external/double-conversion",
+        "-isystem external/folly",
+        "-isystem external/double-conversion",
+        "-isystem external/proxygen",
+        "-isystem $(GENDIR)/external/proxygen",
+        "-isystem $(GENDIR)/external/fizz",
+        "-isystem external/libsodium/src/libsodium/include",
+        "-isystem external/fizz",
+        "-isystem external/wangle",
+        "-isystem $(GENDIR)/external/folly",
+    ],
+    deps = [
+        ":version_info",
+        "//src/server/http_handler",
+        "@folly",
+        "@jemalloc",
+        "@libunwind//:unwind",
+        "@libunwind//:unwind-all",
+        "@openssl//:crypto",
+        "@openssl//:ssl",
+        "@proxygen",
+    ],
+)
+
+cc_binary(
     name = "grpc_server",
     srcs = ["grpc_server.cc"],
     copts = [
@@ -20,7 +48,6 @@ cc_binary(
         "@libunwind//:unwind-all",
         "@openssl//:crypto",
         "@openssl//:ssl",
-        "@proxygen",
     ],
 )
 

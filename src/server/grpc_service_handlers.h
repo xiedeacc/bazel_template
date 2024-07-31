@@ -20,6 +20,7 @@
 
 namespace bazel_template {
 namespace server {
+
 using EchoResponder = std::function<bool()>;
 
 class MathServerContext : public async_grpc::ExecutionContext {

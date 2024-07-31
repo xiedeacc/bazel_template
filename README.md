@@ -1,6 +1,4 @@
 TODO
-2. proto插件自动生成
-3. swig
 4. proxygen
 5. 代码风格检查，cpu性能分析，内存泄漏检查, gperftools + asnr, 单测覆盖度分析
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
