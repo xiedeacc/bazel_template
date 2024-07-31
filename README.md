@@ -3,6 +3,7 @@ TODO
 5. 代码风格检查，cpu性能分析，内存泄漏检查, gperftools + asnr, 单测覆盖度分析
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
 7. 文档
+8. git sync use bare repo
 
 future todo:
 1. 学习boost的virtual include
@@ -213,4 +214,28 @@ LD_LIBRARY_PATH=/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-ar
 LD_LIBRARY_PATH=/root/src/software/clang_sysroot/lib:/root/src/software/clang_sysroot/usr/lib:/root/src/software/clang_sysroot/usr/lib64:/root/src/software/clang_sysroot/lib/clang/18/lib/aarch64-unknown-linux-gnu:/root/src/software/clang_sysroot/lib/aarch64-unknown-linux-gnu qemu-aarch64 bazel-bin/src/main
 
 
+CMAKE_PREFIX_PATH=\
+      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/boost-AjmARan9-QjeQELFQiaLfua8c_9tx8aLqAFh9QdqSd4:\
+      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/folly:\
+ GETDEPS_BUILD_DIR=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/build \
+ GETDEPS_CABAL_FLAGS='--extra-lib-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/boost-AjmARan9-QjeQELFQiaLfua8c_9tx8aLqAFh9QdqSd4/lib --extra-include-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/boost-AjmARan9-QjeQELFQiaLfua8c_9tx8aLqAFh9QdqSd4/include --extra-lib-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/double-conversion-x8emC6iUhLOnT7N5UzjEF0T6GeLgN1y8NX2n84s-9po/lib --extra-include-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/double-conversion-x8emC6iUhLOnT7N5UzjEF0T6GeLgN1y8NX2n84s-9po/include --extra-lib-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/snappy-gxfOyHGf2FJ0ul7TAj3MVmChv9-6i3Mb1_l5gXysG90/lib --extra-include-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/snappy-gxfOyHGf2FJ0ul7TAj3MVmChv9-6i3Mb1_l5gXysG90/include --extra-lib-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/libiberty-BGHXCgZYbgyPPISiK8glfhC9K-oPT_dshcr_bWEn0Z4/lib --extra-include-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/libiberty-BGHXCgZYbgyPPISiK8glfhC9K-oPT_dshcr_bWEn0Z4/include' \
+ GETDEPS_INSTALL_DIR=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed \
+ LD_LIBRARY_PATH=\
+      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/boost-AjmARan9-QjeQELFQiaLfua8c_9tx8aLqAFh9QdqSd4/lib:\
+      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/double-conversion-x8emC6iUhLOnT7N5UzjEF0T6GeLgN1y8NX2n84s-9po/lib:\
+ PATH=\
+      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/ninja-a0uJUvTTC6-ZhmLhh59nTaABIYis4_IlMXls0u_7NTI/bin:\
+ PKG_CONFIG_PATH=\
+      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/xz-95wfh-pRiHkAz3OGd-E0CZfed-V-cu1gY69h-MQKsD4/lib/pkgconfig:\
+ SSL_CERT_DIR=/etc/ssl/certs \
+ cd /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/build/folly && \
+ /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/cmake-p1rPk5ixSPag0XJ4Imj7OHLK5wq2mlYJJ0zNN_bttxo/bin/cmake \
+      --build \
+      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/build/folly \
+      --target \
+      install \
+      --config \
+      RelWithDebInfo \
+      -j \
+      30
 ```

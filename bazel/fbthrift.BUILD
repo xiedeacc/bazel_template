@@ -29,6 +29,9 @@ cc_binary(
     name = "compiler_generate_build_templates",
     srcs = ["thrift/compiler/generate/build_templates.cc"],
     copts = COPTS,
+    depes = [
+        "@jemalloc",
+    ],
 )
 
 genrule(
@@ -246,6 +249,7 @@ cc_binary(
     deps = [
         ":compiler_generators",
         "@folly",
+        "@jemalloc",
         "@mvfst",
         "@wangle",
     ],
