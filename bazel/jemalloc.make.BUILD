@@ -26,7 +26,10 @@ configure_make_variant(
         "jemalloc.sh",
         "jemalloc-config",
     ],
-    out_shared_libs = ["libjemalloc.so"],
+    out_shared_libs = [
+        "libjemalloc.so",
+        "libjemalloc.so.2",
+    ],
     #out_static_libs = ["libjemalloc.a"], # need --with-malloc-conf
     targets = [
         #"install_lib_static",

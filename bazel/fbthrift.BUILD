@@ -29,6 +29,7 @@ cc_binary(
     srcs = ["thrift/compiler/generate/build_templates.cc"],
     copts = COPTS,
     deps = [
+        "@jemalloc",
     ],
 )
 
@@ -247,6 +248,7 @@ cc_binary(
     deps = [
         ":compiler_generators",
         "@folly",
+        "@jemalloc",
         "@mvfst",
         "@wangle",
     ],
