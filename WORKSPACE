@@ -415,7 +415,7 @@ http_archive(
 
 new_git_repository(
     name = "folly",
-    build_file = "//bazel:folly.BUILD",
+    build_file = "//bazel:folly.src.BUILD",
     remote = "git@code.xiamu.com:facebook/folly.git",
     tag = "v2024.07.08.00",
 )

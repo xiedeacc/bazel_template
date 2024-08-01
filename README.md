@@ -89,8 +89,11 @@ LDFLAGS="-Wl,-rpath,/usr/local/lib64" ./Configure enable-brotli enable-egd enabl
 ./Configure enable-brotli enable-egd enable-tfo enable-thread-pool enable-default-thread-pool enable-zlib enable-zstd --libdir=lib
 
 curl
-cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib64:/usr/local/lib ..
+autoreconf -fi
+./configure --enable-versioned-symbols --with-openssl=/usr/local
 
+cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib64:/usr/local/lib ..
+# libcurl.so.4: no version information available
 
 mstch_cpp2:no_metadata,include_prefix=thrift/lib/thrift
 mstch_cpp2:templates,no_metadata,include_prefix=thrift/lib/thrift

@@ -3,6 +3,7 @@ load("@bazel_template//bazel:proxygen.bzl", "is_external", "proxygen_cpp_gen")
 package(default_visibility = ["//visibility:public"])
 
 COPTS = [
+    "-Iexternal/libdwarf/src/lib/libdwarf",
     "-isystem external/libsodium/src/libsodium/include",
     "-isystem external/proxygen",
     "-isystem $(BINDIR)/external/proxygen",

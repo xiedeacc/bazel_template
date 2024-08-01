@@ -487,8 +487,8 @@ cc_library(
         "folly/system/Shell.cpp",
         "folly/system/ThreadId.cpp",
         "folly/system/ThreadName.cpp",
-        "folly/test/DeterministicSchedule.cpp",
-        "folly/testing/TestUtil.cpp",
+        #"folly/test/DeterministicSchedule.cpp",
+        #"folly/testing/TestUtil.cpp",
         "folly/tracing/AsyncStack.cpp",
     ],
     hdrs = [

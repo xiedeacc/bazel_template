@@ -70,10 +70,10 @@ cc_library(
         "-std=c++17",
     ],
     local_defines = [
-        "MVFST_USE_LIBEV",
+        #"MVFST_USE_LIBEV",
     ],
     deps = [
         "@fizz",
-        "@libev//:ev",
+        #"@libev//:ev",
     ],
 )
