@@ -1,10 +1,9 @@
 TODO
-4. proxygen
+0. GitManger need handle submodule problem and hiden ref problem
 5. 代码风格检查，cpu性能分析，内存泄漏检查, gperftools + asnr, 单测覆盖度分析
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
 7. 文档
 8. git sync use bare repo
-0. GitManger need handle submodule problem and hiden ref problem
 
 future todo:
 1. 学习boost的virtual include
