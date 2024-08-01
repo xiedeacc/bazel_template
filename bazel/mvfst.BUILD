@@ -56,6 +56,7 @@ cc_library(
         ],
     ),
     copts = [
+        "-Iexternal/libdwarf/src/lib/libdwarf",
         "-isystem external/mvfst",
         "-isystem external/libsodium/src/libsodium/include",
         "-Iexternal/libsodium/src/libsodium/include/sodium",

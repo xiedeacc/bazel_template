@@ -1,4 +1,4 @@
-load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
+load("@bazel_template//bazel:common.bzl", "extract_symbols", "jemalloc_template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -308,7 +308,7 @@ genrule(
     tools = [":public_unnamespace_sh"],
 )
 
-template_rule(
+jemalloc_template_rule(
     name = "jemalloc_preamble_h",
     src = "include/jemalloc/internal/jemalloc_preamble.h.in",
     out = "include/jemalloc/internal/jemalloc_preamble.h",
@@ -318,7 +318,7 @@ template_rule(
     },
 )
 
-template_rule(
+jemalloc_template_rule(
     name = "jemalloc_internal_defs_h",
     src = "include/jemalloc/internal/jemalloc_internal_defs.h.in",
     out = "include/jemalloc/internal/jemalloc_internal_defs.h",
@@ -453,7 +453,7 @@ template_rule(
                     },
 )
 
-template_rule(
+jemalloc_template_rule(
     name = "jemalloc_defs_h",
     src = "include/jemalloc/jemalloc_defs.h.in",
     out = "include/jemalloc/jemalloc_defs.h",
@@ -475,7 +475,7 @@ template_rule(
     },
 )
 
-template_rule(
+jemalloc_template_rule(
     name = "jemalloc_macros_h",
     src = "include/jemalloc/jemalloc_macros.h.in",
     out = "include/jemalloc/jemalloc_macros.h",
@@ -489,7 +489,7 @@ template_rule(
     },
 )
 
-template_rule(
+jemalloc_template_rule(
     name = "jemalloc_protos_h",
     src = "include/jemalloc/jemalloc_protos.h.in",
     out = "include/jemalloc/jemalloc_protos.h",
@@ -498,7 +498,7 @@ template_rule(
     },
 )
 
-template_rule(
+jemalloc_template_rule(
     name = "jemalloc_typedefs_h",
     src = "include/jemalloc/jemalloc_typedefs.h.in",
     out = "include/jemalloc/jemalloc_typedefs.h",

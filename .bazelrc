@@ -1,5 +1,3 @@
-#common --experimental_downloader_config=.bazel_downloader.cfg
-
 test:cpplint --test_tag_filters=cpplint
 test:cpplint --build_tests_only
 test:unit_test --test_tag_filters=-cpplint
@@ -39,10 +37,7 @@ build --output_filter="^//"
 #build --remote_cache=http://192.168.1.101/bazel_cache
 #build --keep_going
 common --noenable_bzlmod
-build --enable_platform_specific_config
 #common --experimental_downloader_config=.bazel_downloader.cfg
-#build --experimental_enable_android_migration_apis
-#build --experimental_google_legacy_api
 
 build:clang --extra_toolchains='//toolchain:clang_toolchain_for_linux_x86_64'
 build:gcc --extra_toolchains='@local_config_cc_toolchains//:cc-toolchain-k8'

@@ -17,7 +17,6 @@ COPTS = [
     "-isystem external/wangle",
     "-isystem external/mvfst",
     "-std=c++17",
-    "-fsized-deallocation",
     "-D_LARGEFILE64_SOURCE",
 ]
 
@@ -29,8 +28,7 @@ cc_binary(
     name = "compiler_generate_build_templates",
     srcs = ["thrift/compiler/generate/build_templates.cc"],
     copts = COPTS,
-    depes = [
-        "@jemalloc",
+    deps = [
     ],
 )
 
@@ -249,7 +247,6 @@ cc_binary(
     deps = [
         ":compiler_generators",
         "@folly",
-        "@jemalloc",
         "@mvfst",
         "@wangle",
     ],

@@ -4,6 +4,7 @@ TODO
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
 7. 文档
 8. git sync use bare repo
+0. GitManger need handle submodule problem and hiden ref problem
 
 future todo:
 1. 学习boost的virtual include

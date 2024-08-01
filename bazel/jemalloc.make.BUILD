@@ -15,16 +15,23 @@ configure_make_variant(
     #autogen = True,
     configure_in_place = True,
     configure_options = [
-        "--enable-static",
+        "--disable-static --enable-shared",
     ] + select({
         "@platforms//cpu:aarch64": ["--host=aarch64-unknown-linux-gnu"],
         "//conditions:default": [],
     }),
     lib_name = "jemalloc",
     lib_source = ":all",
-    out_static_libs = ["libjemalloc.a"],
+    out_binaries = [
+        "jemalloc.sh",
+        "jemalloc-config",
+    ],
+    out_shared_libs = ["libjemalloc.so"],
+    #out_static_libs = ["libjemalloc.a"], # need --with-malloc-conf
     targets = [
-        "install_lib_static",
+        #"install_lib_static",
+        "install_bin",
+        "install_lib",
         "install_include",
     ],
     toolchain = "@rules_foreign_cc//toolchains:preinstalled_automake_toolchain",

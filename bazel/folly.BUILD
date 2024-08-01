@@ -171,6 +171,7 @@ cc_library(
     }),
     copts = [
         # buildifier: leave-alone
+        "-Iexternal/libdwarf/src/lib/libdwarf",
         "-isystem external/folly",
         "-isystem $(BINDIR)/external/folly",
         "-isystem external/zstd/lib",
@@ -199,6 +200,7 @@ cc_library(
         "-faligned-new",
         "-Wshadow-compatible-local",
         "-Wno-noexcept-type",
+        "-g",
         "-std=c++17",
         "-fPIC",
         "-finput-charset=UTF-8",
