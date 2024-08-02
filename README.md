@@ -1,6 +1,5 @@
 # features
 
-
 # todo
 5. 代码风格检查，cpu性能分析，内存泄漏检查, gperftools + asnr, 单测覆盖度分析
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
@@ -18,6 +17,15 @@
 
 
 # usage
+
+## 指定toolchain
+```
+bazel build \
+  --platforms=@toolchains_llvm//platforms:linux-x86_64 \
+  --extra_execution_platforms=@toolchains_llvm//platforms:linux-x86_64 \
+  --extra_toolchains=@llvm_toolchain_linux_exec//:cc-toolchain-x86_64-linux \
+  //...
+```
 
 ## 生成compile_commands.json
 ```
@@ -46,7 +54,7 @@ bazel test --test_env=HEAPCHECK=normal //...
 bazel test --test_env=HEAPCHECK=normal --test_env=PPROF_PATH=/usr/local/bin/pprof //... #同时内存泄露检查和性能分析
 ```
 
-## cpu和内存性能分析
+## cpu能分析
 ```
 go install github.com/google/pprof@latest
 bazel test --test_env="CPUPROFILE=prof.out" //src/common:barrier_test #需使用test --spawn_strategy=standalone
@@ -92,70 +100,28 @@ strace -Ff -tt -p 56509 2>&1 | tee strace.log
 pstack 56509
 ```
 
-## 指定toolchain
-```
-bazel build \
-  --platforms=@toolchains_llvm//platforms:linux-x86_64 \
-  --extra_execution_platforms=@toolchains_llvm//platforms:linux-x86_64 \
-  --extra_toolchains=@llvm_toolchain_linux_exec//:cc-toolchain-x86_64-linux \
-  //...
-```
+# 一些常见和编译相关命令
 
-
-# 一些常见软件编译参数
 ```
 /usr/local/llvm-18/bin/clang++ -E -x c++ - -v < /dev/null
-openssl
-LDFLAGS="-Wl,-rpath,/usr/local/lib64" ./Configure enable-brotli enable-egd enable-tfo enable-thread-pool enable-default-thread-pool enable-zlib enable-zstd
-./Configure enable-brotli enable-egd enable-tfo enable-thread-pool enable-default-thread-pool enable-zlib enable-zstd --libdir=lib
+echo "" | gcc -v -E -
 
-curl
-autoreconf -fi
-./configure --enable-versioned-symbols --with-openssl=/usr/local
+-v: verbose mode, including the compiler's version, the directories it searches for header files, and the commands it executes.
+-H: makes the preprocessor print the name of each header file used
+-E: tells GCC to stop after the preprocessing stage, the output is the preprocessed source code, which includes the expanded #include directives, macros, and other preprocessing directives.
+-S: stops the compilation process after the assembly stage, producing an assembly language file
+-P: inhibits the generation of #line directives in the preprocessed output
+-C: instructs the preprocessor to retain comments in the output.
+-dD: tells the preprocessor to output macro definitions in addition to the preprocessed output
+-dM: tells the preprocessor to output only the macro definitions, without processing the rest of the input file.
 
-cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib64:/usr/local/lib ..
-# libcurl.so.4: no version information available
-
-mstch_cpp2:no_metadata,include_prefix=thrift/lib/thrift
-mstch_cpp2:templates,no_metadata,include_prefix=thrift/lib/thrift
-mstch_cpp2:json,no_metadata,include_prefix=thrift/lib/thrift
-mstch_cpp2:include_prefix=thrift/lib/thrift
+gcc -E -P source_file.c -o preprocessed_output.c
+gcc -M source_file.c -o dependencies.d
+gcc -E -dD source_file.c -o macros_output.c
 
 cd /root/src/library/fbthrift && /root/src/library/fbthrift/bazel-bin/thrift1 --gen mstch_cpp2:no_metadata,include_prefix=thrift/conformance/if \
 -o thrift/conformance/if \
 -I /root/src/library/fbthrift thrift/conformance/if/serialization.thrift
-
-cmake -G "Unix Makefiles" ../llvm \
-    -DCMAKE_INSTALL_PREFIX=/usr/local/llvm/18 \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_ENABLE_PROJECTS="bolt;clang;clang-tools-extra;libclc;lld;lldb;mlir;polly;openmp" \
-    -DLLVM_ENABLE_RUNTIMES="libc;libunwind;libcxxabi;pstl;libcxx;compiler-rt" \
-    -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
-    -DCLANG_DEFAULT_RTLIB=compiler-rt \
-    -DCLANG_DEFAULT_LINKER=lld \
-    -DMLIR_INCLUDE_INTEGRATION_TESTS=OFF \
-    -DLLVM_INCLUDE_TESTS=OFF \
-    -DLLVM_BUILD_TESTS=OFF \
-    -DLLDB_INCLUDE_TESTS=OFF \
-    -DCLANG_INCLUDE_TESTS=OFF
-
-TARGET=aarch64-linux-gnu cmake \
-   -DCMAKE_C_FLAGS="--sysroot=/root/src/software/openwrt/toolchain/" \
-   -DCMAKE_CXX_FLAGS="--sysroot=/root/src/software/openwrt/toolchain/" \
-   -DCMAKE_C_COMPILER=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-12.3.0 \
-   -DCMAKE_CXX_COMPILER=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-g++.bin  \
-   -DCMAKE_LINKER=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-ld.bin \
-   -DCMAKE_AR=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-ar \
-   -DCMAKE_ASM_COMPILER=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-as.bin \
-   -DCMAKE_RANLIB=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-ranlib \
-   -DCMAKE_NM=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-nm \
-   -DCMAKE_STRIP=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-strip \
-   -DCMAKE_SYSROOT=/root/src/software/openwrt/toolchain \
-   -DCMAKE_INCLUDE_PATH=":" \
-   -DCMAKE_LIBRARY_PATH="/root/src/software/openwrt/toolchain/lib" \
-   -DCMAKE_INSTALL_RPATH="/root/src/software/openwrt/toolchain/lib" \
-   -DCMAKE_SHARED_LINKER_FLAGS="--sysroot=/root/src/software/openwrt/toolchain" \
-   ..
 
 CC=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-12.3.0 \
 CXX=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-g++.bin \
@@ -164,26 +130,17 @@ CXXFLAGS="--sysroot=/root/src/software/openwrt/toolchain -isystem /root/src/soft
 CFLAGS="--sysroot=/root/src/software/openwrt/toolchain -isystem /root/src/software/openwrt/toolchain/include" \
 LDFLAGS="--sysroot=/root/src/software/openwrt/toolchain -L/root/src/software/openwrt/toolchain/lib" ./configure --host=aarch64-unknown-linux-gnu
 
-
 cmake \
-  -DCMAKE_INCLUDE_PATH=/alt/include/path1:/alt/include/path2 \
-  -DCMAKE_LIBRARY_PATH=/alt/lib/path1:/alt/lib/path2 ...
-liuring
-./configure \
- --cc=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-gcc-12.3.0 \
- --cxx=/root/src/software/openwrt/toolchain/bin/aarch64-openwrt-linux-musl-g++.bin  \
- --includedir=/root/src/software/openwrt/toolchain/include \
- --libdir=/root/src/software/openwrt/toolchain/lib \
- --libdevdir=/root/src/software/openwrt/toolchain/lib
+  -DCMAKE_INCLUDE_PATH=/usr/local/llvm/18/include/aarch64-unknown-linux-gnu/c++/v1:/usr/local/llvm/18/include/c++/v1 \
+  -DCMAKE_LIBRARY_PATH=/usr/local/llvm18/lib ...
 
-mbedtls
-cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DENABLE_TESTING=OFF -DUSE_SHARED_MBEDTLS_LIBRARY=ON ..
+CMAKE_PREFIX_PATH=/usr/local:/usr/local/llvm/18 LD_LIBRARY_PATH=/usr/local/lib PATH=/usr/local/bin PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
+  cmake --build build --target install --config RelWithDebInfo -j 16
+```
 
+# 一些常见和交叉编译相关命令
 
-libevent
-cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DEVENT__DISABLE_TESTS:BOOL=ON -DEVENT__ENABLE_VERBOSE_DEBUG:BOOL=OFF ..
-
-
+```
 CC=aarch64-linux-gnu-gcc ./configure --enable-shared=no --host=aarch64-unknown-linux-gnu
 
 /usr/local/llvm/18/bin/clang++ -v --target=aarch64-unknown-linux-gnu \
@@ -200,67 +157,46 @@ CC=aarch64-linux-gnu-gcc ./configure --enable-shared=no --host=aarch64-unknown-l
   -static -stdlib=libc++ -lc++ -lc++abi -lunwind -fuse-ld=lld --rtlib=compiler-rt \
   main.cc
 
+LD_LIBRARY_PATH=/root/src/software/clang_sysroot/lib:\
+/root/src/software/clang_sysroot/usr/lib:\
+/root/src/software/clang_sysroot/usr/lib64:\
+/root/src/software/clang_sysroot/lib/clang/18/lib/aarch64-unknown-linux-gnu:\
+/root/src/software/clang_sysroot/lib/aarch64-unknown-linux-gnu qemu-aarch64 bazel-bin/src/main
 
-/usr/local/llvm/18/bin/clang++ -v --target=aarch64-unknown-linux-gnu \
-  --sysroot=/root/src/software/clang_sysroot \
-  -I/root/src/software/clang_sysroot/include/aarch64-unknown-linux-gnu/c++/v1 \
-  -I/root/src/software/clang_sysroot/include/c++/v1 \
-  -I/root/src/software/clang_sysroot/lib/clang/18/include \
-  -isystem /root/src/software/clang_sysroot/usr/sysinclude \
-  -B/usr/local/llvm/18/bin \
-  -L/root/src/software/clang_sysroot/lib \
-  -L/root/src/software/clang_sysroot/lib/aarch64-unknown-linux-gnu \
-  -L/root/src/software/clang_sysroot/lib/clang/18/lib/aarch64-unknown-linux-gnu \
-  -L/root/src/software/clang_sysroot/usr/lib \
-  -static -stdlib=libc++ -lc++ -lc++abi -lunwind -fuse-ld=lld --rtlib=compiler-rt \
-  main.cc
+```
 
+# 一些常见软件编译参数
 
-/usr/local/llvm/18/bin/clang-18 -cc1 -triple aarch64-unknown-linux-gnu \
--emit-obj -mrelax-all -dumpdir a- -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names \
--main-file-name main.cc -static-define -mrelocation-model pic -pic-level 2 -pic-is-pie \
--mframe-pointer=non-leaf -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 \
--target-cpu generic -target-feature +v8a -target-feature +fp-armv8 -target-feature +neon -target-abi aapcs -debugger-tuning=gdb \
--fdebug-compilation-dir=/root/src/software -v -fcoverage-compilation-dir=/root/src/software \
--resource-dir /usr/local/llvm/18/lib/clang/18 \
--isysroot /root/src/software/clang_sysroot \
--internal-isystem /root/src/software/clang_sysroot/include/aarch64-unknown-linux-gnu/c++/v1 \
--internal-isystem /usr/local/llvm/18/bin/../include/c++/v1 \
--internal-isystem /usr/local/llvm/18/lib/clang/18/include \
--internal-externc-isystem /root/src/software/clang_sysroot/usr/include \
--internal-externc-isystem /root/src/software/clang_sysroot/include \
--fdeprecated-macro -ferror-limit 19 -fno-signed-char -fgnuc-version=4.2.1 \
--fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -fcolor-diagnostics \
--target-feature +outline-atomics -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 \
--o /tmp/main-8512fd.o -x c++ main.cc
+## openssl
+指定rpath, 解决和系统自带openssl共存问题
+```
+openssl
+LDFLAGS="-Wl,-rpath,/usr/local/lib64" ./Configure enable-brotli enable-egd enable-tfo enable-thread-pool enable-default-thread-pool enable-zlib enable-zstd
+./Configure enable-brotli enable-egd enable-tfo enable-thread-pool enable-default-thread-pool enable-zlib enable-zstd --libdir=lib
+```
 
+## curl
+```
+autoreconf -fi
+./configure --enable-versioned-symbols --with-openssl=/usr/local
 
-LD_LIBRARY_PATH=/root/src/software/openwrt/openwrt-toolchain-23.05.3-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64/toolchain-aarch64_generic_gcc-12.3.0_musl/lib qemu-aarch64 bazel-bin/src/main
-LD_LIBRARY_PATH=/root/src/software/clang_sysroot/lib:/root/src/software/clang_sysroot/usr/lib:/root/src/software/clang_sysroot/usr/lib64:/root/src/software/clang_sysroot/lib/clang/18/lib/aarch64-unknown-linux-gnu:/root/src/software/clang_sysroot/lib/aarch64-unknown-linux-gnu qemu-aarch64 bazel-bin/src/main
+cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib64:/usr/local/lib ..
+# libcurl.so.4: no version information available
+```
 
-
-CMAKE_PREFIX_PATH=\
-      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/boost-AjmARan9-QjeQELFQiaLfua8c_9tx8aLqAFh9QdqSd4:\
-      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/folly:\
- GETDEPS_BUILD_DIR=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/build \
- GETDEPS_CABAL_FLAGS='--extra-lib-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/boost-AjmARan9-QjeQELFQiaLfua8c_9tx8aLqAFh9QdqSd4/lib --extra-include-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/boost-AjmARan9-QjeQELFQiaLfua8c_9tx8aLqAFh9QdqSd4/include --extra-lib-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/double-conversion-x8emC6iUhLOnT7N5UzjEF0T6GeLgN1y8NX2n84s-9po/lib --extra-include-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/double-conversion-x8emC6iUhLOnT7N5UzjEF0T6GeLgN1y8NX2n84s-9po/include --extra-lib-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/snappy-gxfOyHGf2FJ0ul7TAj3MVmChv9-6i3Mb1_l5gXysG90/lib --extra-include-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/snappy-gxfOyHGf2FJ0ul7TAj3MVmChv9-6i3Mb1_l5gXysG90/include --extra-lib-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/libiberty-BGHXCgZYbgyPPISiK8glfhC9K-oPT_dshcr_bWEn0Z4/lib --extra-include-dirs=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/libiberty-BGHXCgZYbgyPPISiK8glfhC9K-oPT_dshcr_bWEn0Z4/include' \
- GETDEPS_INSTALL_DIR=/tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed \
- LD_LIBRARY_PATH=\
-      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/boost-AjmARan9-QjeQELFQiaLfua8c_9tx8aLqAFh9QdqSd4/lib:\
-      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/double-conversion-x8emC6iUhLOnT7N5UzjEF0T6GeLgN1y8NX2n84s-9po/lib:\
- PATH=\
-      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/ninja-a0uJUvTTC6-ZhmLhh59nTaABIYis4_IlMXls0u_7NTI/bin:\
- PKG_CONFIG_PATH=\
-      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/xz-95wfh-pRiHkAz3OGd-E0CZfed-V-cu1gY69h-MQKsD4/lib/pkgconfig:\
- SSL_CERT_DIR=/etc/ssl/certs \
- cd /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/build/folly && \
- /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/installed/cmake-p1rPk5ixSPag0XJ4Imj7OHLK5wq2mlYJJ0zNN_bttxo/bin/cmake \
-      --build \
-      /tmp/fbcode_builder_getdeps-ZrootZsrcZlibraryZfollyZbuildZfbcode_builder-root/build/folly \
-      --target \
-      install \
-      --config \
-      RelWithDebInfo \
-      -j \
-      30
+## llvm/clang
+```
+cmake -G "Unix Makefiles" ../llvm \
+    -DCMAKE_INSTALL_PREFIX=/usr/local/llvm/18 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_ENABLE_PROJECTS="bolt;clang;clang-tools-extra;libclc;lld;lldb;mlir;polly;openmp" \
+    -DLLVM_ENABLE_RUNTIMES="libc;libunwind;libcxxabi;pstl;libcxx;compiler-rt" \
+    -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
+    -DCLANG_DEFAULT_RTLIB=compiler-rt \
+    -DCLANG_DEFAULT_LINKER=lld \
+    -DMLIR_INCLUDE_INTEGRATION_TESTS=OFF \
+    -DLLVM_INCLUDE_TESTS=OFF \
+    -DLLVM_BUILD_TESTS=OFF \
+    -DLLDB_INCLUDE_TESTS=OFF \
+    -DCLANG_INCLUDE_TESTS=OFF
 ```
