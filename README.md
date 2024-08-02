@@ -32,13 +32,17 @@ bazel test //... --config=unit_test            #根据.bazelrc配置文件，跑
 bazel test //... --config=cpplint              #只跑cpplint检查
 ```
 
-## 内存泄露分析
+## 内存leak检测
 ```
 bazel test --config=unit_test //... #检测到内存泄露单测将失败，并查询详细日志即可
+```
+
+## 内存corruption
+```
 bazel test --config=sanitize //...
 ```
 
-## cpu能分析
+## cpu性能和内存分析
 ```
 go install github.com/google/pprof@latest
 bazel test --test_env="CPUPROFILE=prof.out" --test_env=HEAPCHECK=normal --test_env=PPROF_PATH=/root/src/bin/pprof //src/common:host_spec_test #需使用test --spawn_strategy=standalone
