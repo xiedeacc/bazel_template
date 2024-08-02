@@ -77,8 +77,6 @@ cc_binary(
 
 #include <assert.h>
 
-#include <string>
-
 namespace testing {
 void InitGoogleTest(int* argc, char** argv);
 }

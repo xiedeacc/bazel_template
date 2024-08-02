@@ -4,6 +4,8 @@ load("//bazel:swig_java.bzl", "java_wrap_cc")
 
 package(default_visibility = ["//visibility:public"])
 
+exports_files(["CPPLINT.cfg"])
+
 config_setting(
     name = "on_linux",
     constraint_values = ["@platforms//os:linux"],

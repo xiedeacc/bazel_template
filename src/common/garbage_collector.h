@@ -8,13 +8,12 @@
 
 #include <atomic>
 #include <list>
-#include <map>
-#include <string>
+#include <memory>
 #include <thread>
 #include <vector>
 
+#include "absl/base/internal/spinlock.h"
 #include "folly/Singleton.h"
-#include "src/util/util.h"
 
 namespace bazel_template {
 namespace common {

@@ -7,6 +7,7 @@
 #define BAZEL_TEMPLATE_SERVER_GRPC_HANDLERS_H
 
 #include <future>
+#include <utility>
 
 #include "glog/logging.h"
 #include "google/protobuf/descriptor.h"

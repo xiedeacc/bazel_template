@@ -5,6 +5,8 @@
 
 #include "src/common/host_spec.h"
 
+#include <vector>
+
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"

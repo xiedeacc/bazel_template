@@ -19,7 +19,7 @@ namespace proto_plugin {
 
 class PBCodeGenerator : public google::protobuf::compiler::CodeGenerator {
  public:
-  explicit PBCodeGenerator();
+  PBCodeGenerator();
 
  public:
   bool Generate(const google::protobuf::FileDescriptor* file,

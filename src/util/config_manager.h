@@ -6,10 +6,10 @@
 #ifndef BAZEL_TEMPLATE_UTIL_CONFIG_MANAGER_H
 #define BAZEL_TEMPLATE_UTIL_CONFIG_MANAGER_H
 
+#include <memory>
 #include <string>
 
 #include "folly/Singleton.h"
-#include "folly/init/Init.h"
 #include "src/proto/config.pb.h"
 #include "src/util/util.h"
 
@@ -31,7 +31,7 @@ class ConfigManager {
   std::string ServerAddr();
   uint32_t GrpcServerPort();
   uint32_t HttpServerPort();
-  uint32_t MetricRatio() { return base_config_.metric_ratio(); };
+  uint32_t MetricRatio() { return base_config_.metric_ratio(); }
   uint32_t MetricIntervalSec() { return base_config_.metric_interval_sec(); }
   uint32_t DiscardRatio() { return base_config_.discard_ratio(); }
   uint32_t ThreadPoolSize() { return base_config_.thread_pool_size(); }

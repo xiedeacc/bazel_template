@@ -5,6 +5,7 @@
  *******************************************************************************/
 
 #include <functional>
+#include <memory>
 #include <shared_mutex>
 #include <string>
 #include <thread>
@@ -49,7 +50,7 @@ class GrpcServer final {
     server_->SetExecutionContext(
         async_grpc::common::make_unique<MathServerContext>());
     server_->Start();
-  };
+  }
 
  public:
   void WaitForShutdown() { server_->WaitForShutdown(); }

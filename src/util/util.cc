@@ -5,21 +5,21 @@
 
 #include "src/util/util.h"
 
+#include <algorithm>
 #include <charconv>
 #include <exception>
 #include <filesystem>
 #include <fstream>
-#include <iomanip>
 #include <random>
 #include <thread>
+#include <utility>
 
 #include "absl/time/clock.h"
-#include "boost/algorithm/string.hpp"
+#include "boost/algorithm/string/predicate.hpp"
+#include "boost/algorithm/string/split.hpp"
 #include "boost/algorithm/string/trim_all.hpp"
-#include "boost/beast/core/detail/base64.hpp"
 #include "boost/iostreams/device/mapped_file.hpp"
 #include "fmt/core.h"
-#include "fmt/format.h"
 #include "glog/logging.h"
 #include "google/protobuf/util/json_util.h"
 #include "openssl/md5.h"
@@ -37,13 +37,12 @@ using absl::Time;
 using absl::TimeZone;
 using google::protobuf::util::JsonParseOptions;
 using google::protobuf::util::JsonPrintOptions;
-using namespace std;
+using std::string;
 
 namespace bazel_template {
 namespace util {
 
 const char *Util::kPathDelimeter = "/";
-const string Util::server_ip = Util::GetServerIp();
 
 string Util::GetServerIp() {
   common::IPAddress ip_address;
@@ -61,9 +60,12 @@ int64_t Util::CurrentTimeMillis() {
 int64_t Util::NanoTime() { return GetCurrentTimeNanos(); }
 
 uint64_t Util::Now() {
-  auto duration_since_epoch = chrono::system_clock::now().time_since_epoch();
+  auto duration_since_epoch =
+      std::chrono::system_clock::now().time_since_epoch();
   auto microseconds_since_epoch =
-      chrono::duration_cast<chrono::microseconds>(duration_since_epoch).count();
+      std::chrono::duration_cast<std::chrono::microseconds>(
+          duration_since_epoch)
+          .count();
   time_t seconds_since_epoch =
       static_cast<time_t>(microseconds_since_epoch / 1000000);  // second
   return seconds_since_epoch;
@@ -92,13 +94,13 @@ string Util::GetTodayString() {
 }
 
 int64_t Util::Random(int64_t start, int64_t end) {
-  static thread_local mt19937 generator(NanoTime());
-  uniform_int_distribution<int64_t> distribution(start, end - 1);
+  static thread_local std::mt19937 generator(NanoTime());
+  std::uniform_int_distribution<int64_t> distribution(start, end - 1);
   return distribution(generator);
 }
 
 void Util::Sleep(int64_t ms) {
-  this_thread::sleep_for(chrono::milliseconds(ms));
+  std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 void Util::SleepUntil(const Time &time) {
@@ -159,7 +161,7 @@ bool Util::Remove(const string &dir, const string &file) {
     if (std::filesystem::exists(path)) {
       return std::filesystem::remove(path);
     }
-  } catch (exception &e) {
+  } catch (std::exception &e) {
     LOG(ERROR) << e.what();
     return false;
   }
@@ -205,7 +207,7 @@ string Util::RealPath(const string &path) {
   return std::filesystem::canonical(path).string();
 }
 
-bool Util::ListDir(const string &path, vector<string> *files,
+bool Util::ListDir(const string &path, std::vector<string> *files,
                    const bool recursive) {
   if (!files) {
     return true;
@@ -228,14 +230,14 @@ bool Util::ListDir(const string &path, vector<string> *files,
         files->emplace_back(it->path().string());
       }
     }
-  } catch (const exception &e) {
+  } catch (const std::exception &e) {
     LOG(ERROR) << e.what();
     return false;
   }
   return true;
 }
 
-bool Util::ListFile(const string &path, vector<string> *files,
+bool Util::ListFile(const string &path, std::vector<string> *files,
                     const bool recursive) {
   if (!files) {
     return true;
@@ -262,14 +264,15 @@ bool Util::ListFile(const string &path, vector<string> *files,
         }
       }
     }
-  } catch (const exception &e) {
+  } catch (const std::exception &e) {
     LOG(ERROR) << e.what();
     return false;
   }
   return true;
 }
 
-bool Util::ListFile(const string &path, vector<std::filesystem::path> *files,
+bool Util::ListFile(const string &path,
+                    std::vector<std::filesystem::path> *files,
                     const std::string &name_pattern,
                     const std::string &ignore_ext, const bool recursive) {
   if (!files) {
@@ -310,7 +313,7 @@ bool Util::ListFile(const string &path, vector<std::filesystem::path> *files,
         }
       }
     }
-  } catch (const exception &e) {
+  } catch (const std::exception &e) {
     LOG(ERROR) << e.what();
     return false;
   }
@@ -365,10 +368,8 @@ bool Util::WriteToFile(const string &dir, const string &file,
     if (ofs.is_open()) {
       ofs << content;
       ofs.close();
-    } else {
     }
-
-  } catch (exception &e) {
+  } catch (std::exception &e) {
     LOG(ERROR) << path.string() << " " << e.what();
     return false;
   }
@@ -393,33 +394,33 @@ std::istream &Util::GetLine(std::istream &is, std::string *line) {
         if (line->empty()) is.setstate(std::ios::eofbit);
         return is;
       default:
-        line->push_back((char)c);
+        line->push_back(static_cast<char>(c));
     }
   }
 }
 
 string Util::LoadContent(const string &file_name) {
-  ifstream in(file_name);
+  std::ifstream in(file_name);
   if (!in || !in.is_open()) {
     LOG(ERROR) << "Fail to open " << file_name;
     return "";
   }
-  stringstream buffer;
+  std::stringstream buffer;
   buffer << in.rdbuf();
   in.close();
   return buffer.str();
 }
 
-vector<string> Util::LoadLines(const string &file_name) {
-  ifstream in(file_name);
+std::vector<string> Util::LoadLines(const string &file_name) {
+  std::ifstream in(file_name);
   if (!in) {
     LOG(ERROR) << "Fail to open " << file_name;
-    return vector<string>();
+    return std::vector<string>();
   }
-  vector<string> ret;
+  std::vector<string> ret;
   string line;
   while (getline(in, line)) {
-    Util::Trim(line);
+    Util::Trim(&line);
     if (line.empty()) {
       continue;
     }
@@ -436,9 +437,9 @@ string Util::FileMd5(const string &file_path) {
   unsigned char result[MD5_DIGEST_LENGTH];
   boost::iostreams::mapped_file_source src(file_path);
   MD5((unsigned char *)src.data(), src.size(), result);
-  ostringstream sout;
-  sout << hex << setfill('0');
-  for (auto c : result) sout << setw(2) << (int)c;
+  std::ostringstream sout;
+  sout << std::hex << std::setfill('0');
+  for (auto c : result) sout << std::setw(2) << static_cast<int>(c);
 
   return sout.str();
 }
@@ -461,9 +462,9 @@ void Util::ToLower(string *str) {
   transform(str->begin(), str->end(), str->begin(), ::tolower);
 }
 
-void Util::Trim(string &str) {
-  boost::algorithm::trim_right(str);
-  boost::algorithm::trim_left(str);
+void Util::Trim(string *str) {
+  boost::algorithm::trim_right(*str);
+  boost::algorithm::trim_left(*str);
 }
 
 string Util::Trim(const string &str) {
@@ -489,45 +490,45 @@ bool Util::EndWith(const string &str, const string &postfix) {
   return boost::ends_with(str, postfix);
 }
 
-void Util::ReplaceAll(string &s, const string &from, const string &to) {
-  boost::algorithm::replace_all(s, from, to);
+void Util::ReplaceAll(string *s, const string &from, const string &to) {
+  boost::algorithm::replace_all(*s, from, to);
 }
 
-void Util::ReplaceAll(string &s, const string &from, const char *const to) {
-  boost::algorithm::replace_all(s, from, to);
+void Util::ReplaceAll(string *s, const string &from, const char *const to) {
+  boost::algorithm::replace_all(*s, from, to);
 }
 
-void Util::Split(const string &str, const string &delim, vector<string> &result,
-                 bool trim_empty) {
-  result.clear();
+void Util::Split(const string &str, const string &delim,
+                 std::vector<string> *result, bool trim_empty) {
+  result->clear();
   if (str.empty()) {
     return;
   }
   if (trim_empty) {
     string trimed_str = boost::algorithm::trim_all_copy(str);
-    boost::split(result, trimed_str, boost::is_any_of(delim));
+    boost::split(*result, trimed_str, boost::is_any_of(delim));
     return;
   }
-  boost::split(result, str, boost::is_any_of(delim));
+  boost::split(*result, str, boost::is_any_of(delim));
 }
 
-string Util::ToString(const set<uint64_t> &ids) {
+string Util::ToString(const std::set<uint64_t> &ids) {
   string ret;
   ret.resize(512);
   bool first = true;
   for (auto id : ids) {
     if (first) {
       first = false;
-      ret.append(to_string(id));
+      ret.append(std::to_string(id));
       continue;
     }
     ret.append(",");
-    ret.append(to_string(id));
+    ret.append(std::to_string(id));
   }
   return ret;
 }
 
-std::string Util::ToString(const map<string, string> &vars) {
+std::string Util::ToString(const std::map<string, string> &vars) {
   string ret;
   ret.resize(512);
   bool first = true;

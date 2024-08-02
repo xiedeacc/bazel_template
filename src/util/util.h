@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "absl/time/time.h"
-#include "boost/algorithm/string.hpp"
+#include "boost/algorithm/string/replace.hpp"
 #include "google/protobuf/message.h"
 
 namespace bazel_template {
@@ -111,7 +111,7 @@ class Util final {
 
   static void ToLower(std::string *str);
 
-  static void Trim(std::string &s);
+  static void Trim(std::string *s);
 
   static std::string Trim(const std::string &s);
 
@@ -122,19 +122,19 @@ class Util final {
   static bool EndWith(const std::string &str, const std::string &postfix);
 
   template <class TypeName>
-  static void ReplaceAll(std::string &s, const std::string &from,
+  static void ReplaceAll(std::string *s, const std::string &from,
                          const TypeName &to) {
-    boost::algorithm::replace_all(s, from, std::to_string(to));
+    boost::algorithm::replace_all(*s, from, std::to_string(to));
   }
 
-  static void ReplaceAll(std::string &s, const std::string &from,
+  static void ReplaceAll(std::string *s, const std::string &from,
                          const std::string &to);
 
-  static void ReplaceAll(std::string &s, const std::string &from,
+  static void ReplaceAll(std::string *s, const std::string &from,
                          const char *const to);
 
   static void Split(const std::string &str, const std::string &delim,
-                    std::vector<std::string> &result, bool trim_empty = true);
+                    std::vector<std::string> *result, bool trim_empty = true);
 
   static std::string ToString(const std::set<uint64_t> &ids);
 
@@ -243,7 +243,6 @@ class Util final {
 
  public:
   static const char *kPathDelimeter;
-  static const std::string server_ip;
 };
 
 }  // namespace util

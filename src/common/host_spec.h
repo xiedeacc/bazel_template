@@ -6,6 +6,8 @@
 #ifndef BAZEL_TEMPLATE_COMMON_HOST_SPEC_H
 #define BAZEL_TEMPLATE_COMMON_HOST_SPEC_H
 
+#include <string>
+
 #include "src/common/ip_address.h"
 
 namespace bazel_template {
