@@ -3,29 +3,19 @@
 # todo
 5. 代码风格检查，cpu性能分析，内存泄漏检查, gperftools + asnr, 单测覆盖度分析
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
-7. 文档
 
 # future todo:
 1. import virtual include like boost
 2. use baze aspect find the most possible relative search path
-3. module map, -compiler_param_file, -layering_check
-4. aspect用法
-5. transitive用法
-6. include what you want
-7. renovate.json
-8. fizz lack of aegis, liboqs
-
+3. 集成clang-tidy, clang-check, clang static analyzer
+4. module map, -compiler_param_file, -layering_check
+5. aspect用法
+6. transitive用法
+7. include what you want
+8. renovate.json
+9. fizz lack of aegis, liboqs
 
 # usage
-
-## 指定toolchain
-```
-bazel build \
-  --platforms=@toolchains_llvm//platforms:linux-x86_64 \
-  --extra_execution_platforms=@toolchains_llvm//platforms:linux-x86_64 \
-  --extra_toolchains=@llvm_toolchain_linux_exec//:cc-toolchain-x86_64-linux \
-  //...
-```
 
 ## 生成compile_commands.json
 ```
@@ -36,8 +26,8 @@ clear && bazel run @hedron_compile_commands//:refresh_all
 ```
 bazel test //... --test_tag_filters=cpplint    #只跑cpplint检查
 bazel test //... --test_tag_filters=-cpplint   #不跑cpplint检查
-bazel test //... --test_tag_filters=unit_test  #只跑单测
-bazel test --config=unit_test //...  #根据.bazelrc配置文件，跑单测和内存泄露检查，不跑cpplint检查
+bazel test //... --config=unit_test            #根据.bazelrc配置文件，跑单测和内存泄露检查，不跑cpplint检查
+bazel test //... --config=cpplint              #只跑cpplint检查
 ```
 
 ## 覆盖率分析
@@ -98,6 +88,15 @@ cat /proc/self/stack
 cat /proc/21880/stack
 strace -Ff -tt -p 56509 2>&1 | tee strace.log
 pstack 56509
+```
+
+## 指定toolchain
+```
+bazel build \
+  --platforms=@toolchains_llvm//platforms:linux-x86_64 \
+  --extra_execution_platforms=@toolchains_llvm//platforms:linux-x86_64 \
+  --extra_toolchains=@llvm_toolchain_linux_exec//:cc-toolchain-x86_64-linux \
+  //...
 ```
 
 # 一些常见和编译相关命令
