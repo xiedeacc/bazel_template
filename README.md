@@ -1,14 +1,11 @@
-TODO
-0. GitManger need handle submodule problem and hiden ref problem
+# TODO
 5. 代码风格检查，cpu性能分析，内存泄漏检查, gperftools + asnr, 单测覆盖度分析
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
 7. 文档
-8. git sync use bare repo
 
-future todo:
-1. 学习boost的virtual include
-1. use baze aspect find the most possible relative search path
-2. curl缺少quic + ngquic
+# future todo:
+1. import virtual include like boost
+2. use baze aspect find the most possible relative search path
 3. module map, -compiler_param_file, -layering_check
 4. aspect用法
 5. transitive用法
@@ -16,32 +13,34 @@ future todo:
 7. renovate.json
 8. fizz lack of aegis, liboqs
 
+
+# usage
+
+## 单测与代码风格
 ```
-/usr/local/llvm-18/bin/clang++ -E -x c++ - -v < /dev/null
-
-bazel build \
-  --platforms=@toolchains_llvm//platforms:linux-x86_64 \
-  --extra_execution_platforms=@toolchains_llvm//platforms:linux-x86_64 \
-  --extra_toolchains=@llvm_toolchain_linux_exec//:cc-toolchain-x86_64-linux \
-  //...
-
-3.2 单测与代码格式
 bazel test //... --test_tag_filters=cpplint    #只跑cpplint检查
 bazel test //... --test_tag_filters=-cpplint   #不跑cpplint检查
 bazel test //... --test_tag_filters=unit_test  #只跑单测
 bazel test --config=unit_test //...  #根据.bazelrc配置文件，跑单测和内存泄露检查，不跑cpplint检查
 
-3.3 覆盖率分析
+```
+
+## 覆盖率分析
+```
 bazel coverage //... --test_tag_filters=-cpplint
 genhtml bazel-out/_coverage/_coverage_report.dat -o test_coverage
 genhtml --ignore-errors source bazel-out/_coverage/_coverage_report.dat -o test_coverage
+```
 
-3.4 内存泄露分析
+## 内存泄露分析
+```
 bazel test --config=unit_test //... #检测到内存泄露单测将失败，并查询详细日志即可
 bazel test --test_env=HEAPCHECK=normal //...
 bazel test --test_env=HEAPCHECK=normal --test_env=PPROF_PATH=/usr/local/bin/pprof //... #同时内存泄露检查和性能分析
+```
 
-3.5 cpu和内存性能分析
+## cpu和内存性能分析
+```
 go install github.com/google/pprof@latest
 bazel test --test_env="CPUPROFILE=prof.out" //src/common:barrier_test #需使用test --spawn_strategy=standalone
 
@@ -66,23 +65,39 @@ https://gperftools.github.io/gperftools/heapprofile.html
 https://gperftools.github.io/gperftools/cpuprofile.html
 https://gperftools.github.io/gperftools/heap_checker.html
 https://gperftools.github.io/gperftools/tcmalloc.html
+```
 
-3.6 依赖图等查询
+## 依赖图等查询
+```
 bazel query --notool_deps --noimplicit_deps "deps(//main:hello-world)" --output graph
 bazel query 'attr(visibility, "//visibility:public", //:*)'
 bazel query "deps(//src/context:process_context)"
 bazel query 'deps(//:main)' --output graph > graph.in
 bazel query --noimplicit_deps 'deps(//:main)' --output graph > simplified_graph.in
 dot -Tpng < graph.in > graph.png
+```
 
-3.7 系统调用分析
+## 系统调用分析
+```
 cat /proc/self/stack
 cat /proc/21880/stack
 strace -Ff -tt -p 56509 2>&1 | tee strace.log
 pstack 56509
 ```
 
+## 指定toolchain
 ```
+bazel build \
+  --platforms=@toolchains_llvm//platforms:linux-x86_64 \
+  --extra_execution_platforms=@toolchains_llvm//platforms:linux-x86_64 \
+  --extra_toolchains=@llvm_toolchain_linux_exec//:cc-toolchain-x86_64-linux \
+  //...
+```
+
+
+# 一些常见软件编译参数
+```
+/usr/local/llvm-18/bin/clang++ -E -x c++ - -v < /dev/null
 openssl
 LDFLAGS="-Wl,-rpath,/usr/local/lib64" ./Configure enable-brotli enable-egd enable-tfo enable-thread-pool enable-default-thread-pool enable-zlib enable-zstd
 ./Configure enable-brotli enable-egd enable-tfo enable-thread-pool enable-default-thread-pool enable-zlib enable-zstd --libdir=lib
