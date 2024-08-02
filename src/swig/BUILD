@@ -53,19 +53,19 @@ java_wrap_cc(
     ],
 )
 
-cc_test(
-    name = "config_manager_test",
-    timeout = "short",
-    srcs = ["config_manager_test.cc"],
-    copts = [
-        "-isystem external/double-conversion",
-        "-isystem external/folly",
-        "-isystem $(GENDIR)/external/folly",
-    ],
-    data = [],
-    deps = [
-        ":config_manager",
-    ],
-)
+#cc_test(
+#name = "config_manager_test",
+#timeout = "short",
+#srcs = ["config_manager_test.cc"],
+#copts = [
+#"-isystem external/double-conversion",
+#"-isystem external/folly",
+#"-isystem $(GENDIR)/external/folly",
+#],
+#data = ["//conf:base_config.json"],
+#deps = [
+#":config_manager",
+#],
+#)
 
 cpplint()

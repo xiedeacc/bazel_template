@@ -5,7 +5,6 @@
 
 #include "src/server/version_info.h"
 
-#include <iostream>
 #include <string>
 
 #include "glog/logging.h"

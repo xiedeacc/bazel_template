@@ -39,4 +39,15 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "util_test",
+    timeout = "short",
+    srcs = [
+        "util_test.cc",
+    ],
+    deps = [
+        ":util",
+    ],
+)
+
 cpplint()
