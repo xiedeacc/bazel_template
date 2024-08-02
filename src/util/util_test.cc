@@ -1,0 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2024  xiedeacc.com.
+ * All rights reserved.
+ *******************************************************************************/
+
+#include "glog//logging.h"
+#include "gtest/gtest.h"
+
+namespace bazel_template {
+namespace util {
+
+TEST(Util, MemLeak) {
+  char* arr = new char[8];
+  strcpy(arr, "test");
+  LOG(INFO) << arr;
+}
+
+}  // namespace util
+}  // namespace bazel_template
