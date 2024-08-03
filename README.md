@@ -1,8 +1,6 @@
 # features
 
 # todo
-
-5. cpu性能分析
 1. fix bazel test --config=sanitize //... core
 0. fix //src/swig:config_manager_test core
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
@@ -45,14 +43,9 @@ bazel test --config=sanitize //...
 ## cpu性能和内存分析
 ```
 go install github.com/google/pprof@latest
-bazel test --test_env="CPUPROFILE=prof.out" --test_env=HEAPCHECK=normal --test_env=PPROF_PATH=/root/src/bin/pprof //src/common:host_spec_test #需使用test --spawn_strategy=standalone
+bazel test --test_env="CPUPROFILE=prof.out" --test_env=HEAPCHECK=normal //src/common:host_spec_test #prof.out在bazel构建根目录下
 CPUPROFILE=prof.out bazel-bin/src/common/host_spec_test
-
-需要调用的是HeapProfilerStart和HeapProfilerStop
-env HEAPPROFILE=heap.out bazel-bin/src/common/host_spec_test
-
-CPUPROFILE=prof.out LD_PRELOAD=/usr/local/lib/libtcmalloc_and_profiler.a bazel-bin/src/common/host_spec_test
-HEAPPROFILE=heap.out LD_PRELOAD=/usr/local/lib/libtcmalloc_and_profiler.a bazel-bin/src/common/host_spec_test
+HEAPPROFILE=heap.out bazel-bin/src/common/host_spec_test
 
 pprof --web bazel-bin/src/common/host_spec_test prof.out
 pprof --text ./bazel-bin/src/common/host_spec_test prof.out

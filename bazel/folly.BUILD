@@ -255,7 +255,7 @@ cc_library(
         "@com_google_googletest//:gtest",
         "@double-conversion//:double-conversion",
         "@fmt",
-        "@jemalloc",
+        #"@jemalloc",
         "@libaio//:aio",
         "@libdwarf//:dwarf",
         "@libevent//:event",

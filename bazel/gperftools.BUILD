@@ -26,22 +26,6 @@ platform(
     ],
 )
 
-COPTS = [
-    "-isystem external/libunwind/include",
-    "-isystem $(BINDIR)/external/gperftools",
-    "-isystem $(BINDIR)/external/gperftools/src",
-    "-Iexternal/gperftools/src",
-    "-Iexternal/gperftools/benchmark",
-    "-Wall",
-    "-Wwrite-strings",
-    "-Woverloaded-virtual",
-    "-Wno-sign-compare",
-    "-fsized-deallocation",
-    "-fno-omit-frame-pointer",
-    "-momit-leaf-frame-pointer",
-    "-pthread",
-]
-
 genrule(
     name = "config_h_in",
     outs = ["src/config.h.in"],
@@ -335,7 +319,7 @@ template_rule(
             "#undef HAVE_GETEUID": "#define HAVE_GETEUID 1",
             "#undef HAVE_GLOB_H": "#define HAVE_GLOB_H 1",
             "#undef HAVE_INTTYPES_H": "#define HAVE_INTTYPES_H 1",
-            "#undef HAVE_LIBUNWIND_H": "/* #undef HAVE_LIBUNWIND_H */",
+            "#undef HAVE_LIBUNWIND_H": "#define HAVE_LIBUNWIND_H 1",
             "#undef HAVE_LINUX_SIGEV_THREAD_ID": "#define HAVE_LINUX_SIGEV_THREAD_ID 1",
             "#undef HAVE_MALLOC_H": "#define HAVE_MALLOC_H 1",
             "#undef HAVE_MMAP": "#define HAVE_MMAP 1",
@@ -363,7 +347,7 @@ template_rule(
             "#undef HAVE___ATTRIBUTE__\n": "#define HAVE___ATTRIBUTE__ 1\n",
             "#undef HAVE___ATTRIBUTE__ALIGNED_FN": "#define HAVE___ATTRIBUTE__ALIGNED_FN 1",
             "#undef LT_OBJDIR": "#define LT_OBJDIR \".libs/\"",
-            "#undef PACKAGE": "#define PACKAGE \"gperftools\"",
+            "#undef PACKAGE\n": "#define PACKAGE \"gperftools\"\n",
             "#undef PACKAGE_BUGREPORT": "#define PACKAGE_BUGREPORT \"gperftools@googlegroups.com\"",
             "#undef PACKAGE_NAME": "#define PACKAGE_NAME \"gperftools\"",
             "#undef PACKAGE_STRING": "#define PACKAGE_STRING \"gperftools 2.15\"",
@@ -376,7 +360,7 @@ template_rule(
             "#undef STDC_HEADERS": "#define STDC_HEADERS 1",
             "#undef TCMALLOC_ALIGN_8BYTES": "/* #undef TCMALLOC_ALIGN_8BYTES */",
             "#undef TCMALLOC_PAGE_SIZE_SHIFT": "/* #undef TCMALLOC_PAGE_SIZE_SHIFT */",
-            "#undef USE_LIBUNWIND": "/* #undef USE_LIBUNWIND */",
+            "#undef USE_LIBUNWIND": "#define USE_LIBUNWIND 1",
             "#undef VERSION": "#define VERSION \"2.15\"",
             "#ifndef __STDC_FORMAT_MACROS": "#ifndef __STDC_FORMAT_MACROS",
             "# define __STDC_FORMAT_MACROS 1": "# define __STDC_FORMAT_MACROS 1",
@@ -568,6 +552,30 @@ genrule(
     ]),
 )
 
+COPTS = [
+    "-isystem external/libunwind/include",
+    "-isystem $(BINDIR)/external/gperftools",
+    "-isystem $(BINDIR)/external/gperftools/src",
+    "-Iexternal/gperftools/src",
+    "-Iexternal/gperftools/benchmark",
+    "-Wall",
+    "-Wwrite-strings",
+    "-Woverloaded-virtual",
+    "-Wno-sign-compare",
+    "-fsized-deallocation",
+    "-fno-omit-frame-pointer",
+    "-momit-leaf-frame-pointer",
+    "-pthread",
+]
+
+LINKOPTS = [
+    "-fsized-deallocation",
+    "-fno-omit-frame-pointer",
+    "-momit-leaf-frame-pointer",
+    "-pthread",
+    "-lpthread",
+]
+
 cc_library(
     name = "tcmalloc_and_profiler",
     srcs = [
@@ -585,6 +593,7 @@ cc_library(
         "src/profiler.cc",
         "src/stacktrace.cc",
     ] + [
+        "src/base/linuxthreads.cc",
         "src/base/low_level_alloc.cc",
         "src/central_freelist.cc",
         "src/common.cc",
@@ -621,6 +630,7 @@ cc_library(
         ":config_h",
     ],
     copts = COPTS,
+    linkopts = LINKOPTS,
     local_defines = [
         "ENABLE_EMERGENCY_MALLOC",
         "HAVE_CONFIG_H",
@@ -630,6 +640,7 @@ cc_library(
     deps = [
         "@libunwind//:unwind-all",
     ],
+    alwayslink = True,
 )
 
 cc_library(
@@ -686,6 +697,7 @@ cc_library(
         ":config_h",
     ],
     copts = COPTS,
+    linkopts = LINKOPTS,
     local_defines = [
         "HAVE_CONFIG_H",
         "ENABLE_EMERGENCY_MALLOC",
@@ -695,6 +707,7 @@ cc_library(
     deps = [
         "@libunwind//:unwind-all",
     ],
+    alwayslink = True,
 )
 
 cc_library(
