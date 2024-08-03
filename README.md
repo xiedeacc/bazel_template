@@ -1,7 +1,6 @@
 # features
 
 # todo
-1. fix bazel test --config=sanitize //... core
 0. fix //src/swig:config_manager_test core
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
 

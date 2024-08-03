@@ -39,14 +39,13 @@ class ConfigManager {
   std::string ToString() {
     std::string json;
     Util::PrintProtoMessage(base_config_, &json);
+    LOG(INFO) << "XXX: " << json;
     return json;
   }
 
  private:
   bazel_template::proto::BaseConfig base_config_;
 };
-
-static folly::Singleton<ConfigManager> config_manager;
 
 }  // namespace util
 }  // namespace bazel_template
