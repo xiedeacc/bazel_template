@@ -2,7 +2,7 @@ test:cpplint --test_tag_filters=cpplint
 test:cpplint --build_tests_only
 test:unit_test --test_tag_filters=-cpplint
 test:unit_test --test_env HEAPCHECK=normal
-test:unit_test --test_env CPUPROFILE=pprof.out #pprof.out generated in bazel test sandbox
+test:unit_test --test_env CPUPROFILE=pprof.out # pprof.out generated in bazel test sandbox
 test:unit_test --test_env=PPROF_PATH=/usr/local/bin/pprof # need install gperftools first
 #test:unit_test --test_env MALLOC_CONF="prof:true,prof_active:true,lg_prof_interval:20,lg_prof_sample:17"
 
