@@ -3,8 +3,10 @@ test:cpplint --build_tests_only
 test:unit_test --test_tag_filters=-cpplint
 test:unit_test --test_env HEAPCHECK=normal
 #test:unit_test --test_env MALLOC_CONF="prof:true,prof_active:true,lg_prof_interval:20,lg_prof_sample:17"
-test:sanitize --copt='-fsanitize=address'
+
+test:sanitize --copt='-fsanitize=address' # need comment @gperftools//:tcmalloc_and_profiler in bazel/build.bzl
 test:sanitize --linkopt='-fsanitize=address'
+test:sanitize --linkopt='-static-libasan'
 test:sanitize --copt='-g'
 test:sanitize --test_tag_filters=-cpplint
 #test:sanitize --copt='-O0'

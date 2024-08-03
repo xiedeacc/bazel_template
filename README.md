@@ -100,6 +100,8 @@ bazel build \
 # 一些常见和编译相关命令
 
 ```
+https://wizardforcel.gitbooks.io/100-gcc-tips/content/index.html
+
 /usr/local/llvm-18/bin/clang++ -E -x c++ - -v < /dev/null
 echo "" | gcc -v -E -
 
