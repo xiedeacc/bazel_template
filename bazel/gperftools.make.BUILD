@@ -16,9 +16,12 @@ config_setting(
 
 configure_make(
     name = "gperftools_build",
-    args = ["-j6"],
+    args = ["-j"],
+    autogen = True,
+    configure_in_place = True,
     configure_options = [
-        "--enable-shared=no",
+        "--enable-shared=yes",
+        "--enable-static=no",
         "--enable-frame-pointers",
     ],
     copts = [
@@ -26,11 +29,19 @@ configure_make(
     ],
     lib_source = ":all",
     linkopts = [],
-    out_static_libs = select({
-        ":debug_tcmalloc": ["libtcmalloc_debug.a"],
-        "//conditions:default": ["libtcmalloc_and_profiler.a"],
-    }),
+    out_shared_libs = [
+        "libtcmalloc_and_profiler.so",
+        "libtcmalloc_and_profiler.so.4",
+        "libtcmalloc_and_profiler.so.4.6.11",
+    ],
+    #out_static_libs = select({
+    #":debug_tcmalloc": ["libtcmalloc_debug.a"],
+    #"//conditions:default": ["libtcmalloc_and_profiler.a"],
+    #}),
     tags = ["skip_on_windows"],
+    targets = [
+        "install",
+    ],
     deps = [
         "@libunwind//:unwind",
     ],

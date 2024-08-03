@@ -39,7 +39,6 @@ class ConfigManager {
   std::string ToString() {
     std::string json;
     Util::PrintProtoMessage(base_config_, &json);
-    LOG(INFO) << "XXX: " << json;
     return json;
   }
 

@@ -40,7 +40,6 @@ bazel test --config=sanitize //...
 
 ## cpu性能和内存分析
 ```
-go install github.com/google/pprof@latest
 bazel test --test_env="CPUPROFILE=prof.out" --test_env=HEAPCHECK=normal //src/common:host_spec_test #prof.out在bazel构建根目录下
 CPUPROFILE=prof.out bazel-bin/src/common/host_spec_test
 HEAPPROFILE=heap.out bazel-bin/src/common/host_spec_test
