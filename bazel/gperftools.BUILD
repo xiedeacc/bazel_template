@@ -553,7 +553,6 @@ genrule(
 )
 
 COPTS = [
-    "-isystem external/libunwind/include",
     "-isystem $(BINDIR)/external/gperftools",
     "-isystem $(BINDIR)/external/gperftools/src",
     "-Iexternal/gperftools/src",
@@ -566,6 +565,9 @@ COPTS = [
     "-fno-omit-frame-pointer",
     "-momit-leaf-frame-pointer",
     "-pthread",
+    "-fPIC",
+    "-isystem external/libunwind/include",
+    "-isystem $(GENDIR)/external/libunwind/include",
 ]
 
 LINKOPTS = [
@@ -638,7 +640,7 @@ cc_library(
         "FORCED_FRAME_POINTERS",
     ],
     deps = [
-        "@libunwind//:unwind-all",
+        "@libunwind//:unwind",
     ],
     alwayslink = True,
 )
@@ -705,7 +707,7 @@ cc_library(
         "FORCED_FRAME_POINTERS",
     ],
     deps = [
-        "@libunwind//:unwind-all",
+        "@libunwind//:unwind",
     ],
     alwayslink = True,
 )

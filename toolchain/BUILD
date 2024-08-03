@@ -6,6 +6,14 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(name = "empty")
 
+#filegroup(
+#name = "clang_linux_x86_64",
+#srcs = glob(
+#["/usr/local/llvm/18/**"],
+#allow_empty = True,
+#),
+#)
+
 ######### clang_linux_x86_64 #########
 toolchain(
     name = "clang_toolchain_for_linux_x86_64",
@@ -41,7 +49,7 @@ clang_linux_x86_64_cc_toolchain_config(
     abi_libc_version = "local",
     abi_version = "local",
     compile_flags = [
-        "-v",
+        #"-v",
         "-fstack-protector",
         "-Wall",
         "-Wunused-but-set-parameter",
@@ -50,7 +58,13 @@ clang_linux_x86_64_cc_toolchain_config(
         "-stdlib=libc++",
     ],
     compiler = "clang",
-    conly_flags = [],
+    conly_flags = [
+        #"-std=c11",
+        "-isystem /usr/include",
+        "-isystem /usr/include/x86_64-linux-gnu",
+        "-isystem {}/lib/clang/18/include".format(clang_linux_x86_64_toolchain_root),
+        "-isystem /usr/local/include",
+    ],
     coverage_compile_flags = ["--coverage"],
     coverage_link_flags = ["--coverage"],
     cpu = "k8",
@@ -62,15 +76,19 @@ clang_linux_x86_64_cc_toolchain_config(
         "/usr/include/x86_64-linux-gnu",
         "/usr/include",
     ],
-    cxx_flags = ["-std=c++17"],
+    cxx_flags = [
+        "-std=c++17",
+        "-stdlib=libc++",
+    ],
     dbg_compile_flags = ["-g"],
     host_system_name = "local",
     link_flags = [
+        "-v",
         "-fuse-ld=lld",
         "-B{}/bin".format(clang_linux_x86_64_toolchain_root),
-        "-L{}/lib".format(clang_linux_x86_64_toolchain_root),
-        "-L{}/lib/x86_64-unknown-linux-gnu".format(clang_linux_x86_64_toolchain_root),
-        "-L{}/lib/clang/18/lib/x86_64-unknown-linux-gnu".format(clang_linux_x86_64_toolchain_root),
+        #"-L{}/lib".format(clang_linux_x86_64_toolchain_root),
+        #"-L{}/lib/x86_64-unknown-linux-gnu".format(clang_linux_x86_64_toolchain_root),
+        #"-L{}/lib/clang/18/lib/x86_64-unknown-linux-gnu".format(clang_linux_x86_64_toolchain_root),
         "-Wl,-rpath={}/lib".format(clang_linux_x86_64_toolchain_root),
         "-Wl,-rpath={}/lib/x86_64-unknown-linux-gnu".format(clang_linux_x86_64_toolchain_root),
         "-Wl,-rpath={}/lib/clang/18/lib/x86_64-unknown-linux-gnu".format(clang_linux_x86_64_toolchain_root),
@@ -107,6 +125,7 @@ clang_linux_x86_64_cc_toolchain_config(
         "llvm-profdata": "{}/bin/llvm-profdata".format(clang_linux_x86_64_toolchain_root),
         "cpp": "{}/bin/clang++".format(clang_linux_x86_64_toolchain_root),
         "clang++": "{}/bin/clang++".format(clang_linux_x86_64_toolchain_root),
+        "g++": "{}/bin/clang++".format(clang_linux_x86_64_toolchain_root),
         "gcc": "{}/bin/clang".format(clang_linux_x86_64_toolchain_root),
         "clang": "{}/bin/clang".format(clang_linux_x86_64_toolchain_root),
         "dwp": "{}/bin/llvm-dwp".format(clang_linux_x86_64_toolchain_root),

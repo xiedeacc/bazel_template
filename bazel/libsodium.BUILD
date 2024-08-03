@@ -1,6 +1,6 @@
-package(default_visibility = ["//visibility:public"])
-
 load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
+
+package(default_visibility = ["//visibility:public"])
 
 config_setting(
     name = "windows",
@@ -26,7 +26,6 @@ template_rule(
 COMMON_COTPS = [
     "-g3",
     "-pthread",
-    "-fvisibility=hidden",
     "-fno-strict-aliasing",
     "-fno-strict-overflow",
     "-fstack-protector",

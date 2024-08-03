@@ -263,7 +263,7 @@ cc_library(
         "@libevent//:event_pthreads",
         "@libiberty//:iberty",
         "@libsodium//:sodium",
-        "@libunwind//:unwind-all",
+        "@libunwind//:unwind",
         "@liburing//:liburing-ffi",
         "@openssl//:ssl",
         "@xz",

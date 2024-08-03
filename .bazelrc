@@ -31,6 +31,8 @@ build --workspace_status_command=bazel/workspace_status.sh
 #build --host_features=-compiler_param_file
 #build --host_features=-layering_check
 build --announce_rc
+build -c opt
+#build --conlyopt='-std=c99'
 build --copt='-g'
 build --copt='-O2'
 build --copt='-Wall'

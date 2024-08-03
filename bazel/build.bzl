@@ -6,7 +6,7 @@ def cc_test(
     test_deps = [
         #"@gperftools//:tcmalloc_and_profiler",
         "@gperftools",
-        "@libunwind//:unwind-all",
+        "@libunwind//:unwind",
         "@com_google_googletest//:gtest",
     ]
 

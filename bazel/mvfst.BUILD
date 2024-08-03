@@ -32,6 +32,8 @@ cc_library(
             "quic/**/*.cpp",
         ],
         exclude = [
+            "quic/common/events/LibevQuicEventBase.cpp",
+            "quic/common/udpsocket/LibevQuicAsyncUDPSocket.cpp",
             "quic/api/QuicBatchWriterFactoryMobile.cpp",
             "quic/server/QuicServerBackendIoUring.cpp",
             "quic/server/QuicServerBackend.cpp",

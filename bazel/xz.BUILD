@@ -1,5 +1,5 @@
-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -90,7 +90,6 @@ cc_library(
         ],
         "//conditions:default": [],
     }) + [
-        "src/liblzma/common/memcmplen.h",
         "src/common/mythread.h",
         "src/common/sysdefs.h",
         "src/common/tuklib_common.h",
@@ -138,6 +137,7 @@ cc_library(
         "src/liblzma/common/index_decoder.h",
         "src/liblzma/common/index_encoder.h",
         "src/liblzma/common/lzip_decoder.h",
+        "src/liblzma/common/memcmplen.h",
         "src/liblzma/common/outqueue.h",
         "src/liblzma/common/stream_decoder.h",
         "src/liblzma/common/stream_flags_common.h",
@@ -174,7 +174,6 @@ cc_library(
             "-std=gnu11",
             "-g",
             "-O3",
-            "-fvisibility=hidden",
             "-Iexternal/xz/src/common",
             "-Iexternal/xz/src/liblzma/api",
             "-Iexternal/xz/src/liblzma/check",
@@ -253,6 +252,7 @@ cc_library(
         "_GNU_SOURCE",
     ],
     visibility = ["//visibility:public"],
+    alwayslink = True,
 )
 
 cc_binary(

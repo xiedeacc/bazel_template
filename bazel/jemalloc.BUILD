@@ -649,7 +649,6 @@ cc_library(
         "-Wall",
         "-Wextra",
         "-g3",
-        "-fvisibility=hidden",
         "-Wimplicit-fallthrough",
         "-Wdeprecated-declarations",
         "-O3",

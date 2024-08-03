@@ -4,6 +4,7 @@
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
 
 # future todo:
+0. link with jemalloc and tcmalloc static will cause core, why?
 1. import virtual include like boost
 2. use baze aspect find the most possible relative search path
 3. 集成clang-tidy, clang-check, clang static analyzer

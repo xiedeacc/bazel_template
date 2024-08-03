@@ -555,7 +555,7 @@ new_git_repository(
     #build_file = "//bazel:gperftools.BUILD",
     build_file = "//bazel:gperftools.make.BUILD",
     #commit = "285908e8c7cfa98659127a23532c060f8dcbd148",
-    recursive_init_submodules = True,
+    #recursive_init_submodules = True,
     remote = "git@code.xiamu.com:gperftools/gperftools.git",
     repo_mapping = {
         "@abseil-cpp": "@com_google_absl",

@@ -15,7 +15,8 @@ configure_make_variant(
     #autogen = True,
     configure_in_place = True,
     configure_options = [
-        "--disable-static --enable-shared",
+        "--disable-static",
+        "--enable-shared",
     ] + select({
         "@platforms//cpu:aarch64": ["--host=aarch64-unknown-linux-gnu"],
         "//conditions:default": [],

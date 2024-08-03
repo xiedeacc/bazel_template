@@ -21,6 +21,7 @@ config_setting(
 COPTS = [
     "-g",
     "-O3",
+    "-fPIC",
     "-fexceptions",
     "-Wall",
     "-Wsign-compare",
@@ -441,7 +442,6 @@ cc_library(
         ":tdep_libunwind_i_h",
         "include/tdep/jmpbuf.h",
         "src/elf64.h",
-        "src/elfxx.c",
         "src/elfxx.h",
         "src/os-linux.h",
         "src/unwind/unwind-internal.h",
@@ -481,11 +481,94 @@ cc_library(
 )
 
 cc_library(
-    name = "unwind-elf64",
+    name = "unwind",
     srcs = [
-        "src/elf64.c",
+        "src/dl-iterate-phdr.c",
+        "src/dwarf/global.c",
+        "src/elfxx.c",
+        "src/mi/Gdyn-extract.c",
+        "src/mi/Gdyn-remote.c",
+        "src/mi/Gfind_dynamic_proc_info.c",
+        "src/mi/Gget_reg.c",
+        "src/mi/Gput_dynamic_unwind_info.c",
+        "src/mi/_ReadSLEB.c",
+        "src/mi/_ReadULEB.c",
+        "src/mi/backtrace.c",
+        "src/mi/dyn-cancel.c",
+        "src/mi/dyn-info-list.c",
+        "src/mi/dyn-register.c",
+        "src/mi/flush_cache.c",
         "src/mi/init.c",
-    ],
+        "src/mi/mempool.c",
+        "src/mi/strerror.c",
+        "src/os-linux.c",
+        "src/setjmp/longjmp.c",
+        "src/setjmp/siglongjmp.c",
+    ] + glob(
+        [
+            "src/ptrace/*.c",
+            "src/coredump/*.c",
+            "src/mi/L*.c",
+            "src/dwarf/G*.c",
+            "src/dwarf/L*.c",
+            "src/unwind/*.c",
+        ],
+        exclude = [
+            "src/mi/G*.c",
+            "src/ptrace/_UPT_elf.c",
+            "src/coredump/_UPT_elf.c",
+            "src/coredump/_UCD_access_reg_freebsd.c",
+            "src/coredump/_UCD_access_reg_qnx.c",
+            "src/coredump/_UCD_get_mapinfo_freebsd.c",
+            "src/coredump/_UCD_get_mapinfo_qnx.c",
+            "src/coredump/_UCD_get_mapinfo_generic.c",
+            "src/mi/Ldyn-remote.c",
+        ],
+    ) + select({
+        ":linux_x86_64": glob(
+            [
+                "src/x86_64/L*.c",
+                "src/x86_64/G*.c",
+                "src/x86_64/is_fpreg.c",
+                "src/x86_64/getcontext.S",
+                "src/x86_64/longjmp.S",
+                "src/x86_64/setcontext.S",
+                "src/x86_64/siglongjmp.S",
+                "src/x86_64/regname.c",
+                "src/x86_64/init.h",
+                "src/x86_64/is_fpreg.c",
+                "src/x86_64/regname.c",
+            ],
+            exclude = [
+                "src/x86_64/Los-solaris.c",
+                "src/x86_64/Los-freebsd.c",
+                "src/x86_64/Los-qnx.c",
+                "src/x86_64/Gos-freebsd.c",
+                "src/x86_64/Gos-solaris.c",
+                "src/x86_64/Gos-qnx.c",
+            ],
+        ),
+        ":linux_aarch64": glob(
+            [
+                "src/aarch64/L*.c",
+                "src/aarch64/is_fpreg.c",
+                "src/aarch64/regname.c",
+                "src/aarch64/getcontext.S",
+                "src/aarch64/longjmp.S",
+                "src/aarch64/G*.c",
+                #"src/aarch64/setcontext.S",
+                "src/aarch64/siglongjmp.S",
+            ],
+            exclude = [
+                "src/aarch64/Los-freebsd.c",
+                "src/aarch64/Los-solaris.c",
+                "src/aarch64/Gos-freebsd.c",
+                "src/aarch64/Gos-solaris.c",
+                "src/aarch64/Gos-qnx.c",
+                "src/aarch64/Los-qnx.c",
+            ],
+        ),
+    }),
     hdrs = [
         "include/libunwind-coredump.h",
         "include/libunwind-dynamic.h",
@@ -502,104 +585,6 @@ cc_library(
         ],
     }),
     copts = COPTS + select({
-        ":linux_x86_64": COPTS + LINUX_X86_64_COPTS,
-        ":linux_aarch64": COPTS + LINUX_AARCH64_COPTS,
-    }),
-    local_defines = LOCAL_DEFINES,
-    deps = [
-        ":invisible_header",
-        "@xz",
-        "@zlib",
-        "@zstd",
-    ],
-)
-
-cc_library(
-    name = "unwind-ptrace",
-    srcs = [
-        "src/mi/init.c",
-    ] + glob(
-        ["src/ptrace/*.c"],
-    ),
-    copts = COPTS + select({
-        ":linux_x86_64": LINUX_X86_64_COPTS,
-        ":linux_aarch64": LINUX_AARCH64_COPTS,
-        "//conditions:default": [],
-    }),
-    local_defines = LOCAL_DEFINES,
-    visibility = ["//visibility:public"],
-    deps = [
-        ":unwind-elf64",
-    ],
-)
-
-cc_library(
-    name = "unwind-coredump",
-    srcs = [
-        "src/mi/init.c",
-    ] + glob(
-        ["src/coredump/*.c"],
-        exclude = [
-            "src/coredump/_UCD_access_reg_freebsd.c",
-            "src/coredump/_UCD_access_reg_qnx.c",
-            "src/coredump/_UCD_get_mapinfo_freebsd.c",
-            "src/coredump/_UCD_get_mapinfo_qnx.c",
-            "src/coredump/_UCD_get_mapinfo_generic.c",
-        ],
-    ),
-    copts = COPTS + select({
-        ":linux_x86_64": COPTS + LINUX_X86_64_COPTS,
-        ":linux_aarch64": COPTS + LINUX_AARCH64_COPTS,
-    }),
-    local_defines = LOCAL_DEFINES,
-    visibility = ["//visibility:public"],
-    deps = [
-        ":unwind-elf64",
-    ],
-)
-
-cc_library(
-    name = "unwind-setjmp",
-    srcs = [
-        "src/mi/init.c",
-        "src/setjmp/longjmp.c",
-        "src/setjmp/siglongjmp.c",
-    ] + select({
-        ":linux_x86_64": [],
-        ":linux_aarch64": [
-            #"aarch64/longjmp.c",
-            #"aarch64/siglongjmp.c",
-        ],
-    }),
-    copts = COPTS + select({
-        ":linux_x86_64": LINUX_X86_64_COPTS,
-        ":linux_aarch64": LINUX_AARCH64_COPTS,
-    }),
-    local_defines = LOCAL_DEFINES,
-    visibility = ["//visibility:public"],
-    deps = [
-        ":unwind",
-        ":unwind-elf64",
-    ],
-)
-
-cc_library(
-    name = "context",
-    srcs = select({
-        ":linux_x86_64": [
-            "src/x86_64/getcontext.S",
-            "src/x86_64/longjmp.S",
-            "src/x86_64/setcontext.S",
-            "src/x86_64/siglongjmp.S",
-        ],
-        ":linux_aarch64": [
-            "src/aarch64/getcontext.S",
-            "src/aarch64/longjmp.S",
-            #"src/aarch64/setcontext.S",
-            "src/aarch64/siglongjmp.S",
-        ],
-    }),
-    copts = COPTS + select({
         ":linux_x86_64": LINUX_X86_64_COPTS,
         ":linux_aarch64": LINUX_AARCH64_COPTS,
     }),
@@ -611,138 +596,14 @@ cc_library(
         ":linux_aarch64": [
             "src/aarch64/ucontext_i.h",
         ],
-    }),
-    visibility = ["//visibility:public"],
-    deps = [":invisible_header"],
-)
-
-cc_library(
-    name = "unwind",
-    srcs = [
-        "src/dl-iterate-phdr.c",
-        "src/dwarf/global.c",
-        "src/mi/_ReadSLEB.c",
-        "src/mi/_ReadULEB.c",
-        "src/mi/backtrace.c",
-        "src/mi/dyn-cancel.c",
-        "src/mi/dyn-info-list.c",
-        "src/mi/dyn-register.c",
-        "src/mi/flush_cache.c",
-        "src/mi/init.c",
-        "src/mi/mempool.c",
-        "src/mi/strerror.c",
-        "src/os-linux.c",
-    ] + glob(
-        [
-            "src/mi/L*.c",
-            "src/dwarf/L*.c",
-            "src/dwarf/G*.c",
-            "src/unwind/*.c",
-        ],
-        exclude = ["src/mi/Ldyn-remote.c"],
-    ) + select({
-        ":linux_x86_64": glob(
-            [
-                "src/x86_64/L*.c",
-                "src/x86_64/is_fpreg.c",
-                "src/x86_64/regname.c",
-            ],
-            exclude = [
-                "src/x86_64/Los-freebsd.c",
-                "src/x86_64/Los-solaris.c",
-                "src/x86_64/Los-qnx.c",
-            ],
-        ),
-        ":linux_aarch64": glob(
-            [
-                "src/aarch64/L*.c",
-                "src/aarch64/is_fpreg.c",
-                "src/aarch64/regname.c",
-            ],
-            exclude = [
-                "src/aarch64/Los-freebsd.c",
-                "src/aarch64/Los-solaris.c",
-                "src/aarch64/Los-qnx.c",
-            ],
-        ),
-    }),
-    copts = COPTS + select({
-        ":linux_x86_64": LINUX_X86_64_COPTS,
-        ":linux_aarch64": LINUX_AARCH64_COPTS,
-    }),
-    local_defines = LOCAL_DEFINES,
+    }) + [
+        "src/elfxx.c",
+    ],
     visibility = ["//visibility:public"],
     deps = [
-        ":context",
-        ":unwind-elf64",
+        ":invisible_header",
+        "@xz",
+        "@zlib",
     ],
-)
-
-cc_library(
-    name = "unwind-arch",
-    srcs = select({
-        ":linux_x86_64": [
-            "src/mi/flush_cache.c",
-            "src/mi/init.c",
-            "src/mi/mempool.c",
-            "src/mi/strerror.c",
-            "src/os-linux.c",
-            "src/x86_64/init.h",
-            "src/x86_64/is_fpreg.c",
-            "src/x86_64/regname.c",
-        ] + glob(
-            [
-                "src/mi/G*.c",
-                "src/x86_64/G*.c",
-            ],
-            exclude = [
-                "src/x86_64/Gos-freebsd.c",
-                "src/x86_64/Gos-solaris.c",
-                "src/x86_64/Gos-qnx.c",
-            ],
-        ),
-        ":linux_aarch64": [
-            "src/aarch64/init.h",
-            "src/aarch64/is_fpreg.c",
-            "src/aarch64/regname.c",
-            "src/mi/flush_cache.c",
-            "src/mi/init.c",
-            "src/mi/mempool.c",
-            "src/mi/strerror.c",
-            "src/os-linux.c",
-        ] + glob(
-            [
-                "src/mi/G*.c",
-                "src/aarch64/G*.c",
-            ],
-            exclude = [
-                "src/aarch64/Gos-freebsd.c",
-                "src/aarch64/Gos-solaris.c",
-                "src/aarch64/Gos-qnx.c",
-            ],
-        ),
-    }),
-    copts = COPTS + select({
-        ":linux_x86_64": LINUX_X86_64_COPTS,
-        ":linux_aarch64": LINUX_AARCH64_COPTS,
-    }),
-    local_defines = LOCAL_DEFINES,
-    visibility = ["//visibility:public"],
-    deps = [
-        ":unwind",
-    ],
-)
-
-cc_library(
-    name = "unwind-all",
-    visibility = ["//visibility:public"],
-    deps = [
-        ":context",
-        ":unwind",
-        ":unwind-arch",
-        ":unwind-coredump",
-        ":unwind-elf64",
-        ":unwind-ptrace",
-        ":unwind-setjmp",
-    ],
+    alwayslink = True,
 )

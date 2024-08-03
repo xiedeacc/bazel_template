@@ -251,6 +251,7 @@ cc_binary(
         #"@jemalloc",
         "@mvfst",
         "@wangle",
+        "@libunwind//:unwind",
     ],
 )
 
