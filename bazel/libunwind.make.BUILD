@@ -19,7 +19,7 @@ configure_make(
     autoreconf_options = ["-fi"],
     configure_in_place = True,
     configure_options = [
-        "--enable-shared=no",
+        "--enable-shared=yes",
         "--enable-static=yes",
         "--disable-tests",
         "--enable-documentation=no",

@@ -633,6 +633,7 @@ cc_library(
     ],
     copts = COPTS,
     linkopts = LINKOPTS,
+    linkstatic = False,
     local_defines = [
         "ENABLE_EMERGENCY_MALLOC",
         "HAVE_CONFIG_H",
@@ -646,132 +647,136 @@ cc_library(
 )
 
 cc_library(
-    name = "tcmalloc_debug_and_profiler",
-    srcs = [
-        "src/base/dynamic_annotations.cc",
-        "src/base/elf_mem_image.cc",
-        "src/base/generic_writer.cc",
-        "src/base/logging.cc",
-        "src/base/proc_maps_iterator.cc",
-        "src/base/spinlock.cc",
-        "src/base/spinlock_internal.cc",
-        "src/base/sysinfo.cc",
-        "src/base/vdso_support.cc",
-        "src/profiledata.cc",
-        "src/profiler.cc",
-        "src/stacktrace.cc",
-    ] + [
-        "src/base/linuxthreads.cc",
-        "src/base/low_level_alloc.cc",
-        "src/central_freelist.cc",
-        "src/common.cc",
-        "src/debugallocation.cc",
-        "src/emergency_malloc.cc",
-        "src/heap-checker.cc",
-        "src/heap-profile-table.cc",
-        "src/heap-profiler.cc",
-        "src/internal_logging.cc",
-        "src/malloc_backtrace.cc",
-        "src/malloc_extension.cc",
-        "src/malloc_hook.cc",
-        "src/memfs_malloc.cc",
-        "src/memory_region_map.cc",
-        "src/mmap_hook.cc",
-        "src/page_heap.cc",
-        "src/safe_strerror.cc",
-        "src/sampler.cc",
-        "src/span.cc",
-        "src/stack_trace_table.cc",
-        "src/static_vars.cc",
-        "src/symbolize.cc",
-        "src/system-alloc.cc",
-        "src/thread_cache.cc",
-        "src/thread_cache_ptr.cc",
-        ":config_h",
-        ":tcmalloc_h",
-    ],
-    hdrs = glob([
-        "src/base/**/*.h",
-        "src/gperftools/**/*.h",
-        "src/*.h",
-    ]) + [
-        "src/tcmalloc.cc",
-        ":config_h",
-    ],
-    copts = COPTS,
-    linkopts = LINKOPTS,
-    local_defines = [
-        "HAVE_CONFIG_H",
-        "ENABLE_EMERGENCY_MALLOC",
-        "NDEBUG",
-        "FORCED_FRAME_POINTERS",
-    ],
-    deps = [
-        "@libunwind//:unwind",
-    ],
-    alwayslink = True,
+    name = "gperftools",
+    deps = [":tcmalloc_and_profiler"],
 )
+#cc_library(
+#name = "tcmalloc_debug_and_profiler",
+#srcs = [
+#"src/base/dynamic_annotations.cc",
+#"src/base/elf_mem_image.cc",
+#"src/base/generic_writer.cc",
+#"src/base/logging.cc",
+#"src/base/proc_maps_iterator.cc",
+#"src/base/spinlock.cc",
+#"src/base/spinlock_internal.cc",
+#"src/base/sysinfo.cc",
+#"src/base/vdso_support.cc",
+#"src/profiledata.cc",
+#"src/profiler.cc",
+#"src/stacktrace.cc",
+#] + [
+#"src/base/linuxthreads.cc",
+#"src/base/low_level_alloc.cc",
+#"src/central_freelist.cc",
+#"src/common.cc",
+#"src/debugallocation.cc",
+#"src/emergency_malloc.cc",
+#"src/heap-checker.cc",
+#"src/heap-profile-table.cc",
+#"src/heap-profiler.cc",
+#"src/internal_logging.cc",
+#"src/malloc_backtrace.cc",
+#"src/malloc_extension.cc",
+#"src/malloc_hook.cc",
+#"src/memfs_malloc.cc",
+#"src/memory_region_map.cc",
+#"src/mmap_hook.cc",
+#"src/page_heap.cc",
+#"src/safe_strerror.cc",
+#"src/sampler.cc",
+#"src/span.cc",
+#"src/stack_trace_table.cc",
+#"src/static_vars.cc",
+#"src/symbolize.cc",
+#"src/system-alloc.cc",
+#"src/thread_cache.cc",
+#"src/thread_cache_ptr.cc",
+#":config_h",
+#":tcmalloc_h",
+#],
+#hdrs = glob([
+#"src/base/**/*.h",
+#"src/gperftools/**/*.h",
+#"src/*.h",
+#]) + [
+#"src/tcmalloc.cc",
+#":config_h",
+#],
+#copts = COPTS,
+#linkopts = LINKOPTS,
+#local_defines = [
+#"HAVE_CONFIG_H",
+#"ENABLE_EMERGENCY_MALLOC",
+#"NDEBUG",
+#"FORCED_FRAME_POINTERS",
+#],
+#deps = [
+#"@libunwind//:unwind",
+#],
+#alwayslink = True,
+#)
 
-cc_library(
-    name = "run_benchmark",
-    srcs = [
-        "benchmark/run_benchmark.cc",
-        ":config_h",
-        ":tcmalloc_h",
-    ],
-    hdrs = glob([
-        "src/base/**/*.h",
-        "benchmark/**/*.h",
-        "src/gperftools/**/*.h",
-        "src/*.h",
-    ]),
-    copts = COPTS,
-    local_defines = [
-        "ENABLE_EMERGENCY_MALLOC",
-        "HAVE_CONFIG_H",
-        "NDEBUG",
-        "FORCED_FRAME_POINTERS",
-    ],
-    deps = [
-        ":tcmalloc_and_profiler",
-    ],
-)
+#cc_library(
+#name = "run_benchmark",
+#srcs = [
+#"benchmark/run_benchmark.cc",
+#":config_h",
+#":tcmalloc_h",
+#],
+#hdrs = glob([
+#"src/base/**/*.h",
+#"benchmark/**/*.h",
+#"src/gperftools/**/*.h",
+#"src/*.h",
+#]),
+#copts = COPTS,
+#local_defines = [
+#"ENABLE_EMERGENCY_MALLOC",
+#"HAVE_CONFIG_H",
+#"NDEBUG",
+#"FORCED_FRAME_POINTERS",
+#],
+#deps = [
+#":tcmalloc_and_profiler",
+#],
+#)
 
-cc_binary(
-    name = "malloc_bench",
-    srcs = [
-        "benchmark/malloc_bench.cc",
-        ":config_h",
-        ":tcmalloc_h",
-    ],
-    copts = COPTS,
-    local_defines = [
-        "ENABLE_EMERGENCY_MALLOC",
-        "HAVE_CONFIG_H",
-        "NDEBUG",
-        "FORCED_FRAME_POINTERS",
-    ],
-    deps = [
-        ":run_benchmark",
-        ":tcmalloc_and_profiler",
-    ],
-)
+#cc_binary(
+#name = "malloc_bench",
+#srcs = [
+#"benchmark/malloc_bench.cc",
+#":config_h",
+#":tcmalloc_h",
+#],
+#copts = COPTS,
+#local_defines = [
+#"ENABLE_EMERGENCY_MALLOC",
+#"HAVE_CONFIG_H",
+#"NDEBUG",
+#"FORCED_FRAME_POINTERS",
+#],
+#deps = [
+#":run_benchmark",
+#":tcmalloc_and_profiler",
+#],
+#)
 
-cc_binary(
-    name = "binary_trees",
-    srcs = [
-        "benchmark/binary_trees.cc",
-        ":config_h",
-        ":tcmalloc_h",
-    ],
-    copts = COPTS,
-    local_defines = [
-        "ENABLE_EMERGENCY_MALLOC",
-        "HAVE_CONFIG_H",
-        "NDEBUG",
-        "FORCED_FRAME_POINTERS",
-    ],
-    deps = [
-        ":tcmalloc_and_profiler",
-    ],
-)
+#cc_binary(
+#name = "binary_trees",
+#srcs = [
+#"benchmark/binary_trees.cc",
+#":config_h",
+#":tcmalloc_h",
+#],
+#copts = COPTS,
+#local_defines = [
+#"ENABLE_EMERGENCY_MALLOC",
+#"HAVE_CONFIG_H",
+#"NDEBUG",
+#"FORCED_FRAME_POINTERS",
+#],
+#deps = [
+#":tcmalloc_and_profiler",
+#],
+#)

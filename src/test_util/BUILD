@@ -11,6 +11,7 @@ cc_library(
         "-isystem external/folly",
         "-isystem $(GENDIR)/external/folly",
     ],
+    linkopts = ["-lunwind"],
     deps = [
         "@com_github_gflags_gflags//:gflags",
         "@com_github_glog_glog//:glog",

@@ -183,6 +183,8 @@ cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SH
 
 ## llvm/clang
 ```
+#don't build libunwind pls
+
 cmake -G "Unix Makefiles" ../llvm \
     -DCMAKE_INSTALL_PREFIX=/usr/local/llvm/18 \
     -DCMAKE_BUILD_TYPE=Release \

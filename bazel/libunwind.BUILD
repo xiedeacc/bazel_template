@@ -605,5 +605,19 @@ cc_library(
         "@xz",
         "@zlib",
     ],
-    alwayslink = True,
 )
+
+#genrule(
+#name = "libunwind_symlink",
+#srcs = [":unwind"],
+#outs = [
+#"libunwind.so.1",
+#],
+#cmd = """
+#for file in $(locations @libunwind//:unwind); do
+#if [[ "$$file" == *.so ]]; then
+#cp $$file $(@D)/libunwind.so.1
+#fi
+#""",
+#visibility = ["//visibility:public"],
+#)

@@ -553,14 +553,14 @@ git_repository(
 new_git_repository(
     name = "gperftools",
     #build_file = "//bazel:gperftools.BUILD",
-    build_file = "//bazel:gperftools.make.BUILD",
-    #commit = "285908e8c7cfa98659127a23532c060f8dcbd148",
+    build_file = "//bazel:gperftools.BUILD",
+    commit = "285908e8c7cfa98659127a23532c060f8dcbd148",
     #recursive_init_submodules = True,
     remote = "git@code.xiamu.com:gperftools/gperftools.git",
     repo_mapping = {
         "@abseil-cpp": "@com_google_absl",
     },
-    tag = "gperftools-2.15",
+    #tag = "gperftools-2.15",
 )
 
 new_git_repository(
