@@ -54,7 +54,6 @@ clang_linux_x86_64_cc_toolchain_config(
         "-Wall",
         "-Wunused-but-set-parameter",
         "-Wno-free-nonheap-object",
-        "-fno-omit-frame-pointer",
         "-stdlib=libc++",
     ],
     compiler = "clang",
@@ -134,6 +133,7 @@ clang_linux_x86_64_cc_toolchain_config(
         "objcopy": "{}/bin/llvm-objcopy".format(clang_linux_x86_64_toolchain_root),
         "objdump": "{}/bin/llvm-objdump".format(clang_linux_x86_64_toolchain_root),
         "strip": "{}/bin/llvm-strip".format(clang_linux_x86_64_toolchain_root),
+        "addr2line": "{}/bin/llvm-addr2line".format(clang_linux_x86_64_toolchain_root),
     },
     toolchain_identifier = "local",
     unfiltered_compile_flags = [

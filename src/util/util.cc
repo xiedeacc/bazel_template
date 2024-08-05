@@ -791,6 +791,7 @@ void Util::PrintProtoMessage(const google::protobuf::Message &msg) {
 void Util::PrintProtoMessage(const google::protobuf::Message &msg,
                              string *json) {
   JsonPrintOptions option;
+
   if (!MessageToJsonString(msg, json, option).ok()) {
     LOG(ERROR) << "to json string failed";
   }

@@ -6,17 +6,17 @@ COPTS = [
     "-Iexternal/libdwarf/src/lib/libdwarf",
     "-isystem external/libsodium/src/libsodium/include",
     "-isystem external/proxygen",
-    "-isystem $(BINDIR)/external/proxygen",
+    "-isystem $(GENDIR)/external/proxygen",
     "-isystem external/fbthrift",
-    "-isystem $(BINDIR)/external/fbthrift",
+    "-isystem $(GENDIR)/external/fbthrift",
     "-isystem external/fb303",
-    "-isystem $(BINDIR)/external/fb303",
+    "-isystem $(GENDIR)/external/fb303",
     "-isystem external/double-conversion",
     "-isystem external/xxhash",
     "-isystem external/com_googlesource_code_re2",
     "-isystem external/fatal",
-    "-isystem $(BINDIR)/external/folly",
-    "-isystem $(BINDIR)/external/fizz",
+    "-isystem $(GENDIR)/external/folly",
+    "-isystem $(GENDIR)/external/fizz",
     "-isystem external/folly",
     "-isystem external/fizz",
     "-isystem external/wangle",
@@ -87,7 +87,7 @@ genrule(
 --input_files=$(location :proxygen/lib/utils/samples/TraceEventType.txt),$(location :proxygen/lib/utils/samples/TraceFieldType.txt) \
 --output_scope=proxygen \
 --header_path=proxygen/lib/utils \
---install_dir=$(BINDIR)/external/proxygen/proxygen/lib/utils \
+--install_dir=$(GENDIR)/external/proxygen/proxygen/lib/utils \
 --fbcode_dir=external/proxygen
 """,
 )

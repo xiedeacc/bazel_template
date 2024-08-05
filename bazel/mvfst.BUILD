@@ -1,30 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "windows_x86_64",
-    constraint_values = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "linux_aarch64",
-    constraint_values = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:linux",
-    ],
-)
-
-config_setting(
-    name = "linux_x86_64",
-    constraint_values = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-)
-
 cc_library(
     name = "mvfst",
     srcs = glob(
@@ -43,8 +18,8 @@ cc_library(
             "quic/tools/tperf/**/*.cpp",
         ],
     ) + select({
-        ":linux_x86_64": ["quic/server/QuicServerBackendIoUring.cpp"],
-        ":linux_aarch64": ["quic/server/QuicServerBackendIoUring.cpp"],
+        "@bazel_template//bazel:linux_x86_64": ["quic/server/QuicServerBackendIoUring.cpp"],
+        "@bazel_template//bazel:linux_aarch64": ["quic/server/QuicServerBackendIoUring.cpp"],
     }),
     hdrs = glob(
         [
@@ -62,11 +37,11 @@ cc_library(
         "-isystem external/mvfst",
         "-isystem external/libsodium/src/libsodium/include",
         "-Iexternal/libsodium/src/libsodium/include/sodium",
-        "-isystem $(BINDIR)/external/libsodium/src/libsodium/include",
+        "-isystem $(GENDIR)/external/libsodium/src/libsodium/include",
         "-isystem external/double-conversion",
-        "-isystem $(BINDIR)/external/folly",
+        "-isystem $(GENDIR)/external/folly",
         "-isystem external/folly",
-        "-isystem $(BINDIR)/external/fizz",
+        "-isystem $(GENDIR)/external/fizz",
         "-isystem external/fizz",
         "-isystem external/libev",
         "-std=c++17",

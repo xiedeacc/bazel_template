@@ -1,5 +1,9 @@
 {
     "server_addr": "127.0.0.1",
     "grpc_server_port": 10001,
-    "http_server_port": 10002
+    "http_server_port": 10002,
+    "metric_ratio": 1,
+    "metric_interval_sec": 3,
+    "discard_ratio": 1,
+    "thread_pool_size": 3
 }

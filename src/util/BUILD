@@ -47,6 +47,24 @@ cc_test(
     ],
     deps = [
         ":util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "config_manager_test",
+    srcs = [
+        "config_manager_test.cc",
+    ],
+    copts = [
+        "-isystem external/double-conversion",
+        "-isystem external/folly",
+        "-isystem $(GENDIR)/external/folly",
+    ],
+    data = ["//conf:base_config.json"],
+    deps = [
+        ":config_manager",
+        "@libaio//:aio",
     ],
 )
 

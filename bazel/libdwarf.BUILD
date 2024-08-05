@@ -121,7 +121,7 @@ cc_library(
     copts = [
         "-g",
         "-O2",
-        "-isystem $(BINDIR)/external/libdwarf",
+        "-isystem $(GENDIR)/external/libdwarf",
     ],
     local_defines = [
         "HAVE_CONFIG_H",
@@ -141,7 +141,7 @@ cc_library(
     copts = [
         "-g",
         "-O2",
-        "-isystem $(BINDIR)/external/libdwarf",
+        "-isystem $(GENDIR)/external/libdwarf",
         "-Iexternal/libdwarf/src/lib/libdwarf",
     ],
     local_defines = [

@@ -12,11 +12,12 @@ filegroup(
 configure_make_variant(
     name = "jemalloc_build",
     args = ["-j"],
-    #autogen = True,
+    autogen = True,
     configure_in_place = True,
     configure_options = [
-        "--disable-static",
+        "--enable-static",
         "--enable-shared",
+        "--with-version=5.3.0-186-g21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322",
     ] + select({
         "@platforms//cpu:aarch64": ["--host=aarch64-unknown-linux-gnu"],
         "//conditions:default": [],
@@ -29,11 +30,11 @@ configure_make_variant(
     ],
     out_shared_libs = [
         "libjemalloc.so",
-        "libjemalloc.so.2",
+        #"libjemalloc.so.2",
     ],
-    #out_static_libs = ["libjemalloc.a"], # need --with-malloc-conf
+    #out_static_libs = ["libjemalloc.a"],
     targets = [
-        #"install_lib_static",
+        "install_lib_static",
         "install_bin",
         "install_lib",
         "install_include",

@@ -1,10 +1,3 @@
-# Description:
-#   LZ4 library
-
-licenses(["notice"])  # BSD license
-
-exports_files(["LICENSE"])
-
 cc_library(
     name = "lz4",
     srcs = [

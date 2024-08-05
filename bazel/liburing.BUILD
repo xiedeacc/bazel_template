@@ -1,29 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "linux_x86_64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:x86_64",
-    ],
-)
-
-config_setting(
-    name = "linux_aarch64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:aarch64",
-    ],
-)
-
-platform(
-    name = "linux_aarch64_platform",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:aarch64",
-    ],
-)
-
 COPTS = [
     "-g",
     "-O3",
@@ -122,17 +98,17 @@ cc_library(
         ],
         exclude = ["src/ffi.c"],
     ) + select({
-        ":linux_x86_64": [
+        "@bazel_template//bazel:linux_x86_64": [
             "src/arch/x86/lib.h",
             "src/arch/x86/syscall.h",
         ],
-        ":linux_aarch64": [
+        "@bazel_template//bazel:linux_aarch64": [
             "src/arch/aarch64/lib.h",
             "src/arch/aarch64/syscall.h",
         ],
     }) + [
-        ":io_uring_version_h",
         ":compat_h",
+        ":io_uring_version_h",
     ],
     hdrs = glob([
         "src/include/**/*.h",
@@ -144,9 +120,9 @@ cc_library(
     linkopts = [
     ],
     local_defines = LOCAL_DEFINES + select({
-        ":linux_x86_64": [
+        "@bazel_template//bazel:linux_x86_64": [
         ],
-        ":linux_aarch64": [
+        "@bazel_template//bazel:linux_aarch64": [
         ],
     }),
     visibility = ["//visibility:public"],
@@ -161,17 +137,17 @@ cc_library(
         "src/*.c",
         "src/*.h",
     ]) + select({
-        ":linux_x86_64": [
+        "@bazel_template//bazel:linux_x86_64": [
             "src/arch/x86/lib.h",
             "src/arch/x86/syscall.h",
         ],
-        ":linux_aarch64": [
+        "@bazel_template//bazel:linux_aarch64": [
             "src/arch/aarch64/lib.h",
             "src/arch/aarch64/syscall.h",
         ],
     }) + [
-        ":io_uring_version_h",
         ":compat_h",
+        ":io_uring_version_h",
     ],
     hdrs = glob([
         "src/include/**/*.h",
@@ -183,9 +159,9 @@ cc_library(
     linkopts = [
     ],
     local_defines = LOCAL_DEFINES + select({
-        ":linux_x86_64": [
+        "@bazel_template//bazel:linux_x86_64": [
         ],
-        ":linux_aarch64": [
+        "@bazel_template//bazel:linux_aarch64": [
         ],
     }),
     visibility = ["//visibility:public"],

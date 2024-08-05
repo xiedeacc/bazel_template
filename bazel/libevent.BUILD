@@ -46,7 +46,7 @@ COPTS = [
     "-Wno-unused-function",
     "-Wno-pragmas",
     "-O3",
-    #"-I$(BINDIR)/include",
+    #"-I$(GENDIR)/include",
 ]
 
 template_rule(
@@ -303,9 +303,9 @@ cc_library(
         "ws.c",
     ],
     hdrs = [
+        "arc4random.c",
         ":evconfig-private_h",
         ":event-config_h",
-        "arc4random.c",
     ] + glob(
         [
             "include/**/*.h",
@@ -347,9 +347,9 @@ cc_library(
         "watch.c",
     ],
     hdrs = [
+        "arc4random.c",
         ":evconfig-private_h",
         ":event-config_h",
-        "arc4random.c",
     ] + glob(
         [
             "include/**/*.h",
@@ -375,9 +375,9 @@ cc_library(
         "ws.c",
     ],
     hdrs = [
+        "arc4random.c",
         ":evconfig-private_h",
         ":event-config_h",
-        "arc4random.c",
     ] + glob(
         [
             "include/**/*.h",
@@ -400,9 +400,9 @@ cc_library(
         "bufferevent_ssl.c",
     ],
     hdrs = [
+        "arc4random.c",
         ":evconfig-private_h",
         ":event-config_h",
-        "arc4random.c",
     ] + glob(
         [
             "include/**/*.h",
@@ -429,9 +429,9 @@ cc_library(
         "bufferevent_ssl.c",
     ],
     hdrs = [
+        "arc4random.c",
         ":evconfig-private_h",
         ":event-config_h",
-        "arc4random.c",
     ] + glob(
         [
             "include/**/*.h",
@@ -456,9 +456,9 @@ cc_library(
         "evthread_pthread.c",
     ],
     hdrs = [
+        "arc4random.c",
         ":evconfig-private_h",
         ":event-config_h",
-        "arc4random.c",
     ] + glob(
         [
             "include/**/*.h",

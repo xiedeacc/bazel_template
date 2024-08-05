@@ -1,6 +1,6 @@
-package(default_visibility = ["//visibility:public"])
-
 load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
+
+package(default_visibility = ["//visibility:public"])
 
 template_rule(
     name = "ares_config_h",
@@ -187,7 +187,6 @@ COPTS = [
     "-Wall",
     "-Wextra",
     "-std=c11",
-    "-c",
     "-g",
     "-O3",
 ]
@@ -288,15 +287,15 @@ cc_library(
         "src/lib/windows_port.c",
     ],
     hdrs = [
-        ":ares_config_h",
         ":ares_build_h",
+        ":ares_config_h",
     ] + glob([
         "include/*.h",
         "src/lib/*.h",
     ]),
     copts = COPTS + [
         "-Iexternal/c-ares/src/lib",
-        "-I$(BINDIR)/external/c-ares/src/lib",
+        "-I$(GENDIR)/external/c-ares/src/lib",
     ],
     includes = [
         "include",
@@ -334,7 +333,7 @@ cc_binary(
     srcs = ["src/tools/adig.c"],
     copts = COPTS + [
         "-Iexternal/c-ares/src/lib",
-        "-I$(BINDIR)/external/c-ares/src/lib",
+        "-I$(GENDIR)/external/c-ares/src/lib",
     ],
     local_defines = [
         "CARES_NO_DEPRECATED",
@@ -355,7 +354,7 @@ cc_binary(
     srcs = ["src/tools/ahost.c"],
     copts = COPTS + [
         "-Iexternal/c-ares/src/lib",
-        "-I$(BINDIR)/external/c-ares/src/lib",
+        "-I$(GENDIR)/external/c-ares/src/lib",
     ],
     local_defines = [
         "CARES_NO_DEPRECATED",

@@ -1,13 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "linux_x86_64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:x86_64",
-    ],
-)
-
 cc_library(
     name = "zstd",
     srcs = glob(
@@ -31,7 +23,7 @@ cc_library(
             "lib/legacy/zstd_v03.c",
         ],
     ) + select({
-        ":linux_x86_64": ["lib/decompress/huf_decompress_amd64.S"],
+        "@bazel_template//bazel:linux_x86_64": ["lib/decompress/huf_decompress_amd64.S"],
         "//conditions:default": [],
     }),
     hdrs = [

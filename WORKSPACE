@@ -338,22 +338,6 @@ http_archive(
     url = "https://github.com/boostorg/boost/releases/download/boost-1.83.0/boost-1.83.0.tar.gz",
 )
 
-http_archive(
-    name = "jemalloc",
-    build_file = "//bazel:jemalloc.make.BUILD",
-    sha256 = "2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa",
-    strip_prefix = "jemalloc-5.3.0",
-    url = "https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2",
-)
-
-#new_git_repository(
-#    name = "jemalloc",
-#    build_file = "//bazel:jemalloc.make.BUILD",
-#    remote = "git@code.xiamu.com:jemalloc/jemalloc.git",
-#    #commit = "21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322",
-#    tag = "5.3.0",
-#)
-
 new_git_repository(
     name = "fmt",
     build_file = "//bazel:fmt.BUILD",
@@ -366,14 +350,6 @@ new_git_repository(
     build_file = "//bazel:libdwarf.BUILD",
     remote = "git@code.xiamu.com:davea42/libdwarf-code.git",
     tag = "v0.10.1",
-)
-
-new_git_repository(
-    name = "libunwind",
-    build_file = "//bazel:libunwind.BUILD",
-    #tag = "v1.8.2",
-    commit = "3c47821d681777e3cff33edb25c804d93102e1c6",
-    remote = "git@code.xiamu.com:libunwind/libunwind.git",
 )
 
 new_git_repository(
@@ -413,9 +389,46 @@ http_archive(
     url = "https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.xz",
 )
 
+#new_git_repository(
+#    name = "jemalloc",
+#    build_file = "//bazel:jemalloc.make.BUILD",
+#    remote = "git@code.xiamu.com:jemalloc/jemalloc.git",
+#    #commit = "21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322",
+#    tag = "5.3.0",
+#)
+
+new_git_repository(
+    name = "libunwind",
+    build_file = "//bazel:libunwind.BUILD",
+    #tag = "v1.8.2",
+    commit = "3c47821d681777e3cff33edb25c804d93102e1c6",
+    remote = "git@code.xiamu.com:libunwind/libunwind.git",
+)
+
+new_git_repository(
+    name = "jemalloc",
+    build_file = "//bazel:jemalloc.make.BUILD",
+    commit = "8dc97b11089be6d58a52009ea3da610bf90331d3",
+    remote = "git@code.xiamu.com:jemalloc/jemalloc.git",
+)
+
+new_git_repository(
+    name = "tcmalloc",
+    commit = "bd13fb84b359f6cdc7e0d393b91226dbb904bf75",
+    remote = "git@code.xiamu.com:google/tcmalloc.git",
+)
+
+new_git_repository(
+    name = "gperftools",
+    build_file = "//bazel:gperftools.BUILD",
+    commit = "285908e8c7cfa98659127a23532c060f8dcbd148",
+    #recursive_init_submodules = True,
+    remote = "git@code.xiamu.com:gperftools/gperftools.git",
+)
+
 new_git_repository(
     name = "folly",
-    build_file = "//bazel:folly.src.BUILD",
+    build_file = "//bazel:folly.BUILD",
     remote = "git@code.xiamu.com:facebook/folly.git",
     tag = "v2024.07.08.00",
 )
@@ -548,19 +561,6 @@ git_repository(
         "@boringssl": "@openssl",
     },
     tag = "v1.65.1",
-)
-
-new_git_repository(
-    name = "gperftools",
-    #build_file = "//bazel:gperftools.BUILD",
-    build_file = "//bazel:gperftools.BUILD",
-    commit = "285908e8c7cfa98659127a23532c060f8dcbd148",
-    #recursive_init_submodules = True,
-    remote = "git@code.xiamu.com:gperftools/gperftools.git",
-    repo_mapping = {
-        "@abseil-cpp": "@com_google_absl",
-    },
-    #tag = "gperftools-2.15",
 )
 
 new_git_repository(

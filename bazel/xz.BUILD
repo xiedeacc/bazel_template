@@ -252,7 +252,6 @@ cc_library(
         "_GNU_SOURCE",
     ],
     visibility = ["//visibility:public"],
-    alwayslink = True,
 )
 
 cc_binary(

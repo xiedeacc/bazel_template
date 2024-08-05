@@ -1,10 +1,15 @@
 test:cpplint --test_tag_filters=cpplint
 test:cpplint --build_tests_only
-test:unit_test --test_tag_filters=-cpplint
-test:unit_test --test_env HEAPCHECK=normal
-test:unit_test --test_env CPUPROFILE=pprof.out # pprof.out generated in bazel test sandbox
-test:unit_test --test_env=PPROF_PATH=/usr/local/bin/pprof # need install gperftools first
-#test:unit_test --test_env MALLOC_CONF="prof:true,prof_active:true,lg_prof_interval:20,lg_prof_sample:17"
+
+#unit_test_tcmalloc will coredump for link tcmalloc static not compitible with folly
+test:unit_test_tcmalloc --define=profiling_type=tcmalloc
+test:unit_test_tcmalloc --test_env CPUPROFILE=pprof.out # pprof.out generated in bazel test sandbox
+test:unit_test_tcmalloc --test_env=PPROF_PATH=/usr/local/bin/pprof # need install gperftools first
+
+test:unit_test_jemalloc --define=profiling_type=jemalloc
+test:unit_test_jemalloc --test_env CPUPROFILE=pprof.out # pprof.out generated in bazel test sandbox
+test:unit_test_jemalloc --test_env=PPROF_PATH=/usr/local/bin/pprof # need install gperftools first
+test:unit_test_jemalloc --test_env MALLOC_CONF="prof:true,prof_active:true,lg_prof_interval:20,lg_prof_sample:17"
 
 test:sanitize --copt='-fsanitize=address' # need comment @gperftools//:tcmalloc_and_profiler in bazel/build.bzl
 test:sanitize --linkopt='-fsanitize=address'
@@ -55,7 +60,7 @@ common --experimental_downloader_config=.bazel_downloader.cfg
 build:clang --extra_toolchains='//toolchain:clang_toolchain_for_linux_x86_64'
 build:gcc --extra_toolchains='@local_config_cc_toolchains//:cc-toolchain-k8'
 
-build:clang_aarch64 --platforms='//:linux_aarch64_platform'
+build:clang_aarch64 --platforms='//bazel:linux_aarch64_platform'
 build:clang_aarch64 --extra_toolchains='//toolchain:clang_toolchain_for_linux_aarch64'
 build:clang_aarch64 --copt='-Wno-unused-command-line-argument'
 build:clang_aarch64 --copt='-Wno-error=sign-conversion'
@@ -64,6 +69,6 @@ build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolch
 build:clang_aarch64 --compiler=clang
 
 build:openwrt_aarch64 --extra_toolchains='@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8'
-build:openwrt_aarch64 --platforms='//:linux_aarch64_platform'
+build:openwrt_aarch64 --platforms='//bazel:linux_aarch64_platform'
 build:openwrt_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
 build:openwrt_aarch64 --cpu='aarch64'

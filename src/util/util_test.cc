@@ -3,7 +3,7 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "glog//logging.h"
+#include "glog/logging.h"
 #include "gtest/gtest.h"
 
 namespace bazel_template {
@@ -13,6 +13,7 @@ TEST(Util, MemLeak) {
   char* arr = new char[8];
   strcpy(arr, "test");
   LOG(INFO) << arr;
+  LOG(INFO) << "TEST";
 }
 
 }  // namespace util

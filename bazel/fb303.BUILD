@@ -4,22 +4,21 @@ package(default_visibility = ["//visibility:public"])
 
 COPTS = [
     "-isystem external/fbthrift",
-    "-isystem $(BINDIR)/external/fbthrift",
+    "-isystem $(GENDIR)/external/fbthrift",
     "-isystem external/fb303",
-    "-isystem $(BINDIR)/external/fb303",
+    "-isystem $(GENDIR)/external/fb303",
     "-isystem external/double-conversion",
     "-isystem external/xxhash",
     "-isystem external/com_googlesource_code_re2",
     "-isystem external/fatal",
     "-isystem external/fbthrift",
-    "-isystem $(BINDIR)/external/folly",
-    "-isystem $(BINDIR)/external/fizz",
+    "-isystem $(GENDIR)/external/folly",
+    "-isystem $(GENDIR)/external/fizz",
     "-isystem external/folly",
     "-isystem external/fizz",
     "-isystem external/wangle",
     "-isystem external/mvfst",
     "-std=c++17",
-    "-fsized-deallocation",
 ]
 
 LOCAL_DEFINES = [

@@ -1,36 +1,20 @@
-load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
+load("@bazel_template//bazel:common.bzl", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
-
-config_setting(
-    name = "linux_x86_64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:x86_64",
-    ],
-)
-
-config_setting(
-    name = "linux_aarch64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:aarch64",
-    ],
-)
 
 COPTS = [
     "-g",
     "-O3",
     "-fPIC",
-    "-fexceptions",
     "-Wall",
     "-Wsign-compare",
-    "-Iexternal/libunwind/src",
-    "-I$(BINDIR)/external/libunwind/include",
+    "-I$(GENDIR)/external/libunwind/include",
     "-Iexternal/libunwind/include",
-    "-I$(BINDIR)/external/libunwind/include/tdep",
+    "-I$(GENDIR)/external/libunwind/include/tdep",
+    "-Iexternal/libunwind/src",
     "-Iexternal/libunwind/include/tdep",
     "-Iexternal/libunwind/src/mi",
+    "-Iexternal/libunwind/src/dwarf",
 ]
 
 LINUX_X86_64_COPTS = [
@@ -54,10 +38,10 @@ template_rule(
     src = "include/libunwind.h.in",
     out = "include/libunwind.h",
     substitutions = select({
-        ":linux_x86_64": {
+        "@bazel_template//bazel:linux_x86_64": {
             "@arch@": "x86_64",
         },
-        ":linux_aarch64": {
+        "@bazel_template//bazel:linux_aarch64": {
             "@arch@": "aarch64",
         },
     }),
@@ -68,13 +52,164 @@ template_rule(
     src = "include/tdep/libunwind_i.h.in",
     out = "include/tdep/libunwind_i.h",
     substitutions = select({
-        ":linux_x86_64": {
+        "@bazel_template//bazel:linux_x86_64": {
             "@arch@": "x86_64",
         },
-        ":linux_aarch64": {
+        "@bazel_template//bazel:linux_aarch64": {
             "@arch@": "aarch64",
         },
     }),
+)
+
+cc_library(
+    name = "unwind",
+    srcs = [
+        "src/dl-iterate-phdr.c",
+        "src/dwarf/global.c",
+        "src/elfxx.c",
+        "src/mi/Gdyn-extract.c",
+        "src/mi/Gdyn-remote.c",
+        "src/mi/Gfind_dynamic_proc_info.c",
+        "src/mi/Gget_reg.c",
+        "src/mi/Gput_dynamic_unwind_info.c",
+        "src/mi/_ReadSLEB.c",
+        "src/mi/_ReadULEB.c",
+        "src/mi/backtrace.c",
+        "src/mi/dyn-cancel.c",
+        "src/mi/dyn-info-list.c",
+        "src/mi/dyn-register.c",
+        "src/mi/flush_cache.c",
+        "src/mi/init.c",
+        "src/mi/mempool.c",
+        "src/mi/strerror.c",
+        "src/os-linux.c",
+        "src/setjmp/longjmp.c",
+        "src/setjmp/siglongjmp.c",
+    ] + glob(
+        [
+            "src/coredump/*.c",
+            "src/dwarf/L*.c",
+            "src/mi/L*.c",
+            "src/ptrace/*.c",
+            "src/unwind/*.c",
+        ],
+        exclude = [
+            "src/mi/G*.c",
+            "src/ptrace/_UPT_elf.c",
+            "src/coredump/_UPT_elf.c",
+            "src/coredump/_UCD_access_reg_freebsd.c",
+            "src/coredump/_UCD_access_reg_qnx.c",
+            "src/coredump/_UCD_get_mapinfo_freebsd.c",
+            "src/coredump/_UCD_get_mapinfo_qnx.c",
+            "src/coredump/_UCD_get_mapinfo_generic.c",
+            "src/mi/Ldyn-remote.c",
+        ],
+    ) + select({
+        "@bazel_template//bazel:linux_x86_64": glob(
+            [
+                "src/x86_64/L*.c",
+                "src/x86_64/G*.c",
+                "src/x86_64/is_fpreg.c",
+                "src/x86_64/getcontext.S",
+                "src/x86_64/longjmp.S",
+                "src/x86_64/setcontext.S",
+                "src/x86_64/siglongjmp.S",
+                "src/x86_64/regname.c",
+                "src/x86_64/init.h",
+                "src/x86_64/is_fpreg.c",
+                "src/x86_64/regname.c",
+            ],
+            exclude = [
+                "src/x86_64/Gos-freebsd.c",
+                "src/x86_64/Los-freebsd.c",
+                "src/x86_64/Gos-solaris.c",
+                "src/x86_64/Los-solaris.c",
+                "src/x86_64/Gos-qnx.c",
+                "src/x86_64/Los-qnx.c",
+            ],
+        ),
+        "@bazel_template//bazel:linux_aarch64": glob(
+            [
+                "src/aarch64/L*.c",
+                "src/aarch64/is_fpreg.c",
+                "src/aarch64/regname.c",
+                "src/aarch64/getcontext.S",
+                "src/aarch64/longjmp.S",
+                "src/aarch64/G*.c",
+                #"src/aarch64/setcontext.S",
+                "src/aarch64/siglongjmp.S",
+            ],
+            exclude = [
+                "src/aarch64/Gos-freebsd.c",
+                "src/aarch64/Los-freebsd.c",
+                "src/aarch64/Gos-solaris.c",
+                "src/aarch64/Los-solaris.c",
+                "src/aarch64/Gos-qnx.c",
+                "src/aarch64/Los-qnx.c",
+            ],
+        ),
+    }),
+    hdrs = [
+        "include/compiler.h",
+        "include/dwarf.h",
+        "include/dwarf-eh.h",
+        "include/dwarf_i.h",
+        "include/libunwind-coredump.h",
+        "include/libunwind-dynamic.h",
+        "include/libunwind-ptrace.h",
+        "include/libunwind_i.h",
+        "include/mempool.h",
+        "include/remote.h",
+        "include/tdep/dwarf-config.h",
+        "include/tdep/jmpbuf.h",
+        "include/unwind.h",
+        "src/coredump/_UCD_internal.h",
+        "src/coredump/ucd_file_table.h",
+        "src/elf64.h",
+        "src/elfxx.h",
+        "src/os-linux.h",
+        "src/ptrace/_UPT_internal.h",
+        "src/setjmp/setjmp_i.h",
+        "src/unwind/unwind-internal.h",
+        ":config_h",
+        ":libunwind-common_h",
+        ":libunwind_h",
+        ":tdep_libunwind_i_h",
+    ] + select({
+        "@bazel_template//bazel:linux_x86_64": [
+            "include/libunwind-x86_64.h",
+            "include/tdep-x86_64/dwarf-config.h",
+            "include/tdep-x86_64/jmpbuf.h",
+            "include/tdep-x86_64/libunwind_i.h",
+            "src/x86_64/init.h",
+            "src/x86_64/ucontext_i.h",
+            "src/x86_64/unwind_i.h",
+        ] + glob(["src/x86_64/G*.c"]),
+        "@bazel_template//bazel:linux_aarch64": [
+            "include/libunwind-aarch64.h",
+            "include/tdep-aarch64/dwarf-config.h",
+            "include/tdep-aarch64/jmpbuf.h",
+            "include/tdep-aarch64/libunwind_i.h",
+            "src/aarch64/init.h",
+            "src/aarch64/ucontext_i.h",
+            "src/aarch64/unwind_i.h",
+        ],
+    }) + glob([
+        "src/dwarf/G*.c",
+        "src/mi/G*.c",
+    ]),
+    copts = COPTS + select({
+        "@bazel_template//bazel:linux_x86_64": LINUX_X86_64_COPTS,
+        "@bazel_template//bazel:linux_aarch64": LINUX_AARCH64_COPTS,
+    }),
+    local_defines = LOCAL_DEFINES,
+    textual_hdrs = [
+        "src/elfxx.c",
+    ],
+    deps = [
+        "@xz",
+        "@zlib",
+    ],
 )
 
 genrule(
@@ -353,9 +488,9 @@ template_rule(
     out = "include/config.h",
     substitutions =
         select({
-            ":linux_x86_64": {
+            "@bazel_template//bazel:linux_x86_64": {
             },
-            ":linux_aarch64": {
+            "@bazel_template//bazel:linux_aarch64": {
                 "#define HAVE_ASM_VSYSCALL_H 1": "/* #undef HAVE_ASM_VSYSCALL_H */",
                 "#define HAVE_EXECINFO_H 1": "/* #undef HAVE_EXECINFO_H */",
                 "/* #undef HAVE_STRUCT_DL_PHDR_INFO_DLPI_SUBS */": "#define HAVE_STRUCT_DL_PHDR_INFO_DLPI_SUBS 1",
@@ -425,199 +560,3 @@ template_rule(
         "#define unw_strerror                   UNW_ARCH_OBJ(strerror)": "#define unw_strerror                  UNW_ARCH_OBJ(strerror)",
     },
 )
-
-cc_library(
-    name = "invisible_header",
-    # buildifier: leave-alone
-    hdrs = [
-        "include/compiler.h",
-        ":config_h",
-        "include/dwarf.h",
-        "include/dwarf_i.h",
-        "include/dwarf-eh.h",
-        "include/libunwind_i.h",
-        "include/mempool.h",
-        "include/remote.h",
-        "include/tdep/dwarf-config.h",
-        ":tdep_libunwind_i_h",
-        "include/tdep/jmpbuf.h",
-        "src/elf64.h",
-        "src/elfxx.h",
-        "src/os-linux.h",
-        "src/unwind/unwind-internal.h",
-        "src/ptrace/_UPT_internal.h",
-        "src/setjmp/setjmp_i.h",
-        "src/coredump/ucd_file_table.h",
-        "src/coredump/_UCD_internal.h",
-        #"src/coredump/_UCD_lib.h",
-    ] + glob([
-        "src/dwarf/G*.c",
-        "src/mi/G*.c",
-    ]) + select({
-        ":linux_x86_64": [
-            "src/x86_64/init.h",
-            "src/x86_64/ucontext_i.h",
-            "src/x86_64/unwind_i.h",
-            "include/tdep-x86_64/dwarf-config.h",
-            "include/tdep-x86_64/libunwind_i.h",
-            "include/tdep-x86_64/jmpbuf.h",
-        ] + glob(
-            ["src/x86_64/G*.c"],
-        ),
-        ":linux_aarch64": [
-            "src/aarch64/init.h",
-            "src/aarch64/ucontext_i.h",
-            "src/aarch64/unwind_i.h",
-            "include/tdep-aarch64/dwarf-config.h",
-            "include/tdep-aarch64/libunwind_i.h",
-            "include/tdep-aarch64/jmpbuf.h",
-        ] + glob(
-            ["src/aarch64/G*.c"],
-        ),
-    }),
-    # buildifier: leave-alone
-    local_defines = LOCAL_DEFINES,
-    visibility = ["//visibility:private"],
-)
-
-cc_library(
-    name = "unwind",
-    srcs = [
-        "src/dl-iterate-phdr.c",
-        "src/dwarf/global.c",
-        "src/elfxx.c",
-        "src/mi/Gdyn-extract.c",
-        "src/mi/Gdyn-remote.c",
-        "src/mi/Gfind_dynamic_proc_info.c",
-        "src/mi/Gget_reg.c",
-        "src/mi/Gput_dynamic_unwind_info.c",
-        "src/mi/_ReadSLEB.c",
-        "src/mi/_ReadULEB.c",
-        "src/mi/backtrace.c",
-        "src/mi/dyn-cancel.c",
-        "src/mi/dyn-info-list.c",
-        "src/mi/dyn-register.c",
-        "src/mi/flush_cache.c",
-        "src/mi/init.c",
-        "src/mi/mempool.c",
-        "src/mi/strerror.c",
-        "src/os-linux.c",
-        "src/setjmp/longjmp.c",
-        "src/setjmp/siglongjmp.c",
-    ] + glob(
-        [
-            "src/ptrace/*.c",
-            "src/coredump/*.c",
-            "src/mi/L*.c",
-            "src/dwarf/G*.c",
-            "src/dwarf/L*.c",
-            "src/unwind/*.c",
-        ],
-        exclude = [
-            "src/mi/G*.c",
-            "src/ptrace/_UPT_elf.c",
-            "src/coredump/_UPT_elf.c",
-            "src/coredump/_UCD_access_reg_freebsd.c",
-            "src/coredump/_UCD_access_reg_qnx.c",
-            "src/coredump/_UCD_get_mapinfo_freebsd.c",
-            "src/coredump/_UCD_get_mapinfo_qnx.c",
-            "src/coredump/_UCD_get_mapinfo_generic.c",
-            "src/mi/Ldyn-remote.c",
-        ],
-    ) + select({
-        ":linux_x86_64": glob(
-            [
-                "src/x86_64/L*.c",
-                "src/x86_64/G*.c",
-                "src/x86_64/is_fpreg.c",
-                "src/x86_64/getcontext.S",
-                "src/x86_64/longjmp.S",
-                "src/x86_64/setcontext.S",
-                "src/x86_64/siglongjmp.S",
-                "src/x86_64/regname.c",
-                "src/x86_64/init.h",
-                "src/x86_64/is_fpreg.c",
-                "src/x86_64/regname.c",
-            ],
-            exclude = [
-                "src/x86_64/Los-solaris.c",
-                "src/x86_64/Los-freebsd.c",
-                "src/x86_64/Los-qnx.c",
-                "src/x86_64/Gos-freebsd.c",
-                "src/x86_64/Gos-solaris.c",
-                "src/x86_64/Gos-qnx.c",
-            ],
-        ),
-        ":linux_aarch64": glob(
-            [
-                "src/aarch64/L*.c",
-                "src/aarch64/is_fpreg.c",
-                "src/aarch64/regname.c",
-                "src/aarch64/getcontext.S",
-                "src/aarch64/longjmp.S",
-                "src/aarch64/G*.c",
-                #"src/aarch64/setcontext.S",
-                "src/aarch64/siglongjmp.S",
-            ],
-            exclude = [
-                "src/aarch64/Los-freebsd.c",
-                "src/aarch64/Los-solaris.c",
-                "src/aarch64/Gos-freebsd.c",
-                "src/aarch64/Gos-solaris.c",
-                "src/aarch64/Gos-qnx.c",
-                "src/aarch64/Los-qnx.c",
-            ],
-        ),
-    }),
-    hdrs = [
-        "include/libunwind-coredump.h",
-        "include/libunwind-dynamic.h",
-        "include/libunwind-ptrace.h",
-        "include/unwind.h",
-        ":libunwind-common_h",
-        ":libunwind_h",
-    ] + select({
-        ":linux_x86_64": [
-            "include/libunwind-x86_64.h",
-        ],
-        ":linux_aarch64": [
-            "include/libunwind-aarch64.h",
-        ],
-    }),
-    copts = COPTS + select({
-        ":linux_x86_64": LINUX_X86_64_COPTS,
-        ":linux_aarch64": LINUX_AARCH64_COPTS,
-    }),
-    local_defines = LOCAL_DEFINES,
-    textual_hdrs = select({
-        ":linux_x86_64": [
-            "src/x86_64/ucontext_i.h",
-        ],
-        ":linux_aarch64": [
-            "src/aarch64/ucontext_i.h",
-        ],
-    }) + [
-        "src/elfxx.c",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":invisible_header",
-        "@xz",
-        "@zlib",
-    ],
-)
-
-#genrule(
-#name = "libunwind_symlink",
-#srcs = [":unwind"],
-#outs = [
-#"libunwind.so.1",
-#],
-#cmd = """
-#for file in $(locations @libunwind//:unwind); do
-#if [[ "$$file" == *.so ]]; then
-#cp $$file $(@D)/libunwind.so.1
-#fi
-#""",
-#visibility = ["//visibility:public"],
-#)

@@ -2,39 +2,14 @@ load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "windows_x86_64",
-    constraint_values = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "linux_aarch64",
-    constraint_values = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:linux",
-    ],
-)
-
-config_setting(
-    name = "linux_x86_64",
-    constraint_values = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-)
-
 template_rule(
     name = "config_h",
     src = "libiberty/config.in",
     out = "libiberty/config.h",
     substitutions =
         select({
-            ":linux_aarch64": {},
-            ":linux_x86_64": {
+            "@bazel_template//bazel:linux_aarch64": {},
+            "@bazel_template//bazel:linux_x86_64": {
                 "#undef HAVE_X86_SHA1_HW_SUPPORT": "#define HAVE_X86_SHA1_HW_SUPPORT 1",
             },
         }) |
@@ -319,12 +294,12 @@ cc_library(
         "-Wstrict-prototypes",
         "-Wshadow=local",
         "-pedantic",
-        "-I$(BINDIR)/external/libiberty/libiberty",
+        "-I$(GENDIR)/external/libiberty/libiberty",
         "-Iexternal/libiberty/include",
     ] + select({
-        ":linux_aarch64": [
+        "@bazel_template//bazel:linux_aarch64": [
         ],
-        ":linux_x86_64": [
+        "@bazel_template//bazel:linux_x86_64": [
             "-fcf-protection",
         ],
     }),

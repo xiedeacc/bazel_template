@@ -7,13 +7,13 @@ COPTS = [
     "-isystem $(GENDIR)/external/libunwind/include",
     "-isystem external/libsodium/src/libsodium/include",
     "-isystem external/fbthrift",
-    "-isystem $(BINDIR)/external/fbthrift",
+    "-isystem $(GENDIR)/external/fbthrift",
     "-isystem external/double-conversion",
     "-isystem external/xxhash",
     "-isystem external/com_googlesource_code_re2",
     "-isystem external/fatal",
-    "-isystem $(BINDIR)/external/folly",
-    "-isystem $(BINDIR)/external/fizz",
+    "-isystem $(GENDIR)/external/folly",
+    "-isystem $(GENDIR)/external/fizz",
     "-isystem external/folly",
     "-isystem external/fizz",
     "-isystem external/wangle",
@@ -95,7 +95,6 @@ cc_library(
         "@mvfst",
         "@wangle",
     ],
-    alwayslink = True,
 )
 
 cc_library(

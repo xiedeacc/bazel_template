@@ -58,14 +58,14 @@ int main(int argc, char** argv)
 cc_library(
     name = 'foo',
     srcs = 'foo.cpp',
-    alwayslink = 1 # NOTE: this is required by module registerers
+    alwayslink = True # NOTE: this is required by module registerers
 )
 
 cc_library(
     name = 'bar',
     srcs = 'bar.cpp',
     deps = ':foo',
-    alwayslink = 1 # NOTE: this is required by module registerers
+    alwayslink = True # NOTE: this is required by module registerers
 )
 
 cc_binary(

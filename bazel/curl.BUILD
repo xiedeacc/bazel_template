@@ -273,7 +273,6 @@ cc_library(
     includes = ["include"],
     linkopts = select({
         "//conditions:default": [
-            "-lrt",
         ],
     }),
     visibility = ["//visibility:public"],

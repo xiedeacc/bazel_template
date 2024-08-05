@@ -1,29 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "linux_x86_64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:x86_64",
-    ],
-)
-
-config_setting(
-    name = "linux_aarch64",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:aarch64",
-    ],
-)
-
-platform(
-    name = "linux_aarch64_platform",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:aarch64",
-    ],
-)
-
 filegroup(
     name = "libaio.map",
     srcs = ["src/libaio.map"],
@@ -41,10 +17,10 @@ cc_library(
         "src/syscall-generic.h",
         "src/vsys_def.h",
     ] + select({
-        ":linux_x86_64": [
+        "@bazel_template//bazel:linux_x86_64": [
             "src/syscall-x86_64.h",
         ],
-        ":linux_aarch64": [
+        "@bazel_template//bazel:linux_aarch64": [
             "src/syscall-arm.h",
         ],
     }),
