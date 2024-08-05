@@ -554,6 +554,7 @@ cc_library(
     ] + select({
         "@bazel_template//bazel:jemalloc": ["@jemalloc"],
         #"@bazel_template//bazel:tcmalloc": ["@tcmalloc//tcmalloc"],
+        "@bazel_template//bazel:tcmalloc": ["@bazel_template//lib:jemalloc_lib"],
         "//conditions:default": [],
     }),
     alwayslink = True,

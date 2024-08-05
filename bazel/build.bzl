@@ -17,6 +17,7 @@ def cc_test(
         deps = depset(test_main + test_deps + deps).to_list() + select({
             "//bazel:jemalloc": ["@jemalloc"],
             #"//bazel:tcmalloc": ["@tcmalloc//tcmalloc"],
+            "//bazel:tcmalloc": ["//lib:jemalloc_lib"],
             "//conditions:default": [],
         }),
         **kwargs

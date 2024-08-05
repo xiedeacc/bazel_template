@@ -19,8 +19,6 @@ cc_binary(
         "@com_github_gflags_gflags//:gflags",
         "@com_github_glog_glog//:glog",
         "@folly",
-        #"@jemalloc",
-        "//lib:jemalloc_lib",
     ],
 )
 
