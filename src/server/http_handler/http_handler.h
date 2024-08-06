@@ -6,6 +6,8 @@
 #ifndef BAZEL_TEMPLATE_SERVER_HTTP_HANDLER_HTTP_HANDLER_H
 #define BAZEL_TEMPLATE_SERVER_HTTP_HANDLER_HTTP_HANDLER_H
 
+#include <memory>
+
 #include "proxygen/httpserver/RequestHandler.h"
 #include "proxygen/httpserver/RequestHandlerFactory.h"
 

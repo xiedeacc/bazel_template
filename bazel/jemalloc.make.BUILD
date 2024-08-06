@@ -30,7 +30,7 @@ configure_make_variant(
     ],
     out_shared_libs = [
         "libjemalloc.so",
-        #"libjemalloc.so.2",
+        "libjemalloc.so.2",
     ],
     #out_static_libs = ["libjemalloc.a"],
     targets = [

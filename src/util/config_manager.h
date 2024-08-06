@@ -23,9 +23,7 @@ class ConfigManager {
   ConfigManager() = default;
 
  public:
-  static std::shared_ptr<ConfigManager> Instance() {
-    return folly::Singleton<ConfigManager>::try_get();
-  }
+  static std::shared_ptr<ConfigManager> Instance();
 
   bool Init(const std::string& base_config_path) {
     std::string content = Util::LoadContent(base_config_path);
@@ -54,8 +52,6 @@ class ConfigManager {
  private:
   bazel_template::proto::BaseConfig base_config_;
 };
-
-static folly::Singleton<ConfigManager> config_manager;
 
 }  // namespace util
 }  // namespace bazel_template

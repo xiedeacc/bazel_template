@@ -16,8 +16,8 @@ def cc_test(
         linkstatic = 1,
         deps = depset(test_main + test_deps + deps).to_list() + select({
             "//bazel:jemalloc": ["@jemalloc"],
-            #"//bazel:tcmalloc": ["@tcmalloc//tcmalloc"],
-            "//bazel:tcmalloc": ["//lib:jemalloc_lib"],
+            #"//bazel:tcmalloc": ["@tcmalloc//tcmalloc"], #use this if folly fix link caused couredump prolem
+            "//bazel:tcmalloc": ["//lib:tcmalloc_lib"],
             "//conditions:default": [],
         }),
         **kwargs

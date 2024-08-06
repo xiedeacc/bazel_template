@@ -30,9 +30,6 @@ cc_binary(
     name = "compiler_generate_build_templates",
     srcs = ["thrift/compiler/generate/build_templates.cc"],
     copts = COPTS,
-    deps = [
-        #"@jemalloc",
-    ],
 )
 
 genrule(
@@ -95,6 +92,7 @@ cc_library(
         "@mvfst",
         "@wangle",
     ],
+    alwayslink = True,
 )
 
 cc_library(
@@ -249,10 +247,9 @@ cc_binary(
     deps = [
         ":compiler_generators",
         "@folly",
-        #"@jemalloc",
+        "@libunwind//:unwind",
         "@mvfst",
         "@wangle",
-        "@libunwind//:unwind",
     ],
 )
 

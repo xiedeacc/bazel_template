@@ -35,5 +35,6 @@ cc_library(
         "@com_github_glog_glog//:glog",
         "@com_google_googletest//:gtest",
         "@folly",
+        #"@tcmalloc//tcmalloc",
     ],
 )

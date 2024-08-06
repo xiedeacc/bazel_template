@@ -164,6 +164,16 @@ LD_LIBRARY_PATH=/root/src/software/clang_sysroot/lib:\
 
 # 一些常见软件编译参数
 
+clear && bazel build //src/google/protobuf:protobuf
+cp bazel-bin/protoc /usr/local/lib
+cp bazel-bin/src/google/protobuf/libprotobuf.a /usr/local/lib
+cp bazel-bin/src/google/protobuf/libprotobuf.so /usr/local/lib
+cp -r src/google /usr/local/include
+
+absl
+cmake BUILD_TESTING=OFF -DABSL_PROPAGATE_CXX_STD=ON -DBUILD_SHARED_LIBS=ON ..
+cmake BUILD_TESTING=OFF -DABSL_PROPAGATE_CXX_STD=ON ..
+
 ## openssl
 指定rpath, 解决和系统自带openssl共存问题
 ```

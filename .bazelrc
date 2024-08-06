@@ -1,22 +1,26 @@
 test:cpplint --test_tag_filters=cpplint
 test:cpplint --build_tests_only
+test:unit_test --test_tag_filters=-cpplint
 
-#unit_test_tcmalloc will coredump for link tcmalloc static not compitible with folly
+#########################attention
+# 1. static link tcmalloc or jemalloc with folly will coredump
+# 2. pprof.out generated in bazel test sandbox
+# 3. go install github.com/google/pprof@latest
+# 4. both tcmalloc and jemalloc cannot detect memory leak, use sanitize instead
+
 test:unit_test_tcmalloc --define=profiling_type=tcmalloc
-test:unit_test_tcmalloc --test_env CPUPROFILE=pprof.out # pprof.out generated in bazel test sandbox
-test:unit_test_tcmalloc --test_env=PPROF_PATH=/usr/local/bin/pprof # need install gperftools first
+test:unit_test_tcmalloc --test_env=CPUPROFILE=pprof.out
+test:unit_test_tcmalloc --test_env=PPROF_PATH=/root/src/go/bin/pprof
 
 test:unit_test_jemalloc --define=profiling_type=jemalloc
-test:unit_test_jemalloc --test_env CPUPROFILE=pprof.out # pprof.out generated in bazel test sandbox
-test:unit_test_jemalloc --test_env=PPROF_PATH=/usr/local/bin/pprof # need install gperftools first
+test:unit_test_jemalloc --test_env=CPUPROFILE=pprof.out
+test:unit_test_jemalloc --test_env=PPROF_PATH=/usr/local/bin/pprof
 test:unit_test_jemalloc --test_env MALLOC_CONF="prof:true,prof_active:true,lg_prof_interval:20,lg_prof_sample:17"
 
-test:sanitize --copt='-fsanitize=address' # need comment @gperftools//:tcmalloc_and_profiler in bazel/build.bzl
+test:sanitize --copt='-fsanitize=address'
 test:sanitize --linkopt='-fsanitize=address'
 test:sanitize --linkopt='-static-libasan'
 test:sanitize --copt='-g'
-test:sanitize --test_tag_filters=-cpplint
-#test:sanitize --copt='-O0'
 
 test:coverage --test_tag_filters=-cpplint
 test:coverage --copt=--coverage
@@ -24,9 +28,6 @@ test:coverage --cxxopt=--coverage
 test:coverage --cxxopt=-fprofile-arcs
 test:coverage --cxxopt=-ftest-coverage
 test:coverage --linkopt=-coverage
-test:coverage --linkopt=-lgcov
-test:coverage --linkopt=-lgcc
-test:coverage --linkopt=-lc
 test:coverage --nocache_test_results
 
 #####################################################################
@@ -37,18 +38,18 @@ build --workspace_status_command=bazel/workspace_status.sh
 #build --host_features=-layering_check
 build --announce_rc
 build -c opt
-#build --conlyopt='-std=c99'
+
 build --copt='-g'
 build --copt='-O2'
 build --copt='-Wall'
 build --cxxopt='-std=c++17'
-#build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 
 build --host_copt='-g'
 build --host_copt='-O2'
 build --host_copt='-Wall'
 build --host_cxxopt='-std=c++17'
-#build --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+build --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 
 build --strip='never'
 build --output_filter="^//"

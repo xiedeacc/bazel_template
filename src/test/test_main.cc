@@ -7,6 +7,7 @@
 #include "gflags/gflags.h"
 #include "glog/logging.h"
 #include "gtest/gtest.h"
+// #include "lib/tcmalloc/malloc_extension.h"
 
 int main(int argc, char **argv) {
   folly::Init init(&argc, &argv, false);
@@ -14,5 +15,6 @@ int main(int argc, char **argv) {
   google::SetStderrLogging(google::INFO);
   ::testing::InitGoogleTest(&argc, argv);
   google::ParseCommandLineFlags(&argc, &argv, false);
+  // tcmalloc::MallocExtension::ActivateGuardedSampling();
   return RUN_ALL_TESTS();
 }
