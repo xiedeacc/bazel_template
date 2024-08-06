@@ -3,6 +3,7 @@
  * All rights reserved.
  *******************************************************************************/
 
+#include "folly/init/Init.h"
 #include "gflags/gflags.h"
 #include "glog/logging.h"
 // #include "gperftools/profiler.h"
@@ -13,8 +14,12 @@
 int main(int argc, char **argv) {
   // ProfilerStart("bazel_template_profile");
 
-  // google::InitGoogleLogging(argv[0]);
-  // gflags::ParseCommandLineFlags(&argc, &argv, true);
+  folly::Init init(&argc, &argv, false);
+  // google::InitGoogleLogging(argv[0]); // called in folly::Init
+  gflags::ParseCommandLineFlags(&argc, &argv, false);
+
+  LOG(INFO) << "Program initializing ...";
+  LOG(INFO) << "CommandLine: " << google::GetArgv();
 
   bazel_template::common::InitAllModules(&argc, &argv);
 

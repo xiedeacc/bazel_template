@@ -69,6 +69,8 @@ class ModuleManagerImpl {
   bool is_initialized_;  // Allow initialize repeatly for shared libraries
 };
 
+static folly::Singleton<ModuleManagerImpl> module_manager_impl;
+
 void ModuleManagerImpl::RegisterModuleCtor(const char* filename, int line,
                                            const char* name, ModuleCtor ctor) {
   Module& module = modules_[name];
@@ -157,8 +159,6 @@ void ModuleManagerImpl::InitializeAll(int* argc, char*** argv,
   google::ParseCommandLineFlags(argc, argv, remove_flags);
 
   if (!is_initialized_) {
-    google::InitGoogleLogging((*argv)[0]);
-
     LOG(INFO) << "Program initializing ...";
     LOG(INFO) << "CommandLine: " << google::GetArgv();
 
