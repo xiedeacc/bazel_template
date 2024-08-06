@@ -154,14 +154,7 @@ void ModuleManagerImpl::InitializeAll(int* argc, char*** argv,
 #endif
   }
 
-  // Allow command line to be parsed again to initialize extra flags load
-  // from shared library.
-  google::ParseCommandLineFlags(argc, argv, remove_flags);
-
   if (!is_initialized_) {
-    LOG(INFO) << "Program initializing ...";
-    LOG(INFO) << "CommandLine: " << google::GetArgv();
-
     is_initialized_ = true;
   } else {
     LOG(INFO) << "InitAllModules is called again";

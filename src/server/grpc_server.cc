@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
 
   folly::Init init(&argc, &argv, false);
   // google::InitGoogleLogging(argv[0]); // called in folly::Init
+  google::SetStderrLogging(google::INFO);
   gflags::ParseCommandLineFlags(&argc, &argv, false);
 
   LOG(INFO) << "Program initializing ...";
