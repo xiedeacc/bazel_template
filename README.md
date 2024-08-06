@@ -1,6 +1,7 @@
 # features
 
 # todo
+0. jemalloc没有生成profile文件
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
 
 # future todo:
@@ -32,6 +33,7 @@ bazel test //... --config=cpplint              #只跑cpplint检查
 ## 内存leak检测
 ```
 bazel test --config=unit_test //... #检测到内存泄露单测将失败，并查询详细日志即可
+https://github.com/jemalloc/jemalloc/wiki/Use-Case%3A-Leak-Checking
 ```
 
 ## 内存corruption
