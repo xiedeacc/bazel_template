@@ -16,6 +16,21 @@ py_binary(
 )
 
 config_setting(
+    name = "clang",
+    values = {"compiler": "clang"},
+)
+
+config_setting(
+    name = "gcc",
+    values = {"compiler": "gcc"},
+)
+
+config_setting(
+    name = "msvc",
+    values = {"compiler": "msvc-cl"},
+)
+
+config_setting(
     name = "jemalloc",
     define_values = {"profiling_type": "jemalloc"},
 )

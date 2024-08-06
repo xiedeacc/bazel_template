@@ -1,3 +1,4 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_template//bazel:common.bzl", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
@@ -328,10 +329,10 @@ template_rule(
     name = "folly-config_h",
     src = ":folly-config_h_in",
     out = "folly/folly-config.h",
-    substitutions = select({
-                        "@bazel_template//bazel:linux_x86_64": {
+    substitutions = selects.with_or({
+                        "@bazel_template//bazel:gcc": {
                         },
-                        "@bazel_template//bazel:linux_aarch64": {
+                        "@bazel_template//bazel:clang": {
                             "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 0",
                         },
                     }) |

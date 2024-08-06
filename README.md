@@ -24,15 +24,14 @@ clear && bazel run @hedron_compile_commands//:refresh_all
 
 ## 单测与代码风格
 ```
-bazel test //... --test_tag_filters=cpplint    #只跑cpplint检查
-bazel test //... --test_tag_filters=-cpplint   #不跑cpplint检查
-bazel test //... --config=unit_test            #根据.bazelrc配置文件，跑单测和内存泄露检查，不跑cpplint检查
-bazel test //... --config=cpplint              #只跑cpplint检查
+bazel test //... --config=unit_test_tcmalloc #单测和内存泄露检查
+bazel test //... --config=unit_test_jemalloc #单测和内存泄露检查
+bazel test //... --config=cpplint            #只跑cpplint检查
 ```
 
 ## 内存leak检测
 ```
-bazel test --config=unit_test //... #检测到内存泄露单测将失败，并查询详细日志即可
+bazel test //... --config=unit_test_jemalloc #单测和内存泄露检查
 https://github.com/jemalloc/jemalloc/wiki/Use-Case%3A-Leak-Checking
 ```
 
@@ -43,15 +42,12 @@ bazel test --config=sanitize //...
 
 ## cpu性能和内存分析
 ```
-bazel test --test_env="CPUPROFILE=prof.out" --test_env=HEAPCHECK=normal //src/common:host_spec_test #prof.out在bazel构建根目录下
+bazel test --test_env="CPUPROFILE=prof.out" //src/common:host_spec_test #prof.out在bazel构建根目录下
 CPUPROFILE=prof.out bazel-bin/src/common/host_spec_test
-HEAPPROFILE=heap.out bazel-bin/src/common/host_spec_test
 
 pprof --web bazel-bin/src/common/host_spec_test prof.out
 pprof --text ./bazel-bin/src/common/host_spec_test prof.out
 pprof --pdf ./bazel-bin/src/common/host_spec_test prof.out > profile.pdf
-pprof ./bazel-bin/src/common/host_spec_test heap.prof --inuse_objects --lines --heapcheck --edgefraction=1e-10 --nodefraction=1e-10 --gv
-pprof ./bazel-bin/src/common/host_spec_test heap.prof --inuse_objects --lines --heapcheck --edgefraction=1e-10 --nodefraction=1e-10 --pdf > profile.pdf
 
 perf record -F 99 -g bazel-bin/src/demo 10000
 perf script | /root/src/software/FlameGraph/stackcollapse-perf.pl | /root/src/software/FlameGraph/flamegraph.pl > flamegraph.svg
@@ -74,7 +70,8 @@ https://coverage.xiamu.com
 ```
 bazel query --notool_deps --noimplicit_deps "deps(//src/server:grpc_server)" --output graph
 bazel query 'attr(visibility, "//visibility:public", //:*)'
-bazel query "deps(//src/context:all)"
+bazel query "rdeps(//..., //src/util:util)"
+bazel query "rdeps(//..., @com_google_protobuf//:protobuf)"
 bazel query 'deps(//src/server:grpc_server)' --output graph > graph.in
 bazel query --noimplicit_deps 'deps(//:main)' --output graph > simplified_graph.in
 dot -Tpng < graph.in > graph.png
@@ -140,6 +137,14 @@ CMAKE_PREFIX_PATH=/usr/local:/usr/local/llvm/18 LD_LIBRARY_PATH=/usr/local/lib P
 # 一些常见和交叉编译相关命令
 
 ```
+LLVM_DIR=/usr/local/llvm/18 \
+CC=${LLVM_DIR}/bin/clang \
+CPPFLAGS="-I${LLVM_DIR}/include -I${LLVM_DIR}/include/x86_64-unknown-linux-gnu/c++/v1 -I${LLVM_DIR}/include/c++/v1 -I${LLVM_DIR}/lib/clang/18/include -I/usr/include" \
+CFLAGS="-v -fPIC -I${LLVM_DIR}/include -I${LLVM_DIR}/include/x86_64-unknown-linux-gnu/c++/v1 -I${LLVM_DIR}/include/c++/v1 -I${LLVM_DIR}/lib/clang/18/include -I/usr/include" \
+LDFLAGS="-L${LLVM_DIR}/lib -L${LLVM_DIR}/lib/x86_64-unknown-linux-gnu -L${LLVM_DIR}/lib/clang/18/lib/x86_64-unknown-linux-gnu -L/usr/lib" \
+./configure
+
+
 CC=aarch64-linux-gnu-gcc ./configure --enable-shared=no --host=aarch64-unknown-linux-gnu
 
 /usr/local/llvm/18/bin/clang++ -v --target=aarch64-unknown-linux-gnu \

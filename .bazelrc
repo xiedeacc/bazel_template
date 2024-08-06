@@ -1,13 +1,17 @@
-test:cpplint --test_tag_filters=cpplint
-test:cpplint --build_tests_only
-test:unit_test --test_tag_filters=-cpplint
+common --noenable_bzlmod
+common --experimental_downloader_config=.bazel_downloader.cfg
 
-#########################attention
+######################### attention #########################
 # 1. static link tcmalloc or jemalloc with folly will coredump
 # 2. pprof.out generated in bazel test sandbox
 # 3. go install github.com/google/pprof@latest
 # 4. both tcmalloc and jemalloc cannot detect memory leak, use sanitize instead
 # 5. clang need link -static-libasan
+
+test:cpplint --test_tag_filters=cpplint
+test:cpplint --build_tests_only
+test:unit_test --test_tag_filters=-cpplint
+
 
 test:unit_test_tcmalloc --define=profiling_type=tcmalloc
 test:unit_test_tcmalloc --test_env=CPUPROFILE=pprof.out
@@ -33,12 +37,8 @@ test:coverage --linkopt=-coverage
 test:coverage --nocache_test_results
 
 #####################################################################
-build --workspace_status_command=bazel/workspace_status.sh
-#build --features=-compiler_param_file
-#build --features=-layering_check
-#build --host_features=-compiler_param_file
-#build --host_features=-layering_check
 build --announce_rc
+build --workspace_status_command=bazel/workspace_status.sh
 build -c opt
 
 build --copt='-g'
@@ -55,13 +55,18 @@ build --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 
 build --strip='never'
 build --output_filter="^//"
+
+#build --features=-compiler_param_file
+#build --features=-layering_check
+#build --host_features=-compiler_param_file
+#build --host_features=-layering_check
+
 #build --remote_cache=http://192.168.1.101/bazel_cache
 #build --keep_going
-common --noenable_bzlmod
-common --experimental_downloader_config=.bazel_downloader.cfg
 
 build:clang --extra_toolchains='//toolchain:clang_toolchain_for_linux_x86_64'
-build:gcc --extra_toolchains='@local_config_cc_toolchains//:cc-toolchain-k8'
+build:clang --platforms='//bazel:linux_x86_64_platform'
+build:clang --compiler=clang
 
 build:clang_aarch64 --platforms='//bazel:linux_aarch64_platform'
 build:clang_aarch64 --extra_toolchains='//toolchain:clang_toolchain_for_linux_aarch64'
@@ -70,6 +75,8 @@ build:clang_aarch64 --copt='-Wno-error=sign-conversion'
 build:clang_aarch64 --copt='-Wno-error=gnu-include-next'
 build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
 build:clang_aarch64 --compiler=clang
+
+build:gcc --extra_toolchains='@local_config_cc_toolchains//:cc-toolchain-k8'
 
 build:openwrt_aarch64 --extra_toolchains='@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8'
 build:openwrt_aarch64 --platforms='//bazel:linux_aarch64_platform'

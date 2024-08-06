@@ -2,27 +2,6 @@ load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
-config_setting(
-    name = "msvc",
-    values = {
-        "compiler": "msvc-cl",
-    },
-)
-
-config_setting(
-    name = "gcc",
-    values = {
-        "compiler": "gcc",
-    },
-)
-
-config_setting(
-    name = "clang",
-    values = {
-        "compiler": "clang",
-    },
-)
-
 COPTS = [
     "-Wall",
     "-W",
@@ -55,10 +34,15 @@ template_rule(
     out = "include/event2/event-config.h",
     substitutions =
         select({
-            ":clang": {
+            "@bazel_template//bazel:clang": {
+                "#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM */",
+                "#cmakedefine EVENT__HAVE_ARC4RANDOM_BUF 1": "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */",
+                "#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
+            },
+            "@bazel_template//bazel:gcc": {
                 "#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "#define EVENT__HAVE_ARC4RANDOM 1",
                 "#cmakedefine EVENT__HAVE_ARC4RANDOM_BUF 1": "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
-                "#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
+                "#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
             },
             "//conditions:default": {
                 "#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM */",
