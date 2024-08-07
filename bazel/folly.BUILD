@@ -73,7 +73,10 @@ cc_library(
     srcs = [
         "folly/crypto/detail/MathOperation_AVX2.cpp",
     ],
-    copts = COPTS + ["-mavx"],
+    copts = COPTS + select({
+        "@bazel_template//bazel:linux_x86_64": ["-mavx"],
+        "@bazel_template//bazel:linux_aarch64": [],
+    }),
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -84,7 +87,10 @@ cc_library(
         "folly/crypto/detail/MathOperation_SSE2.cpp",
         "folly/crypto/detail/MathOperation_Simple.cpp",
     ],
-    copts = COPTS + ["-mno-avx"],
+    copts = COPTS + select({
+        "@bazel_template//bazel:linux_x86_64": ["-mno-avx"],
+        "@bazel_template//bazel:linux_aarch64": [],
+    }),
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -97,7 +103,10 @@ cc_library(
         "folly/hash/detail/Crc32CombineDetail.cpp",
         "folly/hash/detail/Crc32cDetail.cpp",
     ],
-    copts = COPTS + ["-mpclmul"],
+    copts = COPTS + select({
+        "@bazel_template//bazel:linux_x86_64": ["-mpclmul"],
+        "@bazel_template//bazel:linux_aarch64": [],
+    }),
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -107,11 +116,10 @@ cc_library(
     srcs = [
         "folly/external/fast-crc32/avx512_crc32c_v8s3x4.cpp",
     ],
-    copts = COPTS + [
-        "-mpclmul",
-        #"-mavx512f",
-        #"-mavx512vl",
-    ],
+    copts = COPTS + select({
+        "@bazel_template//bazel:linux_x86_64": ["-mpclmul"],
+        "@bazel_template//bazel:linux_aarch64": [],
+    }),
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -121,7 +129,10 @@ cc_library(
     srcs = [
         "folly/detail/base64_detail/Base64_SSE4_2.cpp",
     ],
-    copts = COPTS + ["-msse4.2"],
+    copts = COPTS + select({
+        "@bazel_template//bazel:linux_x86_64": ["-msse4.2"],
+        "@bazel_template//bazel:linux_aarch64": [],
+    }),
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )

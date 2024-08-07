@@ -193,7 +193,7 @@ cc_library(
             "src/aarch64/init.h",
             "src/aarch64/ucontext_i.h",
             "src/aarch64/unwind_i.h",
-        ],
+        ] + glob(["src/aarch64/G*.c"]),
     }) + glob([
         "src/dwarf/G*.c",
         "src/mi/G*.c",
