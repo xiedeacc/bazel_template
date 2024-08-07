@@ -131,11 +131,11 @@ cc_library(
         "@bazel_template//bazel:linux_aarch64": glob(
             [
                 "src/aarch64/L*.c",
+                "src/aarch64/G*.c",
                 "src/aarch64/is_fpreg.c",
                 "src/aarch64/regname.c",
                 "src/aarch64/getcontext.S",
                 "src/aarch64/longjmp.S",
-                "src/aarch64/G*.c",
                 #"src/aarch64/setcontext.S",
                 "src/aarch64/siglongjmp.S",
             ],
