@@ -579,58 +579,6 @@ new_git_repository(
     tag = "pcre2-10.42",
 )
 
-register_toolchains(
-    "//toolchain:clang_toolchain_for_linux_aarch64",
-)
-
-new_local_repository(
-    name = "clang_sysroot",
-    build_file_content =
-        """
-filegroup(
-  name = "sysroot",
-  srcs = glob(["*/**"]),
-  visibility = ["//visibility:public"],
-)
-        """,
-    path = "/root/src/software/clang_sysroot",
-)
-
-new_local_repository(
-    name = "gcc_sysroot",
-    build_file_content =
-        """
-filegroup(
-  name = "sysroot",
-  srcs = glob(["*/**"]),
-  visibility = ["//visibility:public"],
-)
-        """,
-    path = "/root/src/software/gcc_sysroot",
-)
-
-local_repository(
-    name = "toolchains_openwrt",
-    path = "../toolchains_openwrt",
-)
-
-load("@toolchains_openwrt//toolchain:toolchains_openwrt.bzl", "openwrt_toolchain_setup")
-
-openwrt_toolchain_setup(
-    name = "openwrt_repo_setup",
-    toolchains = {
-        "rockchip": {
-            "armv8": {
-                "arch": "aarch64",
-                "url": "/root/src/software/openwrt/toolchain",
-                "sha256sum": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3",
-            },
-        },
-    },
-)
-
-register_toolchains("@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8")
-
 git_repository(
     name = "hedron_compile_commands",
     commit = "e43e8eaeed3e252ac7c02983f4b1792bdff2e2f0",
@@ -749,3 +697,153 @@ hedron_compile_commands_setup_transitive()
 hedron_compile_commands_setup_transitive_transitive()
 
 hedron_compile_commands_setup_transitive_transitive_transitive()
+
+register_toolchains(
+    "//toolchain:clang_toolchain_for_linux_aarch64",
+)
+
+new_local_repository(
+    name = "clang_sysroot",
+    build_file_content =
+        """
+filegroup(
+  name = "sysroot",
+  srcs = glob(["*/**"]),
+  visibility = ["//visibility:public"],
+)
+        """,
+    path = "/root/src/software/clang_sysroot",
+)
+
+new_local_repository(
+    name = "gcc_sysroot",
+    build_file_content =
+        """
+filegroup(
+  name = "sysroot",
+  srcs = glob(["*/**"]),
+  visibility = ["//visibility:public"],
+)
+        """,
+    path = "/root/src/software/gcc_sysroot",
+)
+
+local_repository(
+    name = "cc_toolchains",
+    path = "../cc_toolchains",
+)
+
+load("@cc_toolchains//toolchain:cc_toolchains_setup.bzl", "cc_toolchains_setup")
+
+cc_toolchains_setup(
+    name = "cc_toolchains_setup",
+    toolchains = {
+        "amd64": {
+            "x86_64": {
+                "gcc": {
+                    "url": "/root/src/software/openwrt/toolchain",
+                    "sha256sum": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3",
+                    "target_os": "linux",
+                    "tool_names": {
+                        "ar": "aarch64-openwrt-linux-musl-ar",
+                        "ld": "aarch64-openwrt-linux-musl-ld.bin",
+                        "llvm-cov": "aarch64-openwrt-linux-musl-gcov.bin",
+                        "gcov": "aarch64-openwrt-linux-musl-gcov.bin",
+                        "cpp": "aarch64-openwrt-linux-musl-cpp.bin",
+                        "gcc": "aarch64-openwrt-linux-musl-gcc.bin",
+                        "nm": "aarch64-openwrt-linux-musl-nm.bin",
+                        "objcopy": "aarch64-openwrt-linux-musl-objcopy.bin",
+                        "objdump": "aarch64-openwrt-linux-musl-objdump.bin",
+                        "strip": "aarch64-openwrt-linux-musl-strip.bin",
+                    },
+                    "cxx_builtin_include_directories": [
+                        "include",
+                        "aarch64-openwrt-linux-musl/include/c++/12.3.0",
+                        "aarch64-openwrt-linux-musl/sys-include",
+                        "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include",
+                    ],
+                    "debug": True,
+                },
+                "clang": {
+                    "url": "/root/src/software/openwrt/toolchain",
+                    "sha256sum": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3",
+                    "target_os": "linux",
+                    "tool_names": {
+                        "ar": "aarch64-openwrt-linux-musl-ar",
+                        "ld": "aarch64-openwrt-linux-musl-ld.bin",
+                        "llvm-cov": "aarch64-openwrt-linux-musl-gcov.bin",
+                        "gcov": "aarch64-openwrt-linux-musl-gcov.bin",
+                        "cpp": "aarch64-openwrt-linux-musl-cpp.bin",
+                        "gcc": "aarch64-openwrt-linux-musl-gcc.bin",
+                        "nm": "aarch64-openwrt-linux-musl-nm.bin",
+                        "objcopy": "aarch64-openwrt-linux-musl-objcopy.bin",
+                        "objdump": "aarch64-openwrt-linux-musl-objdump.bin",
+                        "strip": "aarch64-openwrt-linux-musl-strip.bin",
+                    },
+                    "cxx_builtin_include_directories": [
+                        "include",
+                        "aarch64-openwrt-linux-musl/include/c++/12.3.0",
+                        "aarch64-openwrt-linux-musl/sys-include",
+                        "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include",
+                    ],
+                },
+            },
+        },
+        "rockchip": {
+            "aarch64": {
+                "gcc": {
+                    "url": "/root/src/software/openwrt/toolchain",
+                    "sha256sum": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3",
+                    "target_os": "linux",
+                    "sysroot": "/root/src/software/openwrt/toolchain",
+                    "tool_names": {
+                        "ar": "aarch64-openwrt-linux-musl-ar",
+                        "ld": "aarch64-openwrt-linux-musl-ld.bin",
+                        "llvm-cov": "aarch64-openwrt-linux-musl-gcov.bin",
+                        "gcov": "aarch64-openwrt-linux-musl-gcov.bin",
+                        "cpp": "aarch64-openwrt-linux-musl-cpp.bin",
+                        "gcc": "aarch64-openwrt-linux-musl-gcc.bin",
+                        "nm": "aarch64-openwrt-linux-musl-nm.bin",
+                        "objcopy": "aarch64-openwrt-linux-musl-objcopy.bin",
+                        "objdump": "aarch64-openwrt-linux-musl-objdump.bin",
+                        "strip": "aarch64-openwrt-linux-musl-strip.bin",
+                    },
+                    "libc": "musl",
+                    "cxx_builtin_include_directories": [
+                        "include",
+                        "aarch64-openwrt-linux-musl/include/c++/12.3.0",
+                        "aarch64-openwrt-linux-musl/sys-include",
+                        "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include",
+                    ],
+                    "supports_start_end_lib": False,
+                    "debug": True,
+                },
+                "clang": {
+                    "url": "/root/src/software/openwrt/toolchain",
+                    "sha256sum": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3",
+                    "target_os": "linux",
+                    "tool_names": {
+                        "ar": "aarch64-openwrt-linux-musl-ar",
+                        "ld": "aarch64-openwrt-linux-musl-ld.bin",
+                        "llvm-cov": "aarch64-openwrt-linux-musl-gcov.bin",
+                        "gcov": "aarch64-openwrt-linux-musl-gcov.bin",
+                        "cpp": "aarch64-openwrt-linux-musl-cpp.bin",
+                        "gcc": "aarch64-openwrt-linux-musl-gcc.bin",
+                        "nm": "aarch64-openwrt-linux-musl-nm.bin",
+                        "objcopy": "aarch64-openwrt-linux-musl-objcopy.bin",
+                        "objdump": "aarch64-openwrt-linux-musl-objdump.bin",
+                        "strip": "aarch64-openwrt-linux-musl-strip.bin",
+                    },
+                    "cxx_builtin_include_directories": [
+                        "include",
+                        "aarch64-openwrt-linux-musl/include/c++/12.3.0",
+                        "aarch64-openwrt-linux-musl/sys-include",
+                        "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include",
+                    ],
+                },
+            },
+        },
+    },
+)
+
+register_toolchains("@cc_toolchain_config_rockchip_aarch64_gcc//:toolchain-rockchip_aarch64_gcc")
