@@ -11,6 +11,10 @@ COPTS = [
     "-ffreestanding",
     "-fno-builtin",
     "-fno-stack-protector",
+    "-Iexternal/liburing/src",
+    "-Iexternal/liburing/src/include",
+    "-I$(GENDIR)/external/liburing/src",
+    "-I$(GENDIR)/external/liburing/src/include",
 ]
 
 LOCAL_DEFINES = [
@@ -114,18 +118,12 @@ cc_library(
         "src/include/**/*.h",
     ]),
     copts = COPTS,
-    includes = [
-        "src/include",
-    ],
-    linkopts = [
-    ],
     local_defines = LOCAL_DEFINES + select({
         "@bazel_template//bazel:linux_x86_64": [
         ],
         "@bazel_template//bazel:linux_aarch64": [
         ],
     }),
-    visibility = ["//visibility:public"],
     deps = [
         ":private_header",
     ],
@@ -153,18 +151,12 @@ cc_library(
         "src/include/**/*.h",
     ]),
     copts = COPTS,
-    includes = [
-        "src/include",
-    ],
-    linkopts = [
-    ],
     local_defines = LOCAL_DEFINES + select({
         "@bazel_template//bazel:linux_x86_64": [
         ],
         "@bazel_template//bazel:linux_aarch64": [
         ],
     }),
-    visibility = ["//visibility:public"],
     deps = [
         ":private_header",
     ],

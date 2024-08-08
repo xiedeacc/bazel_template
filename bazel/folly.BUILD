@@ -318,8 +318,10 @@ genrule(
         "#define FOLLY_HAVE_LIBUNWIND 1",
         "#define FOLLY_HAVE_DWARF 1",
         "#define FOLLY_HAVE_ELF 1",
+        "#ifdef __GLIBC__",
         "#define FOLLY_HAVE_SWAPCONTEXT 1",
         "#define FOLLY_HAVE_BACKTRACE 1",
+        "#endif",
         "#define FOLLY_USE_SYMBOLIZER 1",
         "#define FOLLY_DEMANGLE_MAX_SYMBOL_SIZE 1024",
         "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1",
@@ -332,6 +334,7 @@ genrule(
         "#define FOLLY_LIBRARY_SANITIZE_ADDRESS 0",
         "/* #undef FOLLY_SUPPORT_SHARED_LIBRARY */",
         "#define FOLLY_HAVE_LIBRT 0",
+        "#define FOLLY_ELF_NATIVE_CLASS 64",
         "EOF",
     ]),
 )
@@ -341,15 +344,17 @@ template_rule(
     src = ":folly-config_h_in",
     out = "folly/folly-config.h",
     substitutions = selects.with_or({
-                        "@bazel_template//bazel:gcc": {
-                        },
-                        "@bazel_template//bazel:clang": {
-                            "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 0",
-                        },
-                    }) |
-                    select({
-                        "@bazel_template//bazel:jemalloc": {"#define FOLLY_USE_JEMALLOC 1": "#define FOLLY_USE_JEMALLOC 1"},
-                        "@bazel_template//bazel:tcmalloc": {"#define FOLLY_USE_JEMALLOC 1": ""},
-                        "//conditions:default": {"#define FOLLY_USE_JEMALLOC 1": ""},
-                    }),
+        "@bazel_template//bazel:gcc": {
+        },
+        "@bazel_template//bazel:clang": {
+            "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 0",
+        },
+    }) | select({
+        "@bazel_template//bazel:jemalloc": {"#define FOLLY_USE_JEMALLOC 1": "#define FOLLY_USE_JEMALLOC 1"},
+        "@bazel_template//bazel:tcmalloc": {"#define FOLLY_USE_JEMALLOC 1": ""},
+        "//conditions:default": {"#define FOLLY_USE_JEMALLOC 1": ""},
+    }) | select({
+        "@bazel_template//bazel:linux_x86_64": {},
+        "@bazel_template//bazel:linux_aarch64": {},
+    }),
 )

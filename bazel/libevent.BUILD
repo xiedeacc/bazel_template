@@ -34,6 +34,14 @@ template_rule(
     out = "include/event2/event-config.h",
     substitutions =
         select({
+            "@bazel_template//bazel:linux_aarch64": {
+                "#cmakedefine EVENT__HAVE_EPOLL_PWAIT2 1": "/* #undef EVENT__HAVE_EPOLL_PWAIT2 */",
+            },
+            "//conditions:default": {
+                "#cmakedefine EVENT__HAVE_EPOLL_PWAIT2 1": "#define EVENT__HAVE_EPOLL_PWAIT2 1",
+            },
+        }) |
+        select({
             "@bazel_template//bazel:clang": {
                 "#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM */",
                 "#cmakedefine EVENT__HAVE_ARC4RANDOM_BUF 1": "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */",
@@ -78,7 +86,6 @@ template_rule(
             "#cmakedefine EVENT__HAVE_FD_MASK 1": "#define EVENT__HAVE_FD_MASK 1",
             "#cmakedefine EVENT__HAVE_EPOLL 1": "#define EVENT__HAVE_EPOLL 1",
             "#cmakedefine EVENT__HAVE_EPOLL_CREATE1 1": "#define EVENT__HAVE_EPOLL_CREATE1 1",
-            "#cmakedefine EVENT__HAVE_EPOLL_PWAIT2 1": "#define EVENT__HAVE_EPOLL_PWAIT2 1",
             "#cmakedefine EVENT__HAVE_WEPOLL 1": "/* #undef EVENT__HAVE_WEPOLL */",
             "#cmakedefine EVENT__HAVE_EVENTFD 1": "#define EVENT__HAVE_EVENTFD 1",
             "#cmakedefine EVENT__HAVE_EVENT_PORTS 1": "/* #undef EVENT__HAVE_EVENT_PORTS */",

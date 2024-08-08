@@ -2,6 +2,10 @@
 
 # todo
 0. jemalloc没有生成profile文件
+2. need test libevent EPOLL_PWAIT2 on openwrt
+3. need test folly SWAPCONTEXT on openwrt
+4. test include search path
+1. toolchain need set enviroment viarable
 6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
 
 # future todo:

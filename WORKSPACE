@@ -429,6 +429,8 @@ new_git_repository(
 new_git_repository(
     name = "folly",
     build_file = "//bazel:folly.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:folly.patch"],
     remote = "git@code.xiamu.com:facebook/folly.git",
     tag = "v2024.07.08.00",
 )
@@ -810,10 +812,10 @@ cc_toolchains_setup(
                     },
                     "libc": "musl",
                     "cxx_builtin_include_directories": [
-                        "include",
+                        "aarch64-openwrt-linux-musl/include/c++/12.3.0/aarch64-openwrt-linux-musl",
                         "aarch64-openwrt-linux-musl/include/c++/12.3.0",
-                        "aarch64-openwrt-linux-musl/sys-include",
                         "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include",
+                        "include",
                     ],
                     "supports_start_end_lib": False,
                     "debug": True,
@@ -846,4 +848,26 @@ cc_toolchains_setup(
     },
 )
 
-register_toolchains("@cc_toolchain_config_rockchip_aarch64_gcc//:toolchain-rockchip_aarch64_gcc")
+#register_toolchains("@cc_toolchain_config_rockchip_aarch64_gcc//:toolchain-rockchip_aarch64_gcc")
+
+#local_repository(
+#name = "toolchains_openwrt",
+#path = "../toolchains_openwrt",
+#)
+
+#load("@toolchains_openwrt//toolchain:toolchains_openwrt.bzl", "openwrt_toolchain_setup")
+
+#openwrt_toolchain_setup(
+#name = "openwrt_repo_setup",
+#toolchains = {
+#"rockchip": {
+#"armv8": {
+#"arch": "aarch64",
+#"url": "/root/src/software/openwrt/toolchain",
+#"sha256sum": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3",
+#},
+#},
+#},
+#)
+
+#register_toolchains("@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8")

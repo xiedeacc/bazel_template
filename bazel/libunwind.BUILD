@@ -38,12 +38,8 @@ template_rule(
     src = "include/libunwind.h.in",
     out = "include/libunwind.h",
     substitutions = select({
-        "@bazel_template//bazel:linux_x86_64": {
-            "@arch@": "x86_64",
-        },
-        "@bazel_template//bazel:linux_aarch64": {
-            "@arch@": "aarch64",
-        },
+        "@bazel_template//bazel:linux_x86_64": {"@arch@": "x86_64"},
+        "@bazel_template//bazel:linux_aarch64": {"@arch@": "aarch64"},
     }),
 )
 
@@ -52,12 +48,8 @@ template_rule(
     src = "include/tdep/libunwind_i.h.in",
     out = "include/tdep/libunwind_i.h",
     substitutions = select({
-        "@bazel_template//bazel:linux_x86_64": {
-            "@arch@": "x86_64",
-        },
-        "@bazel_template//bazel:linux_aarch64": {
-            "@arch@": "aarch64",
-        },
+        "@bazel_template//bazel:linux_x86_64": {"@arch@": "x86_64"},
+        "@bazel_template//bazel:linux_aarch64": {"@arch@": "aarch64"},
     }),
 )
 
@@ -66,6 +58,7 @@ cc_library(
     srcs = [
         "src/dl-iterate-phdr.c",
         "src/dwarf/global.c",
+        #"src/elf64.c",
         "src/elfxx.c",
         "src/mi/Gdyn-extract.c",
         "src/mi/Gdyn-remote.c",
@@ -110,14 +103,11 @@ cc_library(
                 "src/x86_64/L*.c",
                 "src/x86_64/G*.c",
                 "src/x86_64/is_fpreg.c",
+                "src/x86_64/regname.c",
                 "src/x86_64/getcontext.S",
                 "src/x86_64/longjmp.S",
                 "src/x86_64/setcontext.S",
                 "src/x86_64/siglongjmp.S",
-                "src/x86_64/regname.c",
-                "src/x86_64/init.h",
-                "src/x86_64/is_fpreg.c",
-                "src/x86_64/regname.c",
             ],
             exclude = [
                 "src/x86_64/Gos-freebsd.c",
@@ -486,16 +476,15 @@ template_rule(
     name = "config_h",
     src = "config_h_in",
     out = "include/config.h",
-    substitutions =
-        select({
-            "@bazel_template//bazel:linux_x86_64": {
-            },
-            "@bazel_template//bazel:linux_aarch64": {
-                "#define HAVE_ASM_VSYSCALL_H 1": "/* #undef HAVE_ASM_VSYSCALL_H */",
-                "#define HAVE_EXECINFO_H 1": "/* #undef HAVE_EXECINFO_H */",
-                "/* #undef HAVE_STRUCT_DL_PHDR_INFO_DLPI_SUBS */": "#define HAVE_STRUCT_DL_PHDR_INFO_DLPI_SUBS 1",
-            },
-        }),
+    substitutions = select({
+        "@bazel_template//bazel:linux_x86_64": {
+        },
+        "@bazel_template//bazel:linux_aarch64": {
+            "#define HAVE_ASM_VSYSCALL_H 1": "/* #undef HAVE_ASM_VSYSCALL_H */",
+            "#define HAVE_EXECINFO_H 1": "/* #undef HAVE_EXECINFO_H */",
+            "/* #undef HAVE_STRUCT_DL_PHDR_INFO_DLPI_SUBS */": "#define HAVE_STRUCT_DL_PHDR_INFO_DLPI_SUBS 1",
+        },
+    }),
 )
 
 template_rule(

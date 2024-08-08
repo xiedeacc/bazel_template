@@ -1,0 +1,93 @@
+diff --git a/folly/experimental/symbolizer/Dwarf.cpp b/folly/experimental/symbolizer/Dwarf.cpp
+index 2fa17c249..de6926bb7 100644
+--- a/folly/experimental/symbolizer/Dwarf.cpp
++++ b/folly/experimental/symbolizer/Dwarf.cpp
+@@ -27,8 +27,6 @@
+ 
+ #if FOLLY_HAVE_DWARF && FOLLY_HAVE_ELF
+ 
+-#include <dwarf.h>
+-
+ namespace folly {
+ namespace symbolizer {
+ 
+diff --git a/folly/experimental/symbolizer/DwarfImpl.cpp b/folly/experimental/symbolizer/DwarfImpl.cpp
+index 82817f690..9706edc80 100644
+--- a/folly/experimental/symbolizer/DwarfImpl.cpp
++++ b/folly/experimental/symbolizer/DwarfImpl.cpp
+@@ -27,8 +27,6 @@
+ 
+ #if FOLLY_HAVE_DWARF && FOLLY_HAVE_ELF
+ 
+-#include <dwarf.h>
+-
+ // We need a single dwarf5 tag, but may not be building against
+ // a new enough libdwarf, so just define it ourselves.
+ #ifndef DW_TAG_skeleton_unit
+diff --git a/folly/experimental/symbolizer/DwarfUtil.cpp b/folly/experimental/symbolizer/DwarfUtil.cpp
+index 567267faa..c5a628af7 100644
+--- a/folly/experimental/symbolizer/DwarfUtil.cpp
++++ b/folly/experimental/symbolizer/DwarfUtil.cpp
+@@ -27,8 +27,6 @@
+ 
+ #if FOLLY_HAVE_DWARF && FOLLY_HAVE_ELF
+ 
+-#include <dwarf.h>
+-
+ // We need a single dwarf5 tag, but may not be building against
+ // a new enough libdwarf, so just define it ourselves.
+ #ifndef DW_TAG_skeleton_unit
+diff --git a/folly/experimental/symbolizer/DwarfUtil.h b/folly/experimental/symbolizer/DwarfUtil.h
+index 4c5f02471..0b4855404 100644
+--- a/folly/experimental/symbolizer/DwarfUtil.h
++++ b/folly/experimental/symbolizer/DwarfUtil.h
+@@ -26,7 +26,8 @@
+ #include <folly/experimental/symbolizer/ElfCache.h>
+ 
+ #if FOLLY_HAVE_DWARF && FOLLY_HAVE_ELF
+-#include <dwarf.h>
++
++#include "src/lib/libdwarf/dwarf.h"
+ 
+ namespace folly {
+ namespace symbolizer {
+diff --git a/folly/experimental/symbolizer/Elf.cpp b/folly/experimental/symbolizer/Elf.cpp
+index 6a7f74fa4..87b092311 100644
+--- a/folly/experimental/symbolizer/Elf.cpp
++++ b/folly/experimental/symbolizer/Elf.cpp
+@@ -47,6 +47,8 @@
+ #endif
+ #elif defined(__ANDROID__)
+ #define FOLLY_ELF_NATIVE_CLASS __WORDSIZE
++#elif defined(__aarch64__)
++#define FOLLY_ELF_NATIVE_CLASS 64
+ #endif // __ELF_NATIVE_CLASS
+ 
+ namespace folly {
+diff --git a/folly/experimental/symbolizer/detail/Debug.h b/folly/experimental/symbolizer/detail/Debug.h
+index 8ba2bc343..4b70628a6 100644
+--- a/folly/experimental/symbolizer/detail/Debug.h
++++ b/folly/experimental/symbolizer/detail/Debug.h
+@@ -26,7 +26,8 @@ namespace folly {
+ namespace symbolizer {
+ namespace detail {
+ 
+-#if defined(__linux__) && FOLLY_HAVE_ELF && FOLLY_HAVE_DWARF
++#if defined(__linux__) && defined(__GLIBC__) && FOLLY_HAVE_ELF && \
++    FOLLY_HAVE_DWARF
+ inline struct r_debug* get_r_debug() {
+   return &_r_debug;
+ }
+diff --git a/folly/memcpy_select_aarch64.cpp b/folly/memcpy_select_aarch64.cpp
+index d5884e5a8..3b42515d9 100644
+--- a/folly/memcpy_select_aarch64.cpp
++++ b/folly/memcpy_select_aarch64.cpp
+@@ -52,7 +52,7 @@
+ #include <cstddef>
+ #include <cstdint>
+ 
+-#if defined(__linux__) && defined(__aarch64__)
++#if defined(__linux__) && defined(__aarch64__) && defined(__GLIBC__)
+ 
+ #include <asm/hwcap.h> // @manual
+ 
