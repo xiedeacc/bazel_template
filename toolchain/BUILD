@@ -176,7 +176,7 @@ clang_linux_aarch64_cc_toolchain_config(
     name = "clang_linux_aarch64_toolchain_config",
     abi_libc_version = "glibc",
     abi_version = "clang",
-    builtin_sysroot = "/root/src/software/clang_sysroot",
+    builtin_sysroot = "/root/src/software/clang18.1.8-linux-aarch64_toolchain",
     compile_flags = [
         "--target=aarch64-unknown-linux-gnu",
         "-v",
