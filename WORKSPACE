@@ -794,10 +794,12 @@ cc_toolchains_setup(
         "rockchip": {
             "aarch64": {
                 "gcc": {
-                    "url": "/root/src/software/openwrt/toolchain",
-                    "sha256sum": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3",
+                    "url": "https://code.xiamu.com/files/openwrt_toolchain.tar.gz",
+                    #"url": "/root/src/software/openwrt",
+                    "strip_prefix": "openwrt_toolchain",
+                    "sha256sum": "388afcd37bb9002f48b19cdf23d64aefe525408a85bab320578b495744db1624",
                     "target_os": "linux",
-                    "sysroot": "/root/src/software/openwrt/toolchain",
+                    "sysroot": "@cc_toolchain_repo_rockchip_aarch64_gcc",
                     "tool_names": {
                         "ar": "aarch64-openwrt-linux-musl-ar",
                         "ld": "aarch64-openwrt-linux-musl-ld.bin",
@@ -811,6 +813,10 @@ cc_toolchains_setup(
                         "strip": "aarch64-openwrt-linux-musl-strip.bin",
                     },
                     "libc": "musl",
+                    "c_builtin_include_directories": [
+                        "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include",
+                        "include",
+                    ],
                     "cxx_builtin_include_directories": [
                         "aarch64-openwrt-linux-musl/include/c++/12.3.0/aarch64-openwrt-linux-musl",
                         "aarch64-openwrt-linux-musl/include/c++/12.3.0",

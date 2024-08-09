@@ -101,6 +101,16 @@ bazel build \
 # 一些常见和编译相关命令
 
 ```
+用LD_PRELOAD不生效时，可以用下面命令check下soname信息是否写，没有写入,可以使用
+cc_binary(
+    name = "libtcmalloc.so",
+    linkopts = ["-Wl,-soname,libtcmalloc.so"],
+    linkshared = 1,
+    deps = [":tcmalloc"],
+)
+
+readelf -Wd libtcmalloc.so | grep SONAME 
+
 https://wizardforcel.gitbooks.io/100-gcc-tips/content/index.html
 
 /usr/local/llvm-18/bin/clang++ -E -x c++ - -v < /dev/null
