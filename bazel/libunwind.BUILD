@@ -198,7 +198,7 @@ cc_library(
         "src/elfxx.c",
     ],
     deps = [
-        "@xz",
+        "@xz//:lzma",
         "@zlib",
     ],
 )
