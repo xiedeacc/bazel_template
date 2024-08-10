@@ -765,6 +765,7 @@ cc_toolchains_setup(
                         "strip": "strip",
                     },
                     "libc": "glibc",
+                    # not work for cross compiling
                     "c_builtin_include_directories": [
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include",
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include-fixed",
@@ -846,12 +847,14 @@ cc_toolchains_setup(
                     "libc": "musl",
                     "c_builtin_include_directories": [
                         "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include",
+                        "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include-fixed",
                         "include",
                     ],
                     "cxx_builtin_include_directories": [
                         "aarch64-openwrt-linux-musl/include/c++/12.3.0/aarch64-openwrt-linux-musl",
                         "aarch64-openwrt-linux-musl/include/c++/12.3.0",
                         "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include",
+                        "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include-fixed",
                         "include",
                     ],
                     "supports_start_end_lib": False,
