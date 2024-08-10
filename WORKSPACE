@@ -757,7 +757,7 @@ cc_toolchains_setup(
                         "g++": "g++",
                         "gcc": "gcc",
                         "gcov": "gcov",
-                        "ld": "ld.gold",
+                        "ld": "ld",
                         "llvm-cov": "gcov",
                         "nm": "gcc-nm",
                         "objcopy": "objcopy",
@@ -767,11 +767,13 @@ cc_toolchains_setup(
                     "libc": "glibc",
                     "c_builtin_include_directories": [
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include",
+                        "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include-fixed",
                     ],
                     "cxx_builtin_include_directories": [
                         "include/c++/14.1.0",
                         "include/c++/14.1.0/x86_64-pc-linux-gnu",
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include",
+                        "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include-fixed",
                         "/usr/include",
                         "/usr/include/x86_64-linux-gnu",
                     ],
@@ -780,7 +782,7 @@ cc_toolchains_setup(
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0",
                         "/usr/lib/x86_64-linux-gnu",
                     ],
-                    #"supports_start_end_lib": True,
+                    "supports_start_end_lib": False,
                     "debug": True,
                 },
                 #"clang": {

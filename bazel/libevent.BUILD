@@ -48,9 +48,12 @@ template_rule(
                 "#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
             },
             "@bazel_template//bazel:gcc": {
-                "#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "#define EVENT__HAVE_ARC4RANDOM 1",
-                "#cmakedefine EVENT__HAVE_ARC4RANDOM_BUF 1": "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
-                "#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
+                #"#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "#define EVENT__HAVE_ARC4RANDOM 1",
+                "#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM */",
+                #"#cmakedefine EVENT__HAVE_ARC4RANDOM_BUF 1": "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
+                "#cmakedefine EVENT__HAVE_ARC4RANDOM_BUF 1": "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */",
+                "#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
+                #"#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
             },
             "//conditions:default": {
                 "#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM */",
