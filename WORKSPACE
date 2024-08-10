@@ -771,10 +771,10 @@ cc_toolchains_setup(
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include-fixed",
                     ],
                     "cxx_builtin_include_directories": [
-                        "include/c++/14.1.0",
-                        "include/c++/14.1.0/x86_64-pc-linux-gnu",
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include",
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include-fixed",
+                        "include/c++/14.1.0",
+                        "include/c++/14.1.0/x86_64-pc-linux-gnu",
                         "/usr/include",
                         "/usr/include/x86_64-linux-gnu",
                     ],
