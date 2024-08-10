@@ -101,6 +101,18 @@ bazel build \
 # 一些常见和编译相关命令
 
 ```
+
+https://gcc.gnu.org/pub/gcc/infrastructure/
+https://gcc.gnu.org/pub/gcc/infrastructure/mpfr-4.1.0.tar.bz2
+https://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.2.1.tar.bz2
+https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.24.tar.bz2
+https://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.2.1.tar.gz
+https://ftp.gnu.org/gnu/binutils/binutils-2.43.tar.gz
+cd bintuils
+mkdir build
+cd build
+../configure
+
 用LD_PRELOAD不生效时，可以用下面命令check下soname信息是否写，没有写入,可以使用
 cc_binary(
     name = "libtcmalloc.so",

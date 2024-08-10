@@ -185,7 +185,6 @@ cc_library(
             "-Iexternal/xz/src/liblzma/simple",
         ],
     }),
-    includes = ["src/liblzma/api"],
     linkopts = select({
         "@platforms//os:android": [],
         "//conditions:default": ["-pthread"],
