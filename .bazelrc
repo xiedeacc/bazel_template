@@ -94,4 +94,4 @@ build:openwrt_aarch64 --java_runtime_version="remotejdk_21"
 build:openwrt_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
 build:openwrt_aarch64 --cpu='aarch64'
 build:openwrt_aarch64 --compiler='gcc'
-build:openwrt_aarch64 --action_env=STAGING_DIR=/root/src/software/openwrt/toolchain
+build:openwrt_aarch64 --action_env=STAGING_DIR=/root/src/software/openwrt/openwrt-aarch64_toolchain

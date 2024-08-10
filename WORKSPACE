@@ -825,11 +825,10 @@ cc_toolchains_setup(
         "rockchip": {
             "aarch64": {
                 "gcc": {
-                    "url": "https://code.xiamu.com/files/openwrt_toolchain.tar.gz",
-                    "strip_prefix": "openwrt_toolchain",
-                    #"url": "/root/src/software/openwrt",
-                    #"url": "/root/src/software/openwrt/openwrt_toolchain",
-                    "sha256sum": "388afcd37bb9002f48b19cdf23d64aefe525408a85bab320578b495744db1624",
+                    "url": "https://code.xiamu.com/files/openwrt-aarch64_toolchain.tar.gz",
+                    "strip_prefix": "openwrt-aarch64_toolchain",
+                    #"url": "/root/src/software/openwrt/openwrt-aarch64_toolchain",
+                    "sha256sum": "7817a07c33b389c99c5a3b39b44937dfa22877e109c83087746f7629560bc82f",
                     "target_os": "linux",
                     "sysroot": "@cc_toolchain_repo_rockchip_aarch64_gcc",
                     "tool_names": {
