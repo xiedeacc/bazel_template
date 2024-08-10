@@ -175,7 +175,7 @@ cc_library(
             "-g",
             "-O3",
             "-Iexternal/xz/src/common",
-            "-Iexternal/xz/src/liblzma/api",
+            "-iquote external/xz/src/liblzma/api",  #https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html
             "-Iexternal/xz/src/liblzma/check",
             "-Iexternal/xz/src/liblzma/common",
             "-Iexternal/xz/src/liblzma/delta",
@@ -185,7 +185,7 @@ cc_library(
             "-Iexternal/xz/src/liblzma/simple",
         ],
     }),
-    #includes = ["src/liblzma/api"],
+    includes = ["src/liblzma/api"],
     linkopts = select({
         "@platforms//os:android": [],
         "//conditions:default": ["-pthread"],

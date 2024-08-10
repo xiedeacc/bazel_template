@@ -8,6 +8,7 @@ COPTS = [
     "-fPIC",
     "-Wall",
     "-Wsign-compare",
+    "-isystem external/xz/src/liblzma/lzma",
     "-I$(GENDIR)/external/libunwind/include",
     "-Iexternal/libunwind/include",
     "-I$(GENDIR)/external/libunwind/include/tdep",
