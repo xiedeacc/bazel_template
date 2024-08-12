@@ -1,3 +1,4 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
@@ -42,18 +43,12 @@ template_rule(
             },
         }) |
         select({
-            "@bazel_template//bazel:clang": {
-                "#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM */",
-                "#cmakedefine EVENT__HAVE_ARC4RANDOM_BUF 1": "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */",
-                "#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
-            },
-            "@bazel_template//bazel:gcc": {
+            "@bazel_template//bazel:linux_aarch64_clang": {
                 #"#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "#define EVENT__HAVE_ARC4RANDOM 1",
                 "#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM */",
-                #"#cmakedefine EVENT__HAVE_ARC4RANDOM_BUF 1": "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
-                "#cmakedefine EVENT__HAVE_ARC4RANDOM_BUF 1": "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */",
-                "#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
+                "#cmakedefine EVENT__HAVE_ARC4RANDOM_BUF 1": "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
                 #"#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
+                "#cmakedefine EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
             },
             "//conditions:default": {
                 "#cmakedefine EVENT__HAVE_ARC4RANDOM 1": "/* #undef EVENT__HAVE_ARC4RANDOM */",

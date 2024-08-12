@@ -1,3 +1,5 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
@@ -62,6 +64,14 @@ config_setting(
     constraint_values = [
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
+    ],
+)
+
+selects.config_setting_group(
+    name = "linux_aarch64_clang",
+    match_all = [
+        ":linux_aarch64",
+        ":clang",
     ],
 )
 
