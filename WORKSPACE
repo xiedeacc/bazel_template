@@ -887,7 +887,7 @@ cc_toolchains_setup(
                         "include",
                     ],
                     "cxx_builtin_include_directories": [
-                        "include/x86_64-unknown-linux-gnu/c++/v1",
+                        "include/aarch64-unknown-linux-gnu/c++/v1",
                         "include/c++/v1",
                         "lib/clang/18/include",
                         "include",

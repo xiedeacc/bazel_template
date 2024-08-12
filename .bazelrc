@@ -84,7 +84,7 @@ build:clang --compiler='clang'
 
 build:clang_aarch64 --platforms='//bazel:linux_aarch64_platform'
 build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
-#build:clang --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
+#build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
 build:clang_aarch64 --extra_toolchains='@cc_toolchain_config_rockchip_aarch64_clang//:toolchain-rockchip_aarch64_clang'
 build:clang_aarch64 --extra_toolchains='@remotejdk21_linux_aarch64_toolchain_config_repo//:toolchain'
 build:clang_aarch64 --cpu='aarch64'
