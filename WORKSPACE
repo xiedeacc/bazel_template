@@ -704,8 +704,8 @@ register_toolchains(
     "//toolchain:clang_toolchain_for_linux_aarch64",
 )
 
-new_local_repository(
-    name = "clang_sysroot",
+http_archive(
+    name = "clang18.1.8-aarch64_sysroot",
     build_file_content =
         """
 filegroup(
@@ -714,20 +714,9 @@ filegroup(
   visibility = ["//visibility:public"],
 )
         """,
-    path = "/root/src/software/clang_sysroot",
-)
-
-new_local_repository(
-    name = "gcc_sysroot",
-    build_file_content =
-        """
-filegroup(
-  name = "sysroot",
-  srcs = glob(["*/**"]),
-  visibility = ["//visibility:public"],
-)
-        """,
-    path = "/root/src/software/gcc_sysroot",
+    sha256 = "95e32680f2f439773edd85640e5072bab099c399506008298cd1251be2d2df39",
+    strip_prefix = "clang18.1.8-linux-aarch64_sysroot",
+    urls = ["https://code.xiamu.com/files/clang18.1.8-linux-aarch64_sysroot.tar.gz"],
 )
 
 local_repository(
@@ -748,7 +737,7 @@ cc_toolchains_setup(
                     #"url": "/usr/local/gcc/14.1.0",
                     "sha256sum": "6d365bcd30cc943e80be25f87b83e408fd120b1f2c8b9a4db837011719892660",
                     "target_os": "linux",
-                    "sysroot": "",
+                    "sysroot": "@cc_toolchain_repo_amd64_x86_64_gcc",
                     "tool_names": {
                         "ar": "gcc-ar",
                         "as": "as",
@@ -871,12 +860,12 @@ cc_toolchains_setup(
                     "debug": True,
                 },
                 "clang": {
-                    "url": "https://code.xiamu.com/files/clang18.1.8-linux-aarch64_toolchain.tar.gz",
-                    "strip_prefix": "clang18.1.8-linux-aarch64_toolchain",
+                    "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
+                    "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
                     #"url": "/usr/local/llvm/18",
-                    "sha256sum": "71a85eef4b1f871a9cb4ffca41f832fe2ec1386d13d8d5e40b3c1495279273e0",
+                    "sha256sum": "89b322e0c506fb87357e2f9191485901b9c2c5faf38c8db802d84148c62a3fda",
                     "target_os": "linux",
-                    "sysroot": "@cc_toolchain_repo_rockchip_aarch64_clang",
+                    "sysroot": "@clang18.1.8-aarch64_sysroot",
                     "tool_names": {
                         "ar": "llvm-ar",
                         "as": "llvm-as",
@@ -905,8 +894,8 @@ cc_toolchains_setup(
                     ],
                     "lib_directories": [
                         "lib",
-                        "lib/x86_64-unknown-linux-gnu",
-                        "lib/clang/18/lib/x86_64-unknown-linux-gnu",
+                        "lib/aarch64-unknown-linux-gnu",
+                        "lib/clang/18/lib/aarch64-unknown-linux-gnu",
                     ],
                     "supports_start_end_lib": True,
                     "debug": True,
