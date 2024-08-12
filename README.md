@@ -5,6 +5,9 @@
 * include swig for JAVA and python example
 * support multiple platforms, eg: linux-x86_64, linux_aarch64, openwrt_aarch64, windows and macos ing
 * all source code compiled success by clang and gcc both
+* include compile_commands.json generator
+* include cpu and memory profiling
+* include memory leak, corruption detection
 
 # todo
 0. jemalloc没有生成profile文件
