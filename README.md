@@ -1,6 +1,6 @@
 # features
-* include most popular C/C++ libraries, eg. boost, abseil, folly, proxygen, mvfst, jemalloc, tcmalloc, xz, zstd, curl, c-ares...
-* grpc server and client example
+* include most popular C/C++ libraries, eg. boost, abseil, folly, proxygen, mvfst, jemalloc, tcmalloc, xz, zstd, curl, c-ares ...
+* include grpc server and client example
 * include protobuf plugin rule example
 * include swig for JAVA and python example
 * support multiple platforms, eg: linux-x86_64, linux_aarch64, openwrt_aarch64, windows and macos ing
@@ -23,6 +23,14 @@
 9. renovate.json
 
 # usage
+
+## build
+```
+clear && bazel build --config=clang //...
+clear && bazel build --config=gcc //...
+clear && bazel build --config=clang_aarch64 //...
+clear && bazel build --config=openwrt_aarch64 //...
+```
 
 ## 生成compile_commands.json
 ```
