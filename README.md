@@ -1,23 +1,26 @@
 # features
+* include most popular C/C++ libraries, eg. boost, abseil, folly, proxygen, mvfst, jemalloc, tcmalloc, xz, zstd, curl, c-ares...
+* grpc server and client example
+* include protobuf plugin rule example
+* include swig for JAVA and python example
+* support multiple platforms, eg: linux-x86_64, linux_aarch64, openwrt_aarch64, windows and macos ing
+* all source code compiled success by clang and gcc both
 
 # todo
 0. jemalloc没有生成profile文件
-2. need test libevent EPOLL_PWAIT2 on openwrt
-3. need test folly SWAPCONTEXT on openwrt
-4. test include search path
-1. toolchain need set enviroment viarable
-6. toolchains_openwrt need download from remote, support gcc, clang, openwrt, windows, 多版本,全部注册
+6. toolchains_openwrt need windows and macos
 
 # future todo:
 0. link with jemalloc and tcmalloc static will cause core, why?
-1. import virtual include like boost
-2. use baze aspect find the most possible relative search path
-3. 集成clang-tidy, clang-check, clang static analyzer
-4. module map, -compiler_param_file, -layering_check
-5. aspect用法
-6. transitive用法
-7. renovate.json
-8. fizz lack of aegis, liboqs
+1. need test libevent EPOLL_PWAIT2 on openwrt
+2. need test folly SWAPCONTEXT on openwrt
+3. import virtual include like boost
+4. use baze aspect find the most possible relative search path
+5. 集成clang-tidy, clang-check, clang static analyzer
+6. module map, -compiler_param_file, -layering_check
+7. aspect用法
+8. transitive用法
+9. renovate.json
 
 # usage
 
@@ -101,17 +104,6 @@ bazel build \
 # 一些常见和编译相关命令
 
 ```
-
-https://gcc.gnu.org/pub/gcc/infrastructure/
-https://gcc.gnu.org/pub/gcc/infrastructure/mpfr-4.1.0.tar.bz2
-https://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.2.1.tar.bz2
-https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.24.tar.bz2
-https://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.2.1.tar.gz
-https://ftp.gnu.org/gnu/binutils/binutils-2.43.tar.gz
-cd bintuils
-mkdir build
-cd build
-../configure
 
 用LD_PRELOAD不生效时，可以用下面命令check下soname信息是否写，没有写入,可以使用
 cc_binary(
@@ -197,15 +189,37 @@ LD_LIBRARY_PATH=/root/src/software/clang_sysroot/lib:\
 
 # 一些常见软件编译参数
 
+## binutils
+```
+https://gcc.gnu.org/pub/gcc/infrastructure/
+https://gcc.gnu.org/pub/gcc/infrastructure/mpfr-4.1.0.tar.bz2
+https://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.2.1.tar.bz2
+https://gcc.gnu.org/pub/gcc/infrastructure/isl-0.24.tar.bz2
+https://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.2.1.tar.gz
+https://ftp.gnu.org/gnu/binutils/binutils-2.43.tar.gz
+cd bintuils
+mkdir build
+cd build
+../configure
+
+```
+
+## protobuf
+```
 clear && bazel build //src/google/protobuf:protobuf
 cp bazel-bin/protoc /usr/local/lib
 cp bazel-bin/src/google/protobuf/libprotobuf.a /usr/local/lib
 cp bazel-bin/src/google/protobuf/libprotobuf.so /usr/local/lib
 cp -r src/google /usr/local/include
 
-absl
+```
+
+## absl
+```
 cmake BUILD_TESTING=OFF -DABSL_PROPAGATE_CXX_STD=ON -DBUILD_SHARED_LIBS=ON ..
 cmake BUILD_TESTING=OFF -DABSL_PROPAGATE_CXX_STD=ON ..
+
+```
 
 ## openssl
 指定rpath, 解决和系统自带openssl共存问题
