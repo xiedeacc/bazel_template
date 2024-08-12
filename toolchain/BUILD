@@ -172,6 +172,8 @@ cc_toolchain(
 
 clang_linux_aarch64_toolchain_root = "/usr/local/llvm/18"
 
+sysroot = "/root/src/software/clang18.1.8-linux-aarch64_toolchain"
+
 clang_linux_aarch64_cc_toolchain_config(
     name = "clang_linux_aarch64_toolchain_config",
     abi_libc_version = "glibc",
@@ -190,13 +192,13 @@ clang_linux_aarch64_cc_toolchain_config(
         #"-nostdinc++",
         "-nostdlibinc",  # equivalent to combine -nostdinc and -nostdinc++
         "-isystem",
-        "/root/src/software/clang_sysroot/include/aarch64-unknown-linux-gnu/c++/v1",
+        "{}/include/aarch64-unknown-linux-gnu/c++/v1".format(sysroot),
         "-isystem",
-        "/root/src/software/clang_sysroot/include/c++/v1",
+        "{}/include/c++/v1".format(sysroot),
         "-isystem",
-        "/root/src/software/clang_sysroot/lib/clang/18/include",
+        "{}/lib/clang/18/include".format(sysroot),
         "-isystem",
-        "/root/src/software/clang_sysroot/usr/include",
+        "{}/usr/include".format(sysroot),
         "-stdlib=libc++",
     ],
     compiler = "clang",
@@ -206,10 +208,10 @@ clang_linux_aarch64_cc_toolchain_config(
     coverage_link_flags = ["--coverage"],
     cpu = "aarch64",
     cxx_builtin_include_directories = [
-        "/root/src/software/clang_sysroot/include/aarch64-unknown-linux-gnu/c++/v1",
-        "/root/src/software/clang_sysroot/include/c++/v1",
-        "/root/src/software/clang_sysroot/lib/clang/18/include",
-        "/root/src/software/clang_sysroot/usr/include",
+        "{}/include/aarch64-unknown-linux-gnu/c++/v1".format(sysroot),
+        "{}/include/c++/v1".format(sysroot),
+        "{}/lib/clang/18/include".format(sysroot),
+        "{}/usr/include".format(sysroot),
     ],
     cxx_flags = [
         "-std=c++17",
@@ -219,10 +221,10 @@ clang_linux_aarch64_cc_toolchain_config(
     link_flags = [
         "--target=aarch64-unknown-linux-gnu",
         "-v",
-        "-L/root/src/software/clang_sysroot/lib",
-        "-L/root/src/software/clang_sysroot/lib/aarch64-unknown-linux-gnu",
-        "-L/root/src/software/clang_sysroot/lib/clang/18/lib/aarch64-unknown-linux-gnu",
-        "-L/root/src/software/clang_sysroot/usr/lib",
+        "-L{}/lib".format(sysroot),
+        "-L{}/lib/aarch64-unknown-linux-gnu".format(sysroot),
+        "-L{}/lib/clang/18/lib/aarch64-unknown-linux-gnu".format(sysroot),
+        "-L{}/usr/lib".format(sysroot),
         "-fuse-ld=lld",
         "-B{}/bin".format(clang_linux_aarch64_toolchain_root),
         "-Wl,-no-as-needed",
@@ -238,7 +240,7 @@ clang_linux_aarch64_cc_toolchain_config(
         "-lm",
         "-Wl,--pop-state",
         "-Wl,--push-state,-as-needed",
-        "/root/src/software/clang_sysroot/lib/clang/18/lib/aarch64-unknown-linux-gnu/libclang_rt.builtins.a",
+        "{}/lib/clang/18/lib/aarch64-unknown-linux-gnu/libclang_rt.builtins.a".format(sysroot),
         "-Wl,--pop-state",
     ],
     opt_compile_flags = [
