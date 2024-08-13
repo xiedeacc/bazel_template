@@ -729,15 +729,17 @@ load("@cc_toolchains//toolchain:cc_toolchains_setup.bzl", "cc_toolchains_setup")
 cc_toolchains_setup(
     name = "cc_toolchains_setup",
     toolchains = {
-        "amd64": {
-            "x86_64": {
-                "gcc": {
+        "x86_64": {
+            "linux": [
+                {
+                    "distro": "generic",
+                    "libc": "glibc",
+                    "compiler": "gcc",
                     "url": "https://code.xiamu.com/files/gcc14.1.0-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "gcc14.1.0-linux-x86_64_toolchain",
                     #"url": "/usr/local/gcc/14.1.0",
                     "sha256sum": "6d365bcd30cc943e80be25f87b83e408fd120b1f2c8b9a4db837011719892660",
-                    "target_os": "linux",
-                    "sysroot": "@cc_toolchain_repo_amd64_x86_64_gcc",
+                    "sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_gcc",
                     "tool_names": {
                         "ar": "gcc-ar",
                         "as": "as",
@@ -753,7 +755,6 @@ cc_toolchains_setup(
                         "objdump": "objdump",
                         "strip": "strip",
                     },
-                    "libc": "glibc",
                     "c_builtin_include_directories": [
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include",
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include-fixed",
@@ -775,13 +776,16 @@ cc_toolchains_setup(
                     "supports_start_end_lib": False,
                     "debug": True,
                 },
-                "clang": {
+                {
+                    "distro": "generic",
+                    "libc": "glibc",
+                    "compiler": "clang",
                     "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
                     #"url": "/usr/local/llvm/18",
                     "sha256sum": "89b322e0c506fb87357e2f9191485901b9c2c5faf38c8db802d84148c62a3fda",
                     "target_os": "linux",
-                    "sysroot": "@cc_toolchain_repo_amd64_x86_64_clang",
+                    "sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_clang",
                     "tool_names": {
                         "ar": "llvm-ar",
                         "as": "llvm-as",
@@ -797,7 +801,6 @@ cc_toolchains_setup(
                         "objdump": "llvm-objdump",
                         "strip": "llvm-strip",
                     },
-                    "libc": "glibc",
                     "c_builtin_include_directories": [
                         "lib/clang/18/include",
                         "include",
@@ -819,17 +822,20 @@ cc_toolchains_setup(
                     "supports_start_end_lib": True,
                     "debug": True,
                 },
-            },
+            ],
         },
-        "rockchip": {
-            "aarch64": {
-                "gcc": {
+        "aarch64": {
+            "linux": [
+                {
+                    "distro": "openwrt",
+                    "libc": "musl",
+                    "compiler": "gcc",
                     "url": "https://code.xiamu.com/files/openwrt-aarch64_toolchain.tar.gz",
                     "strip_prefix": "openwrt-aarch64_toolchain",
                     #"url": "/root/src/software/openwrt/openwrt-aarch64_toolchain",
                     "sha256sum": "7817a07c33b389c99c5a3b39b44937dfa22877e109c83087746f7629560bc82f",
                     "target_os": "linux",
-                    "sysroot": "@cc_toolchain_repo_rockchip_aarch64_gcc",
+                    "sysroot": "@cc_toolchain_repo_aarch64_linux_openwrt_musl_gcc",
                     "tool_names": {
                         "ar": "aarch64-openwrt-linux-musl-ar",
                         "ld": "aarch64-openwrt-linux-musl-ld.bin",
@@ -842,7 +848,6 @@ cc_toolchains_setup(
                         "objdump": "aarch64-openwrt-linux-musl-objdump.bin",
                         "strip": "aarch64-openwrt-linux-musl-strip.bin",
                     },
-                    "libc": "musl",
                     "c_builtin_include_directories": [
                         "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include",
                         "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include-fixed",
@@ -859,7 +864,10 @@ cc_toolchains_setup(
                     "supports_start_end_lib": False,
                     "debug": True,
                 },
-                "clang": {
+                {
+                    "distro": "generic",
+                    "libc": "musl",
+                    "compiler": "clang",
                     "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
                     #"url": "/usr/local/llvm/18",
@@ -881,7 +889,6 @@ cc_toolchains_setup(
                         "objdump": "llvm-objdump",
                         "strip": "llvm-strip",
                     },
-                    "libc": "musl",
                     "c_builtin_include_directories": [
                         "lib/clang/18/include",
                         "include",
@@ -900,31 +907,7 @@ cc_toolchains_setup(
                     "supports_start_end_lib": True,
                     "debug": True,
                 },
-            },
+            ],
         },
     },
 )
-
-#register_toolchains("@cc_toolchain_config_rockchip_aarch64_gcc//:toolchain-rockchip_aarch64_gcc")
-
-#local_repository(
-#name = "toolchains_openwrt",
-#path = "../toolchains_openwrt",
-#)
-
-#load("@toolchains_openwrt//toolchain:toolchains_openwrt.bzl", "openwrt_toolchain_setup")
-
-#openwrt_toolchain_setup(
-#name = "openwrt_repo_setup",
-#toolchains = {
-#"rockchip": {
-#"armv8": {
-#"arch": "aarch64",
-#"url": "/root/src/software/openwrt/toolchain",
-#"sha256sum": "fa88b24029a0bfd5ee9f854670f731406e41debe3303d9cc6123f0a157e719c3",
-#},
-#},
-#},
-#)
-
-#register_toolchains("@openwrt_toolchain_config_rockchip_armv8//:cc-toolchain-rockchip_armv8")
