@@ -67,6 +67,22 @@ config_setting(
     ],
 )
 
+config_setting(
+    name = "osx_x86_64",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:osx",
+    ],
+)
+
+config_setting(
+    name = "osx_aarch64",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:osx",
+    ],
+)
+
 selects.config_setting_group(
     name = "linux_aarch64_clang",
     match_all = [
@@ -88,5 +104,21 @@ platform(
     constraint_values = [
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
+    ],
+)
+
+platform(
+    name = "osx_x86_64_platform",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:osx",
+    ],
+)
+
+platform(
+    name = "osx_aarch64_platform",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:osx",
     ],
 )
