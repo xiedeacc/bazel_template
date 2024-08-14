@@ -735,6 +735,7 @@ cc_toolchains_setup(
                     "distro": "generic",
                     "libc": "glibc",
                     "compiler": "gcc",
+                    "triple": "x86_64-linux-gnu",
                     "url": "https://code.xiamu.com/files/gcc14.1.0-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "gcc14.1.0-linux-x86_64_toolchain",
                     #"url": "/usr/local/gcc/14.1.0",
@@ -755,10 +756,6 @@ cc_toolchains_setup(
                         "objdump": "objdump",
                         "strip": "strip",
                     },
-                    "c_builtin_include_directories": [
-                        "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include",
-                        "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include-fixed",
-                    ],
                     "cxx_builtin_include_directories": [
                         "/usr/include/x86_64-linux-gnu",
                         "/usr/include",
@@ -780,11 +777,11 @@ cc_toolchains_setup(
                     "distro": "generic",
                     "libc": "glibc",
                     "compiler": "clang",
+                    "triple": "x86_64-linux-gnu",
                     "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
                     #"url": "/usr/local/llvm/18",
                     "sha256sum": "89b322e0c506fb87357e2f9191485901b9c2c5faf38c8db802d84148c62a3fda",
-                    "target_os": "linux",
                     "sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_clang",
                     "tool_names": {
                         "ar": "llvm-ar",
@@ -801,10 +798,6 @@ cc_toolchains_setup(
                         "objdump": "llvm-objdump",
                         "strip": "llvm-strip",
                     },
-                    "c_builtin_include_directories": [
-                        "lib/clang/18/include",
-                        "include",
-                    ],
                     "cxx_builtin_include_directories": [
                         "/usr/include/x86_64-linux-gnu",
                         "/usr/include",
@@ -828,6 +821,7 @@ cc_toolchains_setup(
                     "distro": "generic",
                     "libc": "glibc",
                     "compiler": "gcc",
+                    "triple": "x86_64-apple-darwin23.3",
                     "url": "/usr/local/gcc14.1.0-darwin23.3-x86_64_toolchain",
                     "strip_prefix": "",
                     #"url": "/usr/local/gcc/14.1.0",
@@ -848,10 +842,6 @@ cc_toolchains_setup(
                         "objdump": "x86_64-apple-darwin-objdump",
                         "strip": "x86_64-apple-darwin23.3-strip",
                     },
-                    "c_builtin_include_directories": [
-                        "lib/gcc/x86_64-apple-darwin23.3/14.1.0/include",
-                        "lib/gcc/x86_64-apple-darwin23.3/14.1.0/include-fixed",
-                    ],
                     "cxx_builtin_include_directories": [
                         "x86_64-apple-darwin23.3/include/c++/14.1.0/x86_64-apple-darwin23.3",
                         "x86_64-apple-darwin23.3/include/c++/14.1.0",
@@ -862,6 +852,12 @@ cc_toolchains_setup(
                     "lib_directories": [
                         "x86_64-apple-darwin23.3/lib",
                         "lib",
+                    ],
+                    "sysroot_include_directories": [
+                        "usr/include",
+                    ],
+                    "sysroot_lib_directories": [
+                        "usr/lib",
                     ],
                     "supports_start_end_lib": False,
                     "debug": True,
@@ -874,7 +870,6 @@ cc_toolchains_setup(
                 #"strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
                 ##"url": "/usr/local/llvm/18",
                 #"sha256sum": "89b322e0c506fb87357e2f9191485901b9c2c5faf38c8db802d84148c62a3fda",
-                #"target_os": "linux",
                 #"sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_clang",
                 #"tool_names": {
                 #"ar": "llvm-ar",
@@ -910,6 +905,8 @@ cc_toolchains_setup(
                 #"lib/clang/18/lib/x86_64-unknown-linux-gnu",
                 #"/usr/lib/x86_64-linux-gnu",
                 #],
+                #"sysroot_include_directories": [],
+                #"sysroot_lib_directories": [],
                 #"supports_start_end_lib": True,
                 #"debug": True,
                 #},
@@ -921,11 +918,11 @@ cc_toolchains_setup(
                     "distro": "openwrt",
                     "libc": "musl",
                     "compiler": "gcc",
+                    "triple": "aarch64-unknown-linux-gnu",
                     "url": "https://code.xiamu.com/files/openwrt-aarch64_toolchain.tar.gz",
                     "strip_prefix": "openwrt-aarch64_toolchain",
                     #"url": "/root/src/software/openwrt/openwrt-aarch64_toolchain",
                     "sha256sum": "7817a07c33b389c99c5a3b39b44937dfa22877e109c83087746f7629560bc82f",
-                    "target_os": "linux",
                     "sysroot": "@cc_toolchain_repo_aarch64_linux_openwrt_musl_gcc",
                     "tool_names": {
                         "ar": "aarch64-openwrt-linux-musl-ar",
@@ -952,6 +949,9 @@ cc_toolchains_setup(
                         "lib/gcc/aarch64-openwrt-linux-musl/12.3.0/include-fixed",
                         "include",
                     ],
+                    "lib_directories": [],
+                    "sysroot_include_directories": [],
+                    "sysroot_lib_directories": [],
                     "supports_start_end_lib": False,
                     "debug": True,
                 },
@@ -963,7 +963,6 @@ cc_toolchains_setup(
                     "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
                     #"url": "/usr/local/llvm/18",
                     "sha256sum": "89b322e0c506fb87357e2f9191485901b9c2c5faf38c8db802d84148c62a3fda",
-                    "target_os": "linux",
                     "sysroot": "@clang18.1.8-aarch64_sysroot",
                     "tool_names": {
                         "ar": "llvm-ar",
@@ -995,6 +994,8 @@ cc_toolchains_setup(
                         "lib/aarch64-unknown-linux-gnu",
                         "lib/clang/18/lib/aarch64-unknown-linux-gnu",
                     ],
+                    "sysroot_include_directories": [],
+                    "sysroot_lib_directories": [],
                     "supports_start_end_lib": True,
                     "debug": True,
                 },
