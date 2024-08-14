@@ -249,10 +249,25 @@ cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SH
 # libcurl.so.4: no version information available
 ```
 
+## gcc
+```
+export PATH=/root/src/software/osxcross/target/bin:$PATH
+../configure \
+  --prefix=/usr/local/gcc14.1.0-darwin23.3-x86_64_toolchain \
+  --target=x86_64-apple-darwin23.3 \
+  --with-sysroot=/root/src/software/osxcross/target/SDK/MacOSX14.2.sdk \
+  --disable-nls \
+  --enable-languages=c,c++,objc,obj-c++ \
+  --without-headers \
+  --enable-lto \
+  --enable-checking=release \
+  --disable-libstdcxx-pch \
+  --disable-multilib \
+  --with-ld=/root/src/software/osxcross/target/bin/x86_64-apple-darwin23.3-ld \
+  --with-ar=/root/src/software/osxcross/target/bin/x86_64-apple-darwin23.3-ar
+```
 ## llvm/clang
 ```
-#don't build libunwind pls
-
 cmake -G "Unix Makefiles" ../llvm \
     -DCMAKE_INSTALL_PREFIX=/usr/local/llvm/18 \
     -DCMAKE_BUILD_TYPE=Release \
