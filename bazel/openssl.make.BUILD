@@ -1,3 +1,4 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_foreign_cc//foreign_cc:defs.bzl", "configure_make", "configure_make_variant")
 
 package(default_visibility = ["//visibility:public"])
@@ -53,19 +54,22 @@ alias(
 configure_make(
     name = "openssl_default",
     args = ["-j"],
-    configure_command = "config",
+    configure_command = "Configure",
     configure_in_place = True,
-    configure_options = select({
-                            "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
-                            "@bazel_template//bazel:osx_x86_64": ["darwin64-x86_64-cc"],  #darwin64-x86_64-cc
-                            "//conditions:default": [],
-                        }) +
-                        CONFIGURE_OPTIONS,
+    configure_options = CONFIGURE_OPTIONS + select({
+        "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
+        "@bazel_template//bazel:osx_x86_64": ["darwin64-x86_64-cc"],  #darwin64-x86_64-cc
+        "//conditions:default": [],
+    }),
+    env = select({
+        "@bazel_template//bazel:osx_x86_64": {"ARFLAGS": "-static -o"},
+        "//conditions:default": {},
+    }),
     lib_name = LIB_NAME,
     lib_source = ":all_srcs",
     #linkopts = ["-ldl"],
-    out_lib_dir = select({
-        "@platforms//cpu:aarch64": "lib",
+    out_lib_dir = selects.with_or({
+        ("@platforms//cpu:aarch64", "@platforms//os:osx"): "lib",
         "//conditions:default": "lib64",
     }),
     out_static_libs = [
