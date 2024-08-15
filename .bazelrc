@@ -113,6 +113,7 @@ build:gcc --cpu='x86_64'
 build:gcc --compiler='gcc'
 #build:gcc --java_runtime_version="remotejdk_21"
 
+# cannot cross compile for macos for linker not compitible with gcc
 build:gcc_macosx_x86_64 --platforms='//bazel:osx_x86_64_platform'
 #build:gcc_macosx_x86_64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
 build:gcc_macosx_x86_64 --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
