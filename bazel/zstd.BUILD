@@ -23,7 +23,7 @@ cc_library(
             "lib/legacy/zstd_v03.c",
         ],
     ) + select({
-        "@bazel_template//bazel:linux_x86_64": ["lib/decompress/huf_decompress_amd64.S"],
+        "@platforms//cpu:x86_64": ["lib/decompress/huf_decompress_amd64.S"],
         "//conditions:default": [],
     }),
     hdrs = [

@@ -37,5 +37,4 @@ cc_library(
         "-Wl,--version-script=$(location :libaio.map)",
         "-Wl,-soname=libaio.so.1",
     ],
-    visibility = ["//visibility:public"],
 )

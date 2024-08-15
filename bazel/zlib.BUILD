@@ -4,11 +4,11 @@ package(default_visibility = ["//visibility:public"])
 
 alias(
     name = "zlib",
-    actual = selects.with_or({
-        ("@platforms//os:android", "@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): ":zlib_system",
-        "//conditions:default": ":z",
-    }),
-    visibility = ["//visibility:public"],
+    #actual = selects.with_or({
+    #("@platforms//os:android", "@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): ":zlib_system",
+    #"//conditions:default": ":z",
+    #}),
+    actual = ":z",
 )
 
 cc_library(
@@ -60,7 +60,6 @@ cc_library(
     }),
 )
 
-# For OSs that bundle libz
 cc_library(
     name = "zlib_system",
     linkopts = ["-lz"],

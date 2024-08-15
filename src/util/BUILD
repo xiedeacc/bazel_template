@@ -64,7 +64,6 @@ cc_test(
     data = ["//conf:base_config.json"],
     deps = [
         ":config_manager",
-        "@libaio//:aio",
     ],
 )
 

@@ -235,7 +235,6 @@ cc_library(
         "@com_google_googletest//:gtest",
         "@double-conversion//:double-conversion",
         "@fmt",
-        "@libaio//:aio",
         "@libdwarf//:dwarf",
         "@libevent//:event",
         "@libevent//:event_openssl",
@@ -250,6 +249,9 @@ cc_library(
         "@bazel_template//bazel:jemalloc": ["@jemalloc"],
         #"@bazel_template//bazel:tcmalloc": ["@tcmalloc//tcmalloc"],
         "@bazel_template//bazel:tcmalloc": ["@bazel_template//lib:tcmalloc_lib"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:linux": ["@libaio//:aio"],
         "//conditions:default": [],
     }),
     alwayslink = True,

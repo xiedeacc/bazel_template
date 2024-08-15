@@ -1,5 +1,5 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
+load("@bazel_template//bazel:common.bzl", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -53,8 +53,10 @@ cc_library(
     local_defines = [
         "bz2_EXPORTS",
         "BZ_DEBUG=0",
-        "BZ_UNIX=1",
-    ],
+    ] + select({
+        "@platforms//os:windows": ["BZ_LCCWIN32=1"],
+        "//conditions:default": ["BZ_UNIX=1"],
+    }),
 )
 
 cc_binary(

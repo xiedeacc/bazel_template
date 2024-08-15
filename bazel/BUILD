@@ -33,16 +33,6 @@ config_setting(
 )
 
 config_setting(
-    name = "jemalloc",
-    define_values = {"profiling_type": "jemalloc"},
-)
-
-config_setting(
-    name = "tcmalloc",
-    define_values = {"profiling_type": "tcmalloc"},
-)
-
-config_setting(
     name = "windows_x86_64",
     constraint_values = [
         "@platforms//os:windows",
@@ -52,17 +42,17 @@ config_setting(
 )
 
 config_setting(
-    name = "linux_aarch64",
+    name = "linux_x86_64",
     constraint_values = [
-        "@platforms//cpu:aarch64",
+        "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
 )
 
 config_setting(
-    name = "linux_x86_64",
+    name = "linux_aarch64",
     constraint_values = [
-        "@platforms//cpu:x86_64",
+        "@platforms//cpu:aarch64",
         "@platforms//os:linux",
     ],
 )
@@ -84,6 +74,46 @@ config_setting(
 )
 
 selects.config_setting_group(
+    name = "windows_x86_64_gcc",
+    match_all = [
+        ":windows_x86_64",
+        ":gcc",
+    ],
+)
+
+selects.config_setting_group(
+    name = "windows_x86_64_clang",
+    match_all = [
+        ":windows_x86_64",
+        ":clang",
+    ],
+)
+
+selects.config_setting_group(
+    name = "linux_x86_64_gcc",
+    match_all = [
+        ":linux_x86_64",
+        ":gcc",
+    ],
+)
+
+selects.config_setting_group(
+    name = "linux_x86_64_clang",
+    match_all = [
+        ":linux_x86_64",
+        ":clang",
+    ],
+)
+
+selects.config_setting_group(
+    name = "linux_aarch64_gcc",
+    match_all = [
+        ":linux_aarch64",
+        ":gcc",
+    ],
+)
+
+selects.config_setting_group(
     name = "linux_aarch64_clang",
     match_all = [
         ":linux_aarch64",
@@ -91,11 +121,43 @@ selects.config_setting_group(
     ],
 )
 
+selects.config_setting_group(
+    name = "osx_x86_64_gcc",
+    match_all = [
+        ":osx_x86_64",
+        ":gcc",
+    ],
+)
+
+selects.config_setting_group(
+    name = "osx_x86_64_clang",
+    match_all = [
+        ":osx_x86_64",
+        ":clang",
+    ],
+)
+
+selects.config_setting_group(
+    name = "osx_aarch64_gcc",
+    match_all = [
+        ":osx_aarch64",
+        ":gcc",
+    ],
+)
+
+selects.config_setting_group(
+    name = "osx_aarch64_clang",
+    match_all = [
+        ":osx_aarch64",
+        ":clang",
+    ],
+)
+
 platform(
-    name = "linux_aarch64_platform",
+    name = "windows_x86_64_platform",
     constraint_values = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
     ],
 )
 
@@ -103,6 +165,14 @@ platform(
     name = "linux_x86_64_platform",
     constraint_values = [
         "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+)
+
+platform(
+    name = "linux_aarch64_platform",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
         "@platforms//os:linux",
     ],
 )
@@ -121,4 +191,14 @@ platform(
         "@platforms//cpu:aarch64",
         "@platforms//os:osx",
     ],
+)
+
+config_setting(
+    name = "jemalloc",
+    define_values = {"profiling_type": "jemalloc"},
+)
+
+config_setting(
+    name = "tcmalloc",
+    define_values = {"profiling_type": "tcmalloc"},
 )

@@ -15,14 +15,14 @@ template_rule(
 )
 
 COMMON_COTPS = [
-    "-g3",
+    "-g",
     "-pthread",
     "-fno-strict-aliasing",
     "-fno-strict-overflow",
     "-fstack-protector",
+    "-ftls-model=local-dynamic",
     "-Wno-deprecated-declarations",
     "-Wno-unknown-pragmas",
-    "-ftls-model=local-dynamic",
     "-Iexternal/libsodium/src/libsodium/include/sodium",
     "-Iexternal/libsodium/src/libsodium/crypto_aead/aegis128l",
     "-Iexternal/libsodium/src/libsodium/crypto_aead/aegis256",
@@ -58,7 +58,6 @@ COMMON_DEFINES = [
     "PACKAGE_URL=\\\"https://libsodium.org\\\"",
     "PACKAGE=\\\"libsodium\\\"",
     "VERSION=\\\"1.0.20\\\"",
-    "ASM_HIDE_SYMBOL=.hidden",
     "CONFIGURED=1",
     "HAVE_ALLOCA=1",
     "HAVE_ALLOCA_H=1",
@@ -90,7 +89,6 @@ COMMON_DEFINES = [
     "HAVE_STRINGS_H=1",
     "HAVE_STRING_H=1",
     "HAVE_SYSCONF=1",
-    "HAVE_SYS_AUXV_H=1",
     "HAVE_SYS_MMAN_H=1",
     "HAVE_SYS_PARAM_H=1",
     "HAVE_SYS_RANDOM_H=1",
@@ -149,6 +147,17 @@ AARCH64_DEFINES = [
     "HAVE_ARMCRYPTO=1",
 ]
 
+LINUX_DEFINES = [
+    "HAVE_SYS_AUXV_H=1",
+]
+
+OSX_DEFINES = [
+    "HAVE_COMMONCRYPTO_COMMONRANDOM_H=1",
+    "HAVE_ARC4RANDOM=1",
+    "HAVE_ARC4RANDOM_BUF=1",
+    "HAVE_MEMSET_S=1",
+]
+
 cc_library(
     name = "utils",
     srcs = [
@@ -169,11 +178,14 @@ cc_library(
         "//conditions:default": [
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES,
+        "@platforms//os:linux": LINUX_DEFINES,
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -299,11 +311,14 @@ cc_library(
         "//conditions:default": [
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES + ["ASM_HIDE_SYMBOL=.private_extern"],
+        "@platforms//os:linux": LINUX_DEFINES + ["ASM_HIDE_SYMBOL=.hidden"],
+        "//conditions:default": ["ASM_HIDE_SYMBOL=.hidden"],
+    }),
     deps = [":utils"],
 )
 
@@ -330,11 +345,14 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES,
+        "@platforms//os:linux": LINUX_DEFINES,
+        "//conditions:default": [],
+    }),
     deps = [":common"],
 )
 
@@ -362,11 +380,14 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES,
+        "@platforms//os:linux": LINUX_DEFINES,
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -395,11 +416,14 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES,
+        "@platforms//os:linux": LINUX_DEFINES,
+        "//conditions:default": [],
+    }),
     deps = [":common"],
 )
 
@@ -429,11 +453,14 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES,
+        "@platforms//os:linux": LINUX_DEFINES,
+        "//conditions:default": [],
+    }),
     deps = [":common"],
 )
 
@@ -466,11 +493,14 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES,
+        "@platforms//os:linux": LINUX_DEFINES,
+        "//conditions:default": [],
+    }),
     deps = [":common"],
 )
 
@@ -499,11 +529,14 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES,
+        "@platforms//os:linux": LINUX_DEFINES,
+        "//conditions:default": [],
+    }),
     deps = [":common"],
 )
 
@@ -537,11 +570,14 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES,
+        "@platforms//os:linux": LINUX_DEFINES,
+        "//conditions:default": [],
+    }),
     deps = [":common"],
 )
 
@@ -573,11 +609,14 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES,
+        "@platforms//os:linux": LINUX_DEFINES,
+        "//conditions:default": [],
+    }),
     deps = [":common"],
 )
 
@@ -608,11 +647,14 @@ cc_library(
             "-Wl,-z,noexecstack",
         ],
     }),
-    local_defines = select({
+    local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
-    }) + COMMON_DEFINES,
-    visibility = ["//visibility:public"],
+    }) + select({
+        "@platforms//os:osx": OSX_DEFINES,
+        "@platforms//os:linux": LINUX_DEFINES,
+        "//conditions:default": [],
+    }),
     deps = [
         ":aesni",
         ":armcrypto",
