@@ -700,10 +700,6 @@ hedron_compile_commands_setup_transitive_transitive()
 
 hedron_compile_commands_setup_transitive_transitive_transitive()
 
-register_toolchains(
-    "//toolchain:clang_toolchain_for_linux_aarch64",
-)
-
 http_archive(
     name = "clang18.1.8-aarch64_sysroot",
     build_file_content =
@@ -718,6 +714,11 @@ filegroup(
     strip_prefix = "clang18.1.8-linux-aarch64_sysroot",
     urls = ["https://code.xiamu.com/files/clang18.1.8-linux-aarch64_sysroot.tar.gz"],
 )
+
+#local_repository(
+#name = "cc_toolchains",
+#path = "../cc_toolchains",
+#)
 
 local_repository(
     name = "cc_toolchains",
@@ -819,25 +820,26 @@ cc_toolchains_setup(
             "osx": [
                 {
                     "distro": "generic",
-                    "libc": "glibc",
+                    "libc": "macosx",
                     "compiler": "gcc",
                     "triple": "x86_64-apple-darwin23.3",
-                    "url": "/usr/local/gcc14.1.0-darwin23.3-x86_64_toolchain",
+                    "url": "/root/src/software/gcc14.1.0-darwin23.3-x86_64_toolchain",
                     "strip_prefix": "",
                     #"url": "/usr/local/gcc/14.1.0",
                     "sha256sum": "6d365bcd30cc943e80be25f87b83e408fd120b1f2c8b9a4db837011719892661",
                     "sysroot": "/root/src/software/macosx14.2-x86_64_sysroot",
                     "tool_names": {
-                        "ar": "x86_64-apple-darwin23.3-gcc-ar",
+                        "ar": "x86_64-apple-darwin23.3-libtool",
                         "as": "x86_64-apple-darwin23.3-as",
+                        #"as": "as",
                         "c++": "x86_64-apple-darwin23.3-g++",
                         "cpp": "x86_64-apple-darwin23.3-cpp",
                         "g++": "x86_64-apple-darwin23.3-g++",
                         "gcc": "x86_64-apple-darwin23.3-gcc",
                         "gcov": "x86_64-apple-darwin23.3-gcov",
                         "ld": "x86_64-apple-darwin23.3-ld",
-                        "llvm-cov": "x86_64-apple-darwin23.3-gcov",
-                        "nm": "x86_64-apple-darwin23.3-gcc-nm",
+                        "llvm-cov": "None",
+                        "nm": "x86_64-apple-darwin23.3-nm",
                         "objcopy": "x86_64-apple-darwin-objcopy",
                         "objdump": "x86_64-apple-darwin-objdump",
                         "strip": "x86_64-apple-darwin23.3-strip",
@@ -959,6 +961,7 @@ cc_toolchains_setup(
                     "distro": "generic",
                     "libc": "musl",
                     "compiler": "clang",
+                    "triple": "aarch64-unknown-linux-gnu",
                     "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
                     #"url": "/usr/local/llvm/18",
