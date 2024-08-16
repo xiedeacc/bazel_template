@@ -1,7 +1,216 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
+load("@bazel_template//bazel:common.bzl", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
+
+COPTS = [
+    "-Wall",
+    "-Wextra",
+    "-std=gnu90",
+    "-g",
+    "-O3",
+]
+
+alias(
+    name = "ares",
+    actual = "c-ares",
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "c-ares",
+    srcs = [
+        "src/lib/ares__addrinfo2hostent.c",
+        "src/lib/ares__addrinfo_localhost.c",
+        "src/lib/ares__buf.c",
+        "src/lib/ares__close_sockets.c",
+        "src/lib/ares__hosts_file.c",
+        "src/lib/ares__htable.c",
+        "src/lib/ares__htable_asvp.c",
+        "src/lib/ares__htable_strvp.c",
+        "src/lib/ares__htable_szvp.c",
+        "src/lib/ares__htable_vpvp.c",
+        "src/lib/ares__iface_ips.c",
+        "src/lib/ares__llist.c",
+        "src/lib/ares__parse_into_addrinfo.c",
+        "src/lib/ares__slist.c",
+        "src/lib/ares__socket.c",
+        "src/lib/ares__sortaddrinfo.c",
+        "src/lib/ares__threads.c",
+        "src/lib/ares__timeval.c",
+        "src/lib/ares_android.c",
+        "src/lib/ares_cancel.c",
+        "src/lib/ares_create_query.c",
+        "src/lib/ares_data.c",
+        "src/lib/ares_destroy.c",
+        "src/lib/ares_dns_mapping.c",
+        "src/lib/ares_dns_name.c",
+        "src/lib/ares_dns_parse.c",
+        "src/lib/ares_dns_record.c",
+        "src/lib/ares_dns_write.c",
+        "src/lib/ares_event_configchg.c",
+        "src/lib/ares_event_epoll.c",
+        "src/lib/ares_event_kqueue.c",
+        "src/lib/ares_event_poll.c",
+        "src/lib/ares_event_select.c",
+        "src/lib/ares_event_thread.c",
+        "src/lib/ares_event_wake_pipe.c",
+        "src/lib/ares_event_win32.c",
+        "src/lib/ares_expand_name.c",
+        "src/lib/ares_expand_string.c",
+        "src/lib/ares_fds.c",
+        "src/lib/ares_free_hostent.c",
+        "src/lib/ares_free_string.c",
+        "src/lib/ares_freeaddrinfo.c",
+        "src/lib/ares_getaddrinfo.c",
+        "src/lib/ares_getenv.c",
+        "src/lib/ares_gethostbyaddr.c",
+        "src/lib/ares_gethostbyname.c",
+        "src/lib/ares_getnameinfo.c",
+        "src/lib/ares_getsock.c",
+        "src/lib/ares_init.c",
+        "src/lib/ares_library_init.c",
+        "src/lib/ares_math.c",
+        "src/lib/ares_metrics.c",
+        "src/lib/ares_options.c",
+        "src/lib/ares_parse_a_reply.c",
+        "src/lib/ares_parse_aaaa_reply.c",
+        "src/lib/ares_parse_caa_reply.c",
+        "src/lib/ares_parse_mx_reply.c",
+        "src/lib/ares_parse_naptr_reply.c",
+        "src/lib/ares_parse_ns_reply.c",
+        "src/lib/ares_parse_ptr_reply.c",
+        "src/lib/ares_parse_soa_reply.c",
+        "src/lib/ares_parse_srv_reply.c",
+        "src/lib/ares_parse_txt_reply.c",
+        "src/lib/ares_parse_uri_reply.c",
+        "src/lib/ares_platform.c",
+        "src/lib/ares_process.c",
+        "src/lib/ares_qcache.c",
+        "src/lib/ares_query.c",
+        "src/lib/ares_rand.c",
+        "src/lib/ares_search.c",
+        "src/lib/ares_send.c",
+        "src/lib/ares_str.c",
+        "src/lib/ares_strcasecmp.c",
+        "src/lib/ares_strerror.c",
+        "src/lib/ares_strsplit.c",
+        "src/lib/ares_sysconfig.c",
+        "src/lib/ares_sysconfig_files.c",
+        "src/lib/ares_sysconfig_mac.c",
+        "src/lib/ares_sysconfig_win.c",
+        "src/lib/ares_timeout.c",
+        "src/lib/ares_update_servers.c",
+        "src/lib/ares_version.c",
+        "src/lib/inet_net_pton.c",
+        "src/lib/inet_ntop.c",
+        "src/lib/windows_port.c",
+    ],
+    hdrs = [
+        "src/lib/thirdparty/apple/dnsinfo.h",
+        ":ares_build_h",
+        ":ares_config_h",
+    ] + glob([
+        "include/*.h",
+        "src/lib/*.h",
+    ]),
+    copts = COPTS + [
+        "-Iexternal/c-ares/src/lib",
+        "-I$(GENDIR)/external/c-ares/src/lib",
+    ],
+    includes = [
+        "include",
+    ],
+    local_defines = [
+        "CARES_BUILDING_LIBRARY",
+        "HAVE_CONFIG_H=1",
+        "_XOPEN_SOURCE=700",
+        "_POSIX_C_SOURCE=200809L",
+        "c_ares_EXPORTS",
+    ] + select({
+        "@platforms//os:linux": [
+            "_GNU_SOURCE",
+        ],
+        "@platforms//os:osx": [
+            "_DARWIN_C_SOURCE",
+        ],
+    }),
+)
+
+#cc_library(
+#name = "ares_getopt",
+#srcs = ["src/tools/ares_getopt.c"],
+#hdrs = ["src/tools/ares_getopt.h"],
+#copts = COPTS,
+#local_defines = [
+#"CARES_BUILDING_LIBRARY",
+#"HAVE_CONFIG_H=1",
+#"c_ares_EXPORTS",
+#] + select({
+#"@platforms//os:linux": [
+#"_GNU_SOURCE",
+#"_POSIX_C_SOURCE=200809L",
+#"_XOPEN_SOURCE=700",
+#],
+#"@platforms//os:osx": [
+#"_DARWIN_C_SOURCE",
+#],
+#}),
+#)
+
+#cc_binary(
+#name = "adig",
+#srcs = ["src/tools/adig.c"],
+#copts = COPTS + [
+#"-Iexternal/c-ares/src/lib",
+#"-I$(GENDIR)/external/c-ares/src/lib",
+#],
+#local_defines = [
+#"CARES_BUILDING_LIBRARY",
+#"HAVE_CONFIG_H=1",
+#"c_ares_EXPORTS",
+#] + select({
+#"@platforms//os:linux": [
+#"_GNU_SOURCE",
+#"_POSIX_C_SOURCE=200809L",
+#"_XOPEN_SOURCE=700",
+#],
+#"@platforms//os:osx": [
+#"_DARWIN_C_SOURCE",
+#],
+#}),
+#deps = [
+#":ares_getopt",
+#":c-ares",
+#],
+#)
+
+#cc_binary(
+#name = "ahost",
+#srcs = ["src/tools/ahost.c"],
+#copts = COPTS + [
+#"-Iexternal/c-ares/src/lib",
+#"-I$(GENDIR)/external/c-ares/src/lib",
+#],
+#local_defines = [
+#"CARES_BUILDING_LIBRARY",
+#"HAVE_CONFIG_H=1",
+#"c_ares_EXPORTS",
+#] + select({
+#"@platforms//os:linux": [
+#"_GNU_SOURCE",
+#"_POSIX_C_SOURCE=200809L",
+#"_XOPEN_SOURCE=700",
+#],
+#"@platforms//os:osx": [
+#"_DARWIN_C_SOURCE",
+#],
+#}),
+#deps = [
+#":ares_getopt",
+#":c-ares",
+#],
+#)
 
 genrule(
     name = "ares_config_h_in",
@@ -553,212 +762,3 @@ template_rule(
         "//conditions:default": {},
     }),
 )
-
-COPTS = [
-    "-Wall",
-    "-Wextra",
-    "-std=gnu90",
-    "-g",
-    "-O3",
-]
-
-alias(
-    name = "ares",
-    actual = "c-ares",
-    visibility = ["//visibility:public"],
-)
-
-cc_library(
-    name = "c-ares",
-    srcs = [
-        "src/lib/ares__addrinfo2hostent.c",
-        "src/lib/ares__addrinfo_localhost.c",
-        "src/lib/ares__buf.c",
-        "src/lib/ares__close_sockets.c",
-        "src/lib/ares__hosts_file.c",
-        "src/lib/ares__htable.c",
-        "src/lib/ares__htable_asvp.c",
-        "src/lib/ares__htable_strvp.c",
-        "src/lib/ares__htable_szvp.c",
-        "src/lib/ares__htable_vpvp.c",
-        "src/lib/ares__iface_ips.c",
-        "src/lib/ares__llist.c",
-        "src/lib/ares__parse_into_addrinfo.c",
-        "src/lib/ares__slist.c",
-        "src/lib/ares__socket.c",
-        "src/lib/ares__sortaddrinfo.c",
-        "src/lib/ares__threads.c",
-        "src/lib/ares__timeval.c",
-        "src/lib/ares_android.c",
-        "src/lib/ares_cancel.c",
-        "src/lib/ares_create_query.c",
-        "src/lib/ares_data.c",
-        "src/lib/ares_destroy.c",
-        "src/lib/ares_dns_mapping.c",
-        "src/lib/ares_dns_name.c",
-        "src/lib/ares_dns_parse.c",
-        "src/lib/ares_dns_record.c",
-        "src/lib/ares_dns_write.c",
-        "src/lib/ares_event_configchg.c",
-        "src/lib/ares_event_epoll.c",
-        "src/lib/ares_event_kqueue.c",
-        "src/lib/ares_event_poll.c",
-        "src/lib/ares_event_select.c",
-        "src/lib/ares_event_thread.c",
-        "src/lib/ares_event_wake_pipe.c",
-        "src/lib/ares_event_win32.c",
-        "src/lib/ares_expand_name.c",
-        "src/lib/ares_expand_string.c",
-        "src/lib/ares_fds.c",
-        "src/lib/ares_free_hostent.c",
-        "src/lib/ares_free_string.c",
-        "src/lib/ares_freeaddrinfo.c",
-        "src/lib/ares_getaddrinfo.c",
-        "src/lib/ares_getenv.c",
-        "src/lib/ares_gethostbyaddr.c",
-        "src/lib/ares_gethostbyname.c",
-        "src/lib/ares_getnameinfo.c",
-        "src/lib/ares_getsock.c",
-        "src/lib/ares_init.c",
-        "src/lib/ares_library_init.c",
-        "src/lib/ares_math.c",
-        "src/lib/ares_metrics.c",
-        "src/lib/ares_options.c",
-        "src/lib/ares_parse_a_reply.c",
-        "src/lib/ares_parse_aaaa_reply.c",
-        "src/lib/ares_parse_caa_reply.c",
-        "src/lib/ares_parse_mx_reply.c",
-        "src/lib/ares_parse_naptr_reply.c",
-        "src/lib/ares_parse_ns_reply.c",
-        "src/lib/ares_parse_ptr_reply.c",
-        "src/lib/ares_parse_soa_reply.c",
-        "src/lib/ares_parse_srv_reply.c",
-        "src/lib/ares_parse_txt_reply.c",
-        "src/lib/ares_parse_uri_reply.c",
-        "src/lib/ares_platform.c",
-        "src/lib/ares_process.c",
-        "src/lib/ares_qcache.c",
-        "src/lib/ares_query.c",
-        "src/lib/ares_rand.c",
-        "src/lib/ares_search.c",
-        "src/lib/ares_send.c",
-        "src/lib/ares_str.c",
-        "src/lib/ares_strcasecmp.c",
-        "src/lib/ares_strerror.c",
-        "src/lib/ares_strsplit.c",
-        "src/lib/ares_sysconfig.c",
-        "src/lib/ares_sysconfig_files.c",
-        "src/lib/ares_sysconfig_mac.c",
-        "src/lib/ares_sysconfig_win.c",
-        "src/lib/ares_timeout.c",
-        "src/lib/ares_update_servers.c",
-        "src/lib/ares_version.c",
-        "src/lib/inet_net_pton.c",
-        "src/lib/inet_ntop.c",
-        "src/lib/windows_port.c",
-    ],
-    hdrs = [
-        "src/lib/thirdparty/apple/dnsinfo.h",
-        ":ares_build_h",
-        ":ares_config_h",
-    ] + glob([
-        "include/*.h",
-        "src/lib/*.h",
-    ]),
-    copts = COPTS + [
-        "-Iexternal/c-ares/src/lib",
-        "-I$(GENDIR)/external/c-ares/src/lib",
-    ],
-    includes = [
-        "include",
-    ],
-    local_defines = [
-        "CARES_BUILDING_LIBRARY",
-        "HAVE_CONFIG_H=1",
-        "_XOPEN_SOURCE=700",
-        "_POSIX_C_SOURCE=200809L",
-        "c_ares_EXPORTS",
-    ] + select({
-        "@platforms//os:linux": [
-            "_GNU_SOURCE",
-        ],
-        "@platforms//os:osx": [
-            "_DARWIN_C_SOURCE",
-        ],
-    }),
-)
-
-#cc_library(
-#name = "ares_getopt",
-#srcs = ["src/tools/ares_getopt.c"],
-#hdrs = ["src/tools/ares_getopt.h"],
-#copts = COPTS,
-#local_defines = [
-#"CARES_BUILDING_LIBRARY",
-#"HAVE_CONFIG_H=1",
-#"c_ares_EXPORTS",
-#] + select({
-#"@platforms//os:linux": [
-#"_GNU_SOURCE",
-#"_POSIX_C_SOURCE=200809L",
-#"_XOPEN_SOURCE=700",
-#],
-#"@platforms//os:osx": [
-#"_DARWIN_C_SOURCE",
-#],
-#}),
-#)
-
-#cc_binary(
-#name = "adig",
-#srcs = ["src/tools/adig.c"],
-#copts = COPTS + [
-#"-Iexternal/c-ares/src/lib",
-#"-I$(GENDIR)/external/c-ares/src/lib",
-#],
-#local_defines = [
-#"CARES_BUILDING_LIBRARY",
-#"HAVE_CONFIG_H=1",
-#"c_ares_EXPORTS",
-#] + select({
-#"@platforms//os:linux": [
-#"_GNU_SOURCE",
-#"_POSIX_C_SOURCE=200809L",
-#"_XOPEN_SOURCE=700",
-#],
-#"@platforms//os:osx": [
-#"_DARWIN_C_SOURCE",
-#],
-#}),
-#deps = [
-#":ares_getopt",
-#":c-ares",
-#],
-#)
-
-#cc_binary(
-#name = "ahost",
-#srcs = ["src/tools/ahost.c"],
-#copts = COPTS + [
-#"-Iexternal/c-ares/src/lib",
-#"-I$(GENDIR)/external/c-ares/src/lib",
-#],
-#local_defines = [
-#"CARES_BUILDING_LIBRARY",
-#"HAVE_CONFIG_H=1",
-#"c_ares_EXPORTS",
-#] + select({
-#"@platforms//os:linux": [
-#"_GNU_SOURCE",
-#"_POSIX_C_SOURCE=200809L",
-#"_XOPEN_SOURCE=700",
-#],
-#"@platforms//os:osx": [
-#"_DARWIN_C_SOURCE",
-#],
-#}),
-#deps = [
-#":ares_getopt",
-#":c-ares",
-#],
-#)

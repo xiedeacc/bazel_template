@@ -74,6 +74,22 @@ config_setting(
 )
 
 selects.config_setting_group(
+    name = "osx_gcc",
+    match_all = [
+        "@platforms//os:osx",
+        ":gcc",
+    ],
+)
+
+selects.config_setting_group(
+    name = "osx_clang",
+    match_all = [
+        "@platforms//os:osx",
+        ":clang",
+    ],
+)
+
+selects.config_setting_group(
     name = "windows_x86_64_gcc",
     match_all = [
         ":windows_x86_64",

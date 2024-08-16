@@ -186,7 +186,8 @@ new_git_repository(
     name = "bzip2",
     build_file = "//bazel:bzip2.BUILD",
     commit = "66c46b8c9436613fd81bc5d03f63a61933a4dcc3",
-    remote = "https://gitlab.com/bzip2/bzip2.git",
+    #remote = "https://gitlab.com/bzip2/bzip2.git",
+    remote = "git@code.xiamu.com:bzip2/bzip2.git",
 )
 
 new_git_repository(

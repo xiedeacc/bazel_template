@@ -1,4 +1,5 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@bazel_template//bazel:common.bzl", "template_rule")
 
 config_setting(
     name = "ca_bundle_style_is_debian",
@@ -289,8 +290,8 @@ cc_library(
 )
 
 write_file(
-    name = "curl_config_h",
-    out = "curl_config.h",
+    name = "curl_config_h_in",
+    out = "curl_config.h.in",
     content = [
         "/***************************************************************************",
         " *                                  _   _ ____  _",
@@ -1112,4 +1113,47 @@ write_file(
         "/* if ECH support is available */",
         "/* #undef USE_ECH */",
     ],
+)
+
+template_rule(
+    name = "curl_config_h",
+    src = ":curl_config_h_in",
+    out = "curl_config.h",
+    substitutions = select({
+        "@platforms//os:linux": {
+        },
+        "@platforms//os:osx": {
+            "#define CURL_CA_BUNDLE \"/etc/ssl/certs/ca-certificates.crt\"": "#define CURL_CA_BUNDLE \"/etc/ssl/cert.pem\"",
+            "/* #define CURL_DISABLE_LDAP 1 */": "/* #undef CURL_DISABLE_LDAP */",
+            "/* #define CURL_DISABLE_LDAPS 1 */": "/* #undef CURL_DISABLE_LDAPS */",
+            "/* #undef HAVE_ARC4RANDOM */": "#define HAVE_ARC4RANDOM 1",
+            "#define HAVE_GETHOSTBYNAME_R 1": "/* #undef HAVE_GETHOSTBYNAME_R */",
+            "#define HAVE_GETHOSTBYNAME_R_6 1": "/* #undef HAVE_GETHOSTBYNAME_R_6 */",
+            "/* #undef HAVE_LIBIDN2 */": "#define HAVE_LIBIDN2 1",
+            "#define HAVE_LINUX_TCP_H 1": "/* #undef HAVE_LINUX_TCP_H */",
+            "#define HAVE_EVENTFD 1": "/* #undef HAVE_EVENTFD */",
+            "#define HAVE_POLL_FINE 1": "/* #undef HAVE_POLL_FINE */",
+            "/* #undef HAVE_PTHREAD_H */": "#define HAVE_PTHREAD_H 1",
+            "#define HAVE_FSETXATTR_5 1": "/* #undef HAVE_FSETXATTR_5 */",
+            "/* #undef HAVE_FSETXATTR_6 */": "#define HAVE_FSETXATTR_6 1",
+            "/* #undef HAVE_SETMODE */": "#define HAVE_SETMODE 1",
+            "#define HAVE_SYS_EVENTFD_H 1": "/* #undef HAVE_SYS_EVENTFD_H */",
+            "/* #undef HAVE_SYS_FILIO_H */": "#define HAVE_SYS_FILIO_H 1",
+            "/* #undef HAVE_SYS_SOCKIO_H */": "#define HAVE_SYS_SOCKIO_H 1",
+            "#define HAVE_TERMIO_H 1": "/* #undef HAVE_TERMIO_H */",
+            "#define OS \"Linux\"": "#define OS \"Darwin\"",
+            "/* #undef USE_THREADS_POSIX */": "#define USE_THREADS_POSIX 1",
+            #"/* #undef USE_LIBSSH2 */": "#define USE_LIBSSH2 1",
+            "/* #undef HAVE_MACH_ABSOLUTE_TIME */": "#define HAVE_MACH_ABSOLUTE_TIME 1",
+            #"#define USE_WEBSOCKETS 1": "/* #undef USE_WEBSOCKETS */",
+        },
+        "@platforms//os:windows": {
+        },
+        "//conditions:default": {},
+    }) | select({
+        "@bazel_template//bazel:osx_clang": {
+            "/* #undef HAVE_BUILTIN_AVAILABLE */": "#define HAVE_BUILTIN_AVAILABLE 1",
+        },
+        "//conditions:default": {},
+    }),
 )
