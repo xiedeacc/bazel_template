@@ -166,6 +166,9 @@ CMAKE_PREFIX_PATH=/usr/local:/usr/local/llvm/18 LD_LIBRARY_PATH=/usr/local/lib P
 # 一些常见和交叉编译相关命令
 
 ```
+osxcross
+LDFLAGS=-L/usr/local/llvm/18/lib/x86_64-unknown-linux-gnu LIBS=-lunwind ./configure --prefix=/root/src/software/osxcross/target --target=x86_64-apple-darwin23.3 --with-libtapi=/root/src/software/osxcross/target --with-libxar=/root/src/software/osxcross/target
+
 LLVM_DIR=/usr/local/llvm/18 \
 CC=${LLVM_DIR}/bin/clang \
 CPPFLAGS="-I${LLVM_DIR}/include -I${LLVM_DIR}/include/x86_64-unknown-linux-gnu/c++/v1 -I${LLVM_DIR}/include/c++/v1 -I${LLVM_DIR}/lib/clang/18/include -I/usr/include" \

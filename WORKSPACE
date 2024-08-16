@@ -143,8 +143,8 @@ new_git_repository(
     name = "libaio",
     build_file = "//bazel:libaio.BUILD",
     commit = "b8eadc9f89e8f7ab0338eacda9f98a6caea76883",
-    remote = "https://pagure.io/libaio.git",
-    #remote = "git@code.xiamu.com:root/libaio.git",
+    #remote = "https://pagure.io/libaio.git",
+    remote = "git@code.xiamu.com:root/libaio.git",
 )
 
 http_archive(
@@ -849,7 +849,7 @@ cc_toolchains_setup(
                         "x86_64-apple-darwin23.3/include/c++/14.1.0",
                         "x86_64-apple-darwin23.3/include/c++/14.1.0/backward",
                         "lib/gcc/x86_64-apple-darwin23.3/14.1.0/include",
-                        "lib/gcc/x86_64-apple-darwin23.3/14.1.0/include-fixed",
+                        #"lib/gcc/x86_64-apple-darwin23.3/14.1.0/include-fixed",
                     ],
                     "lib_directories": [
                         "x86_64-apple-darwin23.3/lib",
@@ -857,6 +857,8 @@ cc_toolchains_setup(
                     ],
                     "sysroot_include_directories": [
                         "usr/include",
+                        "System/Library/Frameworks",
+                        #"System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach",
                     ],
                     "sysroot_lib_directories": [
                         "usr/lib",
