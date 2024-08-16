@@ -18,11 +18,11 @@ COPTS = [
     "-Iexternal/libunwind/src/dwarf",
 ]
 
-LINUX_X86_64_COPTS = [
+X86_64_COPTS = [
     "-Iexternal/libunwind/src/x86_64",
 ]
 
-LINUX_AARCH64_COPTS = [
+AARCH64_COPTS = [
     "-Iexternal/libunwind/src/aarch64",
 ]
 
@@ -39,8 +39,8 @@ template_rule(
     src = "include/libunwind.h.in",
     out = "include/libunwind.h",
     substitutions = select({
-        "@bazel_template//bazel:linux_x86_64": {"@arch@": "x86_64"},
-        "@bazel_template//bazel:linux_aarch64": {"@arch@": "aarch64"},
+        "@platforms//cpu:x86_64": {"@arch@": "x86_64"},
+        "@platforms//cpu:aarch64": {"@arch@": "aarch64"},
     }),
 )
 
@@ -49,8 +49,8 @@ template_rule(
     src = "include/tdep/libunwind_i.h.in",
     out = "include/tdep/libunwind_i.h",
     substitutions = select({
-        "@bazel_template//bazel:linux_x86_64": {"@arch@": "x86_64"},
-        "@bazel_template//bazel:linux_aarch64": {"@arch@": "aarch64"},
+        "@platforms//cpu:x86_64": {"@arch@": "x86_64"},
+        "@platforms//cpu:aarch64": {"@arch@": "aarch64"},
     }),
 )
 
@@ -99,7 +99,7 @@ cc_library(
             "src/mi/Ldyn-remote.c",
         ],
     ) + select({
-        "@bazel_template//bazel:linux_x86_64": glob(
+        "@platforms//cpu:x86_64": glob(
             [
                 "src/x86_64/L*.c",
                 "src/x86_64/G*.c",
@@ -119,7 +119,7 @@ cc_library(
                 "src/x86_64/Los-qnx.c",
             ],
         ),
-        "@bazel_template//bazel:linux_aarch64": glob(
+        "@platforms//cpu:aarch64": glob(
             [
                 "src/aarch64/L*.c",
                 "src/aarch64/G*.c",
@@ -167,7 +167,7 @@ cc_library(
         ":libunwind_h",
         ":tdep_libunwind_i_h",
     ] + select({
-        "@bazel_template//bazel:linux_x86_64": [
+        "@platforms//cpu:x86_64": [
             "include/libunwind-x86_64.h",
             "include/tdep-x86_64/dwarf-config.h",
             "include/tdep-x86_64/jmpbuf.h",
@@ -176,7 +176,7 @@ cc_library(
             "src/x86_64/ucontext_i.h",
             "src/x86_64/unwind_i.h",
         ] + glob(["src/x86_64/G*.c"]),
-        "@bazel_template//bazel:linux_aarch64": [
+        "@platforms//cpu:aarch64": [
             "include/libunwind-aarch64.h",
             "include/tdep-aarch64/dwarf-config.h",
             "include/tdep-aarch64/jmpbuf.h",
@@ -190,8 +190,8 @@ cc_library(
         "src/mi/G*.c",
     ]),
     copts = COPTS + select({
-        "@bazel_template//bazel:linux_x86_64": LINUX_X86_64_COPTS,
-        "@bazel_template//bazel:linux_aarch64": LINUX_AARCH64_COPTS,
+        "@platforms//cpu:x86_64": X86_64_COPTS,
+        "@platforms//cpu:aarch64": AARCH64_COPTS,
     }),
     local_defines = LOCAL_DEFINES,
     textual_hdrs = [
@@ -478,9 +478,9 @@ template_rule(
     src = "config_h_in",
     out = "include/config.h",
     substitutions = select({
-        "@bazel_template//bazel:linux_x86_64": {
+        "@platforms//cpu:x86_64": {
         },
-        "@bazel_template//bazel:linux_aarch64": {
+        "@platforms//cpu:aarch64": {
             "#define HAVE_ASM_VSYSCALL_H 1": "/* #undef HAVE_ASM_VSYSCALL_H */",
             "#define HAVE_EXECINFO_H 1": "/* #undef HAVE_EXECINFO_H */",
             "/* #undef HAVE_STRUCT_DL_PHDR_INFO_DLPI_SUBS */": "#define HAVE_STRUCT_DL_PHDR_INFO_DLPI_SUBS 1",

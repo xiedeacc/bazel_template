@@ -1,8 +1,78 @@
+load("@bazel_template//bazel:common.bzl", "template_rule")
+
 package(default_visibility = ["//visibility:public"])
 
-genrule(
+cc_library(
+    name = "ev",
+    srcs = [
+        "ev.c",
+        "event.c",
+        ":config_h",
+    ],
+    hdrs = [
+        "ev.h",
+        #"ev++.h",
+        "ev_poll.c",
+        "ev_port.c",
+        "ev_select.c",
+        "ev_vars.h",
+        "ev_wrap.h",
+        "event.h",
+    ] + select({
+        "@platforms//os:osx": ["ev_kqueue.c"],
+        "@platforms//os:linux": [
+            "ev_epoll.c",
+            "ev_iouring.c",
+        ],
+    }),
+    copts = [
+        "-Wno-return-type",
+        "-Wno-unused-value",
+        "-Wno-parentheses",
+        "-Wno-unused-variable",
+        "-Wno-comment",
+        "-Wno-strict-aliasing",
+        "-Wno-implicit-function-declaration",
+        "-Wno-unused-result",
+    ],
+    local_defines = ["HAVE_CONFIG_H"],
+    deps = select({
+        "@platforms//os:osx": [],
+        "@platforms//os:linux": ["@liburing//:liburing-ffi"],
+    }),
+)
+
+template_rule(
     name = "config_h",
-    outs = ["config.h"],
+    src = ":config_h_in",
+    out = "config.h",
+    substitutions = select({
+        "@platforms//os:osx": {
+            "#define HAVE_EPOLL_CTL 1": "/* #undef HAVE_EPOLL_CTL */",
+            "#define HAVE_EVENTFD 1": "/* #undef HAVE_EVENTFD */",
+            "#define HAVE_INOTIFY_INIT 1": "/* #undef HAVE_INOTIFY_INIT */",
+            "#define HAVE_KERNEL_RWF_T 1": "/* #undef HAVE_KERNEL_RWF_T */",
+            "/* #undef HAVE_KQUEUE */": "#define HAVE_KQUEUE 1",
+            "#define HAVE_LINUX_AIO_ABI_H 1": "/* #undef HAVE_LINUX_AIO_ABI_H */",
+            "#define HAVE_LINUX_FS_H 1": "/* #undef HAVE_LINUX_FS_H */",
+            "#define HAVE_SIGNALFD 1": "/* #undef HAVE_SIGNALFD */",
+            "#define HAVE_SYS_EPOLL_H 1": "/* #undef HAVE_SYS_EPOLL_H */",
+            "#define HAVE_SYS_EVENTFD_H 1": "/* #undef HAVE_SYS_EVENTFD_H */",
+            "/* #undef HAVE_SYS_EVENT_H */": "#define HAVE_SYS_EVENT_H 1",
+            "#define HAVE_SYS_INOTIFY_H 1": "/* #undef HAVE_SYS_INOTIFY_H */",
+            "#define HAVE_SYS_TIMERFD_H 1": "/* #undef HAVE_SYS_TIMERFD_H */",
+        },
+        "@platforms//os:linux": {
+            "#define HAVE_MEMORY_H 1": "/* #undef HAVE_MEMORY_H */",
+        },
+        "//conditions:default": {
+        },
+    }),
+)
+
+genrule(
+    name = "config_h_in",
+    outs = ["config.h.in"],
     cmd = "\n".join([
         "cat <<'EOF' >$@",
         "/* config.h.  Generated from config.h.in by configure.  */",
@@ -46,6 +116,9 @@ genrule(
         "",
         "/* Define to 1 if you have the <linux/fs.h> header file. */",
         "#define HAVE_LINUX_FS_H 1",
+        "",
+        "/* Define to 1 if you have the <memory.h> header file. */",
+        "#define HAVE_MEMORY_H 1",
         "",
         "/* Define to 1 if you have the `nanosleep' function. */",
         "#define HAVE_NANOSLEEP 1",
@@ -146,39 +219,4 @@ genrule(
         "#define VERSION \"4.33\"",
         "EOF",
     ]),
-)
-
-cc_library(
-    name = "ev",
-    srcs = [
-        "ev.c",
-        "event.c",
-        ":config_h",
-    ],
-    hdrs = [
-        "ev.h",
-        #"ev++.h",
-        "ev_epoll.c",
-        "ev_iouring.c",
-        "ev_poll.c",
-        "ev_port.c",
-        "ev_select.c",
-        "ev_vars.h",
-        "ev_wrap.h",
-        "event.h",
-    ],
-    copts = [
-        "-Wno-return-type",
-        "-Wno-unused-value",
-        "-Wno-parentheses",
-        "-Wno-unused-variable",
-        "-Wno-comment",
-        "-Wno-strict-aliasing",
-        "-Wno-implicit-function-declaration",
-        "-Wno-unused-result",
-    ],
-    local_defines = ["HAVE_CONFIG_H"],
-    deps = [
-        "@liburing//:liburing-ffi",
-    ],
 )

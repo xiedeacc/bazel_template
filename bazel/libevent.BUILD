@@ -45,6 +45,7 @@ cc_library(
         "evmap.c",
         "evrpc.c",
         "evthread.c",
+        "evthread_pthread.c",
         "evutil.c",
         "evutil_rand.c",
         "evutil_time.c",
@@ -78,78 +79,6 @@ cc_library(
         "HAVE_CONFIG_H",
         "NDEBUG",
         "LITTLE_ENDIAN",
-    ],
-)
-
-cc_library(
-    name = "event_core",
-    srcs = [
-        "buffer.c",
-        "bufferevent.c",
-        "bufferevent_filter.c",
-        "bufferevent_pair.c",
-        "bufferevent_ratelim.c",
-        "bufferevent_sock.c",
-        "epoll.c",
-        "event.c",
-        "evmap.c",
-        "evthread.c",
-        "evutil.c",
-        "evutil_rand.c",
-        "evutil_time.c",
-        "listener.c",
-        "log.c",
-        "poll.c",
-        "select.c",
-        "signal.c",
-        "signalfd.c",
-        "strlcpy.c",
-        "watch.c",
-    ],
-    hdrs = [
-        "arc4random.c",
-        ":evconfig-private_h",
-        ":event-config_h",
-    ] + glob(
-        [
-            "include/**/*.h",
-            "*.h",
-        ],
-    ),
-    copts = COPTS,
-    includes = ["include"],
-    local_defines = [
-        "HAVE_CONFIG_H",
-        "NDEBUG",
-    ],
-)
-
-cc_library(
-    name = "event_extra",
-    srcs = [
-        "evdns.c",
-        "event_tagging.c",
-        "evrpc.c",
-        "http.c",
-        "sha1.c",
-        "ws.c",
-    ],
-    hdrs = [
-        "arc4random.c",
-        ":evconfig-private_h",
-        ":event-config_h",
-    ] + glob(
-        [
-            "include/**/*.h",
-            "*.h",
-        ],
-    ),
-    copts = COPTS,
-    includes = ["include"],
-    local_defines = [
-        "HAVE_CONFIG_H",
-        "LITTLE_ENDIAN",
-        "NDEBUG",
     ],
 )
 
@@ -207,32 +136,6 @@ cc_library(
     ],
     deps = [
         "@mbedtls",
-    ],
-)
-
-cc_library(
-    name = "event_pthreads",
-    srcs = [
-        "evthread_pthread.c",
-    ],
-    hdrs = [
-        "arc4random.c",
-        ":evconfig-private_h",
-        ":event-config_h",
-    ] + glob(
-        [
-            "include/**/*.h",
-            "*.h",
-        ],
-    ),
-    copts = COPTS + ["-pthread"],
-    includes = ["include"],
-    local_defines = [
-        "HAVE_CONFIG_H",
-        "NDEBUG",
-        "LITTLE_ENDIAN",
-    ],
-    deps = [
     ],
 )
 
