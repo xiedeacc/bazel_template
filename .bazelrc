@@ -41,13 +41,13 @@ build --announce_rc
 build --workspace_status_command=bazel/workspace_status.sh
 build -c opt
 
-build --copt='-g'
+#build --copt='-g'
 build --copt='-O2'
 build --copt='-Wall'
 build --cxxopt='-std=c++17'
 build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 
-build --host_copt='-g'
+#build --host_copt='-g'
 build --host_copt='-O2'
 build --host_copt='-Wall'
 build --host_cxxopt='-std=c++17'
