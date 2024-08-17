@@ -3,8 +3,6 @@ load("@bazel_template//bazel:rules_fbthrift.bzl", "fbthrift_cpp_gen", "fbthrift_
 package(default_visibility = ["//visibility:public"])
 
 COPTS = [
-    "-isystem external/libunwind/include",
-    "-isystem $(GENDIR)/external/libunwind/include",
     "-isystem external/libsodium/src/libsodium/include",
     "-isystem external/fbthrift",
     "-isystem $(GENDIR)/external/fbthrift",
@@ -20,7 +18,15 @@ COPTS = [
     "-isystem external/mvfst",
     "-std=c++17",
     "-D_LARGEFILE64_SOURCE",
-]
+] + select({
+    "@platforms//os:linux": [
+        "-isystem external/libunwind/include",
+        "-isystem $(GENDIR)/external/libunwind/include",
+    ],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
 
 LOCAL_DEFINES = [
     "NDEBUG",
@@ -247,7 +253,6 @@ cc_binary(
     deps = [
         ":compiler_generators",
         "@folly",
-        "@libunwind//:unwind",
         "@mvfst",
         "@wangle",
     ],

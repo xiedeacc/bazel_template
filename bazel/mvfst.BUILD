@@ -18,8 +18,10 @@ cc_library(
             "quic/tools/tperf/**/*.cpp",
         ],
     ) + select({
-        "@bazel_template//bazel:linux_x86_64": ["quic/server/QuicServerBackendIoUring.cpp"],
-        "@bazel_template//bazel:linux_aarch64": ["quic/server/QuicServerBackendIoUring.cpp"],
+        "@platforms//os:linux": ["quic/server/QuicServerBackendIoUring.cpp"],
+        "@platforms//os:osx": [],
+        "@platforms//os:windows": [],
+        "//conditions:default": [],
     }),
     hdrs = glob(
         [

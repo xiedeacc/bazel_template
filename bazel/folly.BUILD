@@ -42,6 +42,8 @@ COPTS = [
         "-Iexternal/libunwind/src/mi",
     ],
     "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
 })
 
 LOCAL_DEFINES = [
