@@ -16,12 +16,6 @@ COPTS = [
     "-isystem external/libsodium/src/libsodium/include",
     "-Iexternal/libsodium/src/libsodium/include/sodium",
     "-isystem $(GENDIR)/external/libsodium/src/libsodium/include",
-    "-isystem $(GENDIR)/external/libunwind/include",
-    "-Iexternal/libunwind/src",
-    "-Iexternal/libunwind/include",
-    "-I$(GENDIR)/external/libunwind/include/tdep",
-    "-Iexternal/libunwind/include/tdep",
-    "-Iexternal/libunwind/src/mi",
     "-Wall",
     "-Wno-deprecated",
     "-Wno-deprecated-declarations",
@@ -38,10 +32,19 @@ COPTS = [
     "-fsigned-char",
     "-faligned-new",
     "-fopenmp",
-]
+] + select({
+    "@platforms//os:linux": [
+        "-isystem $(GENDIR)/external/libunwind/include",
+        "-Iexternal/libunwind/src",
+        "-Iexternal/libunwind/include",
+        "-I$(GENDIR)/external/libunwind/include/tdep",
+        "-Iexternal/libunwind/include/tdep",
+        "-Iexternal/libunwind/src/mi",
+    ],
+    "@platforms//os:osx": [],
+})
 
 LOCAL_DEFINES = [
-    "GFLAGS_IS_A_DLL=0",
     "HAVE_CONFIG_H",
     "_GNU_SOURCE",
     "_REENTRANT",
@@ -61,10 +64,8 @@ LOCAL_DEFINES = [
     "BOOST_THREAD_DYN_LINK",
     "BOOST_THREAD_NO_LIB",
 ] + select({
-    #"@bazel_template//bazel:jemalloc": ["USE_JEMALLOC"],
-    "@bazel_template//bazel:jemalloc": [],
-    "@bazel_template//bazel:tcmalloc": [],
-    "//conditions:default": [],
+    "@platforms//os:windows": ["GFLAGS_IS_A_DLL=1"],
+    "//conditions:default": ["GFLAGS_IS_A_DLL=0"],
 })
 
 cc_library(
@@ -73,8 +74,8 @@ cc_library(
         "folly/crypto/detail/MathOperation_AVX2.cpp",
     ],
     copts = COPTS + select({
-        "@bazel_template//bazel:linux_x86_64": ["-mavx"],
-        "@bazel_template//bazel:linux_aarch64": [],
+        "@platforms//cpu:x86_64": ["-mavx"],
+        "@platforms//cpu:aarch64": [],
     }),
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
@@ -87,8 +88,8 @@ cc_library(
         "folly/crypto/detail/MathOperation_Simple.cpp",
     ],
     copts = COPTS + select({
-        "@bazel_template//bazel:linux_x86_64": ["-mno-avx"],
-        "@bazel_template//bazel:linux_aarch64": [],
+        "@platforms//cpu:x86_64": ["-mno-avx"],
+        "@platforms//cpu:aarch64": [],
     }),
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
@@ -103,8 +104,8 @@ cc_library(
         "folly/hash/detail/Crc32cDetail.cpp",
     ],
     copts = COPTS + select({
-        "@bazel_template//bazel:linux_x86_64": ["-mpclmul"],
-        "@bazel_template//bazel:linux_aarch64": [],
+        "@platforms//cpu:x86_64": ["-mpclmul"],
+        "@platforms//cpu:aarch64": [],
     }),
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
@@ -116,8 +117,8 @@ cc_library(
         "folly/external/fast-crc32/avx512_crc32c_v8s3x4.cpp",
     ],
     copts = COPTS + select({
-        "@bazel_template//bazel:linux_x86_64": ["-mpclmul"],
-        "@bazel_template//bazel:linux_aarch64": [],
+        "@platforms//cpu:x86_64": ["-mpclmul"],
+        "@platforms//cpu:aarch64": [],
     }),
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
@@ -129,8 +130,8 @@ cc_library(
         "folly/detail/base64_detail/Base64_SSE4_2.cpp",
     ],
     copts = COPTS + select({
-        "@bazel_template//bazel:linux_x86_64": ["-msse4.2"],
-        "@bazel_template//bazel:linux_aarch64": [],
+        "@platforms//cpu:x86_64": ["-msse4.2"],
+        "@platforms//cpu:aarch64": [],
     }),
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
@@ -139,11 +140,11 @@ cc_library(
 cc_library(
     name = "assemble",
     srcs = select({
-        "@bazel_template//bazel:linux_x86_64": [
+        "@platforms//cpu:x86_64": [
             "folly/memcpy.S",
             #"folly/memset.S",
         ],
-        "@bazel_template//bazel:linux_aarch64": [
+        "@platforms//cpu:aarch64": [
             "folly/external/aor/memcpy-advsimd.S",
             "folly/external/aor/memcpy-armv8.S",
             "folly/external/aor/memcpy_sve.S",
@@ -152,9 +153,8 @@ cc_library(
     }),
     copts = COPTS + ["-x assembler-with-cpp"],
     local_defines = LOCAL_DEFINES + select({
-        "@bazel_template//bazel:linux_x86_64": [
-        ],
-        "@bazel_template//bazel:linux_aarch64": [
+        "@platforms//cpu:x86_64": [],
+        "@platforms//cpu:aarch64": [
             "FOLLY_MEMCPY_IS_MEMCPY",
             "FOLLY_MEMSET_IS_MEMSET",
         ],
@@ -167,12 +167,6 @@ cc_library(
     srcs = glob(
         ["folly/**/*.cpp"],
         exclude = [
-            "folly/experimental/symbolizer/tool/Addr2Line.cpp",
-            "folly/io/tool/HugePageUtil.cpp",
-            "folly/json/tool/JSONSchemaTester.cpp",
-            "folly/tool/BenchmarkCompare.cpp",
-            "folly/build/**",
-            "folly/docs/**",
             "folly/external/aor/**",
             "folly/crypto/detail/MathOperation_AVX2.cpp",
             "folly/crypto/detail/MathOperation_SSE2.cpp",
@@ -183,6 +177,12 @@ cc_library(
             "folly/hash/detail/ChecksumDetail.cpp",
             "folly/hash/detail/Crc32CombineDetail.cpp",
             "folly/hash/detail/Crc32cDetail.cpp",
+            "folly/io/tool/HugePageUtil.cpp",
+            "folly/experimental/symbolizer/tool/Addr2Line.cpp",
+            "folly/json/tool/JSONSchemaTester.cpp",
+            "folly/tool/BenchmarkCompare.cpp",
+            "folly/build/**",
+            "folly/docs/**",
             "folly/python/**/*.cpp",
             "folly/**/example/**",
             "folly/**/test/**/*.cpp",
@@ -207,11 +207,8 @@ cc_library(
             "folly/python/**/*.h",
         ],
     ) + select({
-        "@bazel_template//bazel:linux_x86_64": [
-        ],
-        "@bazel_template//bazel:linux_aarch64": [
-            "folly/external/aor/asmdefs.h",
-        ],
+        "@platforms//cpu:x86_64": [],
+        "@platforms//cpu:aarch64": ["folly/external/aor/asmdefs.h"],
     }),
     copts = COPTS,
     linkstatic = 0,
@@ -238,11 +235,8 @@ cc_library(
         "@libdwarf//:dwarf",
         "@libevent//:event",
         "@libevent//:event_openssl",
-        "@libevent//:event_pthreads",
         "@libiberty//:iberty",
         "@libsodium//:sodium",
-        "@libunwind//:unwind",
-        "@liburing//:liburing-ffi",
         "@openssl//:ssl",
         "@zstd",
     ] + select({
@@ -251,7 +245,11 @@ cc_library(
         "@bazel_template//bazel:tcmalloc": ["@bazel_template//lib:tcmalloc_lib"],
         "//conditions:default": [],
     }) + select({
-        "@platforms//os:linux": ["@libaio//:aio"],
+        "@platforms//os:linux": [
+            "@libaio//:aio",
+            "@libunwind//:unwind",
+            "@liburing//:liburing-ffi",
+        ],
         "//conditions:default": [],
     }),
     alwayslink = True,
@@ -319,10 +317,8 @@ genrule(
         "#define FOLLY_HAVE_LIBUNWIND 1",
         "#define FOLLY_HAVE_DWARF 1",
         "#define FOLLY_HAVE_ELF 1",
-        "#ifdef __GLIBC__",
         "#define FOLLY_HAVE_SWAPCONTEXT 1",
         "#define FOLLY_HAVE_BACKTRACE 1",
-        "#endif",
         "#define FOLLY_USE_SYMBOLIZER 1",
         "#define FOLLY_DEMANGLE_MAX_SYMBOL_SIZE 1024",
         "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1",
@@ -348,14 +344,29 @@ template_rule(
         "@bazel_template//bazel:gcc": {
         },
         "@bazel_template//bazel:clang": {
-            "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 0",
+            "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "/* #undef FOLLY_HAVE_EXTRANDOM_SFMT19937 */",
         },
     }) | select({
         "@bazel_template//bazel:jemalloc": {"#define FOLLY_USE_JEMALLOC 1": "#define FOLLY_USE_JEMALLOC 1"},
         "@bazel_template//bazel:tcmalloc": {"#define FOLLY_USE_JEMALLOC 1": ""},
         "//conditions:default": {"#define FOLLY_USE_JEMALLOC 1": ""},
     }) | select({
-        "@bazel_template//bazel:linux_x86_64": {},
-        "@bazel_template//bazel:linux_aarch64": {},
+        "@platforms//os:linux": {},
+        "@platforms//os:osx": {
+            "#define FOLLY_HAVE_ACCEPT4 1": "/* #undef FOLLY_HAVE_ACCEPT4 */",
+            "#define FOLLY_HAVE_GETRANDOM 1": "#define FOLLY_HAVE_GETRANDOM 0",
+            "#define FOLLY_HAVE_PIPE2 1": "/* #undef FOLLY_HAVE_PIPE2 */",
+            "#define FOLLY_HAVE_IFUNC 1": "/* #undef FOLLY_HAVE_IFUNC */",
+            "#define FOLLY_HAVE_WEAK_SYMBOLS 1": "#define FOLLY_HAVE_WEAK_SYMBOLS 0",
+            "#define FOLLY_HAVE_LINUX_VDSO 1": "/* #undef FOLLY_HAVE_LINUX_VDSO */",
+            "#define FOLLY_HAVE_MALLOC_USABLE_SIZE 1": "/* #undef FOLLY_HAVE_MALLOC_USABLE_SIZE */",
+            "#define HAVE_VSNPRINTF_ERRORS 1": "/* #undef HAVE_VSNPRINTF_ERRORS */",
+            "#define FOLLY_HAVE_LIBUNWIND 1": "/* #undef FOLLY_HAVE_LIBUNWIND */",
+            "#define FOLLY_HAVE_ELF 1": "/* #undef FOLLY_HAVE_ELF */",
+            "#define FOLLY_USE_SYMBOLIZER 1": "/* #undef FOLLY_USE_SYMBOLIZER */",
+            "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1": "/* #undef FOLLY_HAVE_SHADOW_LOCAL_WARNINGS */",
+            #"#define FOLLY_HAVE_SWAPCONTEXT 1": "/* #undef FOLLY_HAVE_SWAPCONTEXT */",
+            #"#define FOLLY_HAVE_BACKTRACE 1": "/* #undef FOLLY_HAVE_BACKTRACE */",
+        },
     }),
 )

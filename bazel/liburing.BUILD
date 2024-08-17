@@ -36,6 +36,79 @@ LOCAL_DEFINES = [
     "CONFIG_HAVE_FANOTIFY",
 ]
 
+cc_library(
+    name = "private_header",
+    hdrs = [
+        "src/arch/syscall-defs.h",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+cc_library(
+    name = "uring",
+    srcs = glob(
+        [
+            "src/*.c",
+            "src/*.h",
+        ],
+        exclude = ["src/ffi.c"],
+    ) + select({
+        "@platforms//cpu:x86_64": [
+            "src/arch/x86/lib.h",
+            "src/arch/x86/syscall.h",
+        ],
+        "@platforms//cpu:aarch64": [
+            "src/arch/aarch64/lib.h",
+            "src/arch/aarch64/syscall.h",
+        ],
+    }) + [
+        ":compat_h",
+        ":io_uring_version_h",
+    ],
+    hdrs = glob([
+        "src/include/**/*.h",
+    ]),
+    copts = COPTS,
+    local_defines = LOCAL_DEFINES + select({
+        "@platforms//cpu:x86_64": [],
+        "@platforms//cpu:aarch64": [],
+    }),
+    deps = [
+        ":private_header",
+    ],
+)
+
+cc_library(
+    name = "liburing-ffi",
+    srcs = glob([
+        "src/*.c",
+        "src/*.h",
+    ]) + select({
+        "@platforms//cpu:x86_64": [
+            "src/arch/x86/lib.h",
+            "src/arch/x86/syscall.h",
+        ],
+        "@platforms//cpu:aarch64": [
+            "src/arch/aarch64/lib.h",
+            "src/arch/aarch64/syscall.h",
+        ],
+    }) + [
+        ":compat_h",
+        ":io_uring_version_h",
+    ],
+    hdrs = glob([
+        "src/include/**/*.h",
+    ]),
+    copts = COPTS,
+    local_defines = LOCAL_DEFINES + select({
+        "@platforms//cpu:x86_64": [],
+        "@platforms//cpu:aarch64": [],
+    }),
+    deps = [
+        ":private_header",
+    ],
+)
+
 genrule(
     name = "io_uring_version_h",
     outs = ["src/include/liburing/io_uring_version.h"],
@@ -83,81 +156,4 @@ genrule(
         "#endif",
         "EOF",
     ]),
-)
-
-cc_library(
-    name = "private_header",
-    hdrs = [
-        "src/arch/syscall-defs.h",
-    ],
-    visibility = ["//visibility:private"],
-)
-
-cc_library(
-    name = "uring",
-    srcs = glob(
-        [
-            "src/*.c",
-            "src/*.h",
-        ],
-        exclude = ["src/ffi.c"],
-    ) + select({
-        "@bazel_template//bazel:linux_x86_64": [
-            "src/arch/x86/lib.h",
-            "src/arch/x86/syscall.h",
-        ],
-        "@bazel_template//bazel:linux_aarch64": [
-            "src/arch/aarch64/lib.h",
-            "src/arch/aarch64/syscall.h",
-        ],
-    }) + [
-        ":compat_h",
-        ":io_uring_version_h",
-    ],
-    hdrs = glob([
-        "src/include/**/*.h",
-    ]),
-    copts = COPTS,
-    local_defines = LOCAL_DEFINES + select({
-        "@bazel_template//bazel:linux_x86_64": [
-        ],
-        "@bazel_template//bazel:linux_aarch64": [
-        ],
-    }),
-    deps = [
-        ":private_header",
-    ],
-)
-
-cc_library(
-    name = "liburing-ffi",
-    srcs = glob([
-        "src/*.c",
-        "src/*.h",
-    ]) + select({
-        "@bazel_template//bazel:linux_x86_64": [
-            "src/arch/x86/lib.h",
-            "src/arch/x86/syscall.h",
-        ],
-        "@bazel_template//bazel:linux_aarch64": [
-            "src/arch/aarch64/lib.h",
-            "src/arch/aarch64/syscall.h",
-        ],
-    }) + [
-        ":compat_h",
-        ":io_uring_version_h",
-    ],
-    hdrs = glob([
-        "src/include/**/*.h",
-    ]),
-    copts = COPTS,
-    local_defines = LOCAL_DEFINES + select({
-        "@bazel_template//bazel:linux_x86_64": [
-        ],
-        "@bazel_template//bazel:linux_aarch64": [
-        ],
-    }),
-    deps = [
-        ":private_header",
-    ],
 )
