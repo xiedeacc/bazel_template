@@ -27,11 +27,9 @@ COPTS = [
     "-Wshadow-compatible-local",
     "-Wno-noexcept-type",
     "-std=c++17",
-    "-fcoroutines",
     "-finput-charset=UTF-8",
     "-fsigned-char",
     "-faligned-new",
-    "-fopenmp",
 ] + select({
     "@platforms//os:linux": [
         "-isystem $(GENDIR)/external/libunwind/include",
@@ -40,6 +38,8 @@ COPTS = [
         "-I$(GENDIR)/external/libunwind/include/tdep",
         "-Iexternal/libunwind/include/tdep",
         "-Iexternal/libunwind/src/mi",
+        "-fopenmp",
+        "-fcoroutines",
     ],
     "@platforms//os:osx": [],
     "@platforms//os:windows": [],
