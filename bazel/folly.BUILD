@@ -365,6 +365,7 @@ template_rule(
             "#define FOLLY_HAVE_ELF 1": "/* #undef FOLLY_HAVE_ELF */",
             "#define FOLLY_USE_SYMBOLIZER 1": "/* #undef FOLLY_USE_SYMBOLIZER */",
             "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1": "/* #undef FOLLY_HAVE_SHADOW_LOCAL_WARNINGS */",
+            "#define FOLLY_ELF_NATIVE_CLASS 64": "",
             #"#define FOLLY_HAVE_SWAPCONTEXT 1": "/* #undef FOLLY_HAVE_SWAPCONTEXT */",
             #"#define FOLLY_HAVE_BACKTRACE 1": "/* #undef FOLLY_HAVE_BACKTRACE */",
         },
