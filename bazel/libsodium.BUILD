@@ -169,15 +169,9 @@ cc_library(
         "src/libsodium/include/sodium/private/*.h",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [],
     }) + COMMON_COTPS + ["-I$(GENDIR)/external/libsodium/src/libsodium/include/sodium"],
-    linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
-        "//conditions:default": [
-        ],
-    }),
     local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
@@ -302,15 +296,9 @@ cc_library(
         "src/libsodium/crypto_scalarmult/curve25519/sandy2x/*.S",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [],
     }) + COMMON_COTPS + ["-Iexternal/libsodium/src/libsodium/include/sodium"],
-    linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
-        "//conditions:default": [
-        ],
-    }),
     local_defines = COMMON_DEFINES + select({
         "@platforms//cpu:aarch64": AARCH64_DEFINES,
         "//conditions:default": X86_64_DEFINES,
@@ -331,14 +319,14 @@ cc_library(
         "src/libsodium/**/*.h",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-mrdrnd",
         ],
     }) + COMMON_COTPS,
     linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [
             "-Wl,-z,relro",
             "-Wl,-z,now",
@@ -366,14 +354,14 @@ cc_library(
         "src/libsodium/**/*.h",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
         ],
     }) + COMMON_COTPS,
     linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [
             "-Wl,-z,relro",
             "-Wl,-z,now",
@@ -401,7 +389,6 @@ cc_library(
         "src/libsodium/**/*.h",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
@@ -409,7 +396,8 @@ cc_library(
         ],
     }) + COMMON_COTPS,
     linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [
             "-Wl,-z,relro",
             "-Wl,-z,now",
@@ -438,7 +426,6 @@ cc_library(
         "src/libsodium/**/*.h",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
@@ -446,7 +433,8 @@ cc_library(
         ],
     }) + COMMON_COTPS,
     linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [
             "-Wl,-z,relro",
             "-Wl,-z,now",
@@ -475,7 +463,6 @@ cc_library(
         "src/libsodium/**/*.h",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
@@ -486,7 +473,8 @@ cc_library(
         ],
     }) + COMMON_COTPS,
     linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [
             "-Wl,-z,relro",
             "-Wl,-z,now",
@@ -513,7 +501,6 @@ cc_library(
         "src/libsodium/**/*.h",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
@@ -522,7 +509,8 @@ cc_library(
         ],
     }) + COMMON_COTPS,
     linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [
             "-Wl,-z,relro",
             "-Wl,-z,now",
@@ -552,7 +540,6 @@ cc_library(
         "src/libsodium/**/*.h",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
@@ -563,7 +550,8 @@ cc_library(
         ],
     }) + COMMON_COTPS,
     linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [
             "-Wl,-z,relro",
             "-Wl,-z,now",
@@ -590,7 +578,6 @@ cc_library(
         "src/libsodium/**/*.h",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
@@ -602,7 +589,8 @@ cc_library(
         ],
     }) + COMMON_COTPS,
     linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [
             "-Wl,-z,relro",
             "-Wl,-z,now",
@@ -632,7 +620,6 @@ cc_library(
         "src/libsodium/include/sodium/private/*.h",
     ]),
     copts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [
             "-msse2",
@@ -640,7 +627,8 @@ cc_library(
         ],
     }) + COMMON_COTPS,
     linkopts = select({
-        "@bazel_template//bazel:windows_x86_64": [],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [
             "-Wl,-z,relro",
             "-Wl,-z,now",

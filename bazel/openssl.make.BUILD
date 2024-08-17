@@ -67,15 +67,29 @@ configure_make(
     }),
     lib_name = LIB_NAME,
     lib_source = ":all_srcs",
-    #linkopts = ["-ldl"],
     out_lib_dir = selects.with_or({
         ("@platforms//cpu:aarch64", "@platforms//os:osx"): "lib",
         "//conditions:default": "lib64",
     }),
-    out_static_libs = [
-        "libssl.a",
-        "libcrypto.a",
-    ],
+    out_shared_libs = select({
+        "@platforms//os:osx": [
+            "libssl.dylib",
+            "libcrypto.dylib",
+        ],
+        "@platforms//os:linux": [
+            "libssl.so",
+            "libcrypto.so",
+        ],
+        "@platforms//os:windows": [
+            "libssl.dll",
+            "libcrypto.dll",
+        ],
+        "//conditions:default": [],
+    }),
+    #out_static_libs = [
+    #"libssl.a",
+    #"libcrypto.a",
+    #],
     targets = MAKE_TARGETS,
     toolchains = ["@rules_perl//:current_toolchain"],
     deps = [
@@ -85,6 +99,7 @@ configure_make(
         "@zlib//:z",
         "@zstd",
     ],
+    alwayslink = True,
 )
 
 filegroup(

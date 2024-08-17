@@ -38,7 +38,6 @@ cc_library(
         "bufferevent_pair.c",
         "bufferevent_ratelim.c",
         "bufferevent_sock.c",
-        "epoll.c",
         "evdns.c",
         "event.c",
         "event_tagging.c",
@@ -60,8 +59,15 @@ cc_library(
         "watch.c",
         "ws.c",
     ] + select({
-        "@platforms//os:osx": [],
-        "//conditions:default": ["signalfd.c"],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": ["kqueue.c"],
+        "@platforms//os:linux": [
+            "epoll.c",
+            "epoll_sub.c",
+            "epolltable-internal.h",
+            "signalfd.c",
+        ],
+        "//conditions:default": [],
     }),
     hdrs = [
         "arc4random.c",
