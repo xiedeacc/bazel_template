@@ -817,25 +817,6 @@ void Util::Replace(const string &from, const string &to, string *str) {
   str->replace(start_pos, from.length(), to);
 }
 
-uint64_t Util::GenUUID(const string &client_ip_str) {
-  uint32_t in_buff[4], out_buff[5];
-  struct timeval tv;
-  uint32_t seed = ::time(nullptr) ^ ::pthread_self();
-  ::gettimeofday(&tv, nullptr);
-  in_buff[0] = ::rand_r(&seed);
-  in_buff[1] = tv.tv_usec;
-  int32_t client_ip;
-  ::inet_pton(AF_INET, client_ip_str.c_str(), &client_ip);
-  in_buff[2] = client_ip ^ ::pthread_self();
-  in_buff[3] = tv.tv_sec;
-  ::MD5((uint8_t *)&in_buff[0], 4 * sizeof(uint32_t), (uint8_t *)&out_buff[0]);
-
-  uint64_t low = out_buff[0] + out_buff[1];
-  uint64_t high = out_buff[2] + out_buff[3];
-
-  return ((high & 0xffffffff) << 32) | (low & 0xffffffff);
-}
-
 bool Util::ConfReplace(const std::filesystem::path &origin_file,
                        const std::filesystem::path &final_file,
                        std::string *out) {

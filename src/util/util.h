@@ -239,8 +239,6 @@ class Util final {
     search_str->append(value);
   }
 
-  static uint64_t GenUUID(const std::string &client_ip);
-
  public:
   static const char *kPathDelimeter;
 };
