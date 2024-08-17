@@ -1,3 +1,20 @@
+# todo
+1. need test libevent EPOLL_PWAIT2 on openwrt
+2. need test folly SWAPCONTEXT on openwrt
+3. need test jemalloc and tcmalloc link static
+0. jemalloc没有生成profile文件
+6. toolchains_openwrt need windows and macos
+
+# future todo:
+0. link with jemalloc and tcmalloc static will cause core, why?
+3. import virtual include like boost
+4. use baze aspect find the most possible relative search path
+5. 集成clang-tidy, clang-check, clang static analyzer
+6. module map, -compiler_param_file, -layering_check
+7. aspect用法
+8. transitive用法
+9. renovate.json
+
 # features
 * include most popular C/C++ libraries, eg. boost, abseil, folly, proxygen, mvfst, jemalloc, tcmalloc, xz, zstd, curl, c-ares ...
 * include grpc server and client example
@@ -8,22 +25,6 @@
 * include compile_commands.json generator
 * include cpu and memory profiling
 * include memory leak, corruption detection
-
-# todo
-0. jemalloc没有生成profile文件
-6. toolchains_openwrt need windows and macos
-
-# future todo:
-0. link with jemalloc and tcmalloc static will cause core, why?
-1. need test libevent EPOLL_PWAIT2 on openwrt
-2. need test folly SWAPCONTEXT on openwrt
-3. import virtual include like boost
-4. use baze aspect find the most possible relative search path
-5. 集成clang-tidy, clang-check, clang static analyzer
-6. module map, -compiler_param_file, -layering_check
-7. aspect用法
-8. transitive用法
-9. renovate.json
 
 # usage
 
