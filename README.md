@@ -1,4 +1,6 @@
 # todo
+0. clang macosx's _____config_site file
+1. openssl still need link with static
 1. need test libevent EPOLL_PWAIT2 on openwrt
 2. need test folly SWAPCONTEXT on openwrt
 3. need test jemalloc and tcmalloc link static
