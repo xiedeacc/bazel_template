@@ -8,39 +8,43 @@ common --experimental_downloader_config=.bazel_downloader.cfg
 # 4. both tcmalloc and jemalloc cannot detect memory leak, use sanitize instead
 # 5. clang need link -static-libasan
 
-test:cpplint --test_tag_filters=cpplint
+test:cpplint --test_tag_filters='cpplint'
 test:cpplint --build_tests_only
-test:unit_test --test_tag_filters=-cpplint
+test:unit_test --test_tag_filters='-cpplint'
 
+test:unit_test_tcmalloc --define='profiling_type=tcmalloc'
+test:unit_test_tcmalloc --test_env='CPUPROFILE=pprof.out'
+test:unit_test_tcmalloc --test_env='PPROF_PATH=/root/src/go/bin/pprof'
+test:unit_test_tcmalloc --copt='-g'
 
-test:unit_test_tcmalloc --define=profiling_type=tcmalloc
-test:unit_test_tcmalloc --test_env=CPUPROFILE=pprof.out
-test:unit_test_tcmalloc --test_env=PPROF_PATH=/root/src/go/bin/pprof
-
-test:unit_test_jemalloc --define=profiling_type=jemalloc
-test:unit_test_jemalloc --test_env=CPUPROFILE=pprof.out
-test:unit_test_jemalloc --test_env=PPROF_PATH=/usr/local/bin/pprof
-test:unit_test_jemalloc --test_env MALLOC_CONF="prof_leak:true,prof:true,prof_active:true,lg_prof_interval:20,lg_prof_sample:17,prof_prefix:jeprof.out,prof_final:true"
+test:unit_test_jemalloc --define='profiling_type=jemalloc'
+test:unit_test_jemalloc --test_env='CPUPROFILE=pprof.out'
+test:unit_test_jemalloc --test_env='PPROF_PATH=/usr/local/bin/pprof'
+test:unit_test_jemalloc --test_env='MALLOC_CONF=prof_leak:true,prof:true,prof_active:true,lg_prof_interval:20,lg_prof_sample:17,prof_prefix:jeprof.out,prof_final:true'
+test:unit_test_jemalloc --copt='-g'
 
 # -fsanitize=address,undefined,thread,memory
+test:sanitize --copt='-fno-omit-frame-pointer'
 test:sanitize --copt='-fsanitize=address'
-test:sanitize --linkopt='-fsanitize=address'
-#test:sanitize --linkopt='-static-libasan'
+test:sanitize --copt='-O1'
 test:sanitize --copt='-g'
+test:sanitize --linkopt='-fsanitize=address'
 
-test:coverage --test_tag_filters=-cpplint
-test:coverage --copt=--coverage
-test:coverage --cxxopt=--coverage
-test:coverage --cxxopt=-fprofile-arcs
-test:coverage --cxxopt=-ftest-coverage
-test:coverage --linkopt=-coverage
-test:coverage --nocache_test_results
+#test:sanitize --linkopt='-static-libasan'
+
+coverage --test_tag_filters=-cpplint
+coverage --copt=--coverage
+coverage --copt=-fprofile-arcs
+coverage --copt=-ftest-coverage
+coverage --copt='-g'
+coverage --linkopt=-coverage
+coverage --nocache_test_results
 
 #####################################################################
 build --announce_rc
 build --workspace_status_command=bazel/workspace_status.sh
-build -c opt
 
+build -c opt
 #build --copt='-g'
 build --copt='-O2'
 build --copt='-Wall'

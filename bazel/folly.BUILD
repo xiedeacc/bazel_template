@@ -343,8 +343,7 @@ template_rule(
     src = ":folly-config_h_in",
     out = "folly/folly-config.h",
     substitutions = selects.with_or({
-        "@bazel_template//bazel:gcc": {
-        },
+        ("@bazel_template//bazel:gcc", "//conditions:default"): {},
         "@bazel_template//bazel:clang": {
             "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "/* #undef FOLLY_HAVE_EXTRANDOM_SFMT19937 */",
         },
@@ -368,8 +367,6 @@ template_rule(
             "#define FOLLY_USE_SYMBOLIZER 1": "/* #undef FOLLY_USE_SYMBOLIZER */",
             "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1": "/* #undef FOLLY_HAVE_SHADOW_LOCAL_WARNINGS */",
             "#define FOLLY_ELF_NATIVE_CLASS 64": "",
-            #"#define FOLLY_HAVE_SWAPCONTEXT 1": "/* #undef FOLLY_HAVE_SWAPCONTEXT */",
-            #"#define FOLLY_HAVE_BACKTRACE 1": "/* #undef FOLLY_HAVE_BACKTRACE */",
         },
     }),
 )

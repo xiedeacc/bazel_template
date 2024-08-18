@@ -1,3 +1,4 @@
+pprof.out
 bazel-*
 /.cache/
 MODULE.bazel.lock

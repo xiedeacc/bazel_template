@@ -779,10 +779,10 @@ cc_toolchains_setup(
                     "distro": "generic",
                     "libc": "glibc",
                     "compiler": "clang",
-                    "triple": "x86_64-linux-gnu",
-                    "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
-                    "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
-                    #"url": "/usr/local/llvm/18",
+                    "triple": "x86_64-unknown-linux-gnu",
+                    #"url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
+                    #"strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
+                    "url": "/usr/local/llvm/18",
                     "sha256sum": "89b322e0c506fb87357e2f9191485901b9c2c5faf38c8db802d84148c62a3fda",
                     "sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_clang",
                     "tool_names": {
@@ -806,6 +806,7 @@ cc_toolchains_setup(
                         "include/x86_64-unknown-linux-gnu/c++/v1",
                         "include/c++/v1",
                         "lib/clang/18/include",
+                        "lib/clang/18/share",
                         "include",
                     ],
                     "lib_directories": [
