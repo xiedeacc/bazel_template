@@ -667,6 +667,11 @@ template_rule(
             "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */": "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
             "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */": "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
         },
+        "@bazel_template//bazel:linux_aarch64": {
+            "/* #undef EVENT__HAVE_ARC4RANDOM */": "#define EVENT__HAVE_ARC4RANDOM 1",
+            "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */": "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
+            #"/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */": "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
+        },
         "//conditions:default": {
         },
     }),

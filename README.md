@@ -35,12 +35,15 @@ clear && bazel test --config=unit_test //...
 clear && bazel test --config=unit_test_tcmalloc //...
 clear && bazel test --config=unit_test_jemalloc //...
 clear && bazel test --config=sanitize //...
+clear && bazel test --config=sanitize --config=clang //src/util/...
+clear && bazel test --config=sanitize --config=gcc //src/util/...
 clear && bazel coverage //...
 
 clear && bazel build //...
 clear && bazel build --config=clang //...
-clear && bazel build --config=gcc //...
 clear && bazel build --config=clang_aarch64 //...
+clear && bazel build --config=gcc //...
+clear && bazel build --config=gcc_macosx_x86_64 //...
 clear && bazel build --config=openwrt_aarch64 //...
 ```
 
@@ -175,8 +178,39 @@ CMAKE_PREFIX_PATH=/usr/local:/usr/local/llvm/18 LD_LIBRARY_PATH=/usr/local/lib P
 # 一些常见和交叉编译相关命令
 
 ```
+binutils
+mkdir build
+../configure --prefix=/usr/local/binutils-linux-x86_64
+../configure --target=x86_64-apple-darwin \
+  --prefix=/usr/local/binutils-darwin \
+  --with-sysroot=/root/src/software/osxcross/target/SDK/MacOSX14.2.sdk
+
+cctools
+./configure --prefix=/root/src/software/osxcross/target \
+  --target=x86_64-apple-darwin23.3 \
+  --with-libtapi=/root/src/software/osxcross/target \
+  --with-libxar=/root/src/software/osxcross/target \
+  --enable-static=yes --disable-shared
+
 osxcross
-LDFLAGS=-L/usr/local/llvm/18/lib/x86_64-unknown-linux-gnu LIBS=-lunwind ./configure --prefix=/root/src/software/osxcross/target --target=x86_64-apple-darwin23.3 --with-libtapi=/root/src/software/osxcross/target --with-libxar=/root/src/software/osxcross/target
+LDFLAGS=-L/usr/local/llvm/18/lib/x86_64-unknown-linux-gnu LIBS=-lunwind ./configure \
+  --prefix=/root/src/software/osxcross/target \
+  --target=x86_64-apple-darwin23.3 \
+  --with-libtapi=/root/src/software/osxcross/target \
+  --with-libxar=/root/src/software/osxcross/target
+
+gcc
+export LD=/usr/local/llvm/18/bin/ld.lld
+export AR=/root/src/software/osxcross/target/bin/x86_64-apple-darwin23.3-ar
+export AS=/root/src/software/osxcross/target/bin/x86_64-apple-darwin23.3-as
+../configure \
+  --prefix=/root/src/software/gcc14.1.0-darwin23.3-x86_64_toolchain \
+  --target=x86_64-apple-darwin23.3 \
+  --with-sysroot=/root/src/software/osxcross/target/SDK/MacOSX14.2.sdk \
+  --enable-languages=c,c++,objc,obj-c++ \
+  --enable-lto \
+  --enable-checking=release \
+  --disable-multilib
 
 LLVM_DIR=/usr/local/llvm/18 \
 CC=${LLVM_DIR}/bin/clang \
