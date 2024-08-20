@@ -36,7 +36,6 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    additional_linker_inputs = [":libaio.map"],
     copts = [
         "-g",
         "-O3",
@@ -44,8 +43,6 @@ cc_library(
         "-fPIC",
     ],
     includes = ["src"],
-    linkopts = [
-        "-Wl,--version-script=$(location :libaio.map)",
-        "-Wl,-soname=libaio.so.1",
-    ],
+    linkstatic = True,
+    alwayslink = True,
 )

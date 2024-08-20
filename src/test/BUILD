@@ -19,6 +19,5 @@ cc_library(
         "@com_google_googletest//:gtest",
         "@folly",
         "@jemalloc",
-        "@libaio//:aio",
     ],
 )

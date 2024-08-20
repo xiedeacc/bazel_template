@@ -248,7 +248,7 @@ cc_library(
         "//conditions:default": [],
     }) + select({
         "@platforms//os:linux": [
-            #"@libaio//:aio",
+            "@libaio//:aio",
             "@libunwind//:unwind",
             "@liburing//:liburing-ffi",
         ],
