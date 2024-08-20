@@ -29,7 +29,6 @@ test:sanitize --copt='-fsanitize=address'
 test:sanitize --copt='-O1'
 test:sanitize --copt='-g'
 test:sanitize --linkopt='-fsanitize=address'
-
 #test:sanitize --linkopt='-static-libasan'
 
 coverage --test_tag_filters=-cpplint
@@ -68,37 +67,6 @@ build --output_filter="^//"
 #build --remote_cache=http://192.168.1.101/bazel_cache
 #build --keep_going
 
-build:clang_local --platforms='//bazel:linux_x86_64_platform'
-build:clang_local --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
-#build:clang_local --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
-build:clang_local --extra_toolchains='//toolchain:clang_toolchain_for_linux_x86_64'
-build:clang_local --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
-build:clang_local --cpu='x86_64'
-build:clang_local --compiler=clang
-#build:clang_local --java_runtime_version="remotejdk_21"
-
-build:clang --platforms='//bazel:linux_x86_64_platform'
-build:clang --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
-#build:clang --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
-build:clang --extra_toolchains='@cc_toolchain_config_x86_64_linux_generic_glibc_clang//:toolchain-x86_64_linux_generic_glibc_clang'
-build:clang --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
-build:clang --cpu='x86_64'
-build:clang --compiler='clang'
-#build:clang --java_runtime_version="remotejdk_21"
-
-build:clang_aarch64 --platforms='//bazel:linux_aarch64_platform'
-build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
-#build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
-build:clang_aarch64 --extra_toolchains='@cc_toolchain_config_aarch64_linux_generic_glibc_clang//:toolchain-aarch64_linux_generic_glibc_clang'
-build:clang_aarch64 --extra_toolchains='@remotejdk21_linux_aarch64_toolchain_config_repo//:toolchain'
-build:clang_aarch64 --cpu='aarch64'
-build:clang_aarch64 --compiler=clang
-#build:clang_aarch64 --java_runtime_version="remotejdk_21"
-#build:clang_aarch64 --copt='-Wno-unused-command-line-argument'
-#build:clang_aarch64 --copt='-Wno-error=sign-conversion'
-#build:clang_aarch64 --copt='-Wno-error=gnu-include-next'
-
-
 build:gcc_local --platforms='//bazel:linux_x86_64_platform'
 #build:gcc_local --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
 build:gcc_local --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
@@ -115,6 +83,7 @@ build:gcc --extra_toolchains='@cc_toolchain_config_x86_64_linux_generic_glibc_gc
 build:gcc --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:gcc --cpu='x86_64'
 build:gcc --compiler='gcc'
+build:gcc --define='profiling_type=jemalloc'
 #build:gcc --java_runtime_version="remotejdk_21"
 
 build:gcc_macosx_x86_64 --platforms='//bazel:osx_x86_64_platform'
@@ -127,6 +96,44 @@ build:gcc_macosx_x86_64 --compiler='gcc'
 build:gcc_macosx_x86_64 --copt='-mmacosx-version-min=10.13'
 #build:gcc_macosx_x86_64 --java_runtime_version="remotejdk_21"
 
+build:openwrt_aarch64 --platforms='//bazel:linux_aarch64_platform'
+#build:openwrt_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+build:openwrt_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
+build:openwrt_aarch64 --extra_toolchains='@cc_toolchain_config_aarch64_linux_openwrt_musl_gcc//:toolchain-aarch64_linux_openwrt_musl_gcc'
+build:openwrt_aarch64 --extra_toolchains='@remotejdk21_linux_aarch64_toolchain_config_repo//:toolchain'
+build:openwrt_aarch64 --cpu='aarch64'
+build:openwrt_aarch64 --compiler='gcc'
+build:openwrt_aarch64 --java_runtime_version="remotejdk_21"
+build:openwrt_aarch64 --action_env=STAGING_DIR=/root/src/software/openwrt/openwrt-aarch64_toolchain
+
+build:clang_local --platforms='//bazel:linux_x86_64_platform'
+build:clang_local --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+#build:clang_local --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
+build:clang_local --extra_toolchains='//toolchain:clang_toolchain_for_linux_x86_64'
+build:clang_local --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
+build:clang_local --cpu='x86_64'
+build:clang_local --compiler=clang
+#build:clang_local --java_runtime_version="remotejdk_21"
+
+build:clang --platforms='//bazel:linux_x86_64_platform'
+build:clang --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+#build:clang --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
+build:clang --extra_toolchains='@cc_toolchain_config_x86_64_linux_generic_glibc_clang//:toolchain-x86_64_linux_generic_glibc_clang'
+build:clang --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
+build:clang --cpu='x86_64'
+build:clang --compiler='clang'
+build:clang --define='profiling_type=jemalloc'
+#build:clang --java_runtime_version="remotejdk_21"
+
+build:clang_aarch64 --platforms='//bazel:linux_aarch64_platform'
+build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+#build:clang_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
+build:clang_aarch64 --extra_toolchains='@cc_toolchain_config_aarch64_linux_generic_glibc_clang//:toolchain-aarch64_linux_generic_glibc_clang'
+build:clang_aarch64 --extra_toolchains='@remotejdk21_linux_aarch64_toolchain_config_repo//:toolchain'
+build:clang_aarch64 --cpu='aarch64'
+build:clang_aarch64 --compiler=clang
+#build:clang_aarch64 --java_runtime_version="remotejdk_21"
+
 build:clang_macosx_x86_64 --platforms='//bazel:osx_x86_64_platform'
 #build:clang_macosx_x86_64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
 build:clang_macosx_x86_64 --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
@@ -137,12 +144,3 @@ build:clang_macosx_x86_64 --compiler='clang'
 build:clang_macosx_x86_64 --copt='-mmacosx-version-min=10.13'
 #build:clang_macosx_x86_64 --java_runtime_version="remotejdk_21"
 
-build:openwrt_aarch64 --platforms='//bazel:linux_aarch64_platform'
-#build:openwrt_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
-build:openwrt_aarch64 --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
-build:openwrt_aarch64 --extra_toolchains='@cc_toolchain_config_aarch64_linux_openwrt_musl_gcc//:toolchain-aarch64_linux_openwrt_musl_gcc'
-build:openwrt_aarch64 --extra_toolchains='@remotejdk21_linux_aarch64_toolchain_config_repo//:toolchain'
-build:openwrt_aarch64 --cpu='aarch64'
-build:openwrt_aarch64 --compiler='gcc'
-build:openwrt_aarch64 --java_runtime_version="remotejdk_21"
-build:openwrt_aarch64 --action_env=STAGING_DIR=/root/src/software/openwrt/openwrt-aarch64_toolchain

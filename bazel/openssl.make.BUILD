@@ -48,17 +48,21 @@ alias(
 
 alias(
     name = "openssl",
-    actual = "openssl_default",
+    actual = select({
+        "@platforms//os:linux": ":openssl_static",
+        "@platforms//os:osx": ":openssl_shared",
+        "//conditions:default": ":openssl_static",
+    }),
 )
 
 configure_make(
-    name = "openssl_default",
+    name = "openssl_shared",
     args = ["-j"],
     configure_command = "Configure",
     configure_in_place = True,
     configure_options = CONFIGURE_OPTIONS + select({
         "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
-        "@bazel_template//bazel:osx_x86_64": ["darwin64-x86_64-cc"],  #darwin64-x86_64-cc
+        "@bazel_template//bazel:osx_x86_64": ["darwin64-x86_64-cc"],
         "//conditions:default": [],
     }),
     env = select({
@@ -71,24 +75,55 @@ configure_make(
         ("@platforms//cpu:aarch64", "@platforms//os:osx"): "lib",
         "//conditions:default": "lib64",
     }),
-    #out_shared_libs = select({
-    #"@platforms//os:osx": [
-    #"libssl.dylib",
-    #"libcrypto.dylib",
-    #],
-    #"@platforms//os:linux": [
-    #"libssl.so",
-    #"libcrypto.so",
-    #],
-    #"@platforms//os:windows": [
-    #"libssl.dll",
-    #"libcrypto.dll",
-    #],
-    #"//conditions:default": [],
-    #}),
+    out_shared_libs = select({
+        "@platforms//os:osx": [
+            "libssl.dylib",
+            "libcrypto.dylib",
+        ],
+        "@platforms//os:linux": [
+            "libssl.so",
+            "libcrypto.so",
+        ],
+        "@platforms//os:windows": [
+            "libssl.dll",
+            "libcrypto.dll",
+        ],
+        "//conditions:default": [],
+    }),
+    targets = MAKE_TARGETS,
+    toolchains = ["@rules_perl//:current_toolchain"],
+    deps = [
+        "@brotli//:brotlicommon",
+        "@brotli//:brotlidec",
+        "@brotli//:brotlienc",
+        "@zlib//:z",
+        "@zstd",
+    ],
+)
+
+configure_make(
+    name = "openssl_static",
+    args = ["-j"],
+    configure_command = "Configure",
+    configure_in_place = True,
+    configure_options = CONFIGURE_OPTIONS + select({
+        "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
+        "@bazel_template//bazel:osx_x86_64": ["darwin64-x86_64-cc"],
+        "//conditions:default": [],
+    }),
+    env = select({
+        "@bazel_template//bazel:osx_x86_64": {"ARFLAGS": "-static -o"},
+        "//conditions:default": {},
+    }),
+    lib_name = LIB_NAME,
+    lib_source = ":all_srcs",
+    out_lib_dir = selects.with_or({
+        ("@platforms//cpu:aarch64", "@platforms//os:osx"): "lib",
+        "//conditions:default": "lib64",
+    }),
     out_static_libs = [
-        "libssl.a",
         "libcrypto.a",
+        "libssl.a",
     ],
     targets = MAKE_TARGETS,
     toolchains = ["@rules_perl//:current_toolchain"],
@@ -99,7 +134,6 @@ configure_make(
         "@zlib//:z",
         "@zstd",
     ],
-    alwayslink = True,
 )
 
 filegroup(

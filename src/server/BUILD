@@ -23,7 +23,6 @@ cc_binary(
         ":version_info",
         "//src/server/http_handler",
         "@folly",
-        "@jemalloc",
         "@openssl//:crypto",
         "@openssl//:ssl",
         "@proxygen",

@@ -243,8 +243,7 @@ cc_library(
         "@zstd",
     ] + select({
         "@bazel_template//bazel:jemalloc": ["@jemalloc"],
-        #"@bazel_template//bazel:tcmalloc": ["@tcmalloc//tcmalloc"],
-        "@bazel_template//bazel:tcmalloc": ["@bazel_template//lib:tcmalloc_lib"],
+        "@bazel_template//bazel:tcmalloc": ["@tcmalloc//tcmalloc"],
         "//conditions:default": [],
     }) + select({
         "@platforms//os:linux": [

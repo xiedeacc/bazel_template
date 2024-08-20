@@ -886,7 +886,7 @@ cc_toolchains_setup(
                     "url": "/usr/local/llvm/18",
                     "sha256sum": "ef2fb271968c705002b38eca17cfcc2f2e6d4eb613d7e63bb37de4d6f5092b18",
                     #"sysroot": "@macosx14.2-x86_64_sysroot",
-                    "sysroot": "/root/src/software/MacOSX14.2.sdk",
+                    "sysroot": "/root/src/software/macosx14.2-x86_64_sysroot",
                     "tool_names": {
                         "ar": "x86_64-apple-darwin23.3-libtool",
                         "as": "x86_64-apple-darwin23.3-as",
@@ -896,12 +896,7 @@ cc_toolchains_setup(
                         "gcc": "clang",
                         "gcov": "x86_64-apple-darwin23.3-gcov",
                         "ld": "ld64",
-                        #"llvm-cov": "llvm-cov",
                         "llvm-cov": "None",
-                        #"nm": "llvm-nm",
-                        #"objcopy": "llvm-objcopy",
-                        #"objdump": "llvm-objdump",
-                        #"strip": "llvm-strip",
                         "nm": "x86_64-apple-darwin23.3-nm",
                         "objcopy": "x86_64-apple-darwin-objcopy",
                         "objdump": "x86_64-apple-darwin-objdump",
@@ -914,7 +909,7 @@ cc_toolchains_setup(
                     "sysroot_include_directories": [
                         "llvm18.1.8/include/c++/v1",
                         "llvm18.1.8/lib/clang/18/include",
-                        #"usr/include",
+                        "usr/include",
                         "System/Library/Frameworks",
                     ],
                     "sysroot_lib_directories": [
