@@ -1,14 +1,11 @@
 # todo
-0. clang macosx's _____config_site file
 1. openssl still need link with static
 1. need test libevent EPOLL_PWAIT2 on openwrt
 2. need test folly SWAPCONTEXT on openwrt
-3. need test jemalloc and tcmalloc link static
 0. jemalloc没有生成profile文件
 6. toolchains_openwrt need windows and macos
 
 # future todo:
-0. link with jemalloc and tcmalloc static will cause core, why?
 3. import virtual include like boost
 4. use baze aspect find the most possible relative search path
 5. 集成clang-tidy, clang-check, clang static analyzer
