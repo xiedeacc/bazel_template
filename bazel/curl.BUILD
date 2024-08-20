@@ -255,25 +255,27 @@ cc_library(
     copts = [
         "-Iexternal/curl/lib",
         #"-Ilib",
-        "-D_GNU_SOURCE",
-        "-DBUILDING_LIBCURL",
-        "-DHAVE_CONFIG_H",
-        "-DCURL_DISABLE_FTP",
-        "-DCURL_DISABLE_NTLM",  # turning it off in configure is not enough
-        "-DHAVE_LIBZ",
-        "-DHAVE_ZLIB_H",
         "-Wno-string-plus-int",
     ],
-    defines = ["CURL_STATICLIB"] + select({
+    includes = ["include"],
+    linkopts = select({
+        "//conditions:default": [
+        ],
+    }),
+    local_defines = [
+        "CURL_STATICLIB",
+        "_GNU_SOURCE",
+        "BUILDING_LIBCURL",
+        "HAVE_CONFIG_H",
+        "CURL_DISABLE_FTP",
+        "CURL_DISABLE_NTLM",  # turning it off in configure is not enough
+        "HAVE_LIBZ",
+        "HAVE_ZLIB_H",
+    ] + select({
         "//conditions:default": [
             "CURL_MAX_WRITE_SIZE=65536",
             # Avoid false positives on builds with Undefined Behavior Sanitizer.
             "CURL_STRICTER",
-        ],
-    }),
-    includes = ["include"],
-    linkopts = select({
-        "//conditions:default": [
         ],
     }),
     visibility = ["//visibility:public"],

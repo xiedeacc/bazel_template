@@ -26,7 +26,7 @@ COPTS = [
     "-Wuninitialized",
     "-Wshadow-compatible-local",
     "-Wno-noexcept-type",
-    "-std=c++17",
+    "-std=gnu++17",
     "-finput-charset=UTF-8",
     "-fsigned-char",
     "-faligned-new",
@@ -213,7 +213,7 @@ cc_library(
         "@platforms//cpu:aarch64": ["folly/external/aor/asmdefs.h"],
     }),
     copts = COPTS,
-    linkstatic = 0,
+    linkstatic = True,
     local_defines = LOCAL_DEFINES,
     deps = [
         "@boost//:algorithm",
@@ -248,7 +248,7 @@ cc_library(
         "//conditions:default": [],
     }) + select({
         "@platforms//os:linux": [
-            "@libaio//:aio",
+            #"@libaio//:aio",
             "@libunwind//:unwind",
             "@liburing//:liburing-ffi",
         ],
@@ -259,6 +259,7 @@ cc_library(
 
 cc_library(
     name = "folly",
+    linkstatic = True,
     deps = [
         ":MathOperation",
         ":MathOperation_AVX2",

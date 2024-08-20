@@ -1,29 +1,3 @@
-def _jemalloc_template_rule_impl(ctx):
-    jemalloc_private_namespace = ctx.var.get("jemalloc_private_namespace", "je_")
-    substitutions = {} | ctx.attr.substitutions
-    substitutions.update([("#undef JEMALLOC_PRIVATE_NAMESPACE", "#define JEMALLOC_PRIVATE_NAMESPACE {}je_".format(jemalloc_private_namespace))])
-    substitutions.update([("@private_namespace@", "{}je_".format(jemalloc_private_namespace))])
-
-    ctx.actions.expand_template(
-        template = ctx.file.src,
-        output = ctx.outputs.out,
-        substitutions = substitutions,
-    )
-
-jemalloc_template_rule = rule(
-    attrs = {
-        "src": attr.label(
-            mandatory = True,
-            allow_single_file = True,
-        ),
-        "substitutions": attr.string_dict(mandatory = True),
-        "out": attr.output(mandatory = True),
-    },
-    # output_to_genfiles is required for header files.
-    output_to_genfiles = True,
-    implementation = _jemalloc_template_rule_impl,
-)
-
 def _template_rule_impl(ctx):
     ctx.actions.expand_template(
         template = ctx.file.src,

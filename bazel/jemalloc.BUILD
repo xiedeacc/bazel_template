@@ -1,4 +1,4 @@
-load("@bazel_template//bazel:common.bzl", "extract_symbols", "jemalloc_template_rule")
+load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -20,42 +20,58 @@ COPTS = [
     "-Wdeprecated-declarations",
     "-O3",
     "-funroll-loops",
+    "-Iexternal/jemalloc/include",
+    "-I$(GENDIR)/external/jemalloc/include",
+]
+
+public_symbol = [
+    "aligned_alloc",
+    "calloc",
+    "dallocx",
+    "free",
+    "free_sized",
+    "free_aligned_sized",
+    "mallctl",
+    "mallctlbymib",
+    "mallctlnametomib",
+    "malloc",
+    "malloc_conf",
+    "malloc_conf_2_conf_harder",
+    "malloc_message",
+    "malloc_stats_print",
+    "malloc_usable_size",
+    "mallocx",
+    "smallocx_a25b9b8ba91881964be3083db349991bbbbf1661",
+    "nallocx",
+    "posix_memalign",
+    "rallocx",
+    "realloc",
+    "sallocx",
+    "sdallocx",
+    "xallocx",
+    "memalign",
+    "valloc",
+    "pvalloc",
+]
+
+sys_symbol = [
+    "__libc_calloc",
+    "__libc_free",
+    "__libc_malloc",
+    "__libc_memalign",
+    "__libc_realloc",
+    "__libc_valloc",
+    "__libc_pvalloc",
+    "pthread_create",
 ]
 
 genrule(
     name = "public_symbols_txt",
     outs = ["include/jemalloc/internal/public_symbols.txt"],
-    cmd = "\n".join([
-        "cat <<'EOF' > $@",
-        "aligned_alloc:aligned_alloc",
-        "calloc:calloc",
-        "dallocx:dallocx",
-        "free:free",
-        "free_sized:free_sized",
-        "free_aligned_sized:free_aligned_sized",
-        "mallctl:mallctl",
-        "mallctlbymib:mallctlbymib",
-        "mallctlnametomib:mallctlnametomib",
-        "malloc:malloc",
-        "malloc_conf:malloc_conf",
-        "malloc_conf_2_conf_harder:malloc_conf_2_conf_harder",
-        "malloc_message:malloc_message",
-        "malloc_stats_print:malloc_stats_print",
-        "malloc_usable_size:malloc_usable_size",
-        "mallocx:mallocx",
-        "smallocx_21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322:smallocx_21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322",
-        "nallocx:nallocx",
-        "posix_memalign:posix_memalign",
-        "rallocx:rallocx",
-        "realloc:realloc",
-        "sallocx:sallocx",
-        "sdallocx:sdallocx",
-        "xallocx:xallocx",
-        "memalign:memalign",
-        "valloc:valloc",
-        "pvalloc:pvalloc",
-        "EOF",
-    ]),
+    cmd = "\n".join(["cat <<'EOF' > $@"] + [
+        e + ":" + e
+        for e in public_symbol
+    ] + ["EOF"]),
 )
 
 sh_binary(
@@ -68,6 +84,14 @@ genrule(
     srcs = [":public_symbols_txt"],
     outs = ["include/jemalloc/jemalloc_mangle.h"],
     cmd = "$(location :jemalloc_mangle_sh) $(location :public_symbols_txt) je_ > $@",
+    tools = [":jemalloc_mangle_sh"],
+)
+
+genrule(
+    name = "jemalloc_mangle_jet_h",
+    srcs = [":public_symbols_txt"],
+    outs = ["include/jemalloc/jemalloc_mangle_jet.h"],
+    cmd = "$(location :jemalloc_mangle_sh) $(location :public_symbols_txt) jet_ > $@",
     tools = [":jemalloc_mangle_sh"],
 )
 
@@ -110,7 +134,7 @@ genrule(
     tools = [":public_unnamespace_sh"],
 )
 
-jemalloc_template_rule(
+template_rule(
     name = "jemalloc_preamble_h",
     src = "include/jemalloc/internal/jemalloc_preamble.h.in",
     out = "include/jemalloc/internal/jemalloc_preamble.h",
@@ -120,7 +144,7 @@ jemalloc_template_rule(
     },
 )
 
-jemalloc_template_rule(
+template_rule(
     name = "jemalloc_internal_defs_h",
     src = "include/jemalloc/internal/jemalloc_internal_defs.h.in",
     out = "include/jemalloc/internal/jemalloc_internal_defs.h",
@@ -176,9 +200,9 @@ jemalloc_template_rule(
             "#undef JEMALLOC_DEBUG": "/* #undef JEMALLOC_DEBUG */",
             "#undef JEMALLOC_STATS": "#define JEMALLOC_STATS",
             "#undef JEMALLOC_EXPERIMENTAL_SMALLOCX_API": "/* #undef JEMALLOC_EXPERIMENTAL_SMALLOCX_API */",
-            "#undef JEMALLOC_PROF\n": "/* #undef JEMALLOC_PROF */\n",
+            "#undef JEMALLOC_PROF\n": "#define JEMALLOC_PROF\n",
             "#undef JEMALLOC_PROF_LIBUNWIND\n": "/* #undef JEMALLOC_PROF_LIBUNWIND */\n",
-            "#undef JEMALLOC_PROF_LIBGCC\n": "/* #undef JEMALLOC_PROF_LIBGCC */\n",
+            "#undef JEMALLOC_PROF_LIBGCC\n": "#define JEMALLOC_PROF_LIBGCC\n",
             "#undef JEMALLOC_PROF_GCC\n": "/* #undef JEMALLOC_PROF_GCC */\n",
             "#undef JEMALLOC_PAGEID": "/* #undef JEMALLOC_PAGEID */",
             "#undef JEMALLOC_HAVE_PRCTL": "#define JEMALLOC_HAVE_PRCTL",
@@ -256,7 +280,7 @@ jemalloc_template_rule(
         },
 )
 
-jemalloc_template_rule(
+template_rule(
     name = "jemalloc_defs_h",
     src = "include/jemalloc/jemalloc_defs.h.in",
     out = "include/jemalloc/jemalloc_defs.h",
@@ -278,30 +302,41 @@ jemalloc_template_rule(
     },
 )
 
-jemalloc_template_rule(
+template_rule(
     name = "jemalloc_macros_h",
     src = "include/jemalloc/jemalloc_macros.h.in",
     out = "include/jemalloc/jemalloc_macros.h",
     substitutions = {
-        "@jemalloc_version@": "\\\"5.3.0-186-g21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322\\\"",
+        "@jemalloc_version@": "5.3.0-196-ga25b9b8ba91881964be3083db349991bbbbf1661",
         "@jemalloc_version_major@": "5",
         "@jemalloc_version_minor@": "3",
         "@jemalloc_version_bugfix@": "0",
-        "@jemalloc_version_nrev@": "186",
-        "@jemalloc_version_gid@": "\\\"21bcc0a8d49ab2944ae53c7e43f5c84fc8a34322\\\"",
+        "@jemalloc_version_nrev@": "196",
+        "@jemalloc_version_gid@": "a25b9b8ba91881964be3083db349991bbbbf1661",
     },
 )
 
-jemalloc_template_rule(
+template_rule(
     name = "jemalloc_protos_h",
     src = "include/jemalloc/jemalloc_protos.h.in",
     out = "include/jemalloc/jemalloc_protos.h",
     substitutions = {
         "@je_@": "je_",
+        "@install_suffix@": "",
     },
 )
 
-jemalloc_template_rule(
+template_rule(
+    name = "jemalloc_protos_jet_h",
+    src = "include/jemalloc/jemalloc_protos.h.in",
+    out = "include/jemalloc/jemalloc_protos_jet.h",
+    substitutions = {
+        "@je_@": "jet_",
+        "@install_suffix@": "",
+    },
+)
+
+template_rule(
     name = "jemalloc_typedefs_h",
     src = "include/jemalloc/jemalloc_typedefs.h.in",
     out = "include/jemalloc/jemalloc_typedefs.h",
@@ -333,51 +368,23 @@ sh_binary(
     srcs = ["include/jemalloc/internal/private_symbols.sh"],
 )
 
-public_symbol_and_sys_symbol = [
-    "aligned_alloc",
-    "calloc",
-    "dallocx",
-    "free",
-    "free_sized",
-    "free_aligned_sized",
-    "mallctl",
-    "mallctlbymib",
-    "mallctlnametomib",
-    "malloc",
-    "malloc_conf",
-    "malloc_conf_2_conf_harder",
-    "malloc_message",
-    "malloc_stats_print",
-    "malloc_usable_size",
-    "mallocx",
-    "smallocx_abd3b4f2995fbca3f4b5c20692083dedece1cea8",
-    "nallocx",
-    "posix_memalign",
-    "rallocx",
-    "realloc",
-    "sallocx",
-    "sdallocx",
-    "xallocx",
-    "memalign",
-    "valloc",
-    "pvalloc",
-    "__libc_calloc",
-    "__libc_free",
-    "__libc_malloc",
-    "__libc_memalign",
-    "__libc_realloc",
-    "__libc_valloc",
-    "__libc_pvalloc",
-    "pthread_create",
-]
-
 genrule(
     name = "private_symbols_awk",
     srcs = [],
     outs = ["include/jemalloc/internal/private_symbols.awk"],
     cmd = """
             $(location :private_symbols_sh) "" {list} > $@
-          """.format(list = " ".join(public_symbol_and_sys_symbol)),
+          """.format(list = " ".join(public_symbol + sys_symbol)),
+    tools = [":private_symbols_sh"],
+)
+
+genrule(
+    name = "private_symbols_jet_awk",
+    srcs = [],
+    outs = ["include/jemalloc/internal/private_symbols_jet.awk"],
+    cmd = """
+            $(location :private_symbols_sh) "" {list} > $@
+          """.format(list = " ".join(["jet_" + e for e in public_symbol] + sys_symbol)),
     tools = [":private_symbols_sh"],
 )
 
@@ -386,7 +393,7 @@ extract_symbols(
     awk_script = ":private_symbols_awk",
     deps = [
         ":jemalloc_headers",
-        ":jemalloc_impl",
+        ":jemalloc_public",
     ],
 )
 
@@ -407,54 +414,85 @@ cc_library(
     name = "jemalloc_headers",
     hdrs = ["include/jemalloc/jemalloc.h"],
     includes = ["include"],
-    visibility = ["//visibility:public"],
 )
 
 cc_library(
-    name = "jemalloc_impl",
+    name = "jemalloc_public",
     srcs = glob(
                ["src/*.c"],
-               exclude = [],
+               exclude = ["src/zone.c"],
            ) +
            select({
-               "@bazel_template//bazel:linux_x86_64": [
-               ],
-               "@bazel_template//bazel:linux_aarch64": [
-               ],
+               "@bazel_template//bazel:linux_x86_64": [],
+               "@bazel_template//bazel:linux_aarch64": [],
+               "@bazel_template//bazel:osx_x86_64": ["src/zone.c"],
+               "@bazel_template//bazel:osx_aarch64": ["src/zone.c"],
+               "//conditions:default": [],
            }),
     hdrs = [
-        "include/jemalloc/jemalloc_macros.h",
-        "include/jemalloc/jemalloc_protos.h",
-    ] + glob("include/jemalloc/internal/*.h"),
+        ":jemalloc_defs_h",
+        ":jemalloc_h",
+        ":jemalloc_internal_defs_h",
+        ":jemalloc_macros_h",
+        ":jemalloc_mangle_h",
+        ":jemalloc_preamble_h",
+        ":jemalloc_protos_h",
+        ":jemalloc_rename_h",
+        ":jemalloc_typedefs_h",
+    ] + glob([
+        "include/jemalloc/internal/*.h",
+        "include/jemalloc/*.h",
+    ]),
     copts = COPTS,
-    includes = ["include"],
     linkopts = ["-lpthread"],
     local_defines = [
         "JEMALLOC_NO_PRIVATE_NAMESPACE",
         "_GNU_SOURCE",
         "_REENTRANT",
     ],
-    visibility = ["//visibility:public"],
     deps = [":jemalloc_headers"],
 )
 
 cc_library(
-    name = "jemalloc_impl_with_private_namespace",
-    srcs = SRCS,
-    hdrs = HEADERS + ["include/jemalloc/internal/private_namespace.h"],
+    name = "jemalloc_private",
+    srcs = glob(
+               ["src/*.c"],
+               exclude = ["src/zone.c"],
+           ) +
+           select({
+               "@bazel_template//bazel:linux_x86_64": [],
+               "@bazel_template//bazel:linux_aarch64": [],
+               "@bazel_template//bazel:osx_x86_64": ["src/zone.c"],
+               "@bazel_template//bazel:osx_aarch64": ["src/zone.c"],
+               "//conditions:default": [],
+           }),
+    hdrs = [
+        ":jemalloc_defs_h",
+        ":jemalloc_h",
+        ":jemalloc_internal_defs_h",
+        ":jemalloc_macros_h",
+        ":jemalloc_mangle_h",
+        ":jemalloc_preamble_h",
+        ":jemalloc_protos_h",
+        ":jemalloc_rename_h",
+        ":jemalloc_typedefs_h",
+        ":private_namespace_h",
+    ] + glob([
+        "include/jemalloc/internal/*.h",
+        "include/jemalloc/*.h",
+    ]),
     copts = COPTS,
-    includes = ["include"],
     linkopts = ["-lpthread"],
     local_defines = [
         "_GNU_SOURCE",
         "_REENTRANT",
     ],
-    visibility = ["//visibility:public"],
     deps = [":jemalloc_headers"],
+    alwayslink = True,
 )
 
 cc_library(
-    name = "jemalloc",
+    name = "jemalloc_cpp",
     srcs = [
         "src/jemalloc_cpp.cpp",
     ],
@@ -467,7 +505,6 @@ cc_library(
         "-Wimplicit-fallthrough",
         "-Wdeprecated-declarations",
         "-O3",
-        "-c",
     ],
     includes = ["include"],
     linkopts = [
@@ -475,10 +512,18 @@ cc_library(
         "-lm",
     ],
     local_defines = [
-        "JEMALLOC_NO_PRIVATE_NAMESPACE",
         "_GNU_SOURCE",
         "_REENTRANT",
     ],
-    visibility = ["//visibility:public"],
-    deps = [":jemalloc_impl"],
+    deps = [":jemalloc_private"],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "jemalloc",
+    deps = [
+        ":jemalloc_cpp",
+        ":jemalloc_private",
+    ],
+    alwayslink = True,
 )

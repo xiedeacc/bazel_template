@@ -71,25 +71,25 @@ configure_make(
         ("@platforms//cpu:aarch64", "@platforms//os:osx"): "lib",
         "//conditions:default": "lib64",
     }),
-    out_shared_libs = select({
-        "@platforms//os:osx": [
-            "libssl.dylib",
-            "libcrypto.dylib",
-        ],
-        "@platforms//os:linux": [
-            "libssl.so",
-            "libcrypto.so",
-        ],
-        "@platforms//os:windows": [
-            "libssl.dll",
-            "libcrypto.dll",
-        ],
-        "//conditions:default": [],
-    }),
-    #out_static_libs = [
-    #"libssl.a",
-    #"libcrypto.a",
+    #out_shared_libs = select({
+    #"@platforms//os:osx": [
+    #"libssl.dylib",
+    #"libcrypto.dylib",
     #],
+    #"@platforms//os:linux": [
+    #"libssl.so",
+    #"libcrypto.so",
+    #],
+    #"@platforms//os:windows": [
+    #"libssl.dll",
+    #"libcrypto.dll",
+    #],
+    #"//conditions:default": [],
+    #}),
+    out_static_libs = [
+        "libssl.a",
+        "libcrypto.a",
+    ],
     targets = MAKE_TARGETS,
     toolchains = ["@rules_perl//:current_toolchain"],
     deps = [
