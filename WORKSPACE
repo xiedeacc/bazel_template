@@ -718,7 +718,7 @@ filegroup(
   visibility = ["//visibility:public"],
 )
         """,
-    sha256 = "c04939a4b5f32c0910f0cf7ff9968a1a2a0b98a224522968a6b990d44b09d97b",
+    sha256 = "d75e540388ade4056c0c91a5623b927f884bfc3f622b96e23ed31aacf226535d",
     strip_prefix = "macosx14.2-x86_64_sysroot",
     urls = ["https://code.xiamu.com/files/macosx14.2-x86_64_sysroot.tar.gz"],
 )
@@ -747,7 +747,6 @@ cc_toolchains_setup(
                     "triple": "x86_64-pc-linux-gnu",
                     "url": "https://code.xiamu.com/files/gcc14.1.0-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "gcc14.1.0-linux-x86_64_toolchain",
-                    #"url": "/root/src/software/gcc14.1.0-linux-x86_64_toolchain",
                     "sha256sum": "6e6a8a5c33a5e4d64a198619a7b34746be6dee1da2a734396dde8f851b63910c",
                     "sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_gcc",
                     "tool_names": {
@@ -789,8 +788,7 @@ cc_toolchains_setup(
                     "triple": "x86_64-unknown-linux-gnu",
                     "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
-                    #"url": "/usr/local/llvm/18",
-                    "sha256sum": "ef2fb271968c705002b38eca17cfcc2f2e6d4eb613d7e63bb37de4d6f5092b18",
+                    "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
                     "sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_clang",
                     "tool_names": {
                         "ar": "llvm-ar",
@@ -837,7 +835,6 @@ cc_toolchains_setup(
                     "triple": "x86_64-apple-darwin23.3",
                     "url": "https://code.xiamu.com/files/gcc14.1.0-darwin23.3-x86_64_toolchain.tar.gz",
                     "strip_prefix": "gcc14.1.0-darwin23.3-x86_64_toolchain",
-                    #"url": "/root/src/software/gcc14.1.0-darwin23.3-x86_64_toolchain",
                     "sha256sum": "e9fab8943971a4f9733d41c7106e3349ea9e26a2c08f98194cba38d3bfa34d5c",
                     "sysroot": "@macosx14.2-x86_64_sysroot",
                     "tool_names": {
@@ -881,12 +878,10 @@ cc_toolchains_setup(
                     "libc": "macosx",
                     "compiler": "clang",
                     "triple": "x86_64-apple-darwin",
-                    #"url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
-                    #"strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
-                    "url": "/usr/local/llvm/18",
-                    "sha256sum": "ef2fb271968c705002b38eca17cfcc2f2e6d4eb613d7e63bb37de4d6f5092b18",
-                    #"sysroot": "@macosx14.2-x86_64_sysroot",
-                    "sysroot": "/root/src/software/macosx14.2-x86_64_sysroot",
+                    "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
+                    "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
+                    "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
+                    "sysroot": "@macosx14.2-x86_64_sysroot",
                     "tool_names": {
                         "ar": "x86_64-apple-darwin23.3-libtool",
                         "as": "x86_64-apple-darwin23.3-as",
@@ -934,7 +929,6 @@ cc_toolchains_setup(
                     "triple": "aarch64-openwrt-linux-musl",
                     "url": "https://code.xiamu.com/files/gcc12.3.0-openwrt23.4-aarch64_toolchain.tar.gz",
                     "strip_prefix": "gcc12.3.0-openwrt23.4-aarch64_toolchain",
-                    #"url": "/root/src/software/gcc12.3.0-openwrt23.4-aarch64_toolchain",
                     "sha256sum": "03f9bfda848f9d044ec3f4cebf1fce1f82f9c6363d9a3ef36affae522590f52a",
                     "sysroot": "@cc_toolchain_repo_aarch64_linux_openwrt_musl_gcc",
                     "tool_names": {
@@ -976,8 +970,7 @@ cc_toolchains_setup(
                     "triple": "aarch64-unknown-linux-gnu",
                     "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
-                    #"url": "/usr/local/llvm/18",
-                    "sha256sum": "ef2fb271968c705002b38eca17cfcc2f2e6d4eb613d7e63bb37de4d6f5092b18",
+                    "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
                     "sysroot": "@clang18.1.8-aarch64_sysroot",
                     "tool_names": {
                         "ar": "llvm-ar",
