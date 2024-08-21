@@ -92,7 +92,6 @@ def _proto_generate_impl(ctx):
         cmds += ["cd %s" % execdir]
     cmds += [" ".join(protoc_cmd)]
 
-    print(cmds)
     ctx.actions.run_shell(
         inputs = all_inputs + [ctx.executable.plugin] + [ctx.executable.protoc],
         outputs = out_files,
