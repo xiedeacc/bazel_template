@@ -17,7 +17,7 @@ COPTS = [
     "-pthread",
     "-fPIC",
     "-isystem external/libunwind/include",
-    "-I$(GENDIR)/external/libunwind/include",
+    "-isystem $(GENDIR)/external/libunwind/include",
 ]
 
 LINKOPTS = [
