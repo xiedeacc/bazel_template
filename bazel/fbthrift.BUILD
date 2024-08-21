@@ -21,7 +21,7 @@ COPTS = [
 ] + select({
     "@platforms//os:linux": [
         "-isystem external/libunwind/include",
-        "-isystem $(GENDIR)/external/libunwind/include",
+        "-I$(GENDIR)/external/libunwind/include",
     ],
     "@platforms//os:osx": [],
     "@platforms//os:windows": [],

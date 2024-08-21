@@ -32,7 +32,7 @@ COPTS = [
     "-faligned-new",
 ] + select({
     "@platforms//os:linux": [
-        "-isystem $(GENDIR)/external/libunwind/include",
+        "-I$(GENDIR)/external/libunwind/include",
         "-Iexternal/libunwind/src",
         "-Iexternal/libunwind/include",
         "-I$(GENDIR)/external/libunwind/include/tdep",

@@ -58,7 +58,7 @@ cc_library(
         "-std=c++17",
     ] + select({
         "@platforms//os:linux": [
-            "-isystem $(GENDIR)/external/libunwind/include",
+            "-I$(GENDIR)/external/libunwind/include",
             "-Iexternal/libunwind/src",
             "-Iexternal/libunwind/include",
             "-I$(GENDIR)/external/libunwind/include/tdep",
