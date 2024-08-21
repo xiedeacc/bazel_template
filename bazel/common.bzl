@@ -1,3 +1,6 @@
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
+
 def _template_rule_impl(ctx):
     ctx.actions.expand_template(
         template = ctx.file.src,
@@ -20,28 +23,38 @@ template_rule = rule(
 
 def _extract_symbols_impl(ctx):
     awk_script = ctx.file.awk_script
-
-    # Gather all object files from the cc_library target
     obj_files = []
     for lib in ctx.attr.deps:
         cc_info = lib[CcInfo]
-
-        #print(cc_info.compilation_context.)
         for linker_input in cc_info.linking_context.linker_inputs.to_list():
             for library in linker_input.libraries:
-                for obj_file in library.pic_objects:
-                    obj_files.append(obj_file)
+                for obj_file in library.objects:
+                    if "/external/jemalloc" in obj_file.path:
+                        obj_files.append(obj_file)
+
+    cc_toolchain = find_cpp_toolchain(ctx)
+    #print(cc_toolchain.nm_executable)
+    #feature_configuration = cc_common.configure_features(
+    #ctx = ctx,
+    #cc_toolchain = cc_toolchain,
+    #requested_features = ctx.features,
+    #unsupported_features = ctx.disabled_features,
+    #)
+    #archiver_path = cc_common.get_tool_for_action(
+    #feature_configuration = feature_configuration,
+    #action_name = ACTION_NAMES.c_compile,
+    #)
+    #print(archiver_path)
 
     output_files = []
     for obj_file in obj_files:
         output_file = ctx.actions.declare_file(obj_file.basename + ".sym")
         output_files.append(output_file)
 
-        # Create a command to extract symbols from all object files and process with awk
         ctx.actions.run_shell(
             inputs = obj_files + [awk_script],
             outputs = [output_file],
-            command = "nm {} | awk -f {} >> {}".format(obj_file.path, awk_script.path, output_file.path),
+            command = "{} {} | awk -f {} >> {}".format(cc_toolchain.nm_executable, obj_file.path, awk_script.path, output_file.path),
         )
 
     return [DefaultInfo(files = depset(output_files))]
@@ -55,7 +68,10 @@ extract_symbols = rule(
             #providers = ["CcInfo"],
         ),
         "awk_script": attr.label(allow_single_file = True),
+        "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
     },
+    toolchains = use_cpp_toolchain(),
+    fragments = ["cpp"],
 )
 
 def _local_config_git_genrule_impl(ctx):

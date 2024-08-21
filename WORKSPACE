@@ -695,14 +695,7 @@ hedron_compile_commands_setup_transitive_transitive_transitive()
 
 http_archive(
     name = "clang18.1.8-aarch64_sysroot",
-    build_file_content =
-        """
-filegroup(
-  name = "sysroot",
-  srcs = glob(["*/**"]),
-  visibility = ["//visibility:public"],
-)
-        """,
+    build_file = "//bazel:cc_toolchain.BUILD",
     sha256 = "95e32680f2f439773edd85640e5072bab099c399506008298cd1251be2d2df39",
     strip_prefix = "clang18.1.8-linux-aarch64_sysroot",
     urls = ["https://code.xiamu.com/files/clang18.1.8-linux-aarch64_sysroot.tar.gz"],
@@ -710,28 +703,22 @@ filegroup(
 
 http_archive(
     name = "macosx14.2-x86_64_sysroot",
-    build_file_content =
-        """
-filegroup(
-  name = "sysroot",
-  srcs = glob(["*/**"]),
-  visibility = ["//visibility:public"],
-)
-        """,
+    build_file = "//bazel:cc_toolchain.BUILD",
     sha256 = "d75e540388ade4056c0c91a5623b927f884bfc3f622b96e23ed31aacf226535d",
     strip_prefix = "macosx14.2-x86_64_sysroot",
     urls = ["https://code.xiamu.com/files/macosx14.2-x86_64_sysroot.tar.gz"],
+)
+
+new_git_repository(
+    name = "cc_toolchains",
+    commit = "19370106daf5184f4a4aa19378e9103a0d6ac751",
+    remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
 )
 
 #local_repository(
 #name = "cc_toolchains",
 #path = "../cc_toolchains",
 #)
-
-local_repository(
-    name = "cc_toolchains",
-    path = "../cc_toolchains",
-)
 
 load("@cc_toolchains//toolchain:cc_toolchains_setup.bzl", "cc_toolchains_setup")
 

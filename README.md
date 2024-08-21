@@ -1,5 +1,4 @@
 # todo
-1. need test libevent EPOLL_PWAIT2 on openwrt
 0. jemalloc没有生成profile文件
 6. toolchains_openwrt need windows
 
