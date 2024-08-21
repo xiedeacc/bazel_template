@@ -122,8 +122,8 @@ configure_make(
         "//conditions:default": "lib64",
     }),
     out_static_libs = [
-        "libcrypto.a",
         "libssl.a",
+        "libcrypto.a",
     ],
     targets = MAKE_TARGETS,
     toolchains = ["@rules_perl//:current_toolchain"],

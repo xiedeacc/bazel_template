@@ -66,7 +66,6 @@ cc_library(
         ":cc_protos",
         "@com_github_glog_glog//:glog",
         "@com_github_grpc_grpc//:grpc++",
-        "@com_google_protobuf//:cc_wkt_protos",
     ],
 )
 
@@ -90,7 +89,6 @@ cc_library(
 #":cc_protos",
 #"@com_github_grpc_grpc//:grpc++",
 #"@com_google_glog//:glog",
-#"@com_google_protobuf//:cc_wkt_protos",
 #"@com_github_census_instrumentation_opencensus_cpp//opencensus/exporters/trace/stackdriver:stackdriver_exporter",
 #"@com_github_census_instrumentation_opencensus_cpp//opencensus/trace",
 #],

@@ -2,7 +2,6 @@ common --noenable_bzlmod
 common --experimental_downloader_config=.bazel_downloader.cfg
 
 ######################### attention #########################
-# 1. static link tcmalloc or jemalloc with folly will coredump
 # 2. pprof.out generated in bazel test sandbox
 # 3. go install github.com/google/pprof@latest
 # 4. both tcmalloc and jemalloc cannot detect memory leak, use sanitize instead
@@ -67,6 +66,9 @@ build --output_filter="^//"
 #build --remote_cache=http://192.168.1.101/bazel_cache
 #build --keep_going
 
+build:tcmalloc --define='profiling_type=tcmalloc'
+build:jemalloc --define='profiling_type=jemalloc'
+
 build:gcc_local --platforms='//bazel:linux_x86_64_platform'
 #build:gcc_local --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
 build:gcc_local --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
@@ -83,7 +85,6 @@ build:gcc --extra_toolchains='@cc_toolchain_config_x86_64_linux_generic_glibc_gc
 build:gcc --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:gcc --cpu='x86_64'
 build:gcc --compiler='gcc'
-build:gcc --define='profiling_type=jemalloc'
 #build:gcc --java_runtime_version="remotejdk_21"
 
 build:gcc_macosx_x86_64 --platforms='//bazel:osx_x86_64_platform'
@@ -122,7 +123,6 @@ build:clang --extra_toolchains='@cc_toolchain_config_x86_64_linux_generic_glibc_
 build:clang --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:clang --cpu='x86_64'
 build:clang --compiler='clang'
-build:clang --define='profiling_type=jemalloc'
 #build:clang --java_runtime_version="remotejdk_21"
 
 build:clang_aarch64 --platforms='//bazel:linux_aarch64_platform'

@@ -782,7 +782,6 @@ def _impl(ctx):
             ),
         ],
     )
-    print(include_paths_feature)
     external_include_paths_feature = feature(
         name = "external_include_paths",
         flag_sets = [
@@ -1430,7 +1429,6 @@ def _impl(ctx):
     action_configs += parse_headers_action_configs
     features += parse_headers_features
 
-    #print(features)
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
         features = features,

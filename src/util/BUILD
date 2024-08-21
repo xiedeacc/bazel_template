@@ -34,9 +34,14 @@ cc_library(
         "@com_google_absl//absl/time",
         "@com_google_protobuf//:protobuf",
         "@fmt",
+        "@folly",
         "@openssl",
         "@smhasher",
-    ],
+    ] + select({
+        "@bazel_template//bazel:jemalloc": ["@jemalloc"],
+        "@bazel_template//bazel:tcmalloc": ["@tcmalloc//tcmalloc"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(

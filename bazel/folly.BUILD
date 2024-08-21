@@ -253,7 +253,6 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    alwayslink = True,
 )
 
 cc_library(
@@ -344,13 +343,17 @@ template_rule(
     out = "folly/folly-config.h",
     substitutions = selects.with_or({
         ("@bazel_template//bazel:gcc", "//conditions:default"): {},
-        "@bazel_template//bazel:clang": {
-            "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "/* #undef FOLLY_HAVE_EXTRANDOM_SFMT19937 */",
-        },
+        "@bazel_template//bazel:clang": {"#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "/* #undef FOLLY_HAVE_EXTRANDOM_SFMT19937 */"},
     }) | select({
         "@bazel_template//bazel:jemalloc": {"#define FOLLY_USE_JEMALLOC 1": "#define FOLLY_USE_JEMALLOC 1"},
         "@bazel_template//bazel:tcmalloc": {"#define FOLLY_USE_JEMALLOC 1": ""},
         "//conditions:default": {"#define FOLLY_USE_JEMALLOC 1": ""},
+    }) | select({
+        "@bazel_template//bazel:linux_aarch64": {
+            "#define FOLLY_HAVE_SWAPCONTEXT 1": "",
+            "#define FOLLY_HAVE_BACKTRACE 1": "",
+        },
+        "//conditions:default": {},
     }) | select({
         "@platforms//os:linux": {},
         "@platforms//os:osx": {

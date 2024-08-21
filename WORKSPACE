@@ -779,7 +779,7 @@ cc_toolchains_setup(
                         "lib/gcc/x86_64-pc-linux-gnu/14.1.0",
                         "/usr/lib/x86_64-linux-gnu",
                     ],
-                    "supports_start_end_lib": False,
+                    "supports_start_end_lib": True,
                     "debug": True,
                 },
                 {
@@ -823,7 +823,7 @@ cc_toolchains_setup(
                         "/usr/lib/x86_64-linux-gnu",
                     ],
                     "link_libs": [
-                        "lib/clang/18/lib/x86_64-unknown-linux-gnu/libclang_rt.builtins.a",
+                        "libclang_rt.builtins.a",
                     ],
                     "supports_start_end_lib": True,
                     "debug": True,
@@ -918,7 +918,7 @@ cc_toolchains_setup(
                         "usr/lib",
                     ],
                     "link_libs": [
-                        "llvm18.1.8/lib/clang/18/lib/darwin/libclang_rt.osx.a",
+                        "libclang_rt.osx.a",
                     ],
                     "supports_start_end_lib": False,
                     "debug": True,
@@ -960,7 +960,12 @@ cc_toolchains_setup(
                     ],
                     "lib_directories": [],
                     "sysroot_include_directories": [],
-                    "sysroot_lib_directories": [],
+                    "sysroot_lib_directories": [
+                        "lib/gcc/aarch64-openwrt-linux-musl/12.3.0",
+                    ],
+                    "link_libs": [
+                        "libgcc.a",
+                    ],
                     "supports_start_end_lib": True,
                     "debug": True,
                 },
@@ -1006,7 +1011,7 @@ cc_toolchains_setup(
                         "usr/lib",
                     ],
                     "link_libs": [
-                        "lib/clang/18/lib/aarch64-unknown-linux-gnu/libclang_rt.builtins.a",
+                        "libclang_rt.builtins.a",
                     ],
                     "supports_start_end_lib": True,
                     "debug": True,
