@@ -1,9 +1,7 @@
 # todo
-1. openssl still need link with static
 1. need test libevent EPOLL_PWAIT2 on openwrt
-2. need test folly SWAPCONTEXT on openwrt
 0. jemalloc没有生成profile文件
-6. toolchains_openwrt need windows and macos
+6. toolchains_openwrt need windows
 
 # future todo:
 3. import virtual include like boost
