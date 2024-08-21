@@ -2,10 +2,8 @@ common --noenable_bzlmod
 common --experimental_downloader_config=.bazel_downloader.cfg
 
 ######################### attention #########################
-# 2. pprof.out generated in bazel test sandbox
-# 3. go install github.com/google/pprof@latest
-# 4. both tcmalloc and jemalloc cannot detect memory leak, use sanitize instead
-# 5. clang need link -static-libasan
+# 1. pprof.out generated in bazel test sandbox
+# 2. go install github.com/google/pprof@latest
 
 test:cpplint --test_tag_filters='cpplint'
 test:cpplint --build_tests_only
@@ -76,6 +74,8 @@ build:gcc_local --extra_toolchains='@local_config_cc_toolchains//:cc-toolchain-k
 build:gcc_local --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:gcc_local --cpu='x86_64'
 build:gcc_local --compiler=gcc
+build:gcc_local --copt='-g'
+build:gcc_local --host_copt='-g'
 #build:gcc_local --java_runtime_version="remotejdk_21"
 
 build:gcc --platforms='//bazel:linux_x86_64_platform'
@@ -85,6 +85,8 @@ build:gcc --extra_toolchains='@cc_toolchain_config_x86_64_linux_generic_glibc_gc
 build:gcc --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:gcc --cpu='x86_64'
 build:gcc --compiler='gcc'
+build:gcc --copt='-g'
+build:gcc --host_copt='-g'
 #build:gcc --java_runtime_version="remotejdk_21"
 
 build:gcc_macosx_x86_64 --platforms='//bazel:osx_x86_64_platform'
@@ -106,6 +108,8 @@ build:openwrt_aarch64 --cpu='aarch64'
 build:openwrt_aarch64 --compiler='gcc'
 build:openwrt_aarch64 --java_runtime_version="remotejdk_21"
 build:openwrt_aarch64 --action_env=STAGING_DIR=/root/src/software/openwrt/openwrt-aarch64_toolchain
+build:openwrt_aarch64 --copt='-g'
+build:openwrt_aarch64 --host_copt='-g'
 
 build:clang_local --platforms='//bazel:linux_x86_64_platform'
 build:clang_local --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
@@ -114,6 +118,8 @@ build:clang_local --extra_toolchains='//toolchain:clang_toolchain_for_linux_x86_
 build:clang_local --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:clang_local --cpu='x86_64'
 build:clang_local --compiler=clang
+build:clang_local --copt='-g'
+build:clang_local  --host_copt='-g'
 #build:clang_local --java_runtime_version="remotejdk_21"
 
 build:clang --platforms='//bazel:linux_x86_64_platform'
@@ -123,6 +129,8 @@ build:clang --extra_toolchains='@cc_toolchain_config_x86_64_linux_generic_glibc_
 build:clang --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:clang --cpu='x86_64'
 build:clang --compiler='clang'
+build:clang --copt='-g'
+build:clang --host_copt='-g'
 #build:clang --java_runtime_version="remotejdk_21"
 
 build:clang_aarch64 --platforms='//bazel:linux_aarch64_platform'
@@ -132,6 +140,8 @@ build:clang_aarch64 --extra_toolchains='@cc_toolchain_config_aarch64_linux_gener
 build:clang_aarch64 --extra_toolchains='@remotejdk21_linux_aarch64_toolchain_config_repo//:toolchain'
 build:clang_aarch64 --cpu='aarch64'
 build:clang_aarch64 --compiler=clang
+build:clang_aarch64 --copt='-g'
+build:clang_aarch64 --host_copt='-g'
 #build:clang_aarch64 --java_runtime_version="remotejdk_21"
 
 build:clang_macosx_x86_64 --platforms='//bazel:osx_x86_64_platform'

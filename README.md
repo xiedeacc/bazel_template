@@ -1,5 +1,4 @@
 # todo
-0. jemalloc没有生成profile文件
 6. toolchains_openwrt need windows
 
 # future todo:
@@ -12,15 +11,17 @@
 9. renovate.json
 
 # features
-* include most popular C/C++ libraries, eg. boost, abseil, folly, proxygen, mvfst, jemalloc, tcmalloc, xz, zstd, curl, c-ares ...
+* include most popular C/C++ libraries, eg. grpc protobuf boost abseil folly proxygen mvfst jemalloc tcmalloc xz zstd curl c-ares ...
 * include grpc server and client example
-* include protobuf plugin rule example
-* include swig for JAVA and python example
-* support multiple platforms, eg: linux-x86_64, linux_aarch64, openwrt_aarch64, windows and macos ing
-* all source code compiled success by clang and gcc both
+* include http server and client example
+* include protobuf plugin example
+* include swig for JAVA and Python example
+* support multiple platforms, eg: linux-x86_64 linux_aarch64 openwrt_aarch64 and macosx, windows ing
+* all source code compiled successful by clang and gcc both
 * include compile_commands.json generator
 * include cpu and memory profiling
 * include memory leak, corruption detection
+* automatic code google style detect
 
 # usage
 
