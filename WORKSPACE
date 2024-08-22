@@ -941,25 +941,14 @@ cc_toolchains_setup(
                         "x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include",
                     ],
                     "lib_directories": [
-                        "lib",
                         "lib/gcc/x86_64-w64-mingw32/14.2.0",
+                        "lib/gcc",
+                        "x86_64-w64-mingw32/sysroot/lib",
                         "x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib",
                     ],
                     "sysroot_include_directories": [
                     ],
                     "sysroot_lib_directories": [
-                    ],
-                    "link_libs": [
-                        "libkernel32.a",
-                        "libwsock32.a",
-                        "libuser32.a",
-                        "libmingwex.a",
-                        "libucrt.a",
-                        "dllcrt1.o",
-                        "libmincore.a",
-                        "libmingw32.a",
-                        "libwinpthread-1.dll",
-                        "libgcc.a",
                     ],
                     "supports_start_end_lib": False,
                     "debug": False,

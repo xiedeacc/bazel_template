@@ -65,9 +65,10 @@ cc_binary(
         "bzip2.c",
     ],
     copts = COPTS,
-    local_defines = [
-        "BZ_UNIX=1",
-    ],
+    local_defines = select({
+        "@platforms//os:windows": ["BZ_LCCWIN32=1"],
+        "//conditions:default": ["BZ_UNIX=1"],
+    }),
     deps = [
         "libbzip2",
     ],
@@ -79,9 +80,10 @@ cc_binary(
         "bzip2recover.c",
     ],
     copts = COPTS,
-    local_defines = [
-        "BZ_UNIX=1",
-    ],
+    local_defines = select({
+        "@platforms//os:windows": ["BZ_LCCWIN32=1"],
+        "//conditions:default": ["BZ_UNIX=1"],
+    }),
     deps = [
         "libbzip2",
     ],

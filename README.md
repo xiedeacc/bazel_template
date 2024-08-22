@@ -244,6 +244,10 @@ ls | xargs /root/.cache/bazel/_bazel_root/d7f4cad81e2b036f4c3382027c9d9c7a/exter
 find . -name "*.o" -exec nm -A {} + | grep "symbol_name"
 
 
+export PATH=/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin:$PATH
+./Configure mingw64 --cross-compile-prefix=x86_64-w64-mingw32- no-shared no-dso
+make install DESTDIR=/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usrmake install DESTDIR=/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr
+
 CC=aarch64-linux-gnu-gcc ./configure --enable-shared=no --host=aarch64-unknown-linux-gnu
 
 /usr/local/llvm/18/bin/clang++ -v --target=aarch64-unknown-linux-gnu \
