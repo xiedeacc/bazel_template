@@ -709,16 +709,16 @@ http_archive(
     urls = ["https://code.xiamu.com/files/macosx14.2-x86_64_sysroot.tar.gz"],
 )
 
-new_git_repository(
-    name = "cc_toolchains",
-    commit = "19370106daf5184f4a4aa19378e9103a0d6ac751",
-    remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
-)
-
-#local_repository(
+#new_git_repository(
 #name = "cc_toolchains",
-#path = "../cc_toolchains",
+#commit = "19370106daf5184f4a4aa19378e9103a0d6ac751",
+#remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
 #)
+
+local_repository(
+    name = "cc_toolchains",
+    path = "../cc_toolchains",
+)
 
 load("@cc_toolchains//toolchain:cc_toolchains_setup.bzl", "cc_toolchains_setup")
 
@@ -904,6 +904,65 @@ cc_toolchains_setup(
                     ],
                     "supports_start_end_lib": False,
                     "debug": True,
+                },
+            ],
+            "windows": [
+                {
+                    "distro": "generic",
+                    "libc": "mingw-w64",
+                    "compiler": "gcc",
+                    "triple": "x86_64-w64-mingw32",
+                    #"url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
+                    "url": "/root/src/software/gcc14.2.0-windows-x86_64_toolchain",
+                    #"strip_prefix": "gcc14.2.0-windows-x86_64_toolchain",
+                    "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
+                    "sysroot": "/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot",
+                    "tool_names": {
+                        "ar": "x86_64-w64-mingw32-ar",
+                        "as": "x86_64-w64-mingw32-as",
+                        "c++": "x86_64-w64-mingw32-c++",
+                        "cpp": "x86_64-w64-mingw32-cpp",
+                        "g++": "x86_64-w64-mingw32-g++",
+                        "gcc": "x86_64-w64-mingw32-gcc",
+                        "gcov": "x86_64-w64-mingw32-gcov",
+                        "ld": "x86_64-w64-mingw32-ld",
+                        "llvm-cov": "None",
+                        "nm": "x86_64-w64-mingw32-nm",
+                        "objcopy": "x86_64-w64-mingw32-objcopy",
+                        "objdump": "x86_64-w64-mingw32-objdump",
+                        "strip": "x86_64-w64-mingw32-strip",
+                    },
+                    "cxx_builtin_include_directories": [
+                        "x86_64-w64-mingw32/include/c++/14.2.0/x86_64-w64-mingw32",
+                        "x86_64-w64-mingw32/include/c++/14.2.0",
+                        "x86_64-w64-mingw32/include/c++/14.2.0/backward",
+                        "lib/gcc/x86_64-w64-mingw32/14.2.0/include",
+                        "lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed",
+                        "x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include",
+                    ],
+                    "lib_directories": [
+                        "lib",
+                        "lib/gcc/x86_64-w64-mingw32/14.2.0",
+                        "x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib",
+                    ],
+                    "sysroot_include_directories": [
+                    ],
+                    "sysroot_lib_directories": [
+                    ],
+                    "link_libs": [
+                        "libkernel32.a",
+                        "libwsock32.a",
+                        "libuser32.a",
+                        "libmingwex.a",
+                        "libucrt.a",
+                        "dllcrt1.o",
+                        "libmincore.a",
+                        "libmingw32.a",
+                        "libwinpthread-1.dll",
+                        "libgcc.a",
+                    ],
+                    "supports_start_end_lib": False,
+                    "debug": False,
                 },
             ],
         },

@@ -182,6 +182,9 @@ CMAKE_PREFIX_PATH=/usr/local:/usr/local/llvm/18 LD_LIBRARY_PATH=/usr/local/lib P
 # 一些常见和交叉编译相关命令
 
 ```
+crosstool-NG
+ct-ng list-samples
+
 binutils
 mkdir build
 ../configure --prefix=/usr/local/binutils-linux-x86_64
@@ -222,6 +225,23 @@ CPPFLAGS="-I${LLVM_DIR}/include -I${LLVM_DIR}/include/x86_64-unknown-linux-gnu/c
 CFLAGS="-v -fPIC -I${LLVM_DIR}/include -I${LLVM_DIR}/include/x86_64-unknown-linux-gnu/c++/v1 -I${LLVM_DIR}/include/c++/v1 -I${LLVM_DIR}/lib/clang/18/include -I/usr/include" \
 LDFLAGS="-L${LLVM_DIR}/lib -L${LLVM_DIR}/lib/x86_64-unknown-linux-gnu -L${LLVM_DIR}/lib/clang/18/lib/x86_64-unknown-linux-gnu -L/usr/lib" \
 ./configure
+
+CC='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-gcc' \
+CXX='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-g++' \
+CFLAGS='--sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+CXXFLAGS='--sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0/x86_64-w64-mingw32 -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0 -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0/backward -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+LDFLAGS='-B/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin -B/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib/ -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0 -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/sysroot/usr/x86_64-w64-mingw32/lib ' \
+./configure --host=x86_64-w64-mingw32 --disable-shared
+
+CC='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-gcc' \
+CXX='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-g++' \
+CFLAGS='--sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+CXXFLAGS='--sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0/x86_64-w64-mingw32 -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0 -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0/backward -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+LDFLAGS='-B/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin -B/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib/ -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0 -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/sysroot/usr/x86_64-w64-mingw32/lib ' \
+cmake ..
+
+ls | xargs /root/.cache/bazel/_bazel_root/d7f4cad81e2b036f4c3382027c9d9c7a/external/cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc/bin/x86_64-w64-mingw32-nm -A | grep fseek
+find . -name "*.o" -exec nm -A {} + | grep "symbol_name"
 
 
 CC=aarch64-linux-gnu-gcc ./configure --enable-shared=no --host=aarch64-unknown-linux-gnu
