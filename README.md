@@ -4,11 +4,13 @@
 # future todo:
 3. import virtual include like boost
 4. use baze aspect find the most possible relative search path
-5. 集成clang-tidy, clang-check, clang static analyzer
-6. module map, -compiler_param_file, -layering_check
 7. aspect用法
 8. transitive用法
 9. renovate.json
+5. 集成clang-tidy, clang-check, clang static analyzer https://github.com/erenon/bazel_clang_tidy
+6. 集成IWYU https://github.com/storypku/bazel_iwyu
+6. module map, https://juejin.cn/post/6994342497698873375 
+7. -layering_check https://maskray.me/blog/2022-09-25-layering-check-with-clang
 
 # features
 * include most popular C/C++ libraries, eg. grpc protobuf boost abseil folly proxygen mvfst jemalloc tcmalloc xz zstd curl c-ares ...
@@ -270,6 +272,15 @@ LD_LIBRARY_PATH=/root/src/software/clang_sysroot/lib:\
 /root/src/software/clang_sysroot/lib/clang/18/lib/aarch64-unknown-linux-gnu:\
 /root/src/software/clang_sysroot/lib/aarch64-unknown-linux-gnu qemu-aarch64 bazel-bin/src/main
 
+CC='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-gcc --sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain' \
+CXX='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-g++ --sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain' \
+CFLAGS='-I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+CXXFLAGS='-I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0/x86_64-w64-mingw32 -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0 -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0/backward -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+CPPFLAGS='-I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+LDFLAGS='-B/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin -B/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0 -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/lib' \
+cmake -DCMAKE_SYSTEM_PROCESSOR=x86_64 -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_RC_COMPILE=/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-windres -DCMAKE_VERBOSE_MAKEFILE=ON ..
+
+
 ```
 
 # 一些常见软件编译参数
@@ -312,6 +323,16 @@ cmake BUILD_TESTING=OFF -DABSL_PROPAGATE_CXX_STD=ON ..
 openssl
 LDFLAGS="-Wl,-rpath,/usr/local/lib64" ./Configure enable-brotli enable-egd enable-tfo enable-thread-pool enable-default-thread-pool enable-zlib enable-zstd
 ./Configure enable-brotli enable-egd enable-tfo enable-thread-pool enable-default-thread-pool enable-zlib enable-zstd --libdir=lib
+
+CC='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-gcc --sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain' \
+CXX='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-g++ --sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain' \
+CFLAGS='-I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+CXXFLAGS='--sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0/x86_64-w64-mingw32 -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0 -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0/backward -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+CPPFLAGS='-I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+LDFLAGS='-B/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin -B/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0 -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/lib' \
+RC='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-windres' \
+./Configure mingw64 --prefix=/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr
+
 ```
 
 ## curl
