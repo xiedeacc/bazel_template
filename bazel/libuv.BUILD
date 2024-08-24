@@ -116,11 +116,6 @@ cc_library(
     includes = ["include"],
     linkopts = select({
         "@platforms//os:windows": [
-            "-DEFAULTLIB:Ws2_32.lib",
-            "-DEFAULTLIB:Iphlpapi.lib",
-            "-DEFAULTLIB:Psapi.lib",
-            "-DEFAULTLIB:User32.lib",
-            "-DEFAULTLIB:Userenv.lib",
         ],
         "//conditions:default": [
             "-lpthread",
@@ -154,11 +149,5 @@ cc_library(
         "//conditions:default": [
             "_GNU_SOURCE",
         ],
-    }),
-    deps = select({
-        "@platforms//os:windows": [
-            "@pthread_windows//:pthread",
-        ],
-        "//conditions:default": [],
     }),
 )

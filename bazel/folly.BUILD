@@ -79,6 +79,7 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mavx"],
         "@platforms//cpu:aarch64": [],
     }),
+    defines = ["GFLAGS_IS_A_DLL=1"],
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -94,6 +95,7 @@ cc_library(
         "@platforms//cpu:aarch64": [],
     }),
     local_defines = LOCAL_DEFINES,
+    defines = ["GFLAGS_IS_A_DLL=1"],
     deps = [":common"],
 )
 
@@ -110,6 +112,7 @@ cc_library(
         "@platforms//cpu:aarch64": [],
     }),
     local_defines = LOCAL_DEFINES,
+    defines = ["GFLAGS_IS_A_DLL=1"],
     deps = [":common"],
 )
 
@@ -123,6 +126,7 @@ cc_library(
         "@platforms//cpu:aarch64": [],
     }),
     local_defines = LOCAL_DEFINES,
+    defines = ["GFLAGS_IS_A_DLL=1"],
     deps = [":common"],
 )
 
@@ -136,6 +140,7 @@ cc_library(
         "@platforms//cpu:aarch64": [],
     }),
     local_defines = LOCAL_DEFINES,
+    defines = ["GFLAGS_IS_A_DLL=1"],
     deps = [":common"],
 )
 
@@ -154,6 +159,7 @@ cc_library(
         ],
     }),
     copts = COPTS + ["-x assembler-with-cpp"],
+    defines = ["GFLAGS_IS_A_DLL=1"],
     local_defines = LOCAL_DEFINES + select({
         "@platforms//cpu:x86_64": [],
         "@platforms//cpu:aarch64": [
@@ -215,6 +221,7 @@ cc_library(
     copts = COPTS,
     linkstatic = True,
     local_defines = LOCAL_DEFINES,
+    defines = ["GFLAGS_IS_A_DLL=1"],
     deps = [
         "@boost//:algorithm",
         "@boost//:bind",
@@ -258,6 +265,7 @@ cc_library(
 cc_library(
     name = "folly",
     linkstatic = True,
+    defines = ["GFLAGS_IS_A_DLL=1"],
     deps = [
         ":MathOperation",
         ":MathOperation_AVX2",

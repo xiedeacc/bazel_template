@@ -60,26 +60,16 @@ COMMON_DEFINES = [
     "VERSION=\\\"1.0.20\\\"",
     "CONFIGURED=1",
     "HAVE_ALLOCA=1",
-    "HAVE_ALLOCA_H=1",
     "HAVE_ATOMIC_OPS=1",
     "HAVE_C11_MEMORY_FENCES=1",
     "HAVE_CLOCK_GETTIME=1",
     "HAVE_C_VARARRAYS=1",
-    "HAVE_DLFCN_H=1",
-    "HAVE_EXPLICIT_BZERO=1",
     "HAVE_GCC_MEMORY_FENCES=1",
-    "HAVE_GETAUXVAL=1",
-    "HAVE_GETENTROPY=1",
     "HAVE_GETPID=1",
-    "HAVE_GETRANDOM=1",
     "HAVE_INLINE_ASM=1",
     "HAVE_INTTYPES_H=1",
-    "HAVE_MADVISE=1",
-    "HAVE_MLOCK=1",
-    "HAVE_MMAP=1",
     "HAVE_MPROTECT=1",
     "HAVE_NANOSLEEP=1",
-    "HAVE_POSIX_MEMALIGN=1",
     "HAVE_PTHREAD=1",
     "HAVE_PTHREAD_PRIO_INHERIT=1",
     "HAVE_RAISE=1",
@@ -88,16 +78,12 @@ COMMON_DEFINES = [
     "HAVE_STDLIB_H=1",
     "HAVE_STRINGS_H=1",
     "HAVE_STRING_H=1",
-    "HAVE_SYSCONF=1",
-    "HAVE_SYS_MMAN_H=1",
     "HAVE_SYS_PARAM_H=1",
-    "HAVE_SYS_RANDOM_H=1",
     "HAVE_SYS_STAT_H=1",
     "HAVE_SYS_TYPES_H=1",
     "HAVE_TI_MODE=1",
     "HAVE_UNISTD_H=1",
     "HAVE_WCHAR_H=1",
-    "HAVE_WEAK_SYMBOLS=1",
     "NATIVE_LITTLE_ENDIAN=1",
     "STDC_HEADERS=1",
     "TLS=_Thread_local",
@@ -113,7 +99,6 @@ COMMON_DEFINES = [
     "__STDC_WANT_IEC_60559_ATTRIBS_EXT__=1",
     "__STDC_WANT_IEC_60559_BFP_EXT__=1",
     "__STDC_WANT_IEC_60559_DFP_EXT__=1",
-    "__STDC_WANT_IEC_60559_EXT__=1",
     "__STDC_WANT_IEC_60559_FUNCS_EXT__=1",
     "__STDC_WANT_IEC_60559_TYPES_EXT__=1",
     "__STDC_WANT_LIB_EXT2__=1",
@@ -130,11 +115,9 @@ X86_64_DEFINES = [
     "HAVE_MMINTRIN_H=1",
     "HAVE_PMMINTRIN_H=1",
     "HAVE_RDRAND=1",
-    "HAVE_TI_MODE_V=1",
     "HAVE_WMMINTRIN_H=1",
     "HAVE_TMMINTRIN_H=1",
     "HAVE_SMMINTRIN_H=1",
-    "HAVE_CPUID_V=1",
     "HAVE_CATCHABLE_SEGV=1",
     "HAVE_CET_H=1",
     "HAVE_AVX512FINTRIN_H=1",
@@ -149,13 +132,51 @@ AARCH64_DEFINES = [
 
 LINUX_DEFINES = [
     "HAVE_SYS_AUXV_H=1",
+    "HAVE_GETRANDOM=1",
+    "HAVE_SYSCONF=1",
+    "HAVE_POSIX_MEMALIGN=1",
+    "HAVE_TI_MODE_V=1",
+    "HAVE_WEAK_SYMBOLS=1",
+    "HAVE_SYS_RANDOM_H=1",
+    "HAVE_MLOCK=1",
+    "HAVE_EXPLICIT_BZERO=1",
+    "HAVE_SYS_MMAN_H=1",
+    "__STDC_WANT_IEC_60559_EXT__=1",
+    "HAVE_MADVISE=1",
+    "HAVE_CPUID_V=1",
+    "HAVE_MMAP=1",
+    "HAVE_DLFCN_H=1",
+    "HAVE_GETAUXVAL=1",
+    "HAVE_GETENTROPY=1",
+    "HAVE_ALLOCA_H=1",
 ]
 
 OSX_DEFINES = [
+    "HAVE_ALLOCA_H=1",
+    "HAVE_SYS_MMAN_H=1",
+    "HAVE_GETRANDOM=1",
+    "HAVE_SYSCONF=1",
+    "HAVE_EXPLICIT_BZERO=1",
+    "HAVE_GETAUXVAL=1",
+    "HAVE_POSIX_MEMALIGN=1",
+    "HAVE_CPUID_V=1",
+    "HAVE_GETENTROPY=1",
+    "HAVE_WEAK_SYMBOLS=1",
+    "HAVE_TI_MODE_V=1",
+    "HAVE_MADVISE=1",
+    "HAVE_SYS_RANDOM_H=1",
+    "HAVE_MMAP=1",
+    "__STDC_WANT_IEC_60559_EXT__=1",
+    "HAVE_DLFCN_H=1",
     "HAVE_COMMONCRYPTO_COMMONRANDOM_H=1",
     "HAVE_ARC4RANDOM=1",
+    "HAVE_MLOCK=1",
     "HAVE_ARC4RANDOM_BUF=1",
     "HAVE_MEMSET_S=1",
+]
+
+WINDOWS_DEFINES = [
+    "HAVE_INTRIN_H=1",
 ]
 
 cc_library(
@@ -178,6 +199,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES,
         "@platforms//os:linux": LINUX_DEFINES,
+        "@platforms//os:windows": WINDOWS_DEFINES,
         "//conditions:default": [],
     }),
 )
@@ -305,6 +327,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES + ["ASM_HIDE_SYMBOL=.private_extern"],
         "@platforms//os:linux": LINUX_DEFINES + ["ASM_HIDE_SYMBOL=.hidden"],
+        "@platforms//os:windows": WINDOWS_DEFINES + [],
         "//conditions:default": ["ASM_HIDE_SYMBOL=.hidden"],
     }),
     deps = [":utils"],
@@ -339,6 +362,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES,
         "@platforms//os:linux": LINUX_DEFINES,
+        "@platforms//os:windows": WINDOWS_DEFINES + [],
         "//conditions:default": [],
     }),
     deps = [":common"],
@@ -374,6 +398,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES,
         "@platforms//os:linux": LINUX_DEFINES,
+        "@platforms//os:windows": WINDOWS_DEFINES + [],
         "//conditions:default": [],
     }),
 )
@@ -410,6 +435,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES,
         "@platforms//os:linux": LINUX_DEFINES,
+        "@platforms//os:windows": WINDOWS_DEFINES + [],
         "//conditions:default": [],
     }),
     deps = [":common"],
@@ -447,6 +473,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES,
         "@platforms//os:linux": LINUX_DEFINES,
+        "@platforms//os:windows": WINDOWS_DEFINES + [],
         "//conditions:default": [],
     }),
     deps = [":common"],
@@ -487,6 +514,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES,
         "@platforms//os:linux": LINUX_DEFINES,
+        "@platforms//os:windows": WINDOWS_DEFINES + [],
         "//conditions:default": [],
     }),
     deps = [":common"],
@@ -523,6 +551,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES,
         "@platforms//os:linux": LINUX_DEFINES,
+        "@platforms//os:windows": WINDOWS_DEFINES + [],
         "//conditions:default": [],
     }),
     deps = [":common"],
@@ -564,6 +593,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES,
         "@platforms//os:linux": LINUX_DEFINES,
+        "@platforms//os:windows": WINDOWS_DEFINES + [],
         "//conditions:default": [],
     }),
     deps = [":common"],
@@ -603,6 +633,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES,
         "@platforms//os:linux": LINUX_DEFINES,
+        "@platforms//os:windows": WINDOWS_DEFINES + [],
         "//conditions:default": [],
     }),
     deps = [":common"],
@@ -641,6 +672,7 @@ cc_library(
     }) + select({
         "@platforms//os:osx": OSX_DEFINES,
         "@platforms//os:linux": LINUX_DEFINES,
+        "@platforms//os:windows": WINDOWS_DEFINES + [],
         "//conditions:default": [],
     }),
     deps = [

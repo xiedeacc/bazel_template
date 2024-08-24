@@ -31,6 +31,9 @@ class Util final {
   static bool ConfReplace(const std::filesystem::path &origin_file,
                           const std::filesystem::path &final_file,
                           std::string *out);
+  static bool ConfDiff(const std::filesystem::path &origin_file,
+                       const std::filesystem::path &final_file,
+                       std::string *out);
 
   static std::string GetServerIp();
 

@@ -330,7 +330,7 @@ git_repository(
 
 http_archive(
     name = "boost",
-    build_file = "@com_github_nelhage_rules_boost//:boost.BUILD",
+    build_file = "//bazel:boost.BUILD",
     patch_cmds = ["rm -f doc/pdf/BUILD"],
     patch_cmds_win = ["Remove-Item -Force doc/pdf/BUILD"],
     repo_mapping = {
