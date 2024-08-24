@@ -113,7 +113,6 @@ cc_library(
     hdrs = [":common_headers"],
     copts = STRICT_C_OPTIONS,
     deps = [":brotli_inc"],
-    alwayslink = True,
 )
 
 cc_library(
@@ -122,7 +121,6 @@ cc_library(
     hdrs = [":dec_headers"],
     copts = STRICT_C_OPTIONS,
     deps = [":brotlicommon"],
-    alwayslink = True,
 )
 
 cc_library(
@@ -136,7 +134,6 @@ cc_library(
         "//conditions:default": ["-lm"],
     }),
     deps = [":brotlicommon"],
-    alwayslink = True,
 )
 
 cc_binary(

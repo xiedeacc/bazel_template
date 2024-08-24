@@ -35,10 +35,15 @@ git_repository(
     tag = "0.0.9",
 )
 
-git_repository(
+#git_repository(
+#name = "rules_foreign_cc",
+#remote = "git@code.xiamu.com:bazelbuild/rules_foreign_cc.git",
+#tag = "0.11.1",
+#)
+
+local_repository(
     name = "rules_foreign_cc",
-    remote = "git@code.xiamu.com:bazelbuild/rules_foreign_cc.git",
-    tag = "0.11.1",
+    path = "../arch/rules_foreign_cc",
 )
 
 git_repository(
@@ -720,6 +725,11 @@ local_repository(
     path = "../cc_toolchains",
 )
 
+register_toolchains(
+    "@openssl//:preinstalled_make_toolchain",
+    "@openssl//:preinstalled_pkgconfig_toolchain",
+)
+
 load("@cc_toolchains//toolchain:cc_toolchains_setup.bzl", "cc_toolchains_setup")
 
 cc_toolchains_setup(
@@ -931,6 +941,7 @@ cc_toolchains_setup(
                         "objcopy": "x86_64-w64-mingw32-objcopy",
                         "objdump": "x86_64-w64-mingw32-objdump",
                         "strip": "x86_64-w64-mingw32-strip",
+                        "windres": "x86_64-w64-mingw32-windres",
                     },
                     "cxx_builtin_include_directories": [
                         "x86_64-w64-mingw32/include/c++/14.2.0/x86_64-w64-mingw32",

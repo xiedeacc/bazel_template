@@ -1,5 +1,6 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_foreign_cc//foreign_cc:defs.bzl", "configure_make", "configure_make_variant")
+load("@rules_foreign_cc//toolchains/native_tools:native_tools_toolchain.bzl", "native_tool_toolchain")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,6 +22,7 @@ CONFIGURE_OPTIONS = [
     "enable-rfc3779",
     "enable-cms",
     "enable-ec_nistp_64_gcc_128",
+    "no-tests",
     "--with-zlib-include=$$EXT_BUILD_DEPS$$/include",
     "--with-zlib-lib=$$EXT_BUILD_DEPS$$/lib",
     "--with-zstd-include=$$EXT_BUILD_DEPS$$/include",
@@ -38,22 +40,45 @@ MAKE_TARGETS = [
 
 alias(
     name = "ssl",
-    actual = "openssl",
+    actual = ":openssl",
 )
 
 alias(
     name = "crypto",
-    actual = "openssl",
+    actual = ":openssl",
 )
 
 alias(
     name = "openssl",
+    #actual = ":openssl_static",
     actual = select({
         "@platforms//os:linux": ":openssl_static",
         "@platforms//os:osx": ":openssl_shared",
         "@platforms//os:windows": ":openssl_static",
         "//conditions:default": ":openssl_static",
     }),
+)
+
+native_tool_toolchain(
+    name = "preinstalled_pkgconfig",
+    path = "pkg-config",
+)
+
+toolchain(
+    name = "preinstalled_pkgconfig_toolchain",
+    toolchain = ":preinstalled_pkgconfig",
+    toolchain_type = "@rules_foreign_cc//toolchains:pkgconfig_toolchain",
+)
+
+native_tool_toolchain(
+    name = "preinstalled_make",
+    path = "make",
+)
+
+toolchain(
+    name = "preinstalled_make_toolchain",
+    toolchain = ":preinstalled_make",
+    toolchain_type = "@rules_foreign_cc//toolchains:make_toolchain",
 )
 
 configure_make(
@@ -96,7 +121,6 @@ configure_make(
         "//conditions:default": [],
     }),
     targets = MAKE_TARGETS,
-    toolchains = ["@rules_perl//:current_toolchain"],
     deps = [
         "@brotli//:brotlicommon",
         "@brotli//:brotlidec",
@@ -109,6 +133,7 @@ configure_make(
 configure_make(
     name = "openssl_static",
     args = ["-j"],
+    build_data = ["@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres"],
     configure_command = "Configure",
     configure_in_place = True,
     configure_options = CONFIGURE_OPTIONS + select({
@@ -116,12 +141,16 @@ configure_make(
         "@bazel_template//bazel:osx_x86_64": ["darwin64-x86_64-cc"],
         "@bazel_template//bazel:windows_x86_64": [
             "mingw64",
-            "disable-shared",
+            #"disable-shared",
         ],
         "//conditions:default": [],
     }),
     env = select({
         "@bazel_template//bazel:osx_x86_64": {"ARFLAGS": "-static -o"},
+        "@bazel_template//bazel:windows_x86_64": {
+            "WINDRES": "x86_64-w64-mingw32-windres",
+            "PATH": "$$(dirname $(execpath @cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres)):$$PATH",
+        },
         "//conditions:default": {},
     }),
     lib_name = LIB_NAME,
@@ -135,7 +164,6 @@ configure_make(
         "libcrypto.a",
     ],
     targets = MAKE_TARGETS,
-    toolchains = ["@rules_perl//:current_toolchain"],
     deps = [
         "@brotli//:brotlicommon",
         "@brotli//:brotlidec",

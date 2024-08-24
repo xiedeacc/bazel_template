@@ -341,7 +341,19 @@ autoreconf -fi
 ./configure --enable-versioned-symbols --with-openssl=/usr/local
 
 cmake -DCMAKE_VERBOSE_MAKEFILE=TRUE -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_RPATH=/usr/local/lib64:/usr/local/lib ..
-# libcurl.so.4: no version information available
+CC='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-gcc --sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain' \
+CXX='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-g++ --sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain' \
+AR='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-ar' \
+LD='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-ld --sysroot=/root/src/software/gcc14.2.0-windows-x86_64_toolchain' \
+NM='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-nm' \
+CFLAGS='' \
+CXXFLAGS='-I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0/x86_64-w64-mingw32 -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0 -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/include/c++/14.2.0/backward -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+CPPFLAGS='-I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed -I/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include' \
+LDFLAGS='-B/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin -B/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/lib/gcc/x86_64-w64-mingw32/14.2.0 -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -L/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/lib' \
+RC='/root/src/software/gcc14.2.0-windows-x86_64_toolchain/bin/x86_64-w64-mingw32-windres' \
+./configure --host=x86_64-w64-mingw32 --prefix=/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr --with-openssl=/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot/usr --disable-shared --enable-static
+
+
 ```
 
 ## gcc
