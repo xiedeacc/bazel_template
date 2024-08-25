@@ -11,6 +11,7 @@ COPTS = select({
         "-Iexternal/libunwind/include/tdep",
         "-Iexternal/libunwind/src/mi",
     ],
+    "@platforms//os:windows": [],
     "@platforms//os:osx": [],
     "//conditions:default": [],
 }) + [
@@ -352,7 +353,8 @@ template_rule(
             "#undef JEMALLOC_HAVE_MACH_ABSOLUTE_TIME": "/* #undef JEMALLOC_HAVE_MACH_ABSOLUTE_TIME */",
             "#undef JEMALLOC_THREADED_INIT": "/* #undef JEMALLOC_THREADED_INIT */",
             "#define JEMALLOC_PROF": "/* #undef JEMALLOC_PROF */",
-            "#undef JEMALLOC_PROF_LIBUNWIND": "/* #undef JEMALLOC_PROF_LIBUNWIND */",
+            "#undef JEMALLOC_PROF_LIBUNWIND\n": "/* #undef JEMALLOC_PROF_LIBUNWIND */\n",
+            #"#undef JEMALLOC_PROF_LIBUNWIND\n": "#define JEMALLOC_PROF_LIBUNWIND\n",
             "#undef JEMALLOC_HAVE_PRCTL": "/* #undef JEMALLOC_HAVE_PRCTL */",
             "#undef JEMALLOC_DSS": "/* #undef JEMALLOC_DSS */",
             "#define JEMALLOC_MAPS_COALESCE": "/* #undef JEMALLOC_MAPS_COALESCE */",
@@ -595,6 +597,8 @@ cc_library(
     ] + LOCAL_DEFINES,
     deps = [":jemalloc_headers"] + select({
         "@platforms//os:linux": ["@libunwind//:unwind"],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [],
     }),
 )
@@ -639,6 +643,8 @@ cc_library(
     local_defines = LOCAL_DEFINES,
     deps = [":jemalloc_headers"] + select({
         "@platforms//os:linux": ["@libunwind//:unwind"],
+        "@platforms//os:windows": [],
+        "@platforms//os:osx": [],
         "//conditions:default": [],
     }),
     alwayslink = True,

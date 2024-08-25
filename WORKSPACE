@@ -935,6 +935,12 @@ cc_toolchains_setup(
                     #"strip_prefix": "gcc14.2.0-windows-x86_64_toolchain",
                     "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
                     "sysroot": "/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot",
+                    "link_flags": [
+                        "-ladvapi32",
+                        "-lbcrypt",
+                        "-lonecore",
+                        "-ldbghelp",
+                    ],
                     "tool_names": {
                         "ar": "x86_64-w64-mingw32-ar",
                         "as": "x86_64-w64-mingw32-as",

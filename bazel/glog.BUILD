@@ -40,6 +40,7 @@ darwin_only_copts = [
 windows_only_copts = [
     "-DGLOG_NO_ABBREVIATED_SEVERITIES",
     "-DHAVE_SNPRINTF",
+    #"-DGLOG_NO_SYMBOLIZE_DETECTION",
     "-I" + "external/com_github_glog_glog/src/windows",
 ]
 
@@ -95,6 +96,10 @@ cc_library(
         "@platforms//os:windows": ["GOOGLE_GLOG_DLL_DECL=__declspec(dllexport)"],
         "//conditions:default": [],
     }),
+    linkopts = select({
+        "@platforms//os:windows": ["-ldbghelp"],
+        "//conditions:default": [],
+    }),
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
     deps = ["@com_github_gflags_gflags//:gflags"] + select({
@@ -112,6 +117,101 @@ cc_library(
         ":stl_logging_h",
         ":vlog_is_on_h",
     ],
+)
+
+template_rule(
+    name = "config_h",
+    src = ":config_h_in",
+    out = "glog_internal/config.h",
+    substitutions = select({
+        "@platforms//os:windows": {},
+        "@platforms//os:linux": {},
+        "@platforms//os:osx": {},
+        "//conditions:default": {},
+    }),
+)
+
+common_config = {
+    "@ac_cv_cxx11_nullptr_t@": "1",
+    "@ac_cv_cxx_using_operator@": "1",
+    "@ac_cv_have_inttypes_h@": "0",
+    "@ac_cv_have_u_int16_t@": "0",
+    "@ac_cv_have_glog_export@": "0",
+    "@ac_google_start_namespace@": "namespace google {",
+    "@ac_google_end_namespace@": "}",
+    "@ac_google_namespace@": "google",
+}
+
+posix_config = dict_union(
+    common_config,
+    {
+        "@ac_cv_have_unistd_h@": "1",
+        "@ac_cv_have_stdint_h@": "1",
+        "@ac_cv_have_systypes_h@": "1",
+        "@ac_cv_have_uint16_t@": "1",
+        "@ac_cv_have___uint16@": "0",
+        "@ac_cv_have___builtin_expect@": "1",
+        "@ac_cv_have_libgflags@": "1",
+        "@ac_cv___attribute___noinline@": "__attribute__((noinline))",
+        "@ac_cv___attribute___noreturn@": "__attribute__((noreturn))",
+        "@ac_cv___attribute___printf_4_5@": "__attribute__((__format__(__printf__, 4, 5)))",
+    },
+)
+
+windows_config = dict_union(
+    common_config,
+    {
+        "@ac_cv_have_unistd_h@": "1",
+        "@ac_cv_have_stdint_h@": "1",
+        "@ac_cv_have_systypes_h@": "1",
+        "@ac_cv_have_uint16_t@": "1",
+        "@ac_cv_have___uint16@": "1",
+        "@ac_cv_have___builtin_expect@": "1",
+        "@ac_cv_have_libgflags@": "1",
+        "@ac_cv___attribute___noinline@": "__attribute__((noinline))",
+        "@ac_cv___attribute___noreturn@": "__attribute__((noreturn))",
+        "@ac_cv___attribute___printf_4_5@": "__attribute__((__format__(__printf__, 4, 5)))",
+    },
+)
+
+template_rule(
+    name = "vlog_is_on_h",
+    src = "src/glog/vlog_is_on.h.in",
+    out = "src/glog/vlog_is_on.h",
+    substitutions = select({
+        "@platforms//os:windows": windows_config,
+        "//conditions:default": posix_config,
+    }),
+)
+
+template_rule(
+    name = "stl_logging_h",
+    src = "src/glog/stl_logging.h.in",
+    out = "src/glog/stl_logging.h",
+    substitutions = select({
+        "@platforms//os:windows": windows_config,
+        "//conditions:default": posix_config,
+    }),
+)
+
+template_rule(
+    name = "raw_logging_h",
+    src = "src/glog/raw_logging.h.in",
+    out = "src/glog/raw_logging.h",
+    substitutions = select({
+        "@platforms//os:windows": windows_config,
+        "//conditions:default": posix_config,
+    }),
+)
+
+template_rule(
+    name = "logging_h",
+    src = "src/glog/logging.h.in",
+    out = "src/glog/logging.h",
+    substitutions = select({
+        "@platforms//os:windows": windows_config,
+        "//conditions:default": posix_config,
+    }),
 )
 
 genrule(
@@ -343,99 +443,4 @@ genrule(
         "#endif  // GLOG_CONFIG_H",
         "EOF",
     ]),
-)
-
-template_rule(
-    name = "config_h",
-    src = ":config_h_in",
-    out = "glog_internal/config.h",
-    substitutions = select({
-        "@platforms//os:windows": {},
-        "@platforms//os:linux": {},
-        "@platforms//os:osx": {},
-        "//conditions:default": {},
-    }),
-)
-
-common_config = {
-    "@ac_cv_cxx11_nullptr_t@": "1",
-    "@ac_cv_cxx_using_operator@": "1",
-    "@ac_cv_have_inttypes_h@": "0",
-    "@ac_cv_have_u_int16_t@": "0",
-    "@ac_cv_have_glog_export@": "0",
-    "@ac_google_start_namespace@": "namespace google {",
-    "@ac_google_end_namespace@": "}",
-    "@ac_google_namespace@": "google",
-}
-
-posix_config = dict_union(
-    common_config,
-    {
-        "@ac_cv_have_unistd_h@": "1",
-        "@ac_cv_have_stdint_h@": "1",
-        "@ac_cv_have_systypes_h@": "1",
-        "@ac_cv_have_uint16_t@": "1",
-        "@ac_cv_have___uint16@": "0",
-        "@ac_cv_have___builtin_expect@": "1",
-        "@ac_cv_have_libgflags@": "1",
-        "@ac_cv___attribute___noinline@": "__attribute__((noinline))",
-        "@ac_cv___attribute___noreturn@": "__attribute__((noreturn))",
-        "@ac_cv___attribute___printf_4_5@": "__attribute__((__format__(__printf__, 4, 5)))",
-    },
-)
-
-windows_config = dict_union(
-    common_config,
-    {
-        "@ac_cv_have_unistd_h@": "0",
-        "@ac_cv_have_stdint_h@": "0",
-        "@ac_cv_have_systypes_h@": "0",
-        "@ac_cv_have_uint16_t@": "0",
-        "@ac_cv_have___uint16@": "1",
-        "@ac_cv_have___builtin_expect@": "0",
-        "@ac_cv_have_libgflags@": "0",
-        "@ac_cv___attribute___noinline@": "",
-        "@ac_cv___attribute___noreturn@": "__declspec(noreturn)",
-        "@ac_cv___attribute___printf_4_5@": "",
-    },
-)
-
-template_rule(
-    name = "vlog_is_on_h",
-    src = "src/glog/vlog_is_on.h.in",
-    out = "src/glog/vlog_is_on.h",
-    substitutions = select({
-        "@platforms//os:windows": windows_config,
-        "//conditions:default": posix_config,
-    }),
-)
-
-template_rule(
-    name = "stl_logging_h",
-    src = "src/glog/stl_logging.h.in",
-    out = "src/glog/stl_logging.h",
-    substitutions = select({
-        "@platforms//os:windows": windows_config,
-        "//conditions:default": posix_config,
-    }),
-)
-
-template_rule(
-    name = "raw_logging_h",
-    src = "src/glog/raw_logging.h.in",
-    out = "src/glog/raw_logging.h",
-    substitutions = select({
-        "@platforms//os:windows": windows_config,
-        "//conditions:default": posix_config,
-    }),
-)
-
-template_rule(
-    name = "logging_h",
-    src = "src/glog/logging.h.in",
-    out = "src/glog/logging.h",
-    substitutions = select({
-        "@platforms//os:windows": windows_config,
-        "//conditions:default": posix_config,
-    }),
 )
