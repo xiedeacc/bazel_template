@@ -1,6 +1,12 @@
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 
+def dict_union(x, y):
+    z = {}
+    z.update(x)
+    z.update(y)
+    return z
+
 def _template_rule_impl(ctx):
     ctx.actions.expand_template(
         template = ctx.file.src,

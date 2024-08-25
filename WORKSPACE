@@ -246,20 +246,28 @@ new_git_repository(
 )
 
 git_repository(
+    name = "com_github_google_benchmark",
+    remote = "git@github.com:google/benchmark.git",
+    tag = "v1.9.0",
+)
+
+git_repository(
     name = "com_google_absl",
     remote = "git@code.xiamu.com:abseil/abseil-cpp.git",
     tag = "20240116.2",
     #tag = "20230802.2",
 )
 
-git_repository(
+new_git_repository(
     name = "com_github_gflags_gflags",
+    build_file = "//bazel:gflags.BUILD",
     remote = "git@code.xiamu.com:gflags/gflags.git",
     tag = "v2.2.2",
 )
 
-git_repository(
+new_git_repository(
     name = "com_github_glog_glog",
+    build_file = "//bazel:glog.BUILD",
     remote = "git@code.xiamu.com:google/glog.git",
     repo_mapping = {
         "@gflags": "@com_github_gflags_gflags",
