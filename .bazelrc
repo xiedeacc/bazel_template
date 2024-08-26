@@ -4,6 +4,7 @@ common --experimental_downloader_config=.bazel_downloader.cfg
 ######################### attention #########################
 # 1. pprof.out generated in bazel test sandbox
 # 2. go install github.com/google/pprof@latest
+# 3. tcmalloc not support windows
 
 test:cpplint --test_tag_filters='cpplint'
 test:cpplint --build_tests_only
