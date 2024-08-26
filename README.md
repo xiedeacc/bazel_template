@@ -1,6 +1,6 @@
 # todo
 6. toolchains_openwrt need windows
-
+1. compiler use from @bazel_tools//tools/cpp:compiler
 # future todo:
 3. import virtual include like boost
 4. use baze aspect find the most possible relative search path

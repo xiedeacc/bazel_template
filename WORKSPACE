@@ -563,6 +563,8 @@ switched_rules_by_language(
 
 git_repository(
     name = "com_github_grpc_grpc",
+    patch_args = ["-p1"],
+    patches = ["//bazel:grpc.patch"],
     remote = "git@code.xiamu.com:grpc/grpc.git",
     repo_mapping = {
         "@com_github_cares_cares": "@c-ares",
@@ -570,6 +572,15 @@ git_repository(
     },
     tag = "v1.65.1",
 )
+
+#local_repository(
+#name = "com_github_grpc_grpc",
+#path = "../arch/grpc",
+#repo_mapping = {
+#"@com_github_cares_cares": "@c-ares",
+#"@boringssl": "@openssl",
+#},
+#)
 
 new_git_repository(
     name = "swig",

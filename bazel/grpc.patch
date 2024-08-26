@@ -1,0 +1,37 @@
+diff --git a/bazel/grpc_build_system.bzl b/bazel/grpc_build_system.bzl
+index 2b6f16a55a..8f4e4e4045 100644
+--- a/bazel/grpc_build_system.bzl
++++ b/bazel/grpc_build_system.bzl
+@@ -43,17 +43,13 @@ EVENT_ENGINES = {"default": {"tags": []}}
+
+ def if_not_windows(a):
+     return select({
+-        "//:windows": [],
+-        "//:windows_msvc": [],
+-        "//:windows_clang": [],
++        "@platforms//os:windows": [],
+         "//conditions:default": a,
+     })
+
+ def if_windows(a):
+     return select({
+-        "//:windows": a,
+-        "//:windows_msvc": a,
+-        "//:windows_clang": a,
++        "@platforms//os:windows": a,
+         "//conditions:default": [],
+     })
+
+diff --git a/src/core/BUILD b/src/core/BUILD
+index 757aaad95b..3e458cf743 100644
+--- a/src/core/BUILD
++++ b/src/core/BUILD
+@@ -2692,6 +2692,7 @@ grpc_cc_library(
+     external_deps = ["absl/memory"],
+     select_deps = [
+         {
++            "@platforms//os:windows": ["windows_event_engine"],
+             "//:windows": ["windows_event_engine"],
+             "//:windows_msvc": ["windows_event_engine"],
+             "//:windows_clang": ["windows_event_engine"],
+

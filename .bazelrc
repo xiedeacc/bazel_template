@@ -163,5 +163,7 @@ build:gcc_windows_x86_64 --extra_toolchains='@openssl//:preinstalled_make_toolch
 build:gcc_windows_x86_64 --extra_toolchains='@openssl//:preinstalled_pkgconfig_toolchain'
 build:gcc_windows_x86_64 --cpu='x86_64'
 build:gcc_windows_x86_64 --compiler='gcc'
+build:gcc_windows_x86_64 --copt='-mbmi'
+
 #build:gcc_windows_x86_64 --java_runtime_version="remotejdk_21"
 
