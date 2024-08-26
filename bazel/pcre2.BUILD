@@ -53,11 +53,11 @@ cc_library(
         ":config_h_generic",
         ":pcre2_h_generic",
     ],
+    defines = ["PCRE2_STATIC"],
     includes = ["src"],
     local_defines = [
         "HAVE_CONFIG_H",
         "PCRE2_CODE_UNIT_WIDTH=8",
-        "PCRE2_STATIC",
     ],
     strip_include_prefix = "src",
     visibility = ["//visibility:public"],
