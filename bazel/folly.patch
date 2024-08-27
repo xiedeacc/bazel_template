@@ -1,3 +1,4 @@
+
 diff --git a/folly/FileUtil.cpp b/folly/FileUtil.cpp
 index ccafc9fc5..fd8335a50 100644
 --- a/folly/FileUtil.cpp
@@ -731,6 +732,24 @@ index 1e4e80167..d5e5bfe8b 100644
  
  #ifdef CAL_GREGORIAN
  #undef CAL_GREGORIAN
+diff --git a/folly/system/ThreadName.cpp b/folly/system/ThreadName.cpp
+index 52c4ddd64..613695b58 100644
+--- a/folly/system/ThreadName.cpp
++++ b/folly/system/ThreadName.cpp
+@@ -237,9 +237,13 @@ bool setThreadNameWindowsViaDebugger(DWORD id, StringPiece name) noexcept {
+ 
+   // SEH requires no use of C++ object destruction semantics in this stack
+   // frame.
++#if !defined(__MINGW32__)
+   __try {
++#endif
+     RaiseException(kMSVCException, 0, 4, tniUnion.upArray);
++#if !defined(__MINGW32__)
+   } __except (
++#endif
+       GetExceptionCode() == kMSVCException ? EXCEPTION_CONTINUE_EXECUTION
+                                            : EXCEPTION_EXECUTE_HANDLER) {
+     // Swallow the exception when a debugger isn't attached.
 diff --git a/folly/tracing/StaticTracepoint.h b/folly/tracing/StaticTracepoint.h
 index 02e099bb3..7520e5b89 100644
 --- a/folly/tracing/StaticTracepoint.h
