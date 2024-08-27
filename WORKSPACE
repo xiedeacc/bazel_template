@@ -432,13 +432,19 @@ new_git_repository(
     remote = "git@code.xiamu.com:gperftools/gperftools.git",
 )
 
-new_git_repository(
+#new_git_repository(
+#name = "folly",
+#build_file = "//bazel:folly.BUILD",
+#patch_args = ["-p1"],
+#patches = ["//bazel:folly.patch"],
+#remote = "git@code.xiamu.com:facebook/folly.git",
+#tag = "v2024.07.08.00",
+#)
+
+new_local_repository(
     name = "folly",
     build_file = "//bazel:folly.BUILD",
-    patch_args = ["-p1"],
-    patches = ["//bazel:folly.patch"],
-    remote = "git@code.xiamu.com:facebook/folly.git",
-    tag = "v2024.07.08.00",
+    path = "../arch/folly",
 )
 
 new_git_repository(

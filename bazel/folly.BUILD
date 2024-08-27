@@ -94,8 +94,8 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mno-avx"],
         "@platforms//cpu:aarch64": [],
     }),
-    local_defines = LOCAL_DEFINES,
     defines = ["GFLAGS_IS_A_DLL=1"],
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
 
@@ -111,8 +111,8 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mpclmul"],
         "@platforms//cpu:aarch64": [],
     }),
-    local_defines = LOCAL_DEFINES,
     defines = ["GFLAGS_IS_A_DLL=1"],
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
 
@@ -125,8 +125,8 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mpclmul"],
         "@platforms//cpu:aarch64": [],
     }),
-    local_defines = LOCAL_DEFINES,
     defines = ["GFLAGS_IS_A_DLL=1"],
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
 
@@ -139,8 +139,8 @@ cc_library(
         "@platforms//cpu:x86_64": ["-msse4.2"],
         "@platforms//cpu:aarch64": [],
     }),
-    local_defines = LOCAL_DEFINES,
     defines = ["GFLAGS_IS_A_DLL=1"],
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
 
@@ -195,8 +195,25 @@ cc_library(
             "folly/**/example/**",
             "folly/**/test/**/*.cpp",
             "folly/**/*Test.cpp",
+            "folly/Subprocess.cpp",
+            "folly/debugging/exception_tracer/*.cpp",
+            "folly/executors/ManualExecutor.cpp",
         ],
-    ),
+    ) + select({
+        "@platforms//os:windows": [],
+        "//conditions:default": [
+            "folly/Subprocess.cpp",
+            "folly/debugging/exception_tracer/ExceptionCounterLib.cpp",
+            "folly/debugging/exception_tracer/ExceptionStackTraceLib.cpp",
+            "folly/debugging/exception_tracer/ExceptionTracer.cpp",
+            "folly/debugging/exception_tracer/ExceptionTracerLib.cpp",
+            "folly/debugging/exception_tracer/SmartExceptionStackTraceHooks.cpp",
+            "folly/debugging/exception_tracer/SmartExceptionTracer.cpp",
+            "folly/debugging/exception_tracer/SmartExceptionTracerSingleton.cpp",
+            "folly/debugging/exception_tracer/StackTrace.cpp",
+            "folly/executors/ManualExecutor.cpp",
+        ],
+    }),
     hdrs = [
         "folly/io/async/test/ScopedBoundPort.h",
         "folly/io/async/test/SocketPair.h",
@@ -219,9 +236,9 @@ cc_library(
         "@platforms//cpu:aarch64": ["folly/external/aor/asmdefs.h"],
     }),
     copts = COPTS,
+    defines = ["GFLAGS_IS_A_DLL=1"],
     linkstatic = True,
     local_defines = LOCAL_DEFINES,
-    defines = ["GFLAGS_IS_A_DLL=1"],
     deps = [
         "@boost//:algorithm",
         "@boost//:bind",
@@ -264,8 +281,8 @@ cc_library(
 
 cc_library(
     name = "folly",
-    linkstatic = True,
     defines = ["GFLAGS_IS_A_DLL=1"],
+    linkstatic = True,
     deps = [
         ":MathOperation",
         ":MathOperation_AVX2",
@@ -393,6 +410,11 @@ template_rule(
             "#define FOLLY_USE_SYMBOLIZER 1": "/* #undef FOLLY_USE_SYMBOLIZER */",
             "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1": "/* #undef FOLLY_HAVE_SHADOW_LOCAL_WARNINGS */",
             "#define FOLLY_ELF_NATIVE_CLASS 64": "",
+            "#define FOLLY_HAVE_PREADV 1": "/* #undef FOLLY_HAVE_PREADV */",
+            "#define FOLLY_HAVE_PWRITEV 1": "/* #undef FOLLY_HAVE_PWRITEV */",
+            "#define FOLLY_HAVE_DWARF 1": "/* #undef FOLLY_HAVE_DWARF */",
+            "#define FOLLY_HAVE_SWAPCONTEXT 1": "/* #undef FOLLY_HAVE_SWAPCONTEXT */",
+            "#define FOLLY_HAVE_BACKTRACE 1": "/* #undef FOLLY_HAVE_BACKTRACE */",
         },
     }),
 )

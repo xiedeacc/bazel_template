@@ -1,3 +1,74 @@
+diff --git a/folly/FileUtil.cpp b/folly/FileUtil.cpp
+index ccafc9fc5..fd8335a50 100644
+--- a/folly/FileUtil.cpp
++++ b/folly/FileUtil.cpp
+@@ -95,7 +95,7 @@ int dup2NoInt(int oldFd, int newFd) {
+ int fdatasyncNoInt(int fd) {
+ #if defined(__APPLE__)
+   return int(wrapNoInt(fcntl, fd, F_FULLFSYNC));
+-#elif defined(__FreeBSD__) || defined(_MSC_VER)
++#elif defined(__FreeBSD__) || defined(_MSC_VER) || defined(__MINGW32__)
+   return int(wrapNoInt(fsync, fd));
+ #else
+   return int(wrapNoInt(fdatasync, fd));
+diff --git a/folly/Random.cpp b/folly/Random.cpp
+index 882b4189f..3adf9c677 100644
+--- a/folly/Random.cpp
++++ b/folly/Random.cpp
+@@ -46,7 +46,7 @@ namespace folly {
+ namespace {
+ 
+ void readRandomDevice(void* data, size_t size) {
+-#ifdef _MSC_VER
++#if defined(_MSC_VER) || defined(__MINGW32__)
+   static auto const cryptoProv = [] {
+     HCRYPTPROV prov;
+     if (!CryptAcquireContext(
+diff --git a/folly/concurrency/CacheLocality.cpp b/folly/concurrency/CacheLocality.cpp
+index 58180cc2e..d4ae507b3 100644
+--- a/folly/concurrency/CacheLocality.cpp
++++ b/folly/concurrency/CacheLocality.cpp
+@@ -16,12 +16,13 @@
+ 
+ #include <folly/concurrency/CacheLocality.h>
+ 
+-#ifndef _MSC_VER
++#if !defined(_MSC_VER) && !defined(__MINGW32__)
+ #define _GNU_SOURCE 1 // for RTLD_NOLOAD
+ #include <dlfcn.h>
+ #endif
+ #include <fstream>
+ #include <mutex>
++#include <thread>
+ 
+ #include <fmt/core.h>
+ 
+@@ -50,8 +51,11 @@ static CacheLocality getSystemLocalityInfo() {
+       // keep trying
+     }
+   }
+-
++#if !defined(__MINGW32__)
+   long numCpus = sysconf(_SC_NPROCESSORS_CONF);
++#else
++  long numCpus = std::thread::hardware_concurrency();
++#endif
+   if (numCpus <= 0) {
+     // This shouldn't happen, but if it does we should try to keep
+     // going.  We are probably not going to be able to parse /sys on
+diff --git a/folly/detail/IPAddressSource.h b/folly/detail/IPAddressSource.h
+index c8dbcc802..cc2d4f234 100644
+--- a/folly/detail/IPAddressSource.h
++++ b/folly/detail/IPAddressSource.h
+@@ -243,7 +243,7 @@ inline void fastIpv4AppendToString(const in_addr& inAddr, std::string& out) {
+ }
+ 
+ inline size_t fastIpv6ToBufferUnsafe(const in6_addr& in6Addr, char* str) {
+-#ifdef _MSC_VER
++#if defined(_MSC_VER) || defined(__MINGW32__)
+   const uint16_t* bytes = reinterpret_cast<const uint16_t*>(&in6Addr.u.Word);
+ #else
+   const uint16_t* bytes = reinterpret_cast<const uint16_t*>(&in6Addr.s6_addr16);
 diff --git a/folly/experimental/symbolizer/Elf.cpp b/folly/experimental/symbolizer/Elf.cpp
 index 6a7f74fa4..87b092311 100644
 --- a/folly/experimental/symbolizer/Elf.cpp
@@ -25,6 +96,41 @@ index 8ba2bc343..4b70628a6 100644
  inline struct r_debug* get_r_debug() {
    return &_r_debug;
  }
+diff --git a/folly/external/farmhash/farmhash.cpp b/folly/external/farmhash/farmhash.cpp
+index e72144e96..37e6d0d77 100644
+--- a/folly/external/farmhash/farmhash.cpp
++++ b/folly/external/farmhash/farmhash.cpp
+@@ -126,7 +126,7 @@
+ 
+ #if defined(FARMHASH_UNKNOWN_ENDIAN) || !defined(bswap_64)
+ 
+-#ifdef _MSC_VER
++#if defined(_MSC_VER) || defined(__MINGW32__)
+ 
+ #undef bswap_32
+ #undef bswap_64
+diff --git a/folly/lang/Exception.cpp b/folly/lang/Exception.cpp
+index 2ce0e1f64..b2701f0b9 100644
+--- a/folly/lang/Exception.cpp
++++ b/folly/lang/Exception.cpp
+@@ -258,7 +258,7 @@ namespace abi = __cxxabiv1;
+ 
+ #endif // defined(__FreeBSD__)
+ 
+-#if defined(_WIN32)
++#if defined(_WIN32) && !defined(__MINGW32__)
+ 
+ #if defined(__clang__)
+ struct _s_ThrowInfo; // compiler intrinsic in msvc
+@@ -492,7 +492,7 @@ void* exception_ptr_get_object_(
+ 
+ #endif // defined(__FreeBSD__)
+ 
+-#if defined(_WIN32)
++#if defined(_WIN32) && !defined(__MINGW32__)
+ 
+ template <typename T>
+ static T* win32_decode_pointer(T* ptr) {
 diff --git a/folly/memcpy_select_aarch64.cpp b/folly/memcpy_select_aarch64.cpp
 index d5884e5a8..3b42515d9 100644
 --- a/folly/memcpy_select_aarch64.cpp
@@ -38,14 +144,601 @@ index d5884e5a8..3b42515d9 100644
  
  #include <asm/hwcap.h> // @manual
  
+diff --git a/folly/net/NetOps.cpp b/folly/net/NetOps.cpp
+index ea2b61c19..fb97f1bb0 100644
+--- a/folly/net/NetOps.cpp
++++ b/folly/net/NetOps.cpp
+@@ -29,9 +29,13 @@
+ #include <folly/ScopeGuard.h>
+ #include <folly/net/detail/SocketFileDescriptorMap.h>
+ 
+-#ifdef _WIN32
++#if defined(_WIN32)
++#if defined(__MINGW32__)
++#include <mswsock.h> // @manual
++#else
+ #include <MSWSock.h> // @manual
+ #endif
++#endif
+ 
+ #if (defined(__linux__) && !defined(__ANDROID__)) ||                       \
+     (defined(__ANDROID__) && __ANDROID_API__ >= 21 /* released 2014 */) || \
+diff --git a/folly/net/NetOps.h b/folly/net/NetOps.h
+index 71c1883df..33e6c1171 100644
+--- a/folly/net/NetOps.h
++++ b/folly/net/NetOps.h
+@@ -26,8 +26,15 @@
+ #include <folly/portability/Windows.h>
+ 
+ #ifdef _WIN32
++#include <memory>
+ 
++#if !defined(__MINGW32__)
+ #include <WS2tcpip.h> // @manual
++#else
++#include <mswsock.h>
++#include <winsock2.h> // @manual
++#include <ws2tcpip.h> // @manual
++#endif
+ 
+ using nfds_t = int;
+ using sa_family_t = ADDRESS_FAMILY;
+diff --git a/folly/net/detail/SocketFileDescriptorMap.cpp b/folly/net/detail/SocketFileDescriptorMap.cpp
+index fae205c2b..c9ca07843 100644
+--- a/folly/net/detail/SocketFileDescriptorMap.cpp
++++ b/folly/net/detail/SocketFileDescriptorMap.cpp
+@@ -18,6 +18,7 @@
+ 
+ #ifdef _WIN32
+ 
++#include <mutex>
+ #include <shared_mutex>
+ #include <unordered_map>
+ 
+@@ -65,11 +66,14 @@ static int closeOnlyFileDescriptor(int fd) {
+     return -1;
+   }
+   int c = 0;
++#if !defined(__MINGW32__)
+   __try {
++#endif
+     // We expect this to fail. It still closes the file descriptor though.
+     c = ::_close(fd);
+     // We just have to catch the SEH exception that gets thrown when we do
+     // this with a debugger attached -_-....
++#if !defined(__MINGW32__)
+   } __except (
+       GetExceptionCode() == STATUS_HANDLE_NOT_CLOSABLE
+           ? EXCEPTION_CONTINUE_EXECUTION
+@@ -77,6 +81,7 @@ static int closeOnlyFileDescriptor(int fd) {
+     // We told it to continue execution, so nothing here would
+     // be run anyways.
+   }
++#endif
+   // We're at the core, we don't get the luxery of SCOPE_EXIT because
+   // of circular dependencies.
+   if (!SetHandleInformation(h, protectFlag, handleFlags)) {
+diff --git a/folly/net/detail/SocketFileDescriptorMap.h b/folly/net/detail/SocketFileDescriptorMap.h
+index 97604f950..2da59b7d8 100644
+--- a/folly/net/detail/SocketFileDescriptorMap.h
++++ b/folly/net/detail/SocketFileDescriptorMap.h
+@@ -18,7 +18,7 @@
+ 
+ #include <folly/portability/Windows.h>
+ 
+-#ifndef _WIN32
++#if !defined(_WIN32) || defined(__MINGW32__)
+ // This can't go via the portability header, because
+ // the portability header depends on us.
+ #include <unistd.h>
+diff --git a/folly/portability/Fcntl.cpp b/folly/portability/Fcntl.cpp
+index 15b726136..eeb205bab 100644
+--- a/folly/portability/Fcntl.cpp
++++ b/folly/portability/Fcntl.cpp
+@@ -24,9 +24,11 @@
+ namespace folly {
+ namespace portability {
+ namespace fcntl {
++#if !defined(__MINGW32__)
+ int creat(char const* fn, int pm) {
+   return _creat(fn, pm);
+ }
++#endif
+ 
+ int fcntl(int fd, int cmd, ...) {
+   va_list args;
+@@ -85,6 +87,13 @@ int fcntl(int fd, int cmd, ...) {
+   return res;
+ }
+ 
++int posix_fallocate(int fd, off_t offset, off_t len) {
++  // We'll pretend we always have enough space. We
++  // can't exactly pre-allocate on windows anyways.
++  return 0;
++}
++
++#if !defined(__MINGW32__)
+ int open(char const* fn, int of, int pm) {
+   int fh;
+   int realMode = _S_IREAD;
+@@ -109,11 +118,7 @@ int open(char const* fn, int of, int pm) {
+   return res ? -1 : fh;
+ }
+ 
+-int posix_fallocate(int fd, off_t offset, off_t len) {
+-  // We'll pretend we always have enough space. We
+-  // can't exactly pre-allocate on windows anyways.
+-  return 0;
+-}
++#endif
+ } // namespace fcntl
+ } // namespace portability
+ } // namespace folly
+diff --git a/folly/portability/Fcntl.h b/folly/portability/Fcntl.h
+index 8b5759f7b..4ec913779 100644
+--- a/folly/portability/Fcntl.h
++++ b/folly/portability/Fcntl.h
+@@ -46,10 +46,14 @@
+ namespace folly {
+ namespace portability {
+ namespace fcntl {
++#if !defined(__MINGW32__)
+ int creat(char const* fn, int pm);
++#endif
+ int fcntl(int fd, int cmd, ...);
+ int posix_fallocate(int fd, off_t offset, off_t len);
++#if !defined(__MINGW32__)
+ int open(char const* fn, int of, int pm = 0);
++#endif
+ } // namespace fcntl
+ } // namespace portability
+ } // namespace folly
+diff --git a/folly/portability/Stdio.cpp b/folly/portability/Stdio.cpp
+index b836f6d8d..25efe3538 100644
+--- a/folly/portability/Stdio.cpp
++++ b/folly/portability/Stdio.cpp
+@@ -24,6 +24,7 @@
+ #include <folly/portability/Unistd.h>
+ 
+ extern "C" {
++#if !defined(__MINGW32__)
+ int dprintf(int fd, const char* fmt, ...) {
+   va_list args;
+   va_start(args, fmt);
+@@ -55,11 +56,13 @@ int pclose(FILE* f) {
+ FILE* popen(const char* name, const char* mode) {
+   return _popen(name, mode);
+ }
++#endif
+ 
+ void setbuffer(FILE* f, char* buf, size_t size) {
+   setvbuf(f, buf, _IOFBF, size);
+ }
+ 
++#if !defined(__MINGW32__)
+ int vasprintf(char** dest, const char* format, va_list ap) {
+   int len = vsnprintf(nullptr, 0, format, ap);
+   if (len <= 0) {
+@@ -72,6 +75,7 @@ int vasprintf(char** dest, const char* format, va_list ap) {
+   free(buf);
+   return -1;
+ }
++#endif
+ }
+ 
+ #endif
+diff --git a/folly/portability/Stdio.h b/folly/portability/Stdio.h
+index 7de41a617..63003ff6f 100644
+--- a/folly/portability/Stdio.h
++++ b/folly/portability/Stdio.h
+@@ -23,10 +23,14 @@
+ #include <cstdint>
+ 
+ extern "C" {
++#if !defined(__MINGW32__)
+ int dprintf(int fd, const char* fmt, ...);
+ int pclose(FILE* f);
+ FILE* popen(const char* name, const char* mode);
++#endif
+ void setbuffer(FILE* f, char* buf, size_t size);
++#if !defined(__MINGW32__)
+ int vasprintf(char** dest, const char* format, va_list ap);
++#endif
+ }
+ #endif
+diff --git a/folly/portability/Stdlib.cpp b/folly/portability/Stdlib.cpp
+index e77a895ef..77f18ff35 100644
+--- a/folly/portability/Stdlib.cpp
++++ b/folly/portability/Stdlib.cpp
+@@ -27,6 +27,7 @@
+ #include <folly/portability/Windows.h>
+ 
+ extern "C" {
++#if !defined(__MINGW32__)
+ char* mktemp(char* tn) {
+   return _mktemp(tn);
+ }
+@@ -131,6 +132,7 @@ int setenv(const char* name, const char* value, int overwrite) {
+   }
+   return 0;
+ }
++#endif
+ 
+ int unsetenv(const char* name) {
+   if (_putenv_s(name, "") != 0) {
+@@ -139,7 +141,6 @@ int unsetenv(const char* name) {
+   return 0;
+ }
+ }
+-
+ #endif
+ 
+ #if !__linux__ && !FOLLY_MOBILE && !defined(__wasm32__)
+diff --git a/folly/portability/Stdlib.h b/folly/portability/Stdlib.h
+index c9d8f97e3..2d32caa28 100644
+--- a/folly/portability/Stdlib.h
++++ b/folly/portability/Stdlib.h
+@@ -34,10 +34,15 @@ extern "C" {
+ // so, instead of creating two headers for a single define each, we put
+ // them here, where they are likely to already have been included in the
+ // code that needs them.
++
++#if !defined(__MINGW32__)
+ #define PATH_MAX _MAX_PATH
+ #define MAXPATHLEN _MAX_PATH
+ #define NAME_MAX _MAX_FNAME
+ #define HOST_NAME_MAX 255
++#else
++#include <limits.h>
++#endif
+ 
+ char* mktemp(char* tn);
+ char* mkdtemp(char* tn);
+diff --git a/folly/portability/String.cpp b/folly/portability/String.cpp
+index 51585c554..2165673d8 100644
+--- a/folly/portability/String.cpp
++++ b/folly/portability/String.cpp
+@@ -38,6 +38,7 @@ void bzero(void* s, size_t n) {
+   memset(s, 0, n);
+ }
+ 
++#if !defined(__MINGW32__)
+ int strcasecmp(const char* a, const char* b) {
+   return _stricmp(a, b);
+ }
+@@ -49,5 +50,6 @@ int strncasecmp(const char* a, const char* b, size_t c) {
+ char* strtok_r(char* str, char const* delim, char** ctx) {
+   return strtok_s(str, delim, ctx);
+ }
++#endif
+ }
+ #endif
+diff --git a/folly/portability/String.h b/folly/portability/String.h
+index 8d2685c8f..1e7020e3e 100644
+--- a/folly/portability/String.h
++++ b/folly/portability/String.h
+@@ -21,7 +21,7 @@
+ 
+ #include <folly/portability/Config.h>
+ 
+-#if !defined(_WIN32)
++#if !defined(_WIN32) && !defined(__MINGW32__)
+ #include <strings.h>
+ #endif
+ 
+@@ -32,8 +32,10 @@ extern "C" char* strndup(const char* a, size_t len);
+ #ifdef _WIN32
+ extern "C" {
+ void bzero(void* s, size_t n);
++#if !defined(__MINGW32__)
+ int strcasecmp(const char* a, const char* b);
+ int strncasecmp(const char* a, const char* b, size_t c);
+ char* strtok_r(char* str, char const* delim, char** ctx);
++#endif
+ }
+ #endif
+diff --git a/folly/portability/SysStat.cpp b/folly/portability/SysStat.cpp
+index 21441f056..1492c8c5b 100644
+--- a/folly/portability/SysStat.cpp
++++ b/folly/portability/SysStat.cpp
+@@ -20,9 +20,11 @@
+ #include <folly/portability/Windows.h>
+ 
+ extern "C" {
++#if !defined(__MINGW32__)
+ int chmod(char const* fn, int am) {
+   return _chmod(fn, am);
+ }
++#endif
+ 
+ int fchmod(int fd, mode_t mode) {
+   HANDLE h = (HANDLE)_get_osfhandle(fd);
+@@ -51,6 +53,7 @@ int fchmod(int fd, mode_t mode) {
+ }
+ 
+ // Just return the result of a normal stat for now
++#if !defined(__MINGW32__)
+ int lstat(const char* path, struct stat* st) {
+   return stat(path, st);
+ }
+@@ -62,5 +65,7 @@ int mkdir(const char* fn, int /* mode */) {
+ int umask(int md) {
+   return _umask(md);
+ }
++#endif
+ }
++
+ #endif
+diff --git a/folly/portability/SysStat.h b/folly/portability/SysStat.h
+index 882368651..7dbefe909 100644
+--- a/folly/portability/SysStat.h
++++ b/folly/portability/SysStat.h
+@@ -43,10 +43,14 @@
+ #define MAXSYMLINKS 255
+ 
+ extern "C" {
++#if !defined(__MINGW32__)
+ int chmod(char const* fn, int am);
++#endif
+ int fchmod(int fd, mode_t mode);
++#if !defined(__MINGW32__)
+ int lstat(const char* path, struct stat* st);
+ int mkdir(const char* fn, int mode);
+ int umask(int md);
++#endif
+ }
+ #endif
+diff --git a/folly/portability/SysTime.cpp b/folly/portability/SysTime.cpp
+index bbdfcb37b..3eecb9e91 100644
+--- a/folly/portability/SysTime.cpp
++++ b/folly/portability/SysTime.cpp
+@@ -16,7 +16,7 @@
+ 
+ #include <folly/portability/SysTime.h>
+ 
+-#ifdef _WIN32
++#if defined(_WIN32) && !defined(__MINGW32__)
+ 
+ #include <cstdint>
+ 
+diff --git a/folly/portability/SysTime.h b/folly/portability/SysTime.h
+index 539985aa9..cdd0ce6bf 100644
+--- a/folly/portability/SysTime.h
++++ b/folly/portability/SysTime.h
+@@ -16,7 +16,7 @@
+ 
+ #pragma once
+ 
+-#ifndef _WIN32
++#if !defined(_WIN32) || defined(__MINGW32__)
+ 
+ #include <sys/time.h>
+ 
+diff --git a/folly/portability/SysTypes.h b/folly/portability/SysTypes.h
+index c631e1d02..ef0542882 100644
+--- a/folly/portability/SysTypes.h
++++ b/folly/portability/SysTypes.h
+@@ -24,10 +24,12 @@
+ // This is a massive pain to have be an `int` due to the pthread implementation
+ // we support, but it's far more compatible with the rest of the windows world
+ // as an `int` than it would be as a `void*`
++#if !defined(__MINGW32__)
+ using pid_t = int;
+ 
+ using uid_t = int;
+ using gid_t = int;
++#endif
+ 
+ // This isn't actually supposed to be defined here, but it's the most
+ // appropriate place without defining a portability header for stdint.h
+@@ -38,7 +40,10 @@ using ssize_t = SSIZE_T;
+ #define HAVE_MODE_T 1
+ // The Windows headers don't define this anywhere, nor do any of the libs
+ // that Folly depends on, so define it here.
++#if !defined(__MINGW32__)
+ using mode_t = unsigned int;
+ #endif
+ 
+ #endif
++
++#endif
+diff --git a/folly/portability/Unistd.cpp b/folly/portability/Unistd.cpp
+index 74f8f27b1..83e385932 100644
+--- a/folly/portability/Unistd.cpp
++++ b/folly/portability/Unistd.cpp
+@@ -198,6 +198,8 @@ ProcessHandleWrapper getParentProcessHandle() {
+ }
+ } // namespace
+ 
++#if !defined(__MINGW32__)
++
+ int access(char const* fn, int am) {
+   return _access(fn, am);
+ }
+@@ -221,6 +223,7 @@ int dup2(int fhs, int fhd) {
+   return _dup2(fhs, fhd);
+ }
+ 
++#endif
+ int fsync(int fd) {
+   HANDLE h = (HANDLE)_get_osfhandle(fd);
+   if (h == INVALID_HANDLE_VALUE) {
+@@ -232,6 +235,7 @@ int fsync(int fd) {
+   return 0;
+ }
+ 
++#if !defined(__MINGW32__)
+ int ftruncate(int fd, off_t len) {
+   off_t origLoc = _lseek(fd, 0, SEEK_CUR);
+   if (origLoc == -1) {
+@@ -257,11 +261,13 @@ int ftruncate(int fd, off_t len) {
+ char* getcwd(char* buf, int sz) {
+   return _getcwd(buf, sz);
+ }
++#endif
+ 
+ int getdtablesize() {
+   return _getmaxstdio();
+ }
+ 
++#if !defined(__MINGW32__)
+ gid_t getgid() {
+   return 1;
+ }
+@@ -277,15 +283,17 @@ pid_t getppid() {
+ uid_t getuid() {
+   return 1;
+ }
+-
+-int isatty(int fh) {
+-  return _isatty(fh);
+-}
++#endif
+ 
+ int lockf(int fd, int cmd, off_t len) {
+   return _locking(fd, cmd, len);
+ }
+ 
++#if !defined(__MINGW32__)
++int isatty(int fh) {
++  return _isatty(fh);
++}
++
+ off_t lseek(int fh, off_t off, int orig) {
+   return _lseek(fh, off, orig);
+ }
+@@ -297,6 +305,7 @@ off64_t lseek64(int fh, off64_t off, int orig) {
+ int rmdir(const char* path) {
+   return _rmdir(path);
+ }
++#endif
+ 
+ int pipe(int pth[2]) {
+   // We need to be able to listen to pipes with
+@@ -319,6 +328,7 @@ ssize_t pwrite(int fd, const void* buf, size_t count, off_t offset) {
+   return wrapPositional<is64Bit>(_write, fd, offset, buf, (unsigned int)count);
+ }
+ 
++#if !defined(__MINGW32__)
+ ssize_t read(int fh, void* buf, size_t count) {
+   if (folly::portability::sockets::is_fh_socket(fh)) {
+     SOCKET s = (SOCKET)_get_osfhandle(fh);
+@@ -339,6 +349,7 @@ ssize_t read(int fh, void* buf, size_t count) {
+   }
+   return r;
+ }
++#endif
+ 
+ ssize_t readlink(const char* path, char* buf, size_t buflen) {
+   if (!buflen) {
+@@ -373,10 +384,12 @@ void* sbrk(intptr_t /* i */) {
+   return (void*)-1;
+ }
+ 
++#if !defined(__MINGW32__)
+ unsigned int sleep(unsigned int seconds) {
+   Sleep((DWORD)(seconds * 1000));
+   return 0;
+ }
++#endif
+ 
+ long sysconf(int tp) {
+   switch (tp) {
+diff --git a/folly/portability/Unistd.h b/folly/portability/Unistd.h
+index 2262210a1..419249db9 100644
+--- a/folly/portability/Unistd.h
++++ b/folly/portability/Unistd.h
+@@ -44,7 +44,6 @@ ssize_t pread64(int fd, void* buf, size_t count, off64_t offset);
+ // such as close(), where we need to override the definition of an existing
+ // function. To avoid conflicts at link time, everything here is in a namespace
+ // which is then used globally.
+-
+ #define _SC_PAGESIZE 1
+ #define _SC_PAGE_SIZE _SC_PAGESIZE
+ #define _SC_NPROCESSORS_ONLN 2
+@@ -71,35 +70,47 @@ namespace folly {
+ namespace portability {
+ namespace unistd {
+ using off64_t = int64_t;
++#if !defined(__MINGW32__)
+ int access(char const* fn, int am);
+ int chdir(const char* path);
+ int close(int fh);
+ int dup(int fh);
+ int dup2(int fhs, int fhd);
++#endif
+ int fsync(int fd);
++#if !defined(__MINGW32__)
+ int ftruncate(int fd, off_t len);
+ char* getcwd(char* buf, int sz);
++#endif
+ int getdtablesize();
++#if !defined(__MINGW32__)
+ int getgid();
+ pid_t getppid();
+ int getuid();
+-int isatty(int fh);
++#endif
+ int lockf(int fd, int cmd, off_t len);
++#if !defined(__MINGW32__)
++int isatty(int fh);
+ off_t lseek(int fh, off_t off, int orig);
+ off64_t lseek64(int fh, off64_t off, int orig);
+ ssize_t read(int fh, void* buf, size_t mcc);
+ int rmdir(const char* path);
++#endif
+ int pipe(int pth[2]);
+ ssize_t pread(int fd, void* buf, size_t count, off_t offset);
+ ssize_t pread64(int fd, void* buf, size_t count, off64_t offset);
+ ssize_t pwrite(int fd, const void* buf, size_t count, off_t offset);
+ ssize_t readlink(const char* path, char* buf, size_t buflen);
+ void* sbrk(intptr_t i);
++#if !defined(__MINGW32__)
+ unsigned int sleep(unsigned int seconds);
++#endif
+ long sysconf(int tp);
++#if !defined(__MINGW32__)
+ int truncate(const char* path, off_t len);
+ int usleep(unsigned int ms);
+ ssize_t write(int fh, void const* buf, size_t count);
++#endif
+ } // namespace unistd
+ } // namespace portability
+ } // namespace folly
+@@ -108,4 +119,5 @@ FOLLY_PUSH_WARNING
+ FOLLY_CLANG_DISABLE_WARNING("-Wheader-hygiene")
+ /* using override */ using namespace folly::portability::unistd;
+ FOLLY_POP_WARNING
++
+ #endif
+diff --git a/folly/portability/Windows.h b/folly/portability/Windows.h
+index 1e4e80167..d5e5bfe8b 100644
+--- a/folly/portability/Windows.h
++++ b/folly/portability/Windows.h
+@@ -63,8 +63,15 @@
+ #define NOMINMAX 1
+ #endif
+ 
++#if defined(__MINGW32__)
++// clang-format off
++#include <winsock2.h> // @manual
++#include <windows.h> // @manual
++// clang-format on
++#else
+ #include <WinSock2.h> // @manual
+ #include <Windows.h> // @manual
++#endif
+ 
+ #ifdef CAL_GREGORIAN
+ #undef CAL_GREGORIAN
 diff --git a/folly/tracing/StaticTracepoint.h b/folly/tracing/StaticTracepoint.h
-index 02e099bb3..5ef0ac362 100644
+index 02e099bb3..7520e5b89 100644
 --- a/folly/tracing/StaticTracepoint.h
 +++ b/folly/tracing/StaticTracepoint.h
 @@ -42,40 +42,13 @@
-
+ 
  #define FOLLY_HAVE_SDT 0
-
+ 
 -// Mark variadic macro args as unused from https://stackoverflow.com/a/31470425
 -#define FOLLY_UNUSED0()
 -#define FOLLY_UNUSED1(a) (void)(a)
@@ -87,8 +780,3 @@ index 02e099bb3..5ef0ac362 100644
    } while (0)
  #define FOLLY_SDT_IS_ENABLED(provider, name) (false)
  #define FOLLY_SDT_SEMAPHORE(provider, name) \
-@@ -88,3 +61,4 @@
-   extern "C" unsigned short FOLLY_SDT_SEMAPHORE(provider, name)
-
- #endif
-+
