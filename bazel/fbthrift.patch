@@ -1,0 +1,47 @@
+diff --git a/thrift/lib/cpp/concurrency/PosixThreadFactory.cpp b/thrift/lib/cpp/concurrency/PosixThreadFactory.cpp
+index 5f7f247e66..6011c1602d 100644
+--- a/thrift/lib/cpp/concurrency/PosixThreadFactory.cpp
++++ b/thrift/lib/cpp/concurrency/PosixThreadFactory.cpp
+@@ -140,7 +140,7 @@ void PthreadThread::join() {
+ }
+
+ Thread::id_t PthreadThread::getId() {
+-#ifdef _WIN32
++#if defined(_WIN32) && !defined(__MINGW32__)
+   return (Thread::id_t)pthread_getw32threadid_np(pthread_);
+ #else
+   return (Thread::id_t)pthread_;
+diff --git a/thrift/lib/cpp/util/PausableTimer.cpp b/thrift/lib/cpp/util/PausableTimer.cpp
+index 7f6a2e8b79..e7c945a84a 100644
+--- a/thrift/lib/cpp/util/PausableTimer.cpp
++++ b/thrift/lib/cpp/util/PausableTimer.cpp
+@@ -48,6 +48,28 @@ void PausableTimer::start() {
+   }
+ }
+
++#if defined(__MINGW32__)
++void timersub(const struct timeval* a, const struct timeval* b, struct timeval* result) {
++    result->tv_sec = a->tv_sec - b->tv_sec;
++    result->tv_usec = a->tv_usec - b->tv_usec;
++
++    if (result->tv_usec < 0) {
++        result->tv_sec -= 1;
++        result->tv_usec += 1000000;
++    }
++}
++
++void timeradd(const struct timeval* a, const struct timeval* b, struct timeval* result) {
++    result->tv_sec = a->tv_sec + b->tv_sec;
++    result->tv_usec = a->tv_usec + b->tv_usec;
++
++    if (result->tv_usec >= 1000000) {
++        result->tv_sec += 1;
++        result->tv_usec -= 1000000;
++    }
++}
++#endif
++
+ void PausableTimer::stop() {
+   if (isTimeLimitFinite_) {
+     if (!paused_) {
+

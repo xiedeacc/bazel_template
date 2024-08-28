@@ -66,6 +66,7 @@ cc_library(
             "-Iexternal/libunwind/src/mi",
         ],
         "@platforms//os:osx": [],
+        "@platforms//os:windows": [],
     }),
     deps = [
         "@double-conversion//:double-conversion",

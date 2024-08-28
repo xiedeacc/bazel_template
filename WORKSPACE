@@ -432,19 +432,13 @@ new_git_repository(
     remote = "git@code.xiamu.com:gperftools/gperftools.git",
 )
 
-#new_git_repository(
-#name = "folly",
-#build_file = "//bazel:folly.BUILD",
-#patch_args = ["-p1"],
-#patches = ["//bazel:folly.patch"],
-#remote = "git@code.xiamu.com:facebook/folly.git",
-#tag = "v2024.07.08.00",
-#)
-
-new_local_repository(
+new_git_repository(
     name = "folly",
     build_file = "//bazel:folly.BUILD",
-    path = "../arch/folly",
+    patch_args = ["-p1"],
+    patches = ["//bazel:folly.patch"],
+    remote = "git@code.xiamu.com:facebook/folly.git",
+    tag = "v2024.07.08.00",
 )
 
 new_git_repository(
@@ -494,6 +488,8 @@ git_repository(
 new_git_repository(
     name = "fbthrift",
     build_file = "//bazel:fbthrift.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:fbthrift.patch"],
     remote = "git@code.xiamu.com:facebook/fbthrift.git",
     tag = "v2024.07.08.00",
 )
@@ -508,6 +504,8 @@ new_git_repository(
 new_git_repository(
     name = "proxygen",
     build_file = "//bazel:proxygen.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:proxygen.patch"],
     remote = "git@code.xiamu.com:facebook/proxygen.git",
     tag = "v2024.07.08.00",
 )

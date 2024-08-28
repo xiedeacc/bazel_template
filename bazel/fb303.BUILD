@@ -83,7 +83,7 @@ cc_library(
     ),
     copts = COPTS,
     deps = [
-        "@fbthrift//:lib",
+        "@fbthrift",
         "@yaml-cpp",
     ],
 )

@@ -506,7 +506,7 @@ fbthrift_service_cpp_gen(
 )
 
 cc_library(
-    name = "lib",
+    name = "fbthrift",
     srcs = [
         ":annotation_thrift_cpp",
         ":conformance_service_thrift_cpp",
