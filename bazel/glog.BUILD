@@ -38,7 +38,6 @@ darwin_only_copts = [
 ]
 
 windows_only_copts = [
-    "-DGLOG_NO_ABBREVIATED_SEVERITIES",
     "-DHAVE_SNPRINTF",
     #"-DGLOG_NO_SYMBOLIZE_DETECTION",
     "-I" + "external/com_github_glog_glog/src/windows",
@@ -93,7 +92,10 @@ cc_library(
         "//conditions:default": common_copts + linux_or_darwin_copts,
     }),
     defines = select({
-        "@platforms//os:windows": ["GOOGLE_GLOG_DLL_DECL=__declspec(dllexport)"],
+        "@platforms//os:windows": [
+            "GOOGLE_GLOG_DLL_DECL=__declspec(dllexport)",
+            "GLOG_NO_ABBREVIATED_SEVERITIES",
+        ],
         "//conditions:default": [],
     }),
     linkopts = select({

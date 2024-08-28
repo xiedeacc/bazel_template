@@ -1,0 +1,35 @@
+diff --git a/proxygen/lib/services/RequestWorkerThread.cpp b/proxygen/lib/services/RequestWorkerThread.cpp
+index 9cbb34243..8e35e9f1a 100644
+--- a/proxygen/lib/services/RequestWorkerThread.cpp
++++ b/proxygen/lib/services/RequestWorkerThread.cpp
+@@ -53,6 +53,7 @@ void RequestWorkerThread::flushStats() {
+ void RequestWorkerThread::setup() {
+   CHECK(evb_);
+   evb_->runImmediatelyOrRunInEventBaseThreadAndWait([&]() {
++#if !defined(_MSC_VER) && !defined(__MINGW32__)
+     sigset_t ss;
+
+     // Ignore some signals
+@@ -68,7 +69,7 @@ void RequestWorkerThread::setup() {
+     sigaddset(&ss, SIGCHLD);
+     sigaddset(&ss, SIGIO);
+     PCHECK(pthread_sigmask(SIG_BLOCK, &ss, nullptr) == 0);
+-
++#endif
+     currentRequestWorker_ = this;
+     callback_.workerStarted(this);
+   });
+diff --git a/proxygen/lib/services/WorkerThread.cpp b/proxygen/lib/services/WorkerThread.cpp
+index 3c422db04..03b95d4fb 100644
+--- a/proxygen/lib/services/WorkerThread.cpp
++++ b/proxygen/lib/services/WorkerThread.cpp
+@@ -151,7 +151,7 @@ void WorkerThread::wait() {
+ }
+
+ void WorkerThread::setup() {
+-#ifndef _MSC_VER
++#if !defined(_MSC_VER) && !defined(__MINGW32__)
+   sigset_t ss;
+
+   // Ignore some signals
+

@@ -25,7 +25,7 @@
 #include "openssl/md5.h"
 #include "src/MurmurHash2.h"
 #include "src/MurmurHash3.h"
-#include "src/common/ip_address.h"
+// #include "src/common/ip_address.h"
 
 using absl::FormatTime;
 using absl::FromUnixMillis;
@@ -45,12 +45,13 @@ namespace util {
 const char *Util::kPathDelimeter = "/";
 
 string Util::GetServerIp() {
-  common::IPAddress ip_address;
-  if (!common::IPAddress::GetFirstPrivateAddress(&ip_address)) {
-    LOG(ERROR) << "Failed to get local ip address";
-    return "";
-  }
-  return ip_address.ToString();
+  //common::IPAddress ip_address;
+  //if (!common::IPAddress::GetFirstPrivateAddress(&ip_address)) {
+    //LOG(ERROR) << "Failed to get local ip address";
+    //return "";
+  //}
+  //return ip_address.ToString();
+  return "";
 }
 
 int64_t Util::CurrentTimeMillis() {

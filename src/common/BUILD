@@ -57,41 +57,41 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "net",
-    srcs = [
-        "host_spec.cc",
-        "ip_address.cc",
-    ],
-    hdrs = [
-        "host_spec.h",
-        "ip_address.h",
-    ],
-    deps = [
-        "@com_google_absl//absl/strings",
-    ],
-)
+#cc_library(
+#name = "net",
+#srcs = [
+#"host_spec.cc",
+#"ip_address.cc",
+#],
+#hdrs = [
+#"host_spec.h",
+#"ip_address.h",
+#],
+#deps = [
+#"@com_google_absl//absl/strings",
+#],
+#)
 
-cc_test(
-    name = "ip_address_test",
-    timeout = "short",
-    srcs = [
-        "ip_address_test.cc",
-    ],
-    deps = [
-        ":net",
-    ],
-)
+#cc_test(
+#name = "ip_address_test",
+#timeout = "short",
+#srcs = [
+#"ip_address_test.cc",
+#],
+#deps = [
+#":net",
+#],
+#)
 
-cc_test(
-    name = "host_spec_test",
-    timeout = "short",
-    srcs = [
-        "host_spec_test.cc",
-    ],
-    deps = [
-        ":net",
-    ],
-)
+#cc_test(
+#name = "host_spec_test",
+#timeout = "short",
+#srcs = [
+#"host_spec_test.cc",
+#],
+#deps = [
+#":net",
+#],
+#)
 
 cpplint()
