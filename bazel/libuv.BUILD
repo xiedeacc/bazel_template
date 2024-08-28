@@ -105,7 +105,7 @@ cc_library(
             "-Iexternal/libuv/src/win",
             "-O2",
             "-DWIN32_LEAN_AND_MEAN",
-            "-D_WIN32_WINNT=0x0600",
+            "-D_WIN32_WINNT=0x0601",
         ],
         "//conditions:default": [
             "-Iexternal/libuv/src/unix",

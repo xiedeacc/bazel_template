@@ -1,6 +1,6 @@
-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_template//bazel:boost.bzl", "boost_library", "boost_so_library", "default_copts", "default_defines", "hdr_list")
 
 _repo_dir = repository_name().removeprefix("@")
@@ -200,7 +200,7 @@ boost_library(
     ],
     copts = select({
         ":windows_x86_64": [
-            "-D_WIN32_WINNT=0x0A00",
+            "-D_WIN32_WINNT=0x0601",
         ],
         "//conditions:default": [],
     }),
@@ -1890,37 +1890,37 @@ BOOST_STACKTRACE_SOURCES = selects.with_or({
 })
 
 #boost_library(
-    #name = "stacktrace",
-    #srcs = BOOST_STACKTRACE_SOURCES,
-    #defines = selects.with_or({
-        #("@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): [
-            #"BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED",
-        #],
-        #"//conditions:default": [],
-    #}),
-    #exclude_src = ["libs/stacktrace/src/*.cpp"],
-    #linkopts = select({
-        #":linux_ppc": [
-            #"-lbacktrace -ldl",
-        #],
-        #":linux_x86_64": [
-            #"-lbacktrace -ldl",
-        #],
-        #":linux_aarch64": [
-            #"-lbacktrace -ldl",
-        #],
-        #"//conditions:default": [],
-    #}),
-    #deps = [
-        #":array",
-        #":config",
-        #":core",
-        #":detail",
-        #":lexical_cast",
-        #":predef",
-        #":static_assert",
-        #":type_traits",
-    #],
+#name = "stacktrace",
+#srcs = BOOST_STACKTRACE_SOURCES,
+#defines = selects.with_or({
+#("@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): [
+#"BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED",
+#],
+#"//conditions:default": [],
+#}),
+#exclude_src = ["libs/stacktrace/src/*.cpp"],
+#linkopts = select({
+#":linux_ppc": [
+#"-lbacktrace -ldl",
+#],
+#":linux_x86_64": [
+#"-lbacktrace -ldl",
+#],
+#":linux_aarch64": [
+#"-lbacktrace -ldl",
+#],
+#"//conditions:default": [],
+#}),
+#deps = [
+#":array",
+#":config",
+#":core",
+#":detail",
+#":lexical_cast",
+#":predef",
+#":static_assert",
+#":type_traits",
+#],
 #)
 
 boost_library(

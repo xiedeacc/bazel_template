@@ -139,7 +139,7 @@ cc_library(
             "_DARWIN_C_SOURCE",
         ],
         "@platforms//os:windows": [
-            "_WIN32_WINNT=0x0602",
+            "_WIN32_WINNT=0x0601",
             "WIN32_LEAN_AND_MEAN",
         ],
         "//conditions:default": [],

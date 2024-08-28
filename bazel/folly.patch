@@ -1,4 +1,3 @@
-
 diff --git a/folly/FileUtil.cpp b/folly/FileUtil.cpp
 index ccafc9fc5..fd8335a50 100644
 --- a/folly/FileUtil.cpp
@@ -13,10 +12,20 @@ index ccafc9fc5..fd8335a50 100644
  #else
    return int(wrapNoInt(fdatasync, fd));
 diff --git a/folly/Random.cpp b/folly/Random.cpp
-index 882b4189f..3adf9c677 100644
+index 882b4189f..257d4328c 100644
 --- a/folly/Random.cpp
 +++ b/folly/Random.cpp
-@@ -46,7 +46,7 @@ namespace folly {
+@@ -31,7 +31,8 @@
+ 
+ #include <glog/logging.h>
+ 
+-#ifdef _MSC_VER
++#if defined( _MSC_VER) || defined(__MINGW32__)
++#include <windows.h>
+ #include <wincrypt.h> // @manual
+ #else
+ #include <fcntl.h>
+@@ -46,7 +47,7 @@ namespace folly {
  namespace {
  
  void readRandomDevice(void* data, size_t size) {
@@ -543,6 +552,22 @@ index c631e1d02..ef0542882 100644
  #endif
 +
 +#endif
+diff --git a/folly/portability/Time.cpp b/folly/portability/Time.cpp
+index 4039ea814..d7e75339a 100644
+--- a/folly/portability/Time.cpp
++++ b/folly/portability/Time.cpp
+@@ -288,7 +288,11 @@ extern "C" int clock_gettime(clockid_t clock_id, struct timespec* tp) {
+ extern "C" {
+ char* asctime_r(const tm* tm, char* buf) {
+   char tmpBuf[64];
++#if defined(__MINGW32__)
++  if (asctime_s(tmpBuf, sizeof(tmpBuf), tm)) {
++#else
+   if (asctime_s(tmpBuf, tm)) {
++#endif
+     return nullptr;
+   }
+   // Nothing we can do if the buff is to small :(
 diff --git a/folly/portability/Unistd.cpp b/folly/portability/Unistd.cpp
 index 74f8f27b1..83e385932 100644
 --- a/folly/portability/Unistd.cpp
@@ -713,15 +738,16 @@ index 2262210a1..419249db9 100644
 +
  #endif
 diff --git a/folly/portability/Windows.h b/folly/portability/Windows.h
-index 1e4e80167..d5e5bfe8b 100644
+index 1e4e80167..9d5be594f 100644
 --- a/folly/portability/Windows.h
 +++ b/folly/portability/Windows.h
-@@ -63,8 +63,15 @@
+@@ -63,8 +63,16 @@
  #define NOMINMAX 1
  #endif
  
 +#if defined(__MINGW32__)
 +// clang-format off
++#include <mswsock.h> // @manual
 +#include <winsock2.h> // @manual
 +#include <windows.h> // @manual
 +// clang-format on
@@ -733,10 +759,10 @@ index 1e4e80167..d5e5bfe8b 100644
  #ifdef CAL_GREGORIAN
  #undef CAL_GREGORIAN
 diff --git a/folly/system/ThreadName.cpp b/folly/system/ThreadName.cpp
-index 52c4ddd64..613695b58 100644
+index 52c4ddd64..f0513b23d 100644
 --- a/folly/system/ThreadName.cpp
 +++ b/folly/system/ThreadName.cpp
-@@ -237,9 +237,13 @@ bool setThreadNameWindowsViaDebugger(DWORD id, StringPiece name) noexcept {
+@@ -237,21 +237,27 @@ bool setThreadNameWindowsViaDebugger(DWORD id, StringPiece name) noexcept {
  
    // SEH requires no use of C++ object destruction semantics in this stack
    // frame.
@@ -746,10 +772,128 @@ index 52c4ddd64..613695b58 100644
      RaiseException(kMSVCException, 0, 4, tniUnion.upArray);
 +#if !defined(__MINGW32__)
    } __except (
-+#endif
        GetExceptionCode() == kMSVCException ? EXCEPTION_CONTINUE_EXECUTION
                                             : EXCEPTION_EXECUTE_HANDLER) {
      // Swallow the exception when a debugger isn't attached.
+   }
++#endif
+   return true;
+ }
+ 
+ bool setThreadNameWindows(std::thread::id tid, StringPiece name) {
++#if !defined(__MINGW32__)
+   static_assert(
+       sizeof(DWORD) == sizeof(std::thread::id),
+       "This assumes std::thread::id is a thin wrapper around "
+       "the Win32 thread id, but that doesn't appear to be true.");
++#endif
+ 
+   // std::thread::id is a thin wrapper around the Windows thread ID,
+   // so just extract it.
+@@ -271,6 +277,31 @@ bool setThreadNameWindows(std::thread::id tid, StringPiece name) {
+ #endif
+ } // namespace
+ 
++
++#if defined(__MINGW32__)
++#include <tlhelp32.h>
++unsigned int GetThreadsByProcessID(pthread_t pid) {
++    HANDLE hThreadSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
++    if (hThreadSnap == INVALID_HANDLE_VALUE) {
++        return -1;
++    }
++
++    THREADENTRY32 te32;
++    te32.dwSize = sizeof(THREADENTRY32);
++    unsigned int ret = 0;
++    if (Thread32First(hThreadSnap, &te32)) {
++        do {
++            if (te32.th32OwnerProcessID == pid) {
++                ret = (unsigned long)te32.th32ThreadID;
++            }
++        } while (Thread32Next(hThreadSnap, &te32));
++    }
++
++    CloseHandle(hThreadSnap);
++    return ret;
++}
++#endif
++
+ bool setThreadName(std::thread::id tid, StringPiece name) {
+ #ifdef _WIN32
+   return setThreadNameWindows(tid, name);
+@@ -281,14 +312,20 @@ bool setThreadName(std::thread::id tid, StringPiece name) {
+ 
+ bool setThreadName(pthread_t pid, StringPiece name) {
+ #ifdef _WIN32
++#if !defined(__MINGW32__)
+   static_assert(
+       sizeof(unsigned int) == sizeof(std::thread::id),
+       "This assumes std::thread::id is a thin wrapper around "
+       "the thread id as an unsigned int, but that doesn't appear to be true.");
++#endif
+ 
+   // std::thread::id is a thin wrapper around an integral thread id,
+   // so just stick the ID in.
++#if !defined(__MINGW32__)
+   unsigned int tid = pthread_getw32threadid_np(pid);
++#else
++  unsigned int tid = GetThreadsByProcessID(pid);
++#endif
+   std::thread::id id;
+   std::memcpy(&id, &tid, sizeof(id));
+   return setThreadName(id, name);
+diff --git a/folly/testing/TestUtil.cpp b/folly/testing/TestUtil.cpp
+index ab2d2fec6..afe1b5713 100644
+--- a/folly/testing/TestUtil.cpp
++++ b/folly/testing/TestUtil.cpp
+@@ -148,11 +148,15 @@ SavedState disableInvalidParameters() {
+ #ifdef _WIN32
+   SavedState ret;
+   ret.previousThreadLocalHandler =
+-      _set_thread_local_invalid_parameter_handler([](const wchar_t*,
++#if !defined(__MINGW32__)
++    _set_thread_local_invalid_parameter_handler([](const wchar_t*,
+                                                      const wchar_t*,
+                                                      const wchar_t*,
+                                                      unsigned int,
+                                                      uintptr_t) {});
++#else
++    nullptr;
++#endif
+   ret.previousCrtReportMode = _CrtSetReportMode(_CRT_ASSERT, 0);
+   return ret;
+ #else
+@@ -162,8 +166,13 @@ SavedState disableInvalidParameters() {
+ 
+ #ifdef _WIN32
+ void enableInvalidParameters(SavedState state) {
++#if !defined(__MINGW32__)
+   _set_thread_local_invalid_parameter_handler(
+       (_invalid_parameter_handler)state.previousThreadLocalHandler);
++#else
++  _set_invalid_parameter_handler(
++      (_invalid_parameter_handler)state.previousThreadLocalHandler);
++#endif
+   _CrtSetReportMode(_CRT_ASSERT, state.previousCrtReportMode);
+ }
+ #else
+diff --git a/folly/testing/TestUtil.h b/folly/testing/TestUtil.h
+index 65f768e02..b8a477eff 100644
+--- a/folly/testing/TestUtil.h
++++ b/folly/testing/TestUtil.h
+@@ -138,7 +138,11 @@ class ChangeToTempDir {
+ 
+ namespace detail {
+ struct SavedState {
++#if !defined(__MINGW32__)
+   void* previousThreadLocalHandler;
++#else
++  void* previousThreadLocalHandler;
++#endif
+   int previousCrtReportMode;
+ };
+ SavedState disableInvalidParameters();
 diff --git a/folly/tracing/StaticTracepoint.h b/folly/tracing/StaticTracepoint.h
 index 02e099bb3..7520e5b89 100644
 --- a/folly/tracing/StaticTracepoint.h
