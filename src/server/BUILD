@@ -59,11 +59,22 @@ cc_library(
         "-isystem $(GENDIR)/external/folly",
     ],
     defines = [
+        "BOOST_BIND_GLOBAL_PLACEHOLDERS",
         "BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION=1",
         "BOOST_THREAD_PROVIDES_EXECUTORS",
-        "BOOST_BIND_GLOBAL_PLACEHOLDERS",
+        "BOOST_THREAD_BUILD_LIB=1",
+        "BOOST_THREAD_USES_CHRONO",
         "BOOST_THREAD_USES_MOVE",
-    ],
+    ] + select({
+        "@platforms//os:windows": [
+            "BOOST_THREAD_PLATFORM_WIN32",
+            "BOOST_THREAD_WIN32",
+        ],
+        "//conditions:default": [
+            "BOOST_THREAD_PLATFORM_PTHREAD",
+            "BOOST_THREAD_POSIX",
+        ],
+    }),
     deps = [
         "//src/common:blocking_list",
         "//src/common:garbage_collector",
@@ -73,7 +84,7 @@ cc_library(
         "@boost//:thread",
         "//src/util",
         "//src/util:config_manager",
-        "//src/async_grpc",
+        #"//src/async_grpc",
     ],
 )
 

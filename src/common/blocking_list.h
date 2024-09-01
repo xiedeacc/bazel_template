@@ -9,7 +9,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
-#include <string>
+#include <condition_variable>
 
 namespace bazel_template {
 namespace common {

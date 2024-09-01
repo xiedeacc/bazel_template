@@ -862,7 +862,7 @@ bool Util::ConfDiff(const std::filesystem::path &origin_file,
     return false;
   }
 
-  std::string name = final_file.filename();
+  std::string name = final_file.filename().string();
   boost::algorithm::replace_all(name, ".", "_");
   std::stringstream buff;
 
@@ -941,7 +941,7 @@ bool Util::ConfReplace(const std::filesystem::path &origin_file,
     return false;
   }
 
-  std::string name = final_file.filename();
+  std::string name = final_file.filename().string();
   boost::algorithm::replace_all(name, ".", "_");
   std::stringstream buff;
 
@@ -991,7 +991,7 @@ bool Util::ConfGen(const std::filesystem::path &origin_file, std::string *out) {
     return false;
   }
 
-  std::string name = origin_file.filename();
+  std::string name = origin_file.filename().string();
   boost::algorithm::replace_all(name, ".", "_");
   std::stringstream buff;
 

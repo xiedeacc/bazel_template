@@ -46,11 +46,21 @@ cc_library(
         "-isystem $(GENDIR)/external/folly",
     ],
     defines = [
+        "BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION=1",
+        "BOOST_THREAD_PROVIDES_EXECUTORS",
         "BOOST_THREAD_BUILD_LIB=1",
-        "BOOST_THREAD_PLATFORM_PTHREAD",
-        "BOOST_THREAD_POSIX",
         "BOOST_THREAD_USES_CHRONO",
-    ],
+        "BOOST_THREAD_USES_MOVE",
+    ] + select({
+        "@platforms//os:windows": [
+            "BOOST_THREAD_PLATFORM_WIN32",
+            "BOOST_THREAD_WIN32",
+        ],
+        "//conditions:default": [
+            "BOOST_THREAD_PLATFORM_PTHREAD",
+            "BOOST_THREAD_POSIX",
+        ],
+    }),
     deps = [
         ":module",
         "//src/util",

@@ -441,6 +441,12 @@ new_git_repository(
     tag = "v2024.07.08.00",
 )
 
+new_local_repository(
+    name = "folly",
+    build_file = "//bazel:folly.BUILD",
+    path = "../arch/folly",
+)
+
 new_git_repository(
     name = "fizz",
     build_file = "//bazel:fizz.BUILD",

@@ -12,7 +12,7 @@
 int main(int argc, char **argv) {
   folly::Init init(&argc, &argv, false);
   // google::InitGoogleLogging(argv[0]);
-  google::SetStderrLogging(google::INFO);
+  google::SetStderrLogging(google::GLOG_INFO);
   ::testing::InitGoogleTest(&argc, argv);
   google::ParseCommandLineFlags(&argc, &argv, false);
   // tcmalloc::MallocExtension::ActivateGuardedSampling();

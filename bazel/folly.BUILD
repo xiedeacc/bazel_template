@@ -65,10 +65,7 @@ LOCAL_DEFINES = [
     "BOOST_SYSTEM_NO_LIB",
     "BOOST_THREAD_DYN_LINK",
     "BOOST_THREAD_NO_LIB",
-] + select({
-    "@platforms//os:windows": ["GFLAGS_IS_A_DLL=1"],
-    "//conditions:default": ["GFLAGS_IS_A_DLL=0"],
-})
+]
 
 cc_library(
     name = "MathOperation_AVX2",
@@ -79,7 +76,6 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mavx"],
         "@platforms//cpu:aarch64": [],
     }),
-    defines = ["GFLAGS_IS_A_DLL=1"],
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -94,7 +90,6 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mno-avx"],
         "@platforms//cpu:aarch64": [],
     }),
-    defines = ["GFLAGS_IS_A_DLL=1"],
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -111,7 +106,6 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mpclmul"],
         "@platforms//cpu:aarch64": [],
     }),
-    defines = ["GFLAGS_IS_A_DLL=1"],
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -125,7 +119,6 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mpclmul"],
         "@platforms//cpu:aarch64": [],
     }),
-    defines = ["GFLAGS_IS_A_DLL=1"],
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -139,7 +132,6 @@ cc_library(
         "@platforms//cpu:x86_64": ["-msse4.2"],
         "@platforms//cpu:aarch64": [],
     }),
-    defines = ["GFLAGS_IS_A_DLL=1"],
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -159,7 +151,6 @@ cc_library(
         ],
     }),
     copts = COPTS + ["-x assembler-with-cpp"],
-    defines = ["GFLAGS_IS_A_DLL=1"],
     local_defines = LOCAL_DEFINES + select({
         "@platforms//cpu:x86_64": [],
         "@platforms//cpu:aarch64": [
@@ -236,7 +227,6 @@ cc_library(
         "@platforms//cpu:aarch64": ["folly/external/aor/asmdefs.h"],
     }),
     copts = COPTS,
-    defines = ["GFLAGS_IS_A_DLL=1"],
     linkstatic = True,
     local_defines = LOCAL_DEFINES,
     deps = [
@@ -281,7 +271,6 @@ cc_library(
 
 cc_library(
     name = "folly",
-    defines = ["GFLAGS_IS_A_DLL=1"],
     linkstatic = True,
     deps = [
         ":MathOperation",

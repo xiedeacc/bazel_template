@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 
   folly::Init init(&argc, &argv, false);
   // google::InitGoogleLogging(argv[0]); // called in folly::Init
-  google::SetStderrLogging(google::INFO);
+  google::SetStderrLogging(google::GLOG_INFO);
   gflags::ParseCommandLineFlags(&argc, &argv, false);
 
   LOG(INFO) << "Program initializing ...";
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
   bazel_template::server::GrpcServer server(
       bazel_template::util::ConfigManager::Instance()->GrpcServerPort());
-  server.WaitForShutdown();
+  // server.WaitForShutdown();
 
   // ProfilerStop();
   return 0;

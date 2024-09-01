@@ -10,14 +10,14 @@
 #include <string>
 #include <thread>
 
-#include "src/async_grpc/server.h"
+// #include "src/async_grpc/server.h"
 // #include "src/context/grpc_context.h"
 #include "boost/thread/thread_pool.hpp"
 #include "src/common/blocking_list.h"
 #include "src/common/garbage_collector.h"
 #include "src/context/server_run_info.h"
 #include "src/proto/service.pb.h"
-#include "src/server/grpc_service_handlers.h"
+// #include "src/server/grpc_service_handlers.h"
 #include "src/util/config_manager.h"
 #include "src/util/util.h"
 
@@ -40,20 +40,20 @@ class GrpcServer final {
     thread_pool_->submit(task);
     server_run_info->MarkedServerInitedDone();
 
-    async_grpc::Server::Builder server_builder;
-    server_builder.SetServerAddress("127.0.0.1");
-    server_builder.SetNumGrpcThreads(10);
-    server_builder.SetNumEventThreads(10);
-    server_builder.RegisterHandler<GetSumHandler>();
-    server_builder.RegisterHandler<GetRunningSumHandler>();
-    server_ = server_builder.Build();
-    server_->SetExecutionContext(
-        async_grpc::common::make_unique<MathServerContext>());
-    server_->Start();
+    //async_grpc::Server::Builder server_builder;
+    //server_builder.SetServerAddress("127.0.0.1");
+    //server_builder.SetNumGrpcThreads(10);
+    //server_builder.SetNumEventThreads(10);
+    //server_builder.RegisterHandler<GetSumHandler>();
+    //server_builder.RegisterHandler<GetRunningSumHandler>();
+    //server_ = server_builder.Build();
+    //server_->SetExecutionContext(
+        //async_grpc::common::make_unique<MathServerContext>());
+    //server_->Start();
   }
 
  public:
-  void WaitForShutdown() { server_->WaitForShutdown(); }
+  // void WaitForShutdown() { server_->WaitForShutdown(); }
 
   // grpc::Status ServerStatus(
   // const tbox::grpc_server::ServerStatusRequest *request,
@@ -81,7 +81,7 @@ class GrpcServer final {
   absl::Mutex working_thread_mu_;
   int64_t working_thread_limit = 6;
   std::shared_ptr<context::ServerRunInfo> server_run_info;
-  std::unique_ptr<async_grpc::Server> server_;
+  // std::unique_ptr<async_grpc::Server> server_;
 };
 
 }  // namespace server
