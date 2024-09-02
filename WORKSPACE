@@ -572,15 +572,6 @@ git_repository(
     tag = "v1.65.1",
 )
 
-#local_repository(
-#name = "com_github_grpc_grpc",
-#path = "../arch/grpc",
-#repo_mapping = {
-#"@com_github_cares_cares": "@c-ares",
-#"@boringssl": "@openssl",
-#},
-#)
-
 new_git_repository(
     name = "swig",
     build_file = "//bazel:swig.BUILD",

@@ -9,7 +9,10 @@ COPTS = [
     "-g",
     "-O3",
 ] + select({
-    "@platforms//os:windows": ["-std=c90"],
+    "@platforms//os:windows": [
+        "-std=c90",
+        "-fPIC",
+    ],
     "//conditions:default": ["-std=gnu90"],
 })
 
@@ -120,12 +123,10 @@ cc_library(
         "-Iexternal/c-ares/src/lib",
         "-I$(GENDIR)/external/c-ares/src/lib",
     ],
-    includes = [
-        "include",
-    ],
-    local_defines = [
+    defines = [
         "CARES_BUILDING_LIBRARY",
         "HAVE_CONFIG_H=1",
+        #"CARES_STATICLIB",
         "c_ares_EXPORTS",
     ] + select({
         "@platforms//os:linux": [
@@ -141,9 +142,15 @@ cc_library(
         "@platforms//os:windows": [
             "_WIN32_WINNT=0x0601",
             "WIN32_LEAN_AND_MEAN",
+            "_CRT_NONSTDC_NO_DEPRECATE",
+            "CARES_NO_DEPRECATED",
+            "_CRT_SECURE_NO_DEPRECATE",
         ],
         "//conditions:default": [],
     }),
+    includes = [
+        "include",
+    ],
 )
 
 genrule(

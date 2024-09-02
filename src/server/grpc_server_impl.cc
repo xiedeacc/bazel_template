@@ -10,8 +10,8 @@ namespace server {
 
 // using context::GrpcContext;
 // using context::ScopeDecrementContextCounter;
-// using common::GCEntry;
-// using grpc::Status;
+using common::GCEntry;
+using grpc::Status;
 using util::ConfigManager;
 using util::Util;
 

@@ -51,10 +51,10 @@ class GetRunningSumHandler
     sum_ += request.input();
 
     // Respond twice to demonstrate bidirectional streaming.
-    auto response = async_grpc::std::make_unique<proto::GetSumResponse>();
+    auto response = std::make_unique<proto::GetSumResponse>();
     response->set_output(sum_);
     Send(std::move(response));
-    response = async_grpc::std::make_unique<proto::GetSumResponse>();
+    response = std::make_unique<proto::GetSumResponse>();
     response->set_output(sum_);
     Send(std::move(response));
   }
@@ -73,7 +73,7 @@ class GetSumHandler : public async_grpc::RpcHandler<GetSumMethod> {
   }
 
   void OnReadsDone() override {
-    auto response = async_grpc::std::make_unique<proto::GetSumResponse>();
+    auto response = std::make_unique<proto::GetSumResponse>();
     response->set_output(sum_);
     Send(std::move(response));
   }

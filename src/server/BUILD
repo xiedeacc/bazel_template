@@ -84,7 +84,7 @@ cc_library(
         "@boost//:thread",
         "//src/util",
         "//src/util:config_manager",
-        #"//src/async_grpc",
+        "//src/async_grpc",
     ],
 )
 
