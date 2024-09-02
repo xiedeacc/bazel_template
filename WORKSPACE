@@ -35,15 +35,10 @@ git_repository(
     tag = "0.0.9",
 )
 
-#git_repository(
-#name = "rules_foreign_cc",
-#remote = "git@code.xiamu.com:bazelbuild/rules_foreign_cc.git",
-#tag = "0.11.1",
-#)
-
-local_repository(
+git_repository(
     name = "rules_foreign_cc",
-    path = "../arch/rules_foreign_cc",
+    remote = "git@code.xiamu.com:bazelbuild/rules_foreign_cc.git",
+    tag = "0.11.1",
 )
 
 git_repository(
