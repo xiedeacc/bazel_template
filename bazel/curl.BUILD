@@ -1,3 +1,5 @@
+#https://github.com/tensorflow/tensorflow/blob/51d480498b07346b8b6e2ee3fbd3dc486f60ed96/third_party/curl.BUILD
+#https://github.com/googleapis/google-cloud-cpp/blob/main/bazel/curl.BUILD
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@bazel_template//bazel:common.bzl", "template_rule")
 
@@ -268,7 +270,7 @@ cc_library(
         # Avoid false positives on builds with Undefined Behavior Sanitizer.
         "CURL_STRICTER",
     ] + select({
-        "@platforms//os:windows": [],
+        "@platforms//os:windows": ["CURL_MAX_WRITE_SIZE=16384"],
         "@platforms//os:linux": ["_GNU_SOURCE"],
         "@platforms//os:osx": ["_GNU_SOURCE"],
         "//conditions:default": [
