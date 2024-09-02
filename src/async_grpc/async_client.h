@@ -19,7 +19,6 @@
 
 #include <memory>
 
-#include "common/make_unique.h"
 #include "completion_queue_pool.h"
 #include "glog/logging.h"
 #include "grpc++/grpc++.h"

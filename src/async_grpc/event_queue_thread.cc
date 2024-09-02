@@ -17,12 +17,11 @@
 #include "src/async_grpc/event_queue_thread.h"
 
 #include "glog/logging.h"
-#include "src/async_grpc/common/make_unique.h"
 
 namespace async_grpc {
 
 EventQueueThread::EventQueueThread() {
-  event_queue_ = common::make_unique<EventQueue>();
+  event_queue_ = std::make_unique<EventQueue>();
 }
 
 EventQueue* EventQueueThread::event_queue() { return event_queue_.get(); }
@@ -30,7 +29,7 @@ EventQueue* EventQueueThread::event_queue() { return event_queue_.get(); }
 void EventQueueThread::Start(EventQueueRunner runner) {
   CHECK(!thread_);
   EventQueue* event_queue = event_queue_.get();
-  thread_ = common::make_unique<std::thread>(
+  thread_ = std::make_unique<std::thread>(
       [event_queue, runner]() { runner(event_queue); });
 }
 

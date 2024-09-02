@@ -24,7 +24,6 @@
 #include <thread>
 
 #include "grpc++/grpc++.h"
-#include "src/async_grpc/common/make_unique.h"
 #include "src/async_grpc/completion_queue_thread.h"
 #include "src/async_grpc/event_queue_thread.h"
 #include "src/async_grpc/execution_context.h"
@@ -99,7 +98,7 @@ class Server {
               ResponseType::default_instance().GetDescriptor(),
               [](Rpc* const rpc, ExecutionContext* const execution_context) {
                 std::unique_ptr<RpcHandlerInterface> rpc_handler =
-                    common::make_unique<RpcHandlerType>();
+                    std::make_unique<RpcHandlerType>();
                 rpc_handler->SetRpc(rpc);
                 rpc_handler->SetExecutionContext(execution_context);
                 rpc_handler->Initialize();

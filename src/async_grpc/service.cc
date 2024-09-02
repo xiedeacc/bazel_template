@@ -42,7 +42,7 @@ void Service::StartServing(
   int i = 0;
   for (const auto& rpc_handler_info : rpc_handler_infos_) {
     for (auto& completion_queue_thread : completion_queue_threads) {
-      std::shared_ptr<Rpc> rpc = active_rpcs_.Add(common::make_unique<Rpc>(
+      std::shared_ptr<Rpc> rpc = active_rpcs_.Add(std::make_unique<Rpc>(
           i, completion_queue_thread.completion_queue(),
           event_queue_selector_(), execution_context, rpc_handler_info.second,
           this, active_rpcs_.GetWeakPtrFactory()));

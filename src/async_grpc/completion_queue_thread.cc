@@ -17,7 +17,6 @@
 #include "src/async_grpc/completion_queue_thread.h"
 
 #include "glog/logging.h"
-#include "src/async_grpc/common/make_unique.h"
 
 namespace async_grpc {
 
@@ -31,7 +30,7 @@ CompletionQueueThread::CompletionQueueThread(
 
 void CompletionQueueThread::Start(CompletionQueueRunner runner) {
   CHECK(!worker_thread_);
-  worker_thread_ = common::make_unique<std::thread>(
+  worker_thread_ = std::make_unique<std::thread>(
       [this, runner]() { runner(this->completion_queue_.get()); });
 }
 

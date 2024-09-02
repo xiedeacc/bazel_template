@@ -22,7 +22,7 @@
 #include "grpc++/impl/codegen/client_unary_call.h"
 #include "grpc++/impl/codegen/proto_utils.h"
 #include "grpc++/impl/codegen/sync_stream.h"
-#include "src/async_grpc/common/optional.h"
+#include <optional>
 #include "src/async_grpc/retry.h"
 #include "src/async_grpc/rpc_handler_interface.h"
 #include "src/async_grpc/rpc_service_method_traits.h"
@@ -48,7 +48,7 @@ class Client<RpcServiceMethodConcept, ::grpc::internal::RpcMethod::NORMAL_RPC> {
  public:
   Client(std::shared_ptr<::grpc::Channel> channel)
       : channel_(channel),
-        client_context_(common::make_unique<::grpc::ClientContext>()),
+        client_context_(std::make_unique<::grpc::ClientContext>()),
         rpc_method_name_(RpcServiceMethod::MethodName()),
         rpc_method_(rpc_method_name_.c_str(), RpcServiceMethod::StreamType,
                     channel_) {}
@@ -58,7 +58,7 @@ class Client<RpcServiceMethodConcept, ::grpc::internal::RpcMethod::NORMAL_RPC> {
   Client(std::shared_ptr<::grpc::Channel> channel, common::Duration timeout,
          RetryStrategy retry_strategy = nullptr)
       : channel_(channel),
-        client_context_(common::make_unique<::grpc::ClientContext>()),
+        client_context_(std::make_unique<::grpc::ClientContext>()),
         rpc_method_name_(RpcServiceMethod::MethodName()),
         rpc_method_(rpc_method_name_.c_str(), RpcServiceMethod::StreamType,
                     channel_),
@@ -67,7 +67,7 @@ class Client<RpcServiceMethodConcept, ::grpc::internal::RpcMethod::NORMAL_RPC> {
 
   bool Write(const RequestType& request, ::grpc::Status* status = nullptr) {
     ::grpc::Status internal_status;
-    common::optional<std::chrono::system_clock::time_point> deadline;
+    std::optional<std::chrono::system_clock::time_point> deadline;
     if (timeout_.has_value()) {
       deadline = std::chrono::system_clock::now() + std::chrono::duration_cast<std::chrono::system_clock::duration>(timeout_.value());
     }
@@ -89,8 +89,8 @@ class Client<RpcServiceMethodConcept, ::grpc::internal::RpcMethod::NORMAL_RPC> {
 
  private:
   static std::unique_ptr<::grpc::ClientContext> ResetContext(
-      common::optional<std::chrono::system_clock::time_point> deadline) {
-    auto context = common::make_unique<::grpc::ClientContext>();
+      std::optional<std::chrono::system_clock::time_point> deadline) {
+    auto context = std::make_unique<::grpc::ClientContext>();
     if (deadline.has_value()) {
       context->set_deadline(deadline.value());
     }
@@ -114,7 +114,7 @@ class Client<RpcServiceMethodConcept, ::grpc::internal::RpcMethod::NORMAL_RPC> {
   std::unique_ptr<::grpc::ClientContext> client_context_;
   const std::string rpc_method_name_;
   const ::grpc::internal::RpcMethod rpc_method_;
-  common::optional<common::Duration> timeout_;
+  std::optional<common::Duration> timeout_;
 
   ResponseType response_;
   RetryStrategy retry_strategy_;
@@ -130,7 +130,7 @@ class Client<RpcServiceMethodConcept,
  public:
   Client(std::shared_ptr<::grpc::Channel> channel)
       : channel_(channel),
-        client_context_(common::make_unique<::grpc::ClientContext>()),
+        client_context_(std::make_unique<::grpc::ClientContext>()),
         rpc_method_name_(RpcServiceMethod::MethodName()),
         rpc_method_(rpc_method_name_.c_str(), RpcServiceMethod::StreamType,
                     channel_) {}
@@ -189,7 +189,7 @@ class Client<RpcServiceMethodConcept,
  public:
   Client(std::shared_ptr<::grpc::Channel> channel)
       : channel_(channel),
-        client_context_(common::make_unique<::grpc::ClientContext>()),
+        client_context_(std::make_unique<::grpc::ClientContext>()),
         rpc_method_name_(RpcServiceMethod::MethodName()),
         rpc_method_(rpc_method_name_.c_str(), RpcServiceMethod::StreamType,
                     channel_) {}
@@ -243,7 +243,7 @@ class Client<RpcServiceMethodConcept,
  public:
   Client(std::shared_ptr<::grpc::Channel> channel)
       : channel_(channel),
-        client_context_(common::make_unique<::grpc::ClientContext>()),
+        client_context_(std::make_unique<::grpc::ClientContext>()),
         rpc_method_name_(RpcServiceMethod::MethodName()),
         rpc_method_(rpc_method_name_.c_str(), RpcServiceMethod::StreamType,
                     channel_) {}

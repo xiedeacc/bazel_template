@@ -17,7 +17,6 @@
 #include "src/async_grpc/rpc.h"
 
 #include "glog/logging.h"
-#include "src/async_grpc/common/make_unique.h"
 #include "src/async_grpc/service.h"
 
 namespace async_grpc {
@@ -81,7 +80,7 @@ Rpc::Rpc(int method_index,
 }
 
 std::unique_ptr<Rpc> Rpc::Clone() {
-  return common::make_unique<Rpc>(
+  return std::make_unique<Rpc>(
       method_index_, server_completion_queue_, event_queue_, execution_context_,
       rpc_handler_info_, service_, weak_ptr_factory_);
 }
@@ -327,22 +326,22 @@ void Rpc::InitializeReadersAndWriters(
   switch (rpc_type) {
     case ::grpc::internal::RpcMethod::BIDI_STREAMING:
       server_async_reader_writer_ =
-          common::make_unique<::grpc::ServerAsyncReaderWriter<
+          std::make_unique<::grpc::ServerAsyncReaderWriter<
               google::protobuf::Message, google::protobuf::Message>>(
               &server_context_);
       break;
     case ::grpc::internal::RpcMethod::CLIENT_STREAMING:
-      server_async_reader_ = common::make_unique<::grpc::ServerAsyncReader<
+      server_async_reader_ = std::make_unique<::grpc::ServerAsyncReader<
           google::protobuf::Message, google::protobuf::Message>>(
           &server_context_);
       break;
     case ::grpc::internal::RpcMethod::NORMAL_RPC:
-      server_async_response_writer_ = common::make_unique<
+      server_async_response_writer_ = std::make_unique<
           ::grpc::ServerAsyncResponseWriter<google::protobuf::Message>>(
           &server_context_);
       break;
     case ::grpc::internal::RpcMethod::SERVER_STREAMING:
-      server_async_writer_ = common::make_unique<
+      server_async_writer_ = std::make_unique<
           ::grpc::ServerAsyncWriter<google::protobuf::Message>>(
           &server_context_);
       break;

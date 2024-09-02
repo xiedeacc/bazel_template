@@ -20,13 +20,12 @@
 #include <set>
 
 #include "grpc++/grpc++.h"
-#include "src/async_grpc/common/optional.h"
 #include "src/async_grpc/common/time.h"
 
 namespace async_grpc {
 
 using common::Duration;
-using common::optional;
+using std::optional;
 
 using RetryStrategy = std::function<optional<Duration>(
     int /* failed_attempts */, const ::grpc::Status &)>;

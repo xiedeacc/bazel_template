@@ -56,9 +56,12 @@ cc_library(
             "**/*_test.cc",
         ],
     ),
-    hdrs = glob([
-        "**/*.h",
-    ]),
+    hdrs = glob(
+        [
+            "**/*.h",
+        ],
+        exclude = ["common/make_unique.h"],
+    ),
     copts = ["-Wno-sign-compare"],
     defines = ["BUILD_TRACING=0"],
     includes = ["."],

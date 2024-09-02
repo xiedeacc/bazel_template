@@ -48,7 +48,7 @@ class GrpcServer final {
     //server_builder.RegisterHandler<GetRunningSumHandler>();
     //server_ = server_builder.Build();
     //server_->SetExecutionContext(
-        //async_grpc::common::make_unique<MathServerContext>());
+        //async_grpc::std::make_unique<MathServerContext>());
     //server_->Start();
   }
 

@@ -18,7 +18,6 @@
 
 #include <cstdlib>
 
-#include "common/make_unique.h"
 #include "glog/logging.h"
 #include "src/async_grpc/async_client.h"
 
@@ -32,7 +31,7 @@ size_t kDefaultNumberCompletionQueues = 2;
 void CompletionQueue::Start() {
   CHECK(!thread_) << "CompletionQueue already started.";
   thread_ =
-      common::make_unique<std::thread>([this]() { RunCompletionQueue(); });
+      std::make_unique<std::thread>([this]() { RunCompletionQueue(); });
 }
 
 void CompletionQueue::Shutdown() {

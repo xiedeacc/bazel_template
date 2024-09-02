@@ -19,7 +19,6 @@
 
 #include "google/protobuf/message.h"
 #include "grpc++/grpc++.h"
-#include "src/async_grpc/common/make_unique.h"
 #include "src/async_grpc/execution_context.h"
 #include "src/async_grpc/span.h"
 
@@ -39,7 +38,7 @@ class RpcHandlerInterface {
   virtual Span* trace_span() = 0;
   template <class RpcHandlerType>
   static std::unique_ptr<RpcHandlerType> Instantiate() {
-    return common::make_unique<RpcHandlerType>();
+    return std::make_unique<RpcHandlerType>();
   }
 };
 
