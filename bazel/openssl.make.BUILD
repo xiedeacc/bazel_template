@@ -90,7 +90,7 @@ configure_make(
     configure_options = CONFIGURE_OPTIONS + select({
         "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
         "@bazel_template//bazel:osx_x86_64": [
-            "darwin64-x86_64-cc",
+            #"darwin64-x86_64-cc",
             "enable-shared",
         ],
         "@bazel_template//bazel:windows_x86_64": [
