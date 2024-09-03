@@ -53,8 +53,8 @@ alias(
     #actual = ":openssl_static",
     actual = select({
         "@platforms//os:linux": ":openssl_static",
-        "@platforms//os:osx": ":openssl_shared",
-        #"@platforms//os:osx": ":openssl_static",
+        #"@platforms//os:osx": ":openssl_shared",
+        "@platforms//os:osx": ":openssl_static",
         "@platforms//os:windows": ":openssl_static",
         "//conditions:default": ":openssl_static",
     }),
@@ -149,6 +149,9 @@ configure_make(
     configure_in_place = True,
     configure_options = CONFIGURE_OPTIONS + select({
         "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
+        "@bazel_template//bazel:osx_x86_64": [
+            "darwin64-x86_64-cc",
+        ],
         "@bazel_template//bazel:windows_x86_64": [
             "mingw64",
             "no-shared",

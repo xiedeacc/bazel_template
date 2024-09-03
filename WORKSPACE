@@ -221,6 +221,8 @@ new_git_repository(
 http_archive(
     name = "openssl",
     build_file = "//bazel:openssl.make.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:openssl.patch"],
     sha256 = "777cd596284c883375a2a7a11bf5d2786fc5413255efab20c50d6ffe6d020b7e",
     strip_prefix = "openssl-3.3.1",
     urls = ["https://github.com/openssl/openssl/releases/download/openssl-3.3.1/openssl-3.3.1.tar.gz"],
@@ -845,6 +847,7 @@ cc_toolchains_setup(
                     "sysroot": "@macosx14.2-x86_64_sysroot",
                     "tool_names": {
                         "ar": "x86_64-apple-darwin23.3-libtool",
+                        #"ar": "x86_64-apple-darwin23.3-ar",
                         "as": "x86_64-apple-darwin23.3-as",
                         "c++": "x86_64-apple-darwin23.3-g++",
                         "cpp": "x86_64-apple-darwin23.3-cpp",
