@@ -54,6 +54,7 @@ alias(
     actual = select({
         "@platforms//os:linux": ":openssl_static",
         "@platforms//os:osx": ":openssl_shared",
+        #"@platforms//os:osx": ":openssl_static",
         "@platforms//os:windows": ":openssl_static",
         "//conditions:default": ":openssl_static",
     }),
@@ -83,16 +84,23 @@ toolchain(
 
 configure_make(
     name = "openssl_shared",
-    args = ["-j"],
+    args = ["-j4"],
     configure_command = "Configure",
     configure_in_place = True,
     configure_options = CONFIGURE_OPTIONS + select({
         "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
-        "@bazel_template//bazel:osx_x86_64": ["darwin64-x86_64-cc"],
+        "@bazel_template//bazel:osx_x86_64": [
+            #"darwin64-x86_64-cc",
+            "enable-shared",
+        ],
         "@bazel_template//bazel:windows_x86_64": [
             "mingw64",
-            "disable-shared",
+            "no-shared",
         ],
+        "//conditions:default": [],
+    }),
+    copts = select({
+        "@bazel_template//bazel:osx_x86_64": [],
         "//conditions:default": [],
     }),
     env = select({
@@ -109,6 +117,8 @@ configure_make(
         "@platforms//os:osx": [
             "libssl.dylib",
             "libcrypto.dylib",
+            "libssl.3.dylib",
+            "libcrypto.3.dylib",
         ],
         "@platforms//os:linux": [
             "libssl.so",
@@ -133,15 +143,19 @@ configure_make(
 configure_make(
     name = "openssl_static",
     args = ["-j"],
-    build_data = ["@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres"],
+    build_data = select({
+        "@bazel_template//bazel:windows_x86_64": [
+            "@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres",
+        ],
+        "//conditions:default": [],
+    }),
     configure_command = "Configure",
     configure_in_place = True,
     configure_options = CONFIGURE_OPTIONS + select({
         "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
-        "@bazel_template//bazel:osx_x86_64": ["darwin64-x86_64-cc"],
         "@bazel_template//bazel:windows_x86_64": [
             "mingw64",
-            #"disable-shared",
+            "no-shared",
         ],
         "//conditions:default": [],
     }),

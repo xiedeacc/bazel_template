@@ -26,7 +26,7 @@ COPTS = [
     "-Wuninitialized",
     "-Wshadow-compatible-local",
     "-Wno-noexcept-type",
-    "-std=gnu++17",
+    "-std=c++17",
     "-finput-charset=UTF-8",
     "-fsigned-char",
     "-faligned-new",
@@ -327,7 +327,9 @@ genrule(
         "#define FOLLY_HAVE_MALLOC_USABLE_SIZE 1",
         "/* #undef FOLLY_HAVE_INT128_T */",
         "#define FOLLY_HAVE_WCHAR_SUPPORT 1",
+        "#if !defined(__clang__)",
         "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1",
+        "#endif",
         "#define HAVE_VSNPRINTF_ERRORS 1",
         "#define FOLLY_HAVE_LIBUNWIND 1",
         "#define FOLLY_HAVE_DWARF 1",
@@ -355,10 +357,7 @@ template_rule(
     name = "folly-config_h",
     src = ":folly-config_h_in",
     out = "folly/folly-config.h",
-    substitutions = selects.with_or({
-        ("@bazel_template//bazel:gcc", "//conditions:default"): {},
-        "@bazel_template//bazel:clang": {"#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "/* #undef FOLLY_HAVE_EXTRANDOM_SFMT19937 */"},
-    }) | select({
+    substitutions = select({
         "@bazel_template//bazel:jemalloc": {"#define FOLLY_USE_JEMALLOC 1": "#define FOLLY_USE_JEMALLOC 1"},
         "@bazel_template//bazel:tcmalloc": {"#define FOLLY_USE_JEMALLOC 1": ""},
         "//conditions:default": {"#define FOLLY_USE_JEMALLOC 1": ""},

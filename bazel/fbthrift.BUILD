@@ -254,6 +254,7 @@ cc_binary(
         ":compiler_generators",
         "@folly",
         "@mvfst",
+        "@openssl",
         "@wangle",
     ],
 )
