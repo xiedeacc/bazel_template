@@ -1,59 +1,9 @@
+#https://github.com/tensorflow/tensorflow/blob/51d480498b07346b8b6e2ee3fbd3dc486f60ed96/third_party/curl.BUILD
+#https://github.com/googleapis/google-cloud-cpp/blob/main/bazel/curl.BUILD
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@bazel_template//bazel:common.bzl", "template_rule")
 
-config_setting(
-    name = "ca_bundle_style_is_debian",
-    define_values = {
-        "ca_bundle_style": "debian",
-    },
-)
-
-genrule(
-    name = "gen-ca-bundle-linux",
-    outs = ["include/curl_ca_bundle_location.h"],
-    cmd = """
-      if [ -f /etc/fedora-release ]; then
-        echo '#define CURL_CA_BUNDLE "/etc/pki/tls/certs/ca-bundle.crt"'
-      elif [ -f /etc/redhat-release ]; then
-        echo '#define CURL_CA_BUNDLE "/etc/pki/tls/certs/ca-bundle.crt"'
-      elif [ -f /etc/debian_version ]; then
-        echo '#define CURL_CA_BUNDLE "/etc/ssl/certs/ca-certificates.crt"'
-      elif [ -f /etc/arch-release ]; then
-        echo '#define CURL_CA_BUNDLE "/etc/ssl/certs/ca-certificates.crt"'
-      else
-        >&2 echo "Unknown platform, cannot guess location of CA bundle"
-        exit 1
-      fi >$@
-    """,
-)
-
-cc_library(
-    name = "define-ca-bundle-location-guess",
-    hdrs = ["include/curl_ca_bundle_location.h"],
-    tags = ["no-cache"],
-)
-
-cc_library(
-    name = "define-ca-bundle-location-debian",
-    hdrs = [],
-    defines = ["""CURL_CA_BUNDLE='"/etc/ssl/certs/ca-certificates.crt"'"""],
-    tags = [],
-)
-
-cc_library(
-    name = "define-ca-bundle-location-linux",
-    deps = select({
-        ":ca_bundle_style_is_debian": [":define-ca-bundle-location-debian"],
-        "//conditions:default": [":define-ca-bundle-location-guess"],
-    }),
-)
-
-cc_library(
-    name = "define-ca-bundle-location",
-    deps = select({
-        "//conditions:default": [":define-ca-bundle-location-linux"],
-    }),
-)
+package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "curl",
@@ -268,23 +218,17 @@ cc_library(
         # Avoid false positives on builds with Undefined Behavior Sanitizer.
         "CURL_STRICTER",
     ] + select({
-        "@platforms//os:windows": [],
+        "@platforms//os:windows": ["CURL_MAX_WRITE_SIZE=16384"],
         "@platforms//os:linux": ["_GNU_SOURCE"],
         "@platforms//os:osx": ["_GNU_SOURCE"],
-        "//conditions:default": [
-        ],
+        "//conditions:default": [],
     }),
-    visibility = ["//visibility:public"],
     deps = [
-        ":define-ca-bundle-location",
         "@c-ares",
         "@openssl//:crypto",
         "@openssl//:ssl",
         "@zlib",
-    ] + select({
-        "//conditions:default": [
-        ],
-    }),
+    ],
 )
 
 write_file(
@@ -301,7 +245,6 @@ write_file(
         "/* #undef CURLDEBUG */",
         "",
         "/* Location of default ca bundle */",
-        "#define CURL_CA_BUNDLE \"/etc/ssl/certs/ca-certificates.crt\"",
         "",
         "/* define \"1\" to use built in CA store of SSL library */",
         "/* #undef CURL_CA_FALLBACK */",
@@ -1424,6 +1367,11 @@ template_rule(
     }) | select({
         "@bazel_template//bazel:osx_clang": {
             "/* #undef HAVE_BUILTIN_AVAILABLE */": "#define HAVE_BUILTIN_AVAILABLE 1",
+        },
+        "//conditions:default": {},
+    }) | select({
+        "@bazel_template//bazel:redhat": {
+            "#define CURL_CA_BUNDLE \"/etc/ssl/certs/ca-certificates.crt\"": "#define CURL_CA_BUNDLE \"/etc/pki/tls/certs/ca-bundle.crt\"",
         },
         "//conditions:default": {},
     }),

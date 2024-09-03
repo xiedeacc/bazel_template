@@ -276,7 +276,7 @@ git_repository(
     repo_mapping = {
         "@abseil-cpp": "@com_google_absl",
     },
-    tag = "v1.14.0",
+    tag = "v1.15.2",
 )
 
 git_repository(
@@ -569,7 +569,7 @@ git_repository(
         "@com_github_cares_cares": "@c-ares",
         "@boringssl": "@openssl",
     },
-    tag = "v1.65.1",
+    tag = "v1.66.1",
 )
 
 new_git_repository(
@@ -931,11 +931,11 @@ cc_toolchains_setup(
                     "libc": "mingw-w64",
                     "compiler": "gcc",
                     "triple": "x86_64-w64-mingw32",
-                    #"url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
-                    "url": "/root/src/software/gcc14.2.0-windows-x86_64_toolchain",
-                    #"strip_prefix": "gcc14.2.0-windows-x86_64_toolchain",
+                    "url": "https://code.xiamu.com/files/gcc14.2.0-windows-x86_64_toolchain.tar.gz",
+                    #"url": "/root/src/software/gcc14.2.0-windows-x86_64_toolchain",
+                    "strip_prefix": "gcc14.2.0-windows-x86_64_toolchain",
                     "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
-                    "sysroot": "/root/src/software/gcc14.2.0-windows-x86_64_toolchain/x86_64-w64-mingw32/sysroot",
+                    "sysroot": "@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc",
                     "link_flags": [
                         "-ladvapi32",
                         "-lbcrypt",

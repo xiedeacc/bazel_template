@@ -33,6 +33,21 @@ config_setting(
 )
 
 config_setting(
+    name = "arch",
+    define_values = {"distro": "arch"},
+)
+
+config_setting(
+    name = "debian",
+    define_values = {"distro": "debian"},
+)
+
+config_setting(
+    name = "redhat",
+    define_values = {"distro": "redhat"},
+)
+
+config_setting(
     name = "windows_x86_64",
     constraint_values = [
         "@platforms//os:windows",

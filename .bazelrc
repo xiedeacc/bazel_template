@@ -45,12 +45,14 @@ build -c opt
 #build --copt='-g'
 build --copt='-O2'
 build --copt='-Wall'
+build --copt='-fno-modules'
 build --cxxopt='-std=c++17'
 build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 
 #build --host_copt='-g'
 build --host_copt='-O2'
 build --host_copt='-Wall'
+build --host_copt='-fno-modules'
 build --host_cxxopt='-std=c++17'
 build --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 
