@@ -46,15 +46,19 @@ build -c opt
 build --copt='-O2'
 build --copt='-Wall'
 build --copt='-fno-modules'
-build --cxxopt='-std=c++17'
+#build --copt='-mmacosx-version-min=10.15'
+build --cxxopt='-std=c++14'
 build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 
 #build --host_copt='-g'
 build --host_copt='-O2'
 build --host_copt='-Wall'
 build --host_copt='-fno-modules'
-build --host_cxxopt='-std=c++17'
+#build --host_copt='-mmacosx-version-min=10.15'
+build --host_cxxopt='-std=c++14'
 build --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+
+build --define cross_compiling=false
 
 build --strip='never'
 build --output_filter="^//"
@@ -99,7 +103,8 @@ build:gcc_macosx_x86_64 --extra_toolchains='@cc_toolchain_config_x86_64_osx_gene
 build:gcc_macosx_x86_64 --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:gcc_macosx_x86_64 --cpu='x86_64'
 build:gcc_macosx_x86_64 --compiler='gcc'
-build:gcc_macosx_x86_64 --copt='-mmacosx-version-min=10.13'
+build:gcc_macosx_x86_64 --copt='-mmacosx-version-min=10.15'
+build:gcc_macosx_x86_64 --define cross_compiling=true
 #build:gcc_macosx_x86_64 --java_runtime_version="remotejdk_21"
 
 build:openwrt_aarch64 --platforms='//bazel:linux_aarch64_platform'
@@ -113,6 +118,7 @@ build:openwrt_aarch64 --java_runtime_version="remotejdk_21"
 build:openwrt_aarch64 --action_env=STAGING_DIR=/root/src/software/openwrt/openwrt-aarch64_toolchain
 build:openwrt_aarch64 --copt='-g'
 build:openwrt_aarch64 --host_copt='-g'
+build:openwrt_aarch64 --define cross_compiling=true
 
 build:clang_local --platforms='//bazel:linux_x86_64_platform'
 build:clang_local --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
@@ -145,6 +151,7 @@ build:clang_aarch64 --cpu='aarch64'
 build:clang_aarch64 --compiler=clang
 build:clang_aarch64 --copt='-g'
 build:clang_aarch64 --host_copt='-g'
+build:clang_aarch64 --define cross_compiling=true
 #build:clang_aarch64 --java_runtime_version="remotejdk_21"
 
 build:clang_macosx_x86_64 --platforms='//bazel:osx_x86_64_platform'
@@ -154,7 +161,8 @@ build:clang_macosx_x86_64 --extra_toolchains='@cc_toolchain_config_x86_64_osx_ge
 build:clang_macosx_x86_64 --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:clang_macosx_x86_64 --cpu='x86_64'
 build:clang_macosx_x86_64 --compiler='clang'
-build:clang_macosx_x86_64 --copt='-mmacosx-version-min=10.13'
+build:clang_macosx_x86_64 --copt='-mmacosx-version-min=10.15'
+build:clang_macosx_x86_64 --define cross_compiling=true
 #build:clang_macosx_x86_64 --java_runtime_version="remotejdk_21"
 
 build:gcc_windows_x86_64 --platforms='//bazel:windows_x86_64_platform'
@@ -168,6 +176,6 @@ build:gcc_windows_x86_64 --cpu='x86_64'
 build:gcc_windows_x86_64 --compiler='gcc'
 build:gcc_windows_x86_64 --copt='-mbmi'
 build:gcc_windows_x86_64 --copt='-D_WIN32_WINNT=0x0601'
-
+build:gcc_windows_x86_64 --define cross_compiling=true
 #build:gcc_windows_x86_64 --java_runtime_version="remotejdk_21"
 
