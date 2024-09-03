@@ -47,7 +47,7 @@ build --copt='-O2'
 build --copt='-Wall'
 build --copt='-fno-modules'
 #build --copt='-mmacosx-version-min=10.15'
-build --cxxopt='-std=c++14'
+build --cxxopt='-std=c++17'
 build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 
 #build --host_copt='-g'
@@ -55,7 +55,7 @@ build --host_copt='-O2'
 build --host_copt='-Wall'
 build --host_copt='-fno-modules'
 #build --host_copt='-mmacosx-version-min=10.15'
-build --host_cxxopt='-std=c++14'
+build --host_cxxopt='-std=c++17'
 build --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 
 build --define cross_compiling=false
