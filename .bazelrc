@@ -1,5 +1,5 @@
 common --noenable_bzlmod
-common --experimental_downloader_config=.bazel_downloader.cfg
+#common --experimental_downloader_config=.bazel_downloader.cfg
 
 ######################### attention #########################
 # 1. pprof.out generated in bazel test sandbox
