@@ -99,10 +99,6 @@ configure_make(
         ],
         "//conditions:default": [],
     }),
-    copts = select({
-        "@bazel_template//bazel:osx_x86_64": [],
-        "//conditions:default": [],
-    }),
     env = select({
         "@bazel_template//bazel:osx_x86_64": {"ARFLAGS": "-static -o"},
         "//conditions:default": {},
