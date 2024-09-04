@@ -709,6 +709,11 @@ hedron_compile_commands_setup_transitive_transitive()
 
 hedron_compile_commands_setup_transitive_transitive_transitive()
 
+register_toolchains(
+    "@openssl//:preinstalled_make_toolchain",
+    "@openssl//:preinstalled_pkgconfig_toolchain",
+)
+
 http_archive(
     name = "clang18.1.8-aarch64_sysroot",
     build_file = "//bazel:cc_toolchain.BUILD",
@@ -725,20 +730,10 @@ http_archive(
     urls = ["https://code.xiamu.com/files/macosx14.2-x86_64_sysroot.tar.gz"],
 )
 
-#new_git_repository(
-#name = "cc_toolchains",
-#commit = "19370106daf5184f4a4aa19378e9103a0d6ac751",
-#remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
-#)
-
-local_repository(
+new_git_repository(
     name = "cc_toolchains",
-    path = "../cc_toolchains",
-)
-
-register_toolchains(
-    "@openssl//:preinstalled_make_toolchain",
-    "@openssl//:preinstalled_pkgconfig_toolchain",
+    commit = "4e65ea7b374024729060baf70a84488c3b5188b2",
+    remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
 )
 
 load("@cc_toolchains//toolchain:cc_toolchains_setup.bzl", "cc_toolchains_setup")
@@ -937,7 +932,7 @@ cc_toolchains_setup(
                     "url": "https://code.xiamu.com/files/gcc14.2.0-windows-x86_64_toolchain.tar.gz",
                     #"url": "/root/src/software/gcc14.2.0-windows-x86_64_toolchain",
                     "strip_prefix": "gcc14.2.0-windows-x86_64_toolchain",
-                    "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
+                    "sha256sum": "a31b7c1a97f8dad9eb5096538dabc2f31381b62fc85c9f1487ae9d28381a933b",
                     "sysroot": "@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc",
                     "link_flags": [
                         "-ladvapi32",
