@@ -1,5 +1,6 @@
 common --noenable_bzlmod
 common --experimental_downloader_config=.bazel_downloader.cfg
+common --enable_platform_specific_config
 
 ######################### attention #########################
 # 1. pprof.out generated in bazel test sandbox
@@ -21,55 +22,125 @@ test:unit_test_jemalloc --test_env='PPROF_PATH=/usr/local/bin/pprof'
 test:unit_test_jemalloc --test_env='MALLOC_CONF=prof_leak:true,prof:true,prof_active:true,lg_prof_interval:20,lg_prof_sample:17,prof_prefix:jeprof.out,prof_final:true'
 test:unit_test_jemalloc --copt='-g'
 
-# -fsanitize=address,undefined,thread,memory
-test:sanitize --copt='-fno-omit-frame-pointer'
-test:sanitize --copt='-fsanitize=address'
-test:sanitize --copt='-O1'
-test:sanitize --copt='-g'
-test:sanitize --linkopt='-fsanitize=address'
-#test:sanitize --linkopt='-static-libasan'
-
 coverage --test_tag_filters=-cpplint
-coverage --copt=--coverage
+coverage --copt=-fprofile-instr-generate
 coverage --copt=-fprofile-arcs
+coverage --copt=--coverage
+coverage --copt=-fcoverage-mapping
 coverage --copt=-ftest-coverage
 coverage --copt='-g'
 coverage --linkopt=-coverage
+coverage --linkopt=-fprofile-instr-generate
 coverage --nocache_test_results
 
 #####################################################################
 build --announce_rc
 build --workspace_status_command=bazel/workspace_status.sh
 
-build -c opt
-#build --copt='-g'
-build --copt='-O2'
-build --copt='-Wall'
-build --copt='-fno-modules'
-build --cxxopt='-std=c++17'
-build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
-
-#build --host_copt='-g'
-build --host_copt='-O2'
-build --host_copt='-Wall'
-build --host_copt='-fno-modules'
-build --host_cxxopt='-std=c++17'
-build --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
-
 build --strip='never'
 build --output_filter="^//"
-
-#build --features=-compiler_param_file
+build -c opt
+build --define cross_compiling=false
+build --features=-module_maps
+build --host_features=-module_maps
 #build --features=-layering_check
-#build --host_features=-compiler_param_file
 #build --host_features=-layering_check
-
 #build --remote_cache=http://192.168.1.101/bazel_cache
 #build --keep_going
+
+build:opt --compilation_mode=opt
+build:opt --copt=-Wframe-larger-than=16384
+build:dbg --compilation_mode=dbg
+
+################# sanitize ###############
+# -fsanitize=address,undefined,thread,memory
+build:asan --strip=never
+build:asan --copt='-fsanitize=address'
+build:asan --copt='-O0'
+build:asan --copt='-fno-omit-frame-pointer'
+build:asan --copt='-g'
+build:asan --linkopt='-fsanitize=address'
+#build:asan --linkopt='-static-libasan'
+build:asan --action_env=ASAN_OPTIONS=detect_leaks=1:color=always
+build:asan --action_env=LSAN_OPTIONS=suppressions=test/core/test_util/lsan_suppressions.txt:report_objects=1
+build:asan --action_env=ASAN_OPTIONS=detect_odr_violation=0  # https://github.com/google/sanitizers/issues/1017
+
+build:msan --strip=never
+build:msan --copt=-fsanitize=memory
+build:msan --copt=-O0
+build:asan --copt='-g'
+build:msan --copt=-fsanitize-memory-track-origins
+build:msan --copt=-fsanitize-memory-use-after-dtor
+build:msan --copt=-fno-omit-frame-pointer
+build:msan --linkopt=-fsanitize=memory
+build:msan --action_env=MSAN_OPTIONS=poison_in_dtor=1
+
+build:tsan --strip=never
+build:tsan --copt=-fsanitize=thread
+build:tsan --copt=-fno-omit-frame-pointer
+build:tsan --linkopt=-fsanitize=thread
+build:tsan --action_env=TSAN_OPTIONS=suppressions=test/core/test_util/tsan_suppressions.txt:halt_on_error=1:second_deadlock_stack=1
+
+# a TSAN build that tries to create new threads whenever possible
+build:thready_tsan --strip=never
+build:thready_tsan --copt=-fsanitize=thread
+build:thready_tsan --copt=-fno-omit-frame-pointer
+build:thready_tsan --linkopt=-fsanitize=thread
+build:thready_tsan --action_env=TSAN_OPTIONS=suppressions=test/core/test_util/tsan_suppressions.txt:halt_on_error=1:second_deadlock_stack=1
+
+build:ubsan --strip=never
+build:ubsan --copt=-fsanitize=undefined
+build:ubsan --copt=-fsanitize-link-c++-runtime
+build:ubsan --copt=-fno-omit-frame-pointer
+build:ubsan --copt=-DNDEBUG
+build:ubsan --copt=-fno-sanitize=function,vptr
+build:ubsan --linkopt=-fsanitize=undefined
+# avoid ubsan build error with int128 by linking against libc++
+build:ubsan --linkopt=-fsanitize-link-c++-runtime
+build:ubsan --linkopt=-lc++
+build:ubsan --linkopt=-lc++abi
+build:ubsan --linkopt=-lm
+build:ubsan --action_env=UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1:suppressions=test/core/test_util/ubsan_suppressions.txt
+# if you want to run ubsan locally, uncomment following three lines
+# build:ubsan --linkopt=-lgcc_s
+# build:ubsan --linkopt=-lubsan
+# build:ubsan --linkopt=--rtlib=compiler-rt
+
+build:windows --cxxopt='/std:c++17'
+build:windows --host_cxxopt='/std:c++17'
+
+build:macos --copt='-mmacosx-version-min=10.15'
+build:macos --copt='-g'
+build:macos --copt='-O2'
+build:macos --copt='-Wall'
+build:macos --cxxopt='-std=c++17'
+build:macos --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+build:macos --host_copt='-mmacosx-version-min=10.15'
+build:macos --host_copt='-g'
+build:macos --host_copt='-O2'
+build:macos --host_copt='-Wall'
+build:macos --host_cxxopt='-std=c++17'
+build:macos --dynamic_mode=off
+
+build:linux --copt='-g'
+build:linux --copt='-O2'
+build:linux --copt='-Wall'
+build:linux --cxxopt='-std=c++17'
+build:linux --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+build:linux --host_copt='-g'
+build:linux --host_copt='-O2'
+build:linux --host_copt='-Wall'
+build:linux --host_cxxopt='-std=c++17'
+build:linux --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+
+build:android --noenable_platform_specific_config
+build:ios --noenable_platform_specific_config
 
 build:tcmalloc --define='profiling_type=tcmalloc'
 build:jemalloc --define='profiling_type=jemalloc'
 
+
+################# cross compiling ###############
 build:gcc_local --platforms='//bazel:linux_x86_64_platform'
 #build:gcc_local --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
 build:gcc_local --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
@@ -99,7 +170,8 @@ build:gcc_macosx_x86_64 --extra_toolchains='@cc_toolchain_config_x86_64_osx_gene
 build:gcc_macosx_x86_64 --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:gcc_macosx_x86_64 --cpu='x86_64'
 build:gcc_macosx_x86_64 --compiler='gcc'
-build:gcc_macosx_x86_64 --copt='-mmacosx-version-min=10.13'
+build:gcc_macosx_x86_64 --copt='-mmacosx-version-min=10.15'
+build:gcc_macosx_x86_64 --define cross_compiling=true
 #build:gcc_macosx_x86_64 --java_runtime_version="remotejdk_21"
 
 build:openwrt_aarch64 --platforms='//bazel:linux_aarch64_platform'
@@ -113,6 +185,7 @@ build:openwrt_aarch64 --java_runtime_version="remotejdk_21"
 build:openwrt_aarch64 --action_env=STAGING_DIR=/root/src/software/openwrt/openwrt-aarch64_toolchain
 build:openwrt_aarch64 --copt='-g'
 build:openwrt_aarch64 --host_copt='-g'
+build:openwrt_aarch64 --define cross_compiling=true
 
 build:clang_local --platforms='//bazel:linux_x86_64_platform'
 build:clang_local --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
@@ -145,6 +218,7 @@ build:clang_aarch64 --cpu='aarch64'
 build:clang_aarch64 --compiler=clang
 build:clang_aarch64 --copt='-g'
 build:clang_aarch64 --host_copt='-g'
+build:clang_aarch64 --define cross_compiling=true
 #build:clang_aarch64 --java_runtime_version="remotejdk_21"
 
 build:clang_macosx_x86_64 --platforms='//bazel:osx_x86_64_platform'
@@ -154,7 +228,8 @@ build:clang_macosx_x86_64 --extra_toolchains='@cc_toolchain_config_x86_64_osx_ge
 build:clang_macosx_x86_64 --extra_toolchains='@remotejdk21_linux_toolchain_config_repo//:toolchain'
 build:clang_macosx_x86_64 --cpu='x86_64'
 build:clang_macosx_x86_64 --compiler='clang'
-build:clang_macosx_x86_64 --copt='-mmacosx-version-min=10.13'
+build:clang_macosx_x86_64 --copt='-mmacosx-version-min=10.15'
+build:clang_macosx_x86_64 --define cross_compiling=true
 #build:clang_macosx_x86_64 --java_runtime_version="remotejdk_21"
 
 build:gcc_windows_x86_64 --platforms='//bazel:windows_x86_64_platform'
@@ -168,6 +243,5 @@ build:gcc_windows_x86_64 --cpu='x86_64'
 build:gcc_windows_x86_64 --compiler='gcc'
 build:gcc_windows_x86_64 --copt='-mbmi'
 build:gcc_windows_x86_64 --copt='-D_WIN32_WINNT=0x0601'
-
+build:gcc_windows_x86_64 --define cross_compiling=true
 #build:gcc_windows_x86_64 --java_runtime_version="remotejdk_21"
-

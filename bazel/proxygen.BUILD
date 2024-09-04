@@ -22,6 +22,7 @@ COPTS = [
     "-isystem external/wangle",
     "-isystem external/mvfst",
     "-std=c++17",
+    "-Wno-register",
     "-fsized-deallocation",
 ]
 

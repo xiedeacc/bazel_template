@@ -1,6 +1,25 @@
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 
+GLOBAL_COPTS = [
+] + select({
+    "@bazel_template//bazel:not_cross_compiling_on_osx": [
+        "-stdlib=libc++",
+        "-mmacosx-version-min=10.15",
+    ],
+    "//conditions:default": [],
+})
+
+GLOBAL_LINKOPTS = [
+] + select({
+    "@bazel_template//bazel:not_cross_compiling_on_osx": [
+        "-stdlib=libc++",
+        "-lc++abi",
+        "-mmacosx-version-min=10.15",
+    ],
+    "//conditions:default": [],
+})
+
 def dict_union(x, y):
     z = {}
     z.update(x)

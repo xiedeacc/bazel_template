@@ -53,7 +53,6 @@ alias(
     #actual = ":openssl_static",
     actual = select({
         "@platforms//os:linux": ":openssl_static",
-        #"@platforms//os:osx": ":openssl_shared",
         "@platforms//os:osx": ":openssl_static",
         "@platforms//os:windows": ":openssl_static",
         "//conditions:default": ":openssl_static",
@@ -90,7 +89,7 @@ configure_make(
     configure_options = CONFIGURE_OPTIONS + select({
         "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
         "@bazel_template//bazel:osx_x86_64": [
-            "darwin64-x86_64-cc",
+            #"darwin64-x86_64-cc",
             "enable-shared",
         ],
         "@bazel_template//bazel:windows_x86_64": [
@@ -138,7 +137,7 @@ configure_make(
 
 configure_make(
     name = "openssl_static",
-    args = ["-j"],
+    args = ["-j4"],
     build_data = select({
         "@bazel_template//bazel:windows_x86_64": [
             "@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres",
@@ -150,7 +149,7 @@ configure_make(
     configure_options = CONFIGURE_OPTIONS + select({
         "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
         "@bazel_template//bazel:osx_x86_64": [
-            "darwin64-x86_64-cc",
+            #"darwin64-x86_64-cc",
         ],
         "@bazel_template//bazel:windows_x86_64": [
             "mingw64",

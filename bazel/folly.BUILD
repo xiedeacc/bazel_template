@@ -1,5 +1,5 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -44,7 +44,7 @@ COPTS = [
     "@platforms//os:osx": [],
     "@platforms//os:windows": [],
     "//conditions:default": [],
-})
+}) + GLOBAL_COPTS
 
 LOCAL_DEFINES = [
     "HAVE_CONFIG_H",
@@ -227,6 +227,7 @@ cc_library(
         "@platforms//cpu:aarch64": ["folly/external/aor/asmdefs.h"],
     }),
     copts = COPTS,
+    linkopts = GLOBAL_LINKOPTS,
     linkstatic = True,
     local_defines = LOCAL_DEFINES,
     deps = [
