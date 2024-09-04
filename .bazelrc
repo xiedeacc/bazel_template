@@ -45,7 +45,6 @@ build -c opt
 #build --copt='-g'
 build --copt='-O2'
 build --copt='-Wall'
-build --copt='-fno-modules'
 #build --copt='-mmacosx-version-min=10.15'
 build --cxxopt='-std=c++17'
 build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
@@ -53,7 +52,6 @@ build --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
 #build --host_copt='-g'
 build --host_copt='-O2'
 build --host_copt='-Wall'
-build --host_copt='-fno-modules'
 #build --host_copt='-mmacosx-version-min=10.15'
 build --host_cxxopt='-std=c++17'
 build --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
@@ -63,9 +61,10 @@ build --define cross_compiling=false
 build --strip='never'
 build --output_filter="^//"
 
-#build --features=-compiler_param_file
+build --features=-module_maps
+build --host_features=-module_maps
+
 #build --features=-layering_check
-#build --host_features=-compiler_param_file
 #build --host_features=-layering_check
 
 #build --remote_cache=http://192.168.1.101/bazel_cache
