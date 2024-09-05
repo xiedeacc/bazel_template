@@ -160,6 +160,7 @@ def _get_python_bin_path(repository_ctx):
     if repository_ctx.attr.python_bin_path != "":
         return repository_ctx.attr.python_bin_path
     python_bin_path = repository_ctx.which("python3")
+    print(python_bin_path)
     if python_bin_path != None:
         return str(python_bin_path)
     python_bin_path = repository_ctx.which("python")
@@ -169,9 +170,6 @@ def _get_python_bin_path(repository_ctx):
 
 def _gen_local_config_git_impl(repository_ctx):
     local_config_git_build = """
-# Description:
-# Exports generated files used to generate tensorflow/core/util/version_info.cc
-
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
