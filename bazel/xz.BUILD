@@ -368,12 +368,11 @@ cc_library(
         "@platforms//os:windows": [],
         "//conditions:default": ["-pthread"],
     }),
-    # linkstatic = select({
-    #     "@platforms//os:windows": True,
-    #     "//conditions:default": False,
-    # }),
     local_defines = LOCAL_DEFINES,
-    #alwayslink = True,
+    alwayslink = select({
+        "@platforms//os:windows": True,
+        "//conditions:default": False,
+    }),
 )
 
 cc_binary(
