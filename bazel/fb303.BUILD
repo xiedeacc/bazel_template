@@ -18,7 +18,6 @@ COPTS = [
     "-isystem external/fizz",
     "-isystem external/wangle",
     "-isystem external/mvfst",
-    "-std=c++17",
 ]
 
 LOCAL_DEFINES = [

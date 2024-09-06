@@ -657,7 +657,6 @@ cc_library(
     ],
     hdrs = [],
     copts = [
-        "-std=c++17",
         "-Wall",
         "-Wextra",
         "-g3",

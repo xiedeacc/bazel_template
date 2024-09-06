@@ -16,7 +16,6 @@ COPTS = [
     "-isystem external/fizz",
     "-isystem external/wangle",
     "-isystem external/mvfst",
-    "-std=c++17",
     "-D_LARGEFILE64_SOURCE",
 ] + select({
     "@platforms//os:linux": [

@@ -2,6 +2,7 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_template//bazel:boost.bzl", "boost_library", "boost_so_library", "default_copts", "default_defines", "hdr_list")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "template_rule")
 
 _repo_dir = repository_name().removeprefix("@")
 

@@ -1,21 +1,77 @@
-load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 
-GLOBAL_COPTS = [
-] + select({
+GLOBAL_COPTS = select({
+    "@bazel_template//bazel:cross_compiling_for_osx_gcc": [
+        "-mmacosx-version-min=10.15",
+    ],
+    "@bazel_template//bazel:cross_compiling_for_osx_clang": [
+        "-stdlib=libc++",
+        "-mmacosx-version-min=10.15",
+    ],
     "@bazel_template//bazel:not_cross_compiling_on_osx": [
         "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
     ],
-    "//conditions:default": [],
+    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
+        "-stdlib=libc++",
+        "-mmacosx-version-min=10.15",
+    ],
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/GS",
+        "/W1",
+        "/Wall",
+        "/Zc:wchar_t",
+        #"/Zi",
+        "/O2",
+        "/Ob2",
+        "/Gm-",
+        "/fp:precise",
+        "/Zc:forScope",
+        "/Gd",
+        "/MD",
+        "/diagnostics:column",
+        "/nologo",
+    ],
+    "//conditions:default": [
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-g",
+    ],
 })
 
-GLOBAL_LINKOPTS = [
-] + select({
+GLOBAL_LOCAL_DEFINES = select({
+    "@bazel_template//bazel:cross_compiling_for_osx_gcc": [],
+    "@bazel_template//bazel:cross_compiling_for_osx_clang": [],
+    "@bazel_template//bazel:not_cross_compiling_on_osx": [],
+    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [],
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "_MBCS",
+        "WIN32",
+        "_WINDOWS",
+        "NDEBUG",
+    ],
+    "//conditions:default": [
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-g",
+    ],
+})
+
+GLOBAL_LINKOPTS = select({
+    "@bazel_template//bazel:cross_compiling_for_osx": [
+        "-stdlib=libc++",
+        "-mmacosx-version-min=10.15",
+    ],
     "@bazel_template//bazel:not_cross_compiling_on_osx": [
         "-stdlib=libc++",
         "-lc++abi",
         "-mmacosx-version-min=10.15",
+    ],
+    "@bazel_template//bazel:cross_compiling_for_windows": [
+    ],
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
     ],
     "//conditions:default": [],
 })
@@ -58,19 +114,6 @@ def _extract_symbols_impl(ctx):
                         obj_files.append(obj_file)
 
     cc_toolchain = find_cpp_toolchain(ctx)
-    #print(cc_toolchain.nm_executable)
-    #feature_configuration = cc_common.configure_features(
-    #ctx = ctx,
-    #cc_toolchain = cc_toolchain,
-    #requested_features = ctx.features,
-    #unsupported_features = ctx.disabled_features,
-    #)
-    #archiver_path = cc_common.get_tool_for_action(
-    #feature_configuration = feature_configuration,
-    #action_name = ACTION_NAMES.c_compile,
-    #)
-    #print(archiver_path)
-
     output_files = []
     for obj_file in obj_files:
         output_file = ctx.actions.declare_file(obj_file.basename + ".sym")

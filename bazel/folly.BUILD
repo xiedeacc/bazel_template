@@ -26,7 +26,6 @@ COPTS = [
     "-Wuninitialized",
     "-Wshadow-compatible-local",
     "-Wno-noexcept-type",
-    "-std=c++17",
     "-finput-charset=UTF-8",
     "-fsigned-char",
     "-faligned-new",

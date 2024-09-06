@@ -46,7 +46,6 @@ cc_library(
         "-isystem $(GENDIR)/external/fizz",
         "-isystem external/fizz",
         "-isystem external/libev",
-        "-std=c++17",
     ],
     local_defines = [
         #"MVFST_USE_LIBEV",

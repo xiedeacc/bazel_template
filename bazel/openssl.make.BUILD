@@ -140,7 +140,7 @@ configure_make(
     args = ["-j4"],
     build_data = select({
         "@bazel_template//bazel:windows_x86_64": [
-            "@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres",
+            #"@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres",
         ],
         "//conditions:default": [],
     }),
@@ -152,7 +152,7 @@ configure_make(
             #"darwin64-x86_64-cc",
         ],
         "@bazel_template//bazel:windows_x86_64": [
-            "mingw64",
+            #"mingw64",
             "no-shared",
         ],
         "//conditions:default": [],
@@ -160,8 +160,8 @@ configure_make(
     env = select({
         "@bazel_template//bazel:osx_x86_64": {"ARFLAGS": "-static -o"},
         "@bazel_template//bazel:windows_x86_64": {
-            "WINDRES": "x86_64-w64-mingw32-windres",
-            "PATH": "$$(dirname $(execpath @cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres)):$$PATH",
+            #"WINDRES": "x86_64-w64-mingw32-windres",
+            #"PATH": "$$(dirname $(execpath @cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres)):$$PATH",
         },
         "//conditions:default": {},
     }),

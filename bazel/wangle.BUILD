@@ -30,7 +30,6 @@ cc_library(
         "-isystem external/folly",
         "-isystem $(GENDIR)/external/fizz",
         "-isystem external/fizz",
-        "-std=c++17",
     ],
     deps = [
         "@fizz",

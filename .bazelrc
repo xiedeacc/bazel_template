@@ -1,5 +1,5 @@
 common --noenable_bzlmod
-common --experimental_downloader_config=.bazel_downloader.cfg
+#common --experimental_downloader_config=.bazel_downloader.cfg
 common --enable_platform_specific_config
 
 ######################### attention #########################
@@ -32,25 +32,6 @@ coverage --copt='-g'
 coverage --linkopt=-coverage
 coverage --linkopt=-fprofile-instr-generate
 coverage --nocache_test_results
-
-#####################################################################
-build --announce_rc
-build --workspace_status_command=bazel/workspace_status.sh
-
-build --strip='never'
-build --output_filter="^//"
-build -c opt
-build --define cross_compiling=false
-build --features=-module_maps
-build --host_features=-module_maps
-#build --features=-layering_check
-#build --host_features=-layering_check
-#build --remote_cache=http://192.168.1.101/bazel_cache
-#build --keep_going
-
-build:opt --compilation_mode=opt
-build:opt --copt=-Wframe-larger-than=16384
-build:dbg --compilation_mode=dbg
 
 ################# sanitize ###############
 # -fsanitize=address,undefined,thread,memory
@@ -106,8 +87,30 @@ build:ubsan --action_env=UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1:suppre
 # build:ubsan --linkopt=-lubsan
 # build:ubsan --linkopt=--rtlib=compiler-rt
 
+
+#####################################################################
+build --announce_rc
+#build --workspace_status_command=bazel/workspace_status.sh
+
+build --strip='never'
+build --output_filter="^//"
+build -c opt
+build --define cross_compiling=false
+build --features=-module_maps
+build --host_features=-module_maps
+#build --features=-layering_check
+#build --host_features=-layering_check
+#build --remote_cache=http://192.168.1.101/bazel_cache
+#build --keep_going
+
+build:opt --compilation_mode=opt
+build:opt --copt=-Wframe-larger-than=16384
+build:dbg --compilation_mode=dbg
+
+startup --output_base=C:/x --windows_enable_symlinks
 build:windows --cxxopt='/std:c++17'
 build:windows --host_cxxopt='/std:c++17'
+build:windows --compiler='msvc-cl'
 
 build:macos --copt='-mmacosx-version-min=10.15'
 build:macos --copt='-g'
@@ -138,7 +141,6 @@ build:ios --noenable_platform_specific_config
 
 build:tcmalloc --define='profiling_type=tcmalloc'
 build:jemalloc --define='profiling_type=jemalloc'
-
 
 ################# cross compiling ###############
 build:gcc_local --platforms='//bazel:linux_x86_64_platform'

@@ -55,7 +55,6 @@ cc_library(
         "-isystem $(GENDIR)/external/libsodium/src/libsodium/include",
         "-isystem $(GENDIR)/external/folly",
         "-isystem external/folly",
-        "-std=c++17",
     ] + select({
         "@platforms//os:linux": [
             "-I$(GENDIR)/external/libunwind/include",

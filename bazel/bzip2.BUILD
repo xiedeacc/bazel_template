@@ -1,5 +1,5 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -18,11 +18,7 @@ alias(
     visibility = ["//visibility:public"],
 )
 
-COPTS = [
-    "-O3",
-    "-g",
-    "-Wall",
-]
+COPTS = GLOBAL_COPTS
 
 template_rule(
     name = "bz_version_h",

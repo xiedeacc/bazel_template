@@ -121,6 +121,14 @@ selects.config_setting_group(
 )
 
 selects.config_setting_group(
+    name = "windows_x86_64_msvc",
+    match_all = [
+        ":windows_x86_64",
+        ":msvc",
+    ],
+)
+
+selects.config_setting_group(
     name = "linux_x86_64_gcc",
     match_all = [
         ":linux_x86_64",
@@ -235,7 +243,7 @@ config_setting(
 )
 
 config_setting(
-    name = "is_cross_compiling",
+    name = "cross_compiling",
     define_values = {"cross_compiling": "true"},
 )
 
@@ -245,9 +253,46 @@ config_setting(
 )
 
 selects.config_setting_group(
+    name = "cross_compiling_for_osx_gcc",
+    match_all = [
+        ":cross_compiling",
+        "@platforms//os:osx",
+        ":gcc",
+    ],
+)
+
+selects.config_setting_group(
+    name = "cross_compiling_for_osx_clang",
+    match_all = [
+        ":cross_compiling",
+        "@platforms//os:osx",
+        ":clang",
+    ],
+)
+
+selects.config_setting_group(
     name = "not_cross_compiling_on_osx",
     match_all = [
         ":not_cross_compiling",
         "@platforms//os:osx",
     ],
 )
+
+selects.config_setting_group(
+    name = "cross_compiling_for_windows_gcc",
+    match_all = [
+        ":cross_compiling",
+        "@platforms//os:windows",
+        ":gcc",
+    ],
+)
+
+selects.config_setting_group(
+    name = "not_cross_compiling_on_windows",
+    match_all = [
+        ":not_cross_compiling",
+        "@platforms//os:windows",
+        ":msvc",
+    ],
+)
+
