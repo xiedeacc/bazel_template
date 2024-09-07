@@ -139,8 +139,8 @@ configure_make(
     name = "openssl_static",
     args = ["-j4"],
     build_data = select({
-        "@bazel_template//bazel:windows_x86_64": [
-            #"@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres",
+        "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
+            "@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres",
         ],
         "//conditions:default": [],
     }),
@@ -148,27 +148,31 @@ configure_make(
     configure_in_place = True,
     configure_options = CONFIGURE_OPTIONS + select({
         "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
-        "@bazel_template//bazel:osx_x86_64": [
-            #"darwin64-x86_64-cc",
+        "@bazel_template//bazel:cross_compiling_for_osx": [
+            "darwin64-x86_64-cc",
         ],
-        "@bazel_template//bazel:windows_x86_64": [
-            #"mingw64",
+        "@bazel_template//bazel:cross_compiling_for_windows": [
+            "mingw64",
+            "no-shared",
+        ],
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "VC-WIN64A",
             "no-shared",
         ],
         "//conditions:default": [],
     }),
     env = select({
-        "@bazel_template//bazel:osx_x86_64": {"ARFLAGS": "-static -o"},
-        "@bazel_template//bazel:windows_x86_64": {
-            #"WINDRES": "x86_64-w64-mingw32-windres",
-            #"PATH": "$$(dirname $(execpath @cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres)):$$PATH",
+        "@platforms//os:osx": {"ARFLAGS": "-static -o"},
+        "@bazel_template//bazel:cross_compiling_for_windows": {
+            "WINDRES": "x86_64-w64-mingw32-windres",
+            "PATH": "$$(dirname $(execpath @cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres)):$$PATH",
         },
         "//conditions:default": {},
     }),
     lib_name = LIB_NAME,
     lib_source = ":all_srcs",
     out_lib_dir = selects.with_or({
-        ("@platforms//cpu:aarch64", "@platforms//os:osx"): "lib",
+        ("@platforms//cpu:aarch64", "@platforms//os:osx", "@platforms//os:windows"): "lib",
         "//conditions:default": "lib64",
     }),
     out_static_libs = [

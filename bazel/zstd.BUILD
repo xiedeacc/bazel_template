@@ -1,4 +1,17 @@
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
+
 package(default_visibility = ["//visibility:public"])
+
+COPTS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/Ox",
+        "/Iexternal/zstd/lib",
+    ],
+    "//conditions:default": [
+        "-O3",
+        "-Iexternal/zstd/lib",
+    ],
+})
 
 cc_library(
     name = "zstd",
@@ -23,6 +36,7 @@ cc_library(
             "lib/legacy/zstd_v03.c",
         ],
     ) + select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [],
         "@platforms//cpu:x86_64": ["lib/decompress/huf_decompress_amd64.S"],
         "//conditions:default": [],
     }),
@@ -31,16 +45,10 @@ cc_library(
         "lib/zstd.h",
         "lib/zstd_errors.h",
     ],
-    copts = [
-        "-O3",
-        "-g",
-        "-Iexternal/zstd/lib",
-    ],
+    copts = COPTS,
     includes = ["lib"],
-    linkopts = [
-        "-pthread",
-    ],
-    local_defines = [
+    linkopts = GLOBAL_LINKOPTS,
+    local_defines = GLOBAL_LOCAL_DEFINES + [
         "ZSTD_LEGACY_SUPPORT=4",
         "ZSTD_MULTITHREAD",
         "XXH_NAMESPACE=ZSTD_",
@@ -54,7 +62,6 @@ cc_library(
         "DEBUGLEVEL=0",
         "ZSTD_MULTITHREAD",
     ],
-    visibility = ["//visibility:public"],
     deps = [
         "@lz4",
         "@xz//:lzma",
@@ -70,15 +77,8 @@ cc_library(
     hdrs = glob([
         "zlibWrapper/*.h",
     ]),
-    copts = [
-        "-O3",
-        "-g",
-        "-Iexternal/zstd/lib",
-    ],
-    linkopts = [
-        "-pthread",
-    ],
-    visibility = ["//visibility:public"],
+    copts = COPTS,
+    linkopts = GLOBAL_LINKOPTS,
     deps = [
         ":zstd",
         "@zlib",
@@ -114,15 +114,8 @@ cc_library(
         "programs/util.h",
         "programs/zstdcli_trace.h",
     ],
-    copts = [
-        "-O3",
-        "-g",
-        "-Iexternal/zstd/programs",
-    ],
-    linkopts = [
-        "-pthread",
-    ],
-    visibility = ["//visibility:public"],
+    copts = COPTS,
+    linkopts = GLOBAL_LINKOPTS,
     deps = [
         ":zstd",
     ],
@@ -131,10 +124,7 @@ cc_library(
 cc_binary(
     name = "zstdcli",
     srcs = ["programs/zstdcli.c"],
-    copts = [
-        "-O3",
-        "-g",
-    ],
+    copts = COPTS,
     deps = [
         ":zstd",
         ":zstd_util",

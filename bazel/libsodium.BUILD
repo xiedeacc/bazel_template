@@ -1,4 +1,4 @@
-load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,75 +14,94 @@ template_rule(
     },
 )
 
-COMMON_COTPS = [
-    "-g",
-    "-pthread",
-    "-fno-strict-aliasing",
-    "-fno-strict-overflow",
-    "-fstack-protector",
-    "-ftls-model=local-dynamic",
-    "-Wno-deprecated-declarations",
-    "-Wno-unknown-pragmas",
-    "-Iexternal/libsodium/src/libsodium/include/sodium",
-    "-Iexternal/libsodium/src/libsodium/crypto_aead/aegis128l",
-    "-Iexternal/libsodium/src/libsodium/crypto_aead/aegis256",
-    "-Iexternal/libsodium/src/libsodium/crypto_core/ed25519/ref10/fe_25_5",
-    "-Iexternal/libsodium/src/libsodium/crypto_core/ed25519/ref10/fe_51",
-    "-Iexternal/libsodium/src/libsodium/crypto_generichash/blake2b/ref",
-    "-Iexternal/libsodium/src/libsodium/crypto_onetimeauth/poly1305",
-    "-Iexternal/libsodium/src/libsodium/crypto_onetimeauth/poly1305/donna",
-    "-Iexternal/libsodium/src/libsodium/crypto_onetimeauth/poly1305/sse2",
-    "-Iexternal/libsodium/src/libsodium/crypto_pwhash/argon2",
-    "-Iexternal/libsodium/src/libsodium/crypto_pwhash/scryptsalsa208sha256",
-    "-Iexternal/libsodium/src/libsodium/crypto_pwhash/scryptsalsa208sha256/nosse",
-    "-Iexternal/libsodium/src/libsodium/crypto_scalarmult/curve25519",
-    "-Iexternal/libsodium/src/libsodium/crypto_scalarmult/curve25519/ref10",
-    "-Iexternal/libsodium/src/libsodium/crypto_scalarmult/curve25519/sandy2x",
-    "-Iexternal/libsodium/src/libsodium/crypto_shorthash/siphash24/ref",
-    "-Iexternal/libsodium/src/libsodium/crypto_sign/ed25519/ref10",
-    "-Iexternal/libsodium/src/libsodium/crypto_stream/chacha20",
-    "-Iexternal/libsodium/src/libsodium/crypto_stream/chacha20/dolbeau",
-    "-Iexternal/libsodium/src/libsodium/crypto_stream/chacha20/ref",
-    "-Iexternal/libsodium/src/libsodium/crypto_stream/salsa20",
-    "-Iexternal/libsodium/src/libsodium/crypto_stream/salsa20/ref",
-    "-Iexternal/libsodium/src/libsodium/crypto_stream/salsa20/xmm6",
-    "-Iexternal/libsodium/src/libsodium/crypto_stream/salsa20/xmm6int",
-]
+COMMON_COTPS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/DSODIUM_STATIC",
+        "/Dinline=__inline",
+        "/D_CRT_SECURE_NO_WARNINGS",
+        "/D_LIB",
+        "/std:c11",
+        "/I$(GENDIR)/external/libsodium/src/libsodium/include/sodium",
+        "/Iexternal/libsodium/src/libsodium/include/sodium",
+        "/Iexternal/libsodium/src/libsodium/crypto_aead/aegis128l",
+        "/Iexternal/libsodium/src/libsodium/crypto_aead/aegis256",
+        "/Iexternal/libsodium/src/libsodium/crypto_core/ed25519/ref10/fe_25_5",
+        "/Iexternal/libsodium/src/libsodium/crypto_core/ed25519/ref10/fe_51",
+        "/Iexternal/libsodium/src/libsodium/crypto_generichash/blake2b/ref",
+        "/Iexternal/libsodium/src/libsodium/crypto_onetimeauth/poly1305",
+        "/Iexternal/libsodium/src/libsodium/crypto_onetimeauth/poly1305/donna",
+        "/Iexternal/libsodium/src/libsodium/crypto_onetimeauth/poly1305/sse2",
+        "/Iexternal/libsodium/src/libsodium/crypto_pwhash/argon2",
+        "/Iexternal/libsodium/src/libsodium/crypto_pwhash/scryptsalsa208sha256",
+        "/Iexternal/libsodium/src/libsodium/crypto_pwhash/scryptsalsa208sha256/nosse",
+        "/Iexternal/libsodium/src/libsodium/crypto_scalarmult/curve25519",
+        "/Iexternal/libsodium/src/libsodium/crypto_scalarmult/curve25519/ref10",
+        "/Iexternal/libsodium/src/libsodium/crypto_scalarmult/curve25519/sandy2x",
+        "/Iexternal/libsodium/src/libsodium/crypto_shorthash/siphash24/ref",
+        "/Iexternal/libsodium/src/libsodium/crypto_sign/ed25519/ref10",
+        "/Iexternal/libsodium/src/libsodium/crypto_stream/chacha20",
+        "/Iexternal/libsodium/src/libsodium/crypto_stream/chacha20/dolbeau",
+        "/Iexternal/libsodium/src/libsodium/crypto_stream/chacha20/ref",
+        "/Iexternal/libsodium/src/libsodium/crypto_stream/salsa20",
+        "/Iexternal/libsodium/src/libsodium/crypto_stream/salsa20/ref",
+        "/Iexternal/libsodium/src/libsodium/crypto_stream/salsa20/xmm6",
+        "/Iexternal/libsodium/src/libsodium/crypto_stream/salsa20/xmm6int",
+    ],
+    "//conditions:default": [
+        "-fno-strict-aliasing",
+        "-fno-strict-overflow",
+        "-fstack-protector",
+        "-ftls-model=local-dynamic",
+        "-Wno-deprecated-declarations",
+        "-Wno-unknown-pragmas",
+        "-std=c11",
+        "-I$(GENDIR)/external/libsodium/src/libsodium/include/sodium",
+        "-Iexternal/libsodium/src/libsodium/include/sodium",
+        "-Iexternal/libsodium/src/libsodium/crypto_aead/aegis128l",
+        "-Iexternal/libsodium/src/libsodium/crypto_aead/aegis256",
+        "-Iexternal/libsodium/src/libsodium/crypto_core/ed25519/ref10/fe_25_5",
+        "-Iexternal/libsodium/src/libsodium/crypto_core/ed25519/ref10/fe_51",
+        "-Iexternal/libsodium/src/libsodium/crypto_generichash/blake2b/ref",
+        "-Iexternal/libsodium/src/libsodium/crypto_onetimeauth/poly1305",
+        "-Iexternal/libsodium/src/libsodium/crypto_onetimeauth/poly1305/donna",
+        "-Iexternal/libsodium/src/libsodium/crypto_onetimeauth/poly1305/sse2",
+        "-Iexternal/libsodium/src/libsodium/crypto_pwhash/argon2",
+        "-Iexternal/libsodium/src/libsodium/crypto_pwhash/scryptsalsa208sha256",
+        "-Iexternal/libsodium/src/libsodium/crypto_pwhash/scryptsalsa208sha256/nosse",
+        "-Iexternal/libsodium/src/libsodium/crypto_scalarmult/curve25519",
+        "-Iexternal/libsodium/src/libsodium/crypto_scalarmult/curve25519/ref10",
+        "-Iexternal/libsodium/src/libsodium/crypto_scalarmult/curve25519/sandy2x",
+        "-Iexternal/libsodium/src/libsodium/crypto_shorthash/siphash24/ref",
+        "-Iexternal/libsodium/src/libsodium/crypto_sign/ed25519/ref10",
+        "-Iexternal/libsodium/src/libsodium/crypto_stream/chacha20",
+        "-Iexternal/libsodium/src/libsodium/crypto_stream/chacha20/dolbeau",
+        "-Iexternal/libsodium/src/libsodium/crypto_stream/chacha20/ref",
+        "-Iexternal/libsodium/src/libsodium/crypto_stream/salsa20",
+        "-Iexternal/libsodium/src/libsodium/crypto_stream/salsa20/ref",
+        "-Iexternal/libsodium/src/libsodium/crypto_stream/salsa20/xmm6",
+        "-Iexternal/libsodium/src/libsodium/crypto_stream/salsa20/xmm6int",
+    ],
+})
 
 COMMON_DEFINES = [
-    "PACKAGE_NAME=\\\"libsodium\\\"",
-    "PACKAGE_TARNAME=\\\"libsodium\\\"",
-    "PACKAGE_VERSION=\\\"1.0.20\\\"",
-    "PACKAGE_STRING=\\\"libsodium\\ 1.0.20\\\"",
-    "PACKAGE_BUGREPORT=\\\"https://github.com/jedisct1/libsodium/issues\\\"",
-    "PACKAGE_URL=\\\"https://libsodium.org\\\"",
-    "PACKAGE=\\\"libsodium\\\"",
-    "VERSION=\\\"1.0.20\\\"",
+    "PACKAGE_NAME=\"libsodium\"",
+    "PACKAGE_TARNAME=\"libsodium\"",
+    "PACKAGE_VERSION=\"1.0.20\"",
+    "PACKAGE=\"libsodium\"",
+    "VERSION=\"1.0.20\"",
     "CONFIGURED=1",
-    "HAVE_ALLOCA=1",
     "HAVE_ATOMIC_OPS=1",
-    "HAVE_C11_MEMORY_FENCES=1",
     "HAVE_CLOCK_GETTIME=1",
-    "HAVE_C_VARARRAYS=1",
-    "HAVE_GCC_MEMORY_FENCES=1",
-    "HAVE_GETPID=1",
-    "HAVE_INLINE_ASM=1",
     "HAVE_INTTYPES_H=1",
     "HAVE_MPROTECT=1",
     "HAVE_NANOSLEEP=1",
-    "HAVE_PTHREAD=1",
-    "HAVE_PTHREAD_PRIO_INHERIT=1",
     "HAVE_RAISE=1",
     "HAVE_STDINT_H=1",
     "HAVE_STDIO_H=1",
     "HAVE_STDLIB_H=1",
-    "HAVE_STRINGS_H=1",
     "HAVE_STRING_H=1",
-    "HAVE_SYS_PARAM_H=1",
     "HAVE_SYS_STAT_H=1",
     "HAVE_SYS_TYPES_H=1",
-    "HAVE_TI_MODE=1",
-    "HAVE_UNISTD_H=1",
     "HAVE_WCHAR_H=1",
     "NATIVE_LITTLE_ENDIAN=1",
     "STDC_HEADERS=1",
@@ -103,81 +122,97 @@ COMMON_DEFINES = [
     "__STDC_WANT_IEC_60559_TYPES_EXT__=1",
     "__STDC_WANT_LIB_EXT2__=1",
     "__STDC_WANT_MATH_SPEC_FUNCS__=1",
-]
-
-X86_64_DEFINES = [
-    "HAVE_AMD64_ASM=1",
-    "HAVE_AMD64_ASM_V=1",
-    "HAVE_AVX2INTRIN_H=1",
-    "HAVE_CATCHABLE_ABRT=1",
-    "HAVE_CPUID=1",
-    "HAVE_EMMINTRIN_H=1",
-    "HAVE_MMINTRIN_H=1",
-    "HAVE_PMMINTRIN_H=1",
-    "HAVE_RDRAND=1",
-    "HAVE_WMMINTRIN_H=1",
-    "HAVE_TMMINTRIN_H=1",
-    "HAVE_SMMINTRIN_H=1",
-    "HAVE_CATCHABLE_SEGV=1",
-    "HAVE_CET_H=1",
-    "HAVE_AVX512FINTRIN_H=1",
-    "HAVE_AVXINTRIN_H=1",
-    "HAVE_AVX_ASM=1",
-    "HAVE_AVX_ASM_V=1",
-]
-
-AARCH64_DEFINES = [
-    "HAVE_ARMCRYPTO=1",
-]
-
-LINUX_DEFINES = [
-    "HAVE_SYS_AUXV_H=1",
-    "HAVE_GETRANDOM=1",
-    "HAVE_SYSCONF=1",
-    "HAVE_POSIX_MEMALIGN=1",
-    "HAVE_TI_MODE_V=1",
-    "HAVE_WEAK_SYMBOLS=1",
-    "HAVE_SYS_RANDOM_H=1",
-    "HAVE_MLOCK=1",
-    "HAVE_EXPLICIT_BZERO=1",
-    "HAVE_SYS_MMAN_H=1",
-    "__STDC_WANT_IEC_60559_EXT__=1",
-    "HAVE_MADVISE=1",
-    "HAVE_CPUID_V=1",
-    "HAVE_MMAP=1",
-    "HAVE_DLFCN_H=1",
-    "HAVE_GETAUXVAL=1",
-    "HAVE_GETENTROPY=1",
-    "HAVE_ALLOCA_H=1",
-]
-
-OSX_DEFINES = [
-    "HAVE_ALLOCA_H=1",
-    "HAVE_SYS_MMAN_H=1",
-    "HAVE_GETRANDOM=1",
-    "HAVE_SYSCONF=1",
-    "HAVE_EXPLICIT_BZERO=1",
-    "HAVE_GETAUXVAL=1",
-    "HAVE_POSIX_MEMALIGN=1",
-    "HAVE_CPUID_V=1",
-    "HAVE_GETENTROPY=1",
-    "HAVE_WEAK_SYMBOLS=1",
-    "HAVE_TI_MODE_V=1",
-    "HAVE_MADVISE=1",
-    "HAVE_SYS_RANDOM_H=1",
-    "HAVE_MMAP=1",
-    "__STDC_WANT_IEC_60559_EXT__=1",
-    "HAVE_DLFCN_H=1",
-    "HAVE_COMMONCRYPTO_COMMONRANDOM_H=1",
-    "HAVE_ARC4RANDOM=1",
-    "HAVE_MLOCK=1",
-    "HAVE_ARC4RANDOM_BUF=1",
-    "HAVE_MEMSET_S=1",
-]
-
-WINDOWS_DEFINES = [
-    "HAVE_INTRIN_H=1",
-]
+    "NDEBUG",
+] + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [
+        "HAVE_SYS_PARAM_H=1",
+        "HAVE_STRINGS_H=1",
+        "HAVE_UNISTD_H=1",
+        "HAVE_PTHREAD=1",
+        "HAVE_PTHREAD_PRIO_INHERIT=1",
+        "HAVE_TI_MODE=1",
+        "HAVE_C11_MEMORY_FENCES=1",
+        "HAVE_GETPID=1",
+        "HAVE_INLINE_ASM=1",
+        "HAVE_ALLOCA=1",
+        "HAVE_C_VARARRAYS=1",
+    ],
+}) + select({
+    "@bazel_template//bazel:gcc": ["HAVE_GCC_MEMORY_FENCES=1"],
+    "//conditions:default": [],
+}) + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//cpu:aarch64": ["HAVE_ARMCRYPTO=1"],
+    "@platforms//cpu:x86_64": [
+        "HAVE_EMMINTRIN_H=1",
+        "HAVE_MMINTRIN_H=1",
+        "HAVE_PMMINTRIN_H=1",
+        "HAVE_RDRAND=1",
+        "HAVE_WMMINTRIN_H=1",
+        "HAVE_TMMINTRIN_H=1",
+        "HAVE_SMMINTRIN_H=1",
+        "HAVE_CATCHABLE_SEGV=1",
+        "HAVE_CET_H=1",
+        "HAVE_AVX512FINTRIN_H=1",
+        "HAVE_AVXINTRIN_H=1",
+        "HAVE_AMD64_ASM=1",
+        "HAVE_AMD64_ASM_V=1",
+        "HAVE_AVX_ASM=1",
+        "HAVE_AVX_ASM_V=1",
+        "HAVE_AVX2INTRIN_H=1",
+        "HAVE_CATCHABLE_ABRT=1",
+        "HAVE_CPUID=1",
+    ],
+}) + select({
+    "@platforms//os:linux": [
+        "HAVE_SYS_AUXV_H=1",
+        "HAVE_GETRANDOM=1",
+        "HAVE_SYSCONF=1",
+        "HAVE_POSIX_MEMALIGN=1",
+        "HAVE_TI_MODE_V=1",
+        "HAVE_WEAK_SYMBOLS=1",
+        "HAVE_SYS_RANDOM_H=1",
+        "HAVE_MLOCK=1",
+        "HAVE_EXPLICIT_BZERO=1",
+        "HAVE_SYS_MMAN_H=1",
+        "__STDC_WANT_IEC_60559_EXT__=1",
+        "HAVE_MADVISE=1",
+        "HAVE_CPUID_V=1",
+        "HAVE_MMAP=1",
+        "HAVE_DLFCN_H=1",
+        "HAVE_GETAUXVAL=1",
+        "HAVE_GETENTROPY=1",
+        "HAVE_ALLOCA_H=1",
+        "ASM_HIDE_SYMBOL=.hidden",
+    ],
+    "@platforms//os:osx": [
+        "HAVE_ALLOCA_H=1",
+        "HAVE_SYS_MMAN_H=1",
+        "HAVE_GETRANDOM=1",
+        "HAVE_SYSCONF=1",
+        "HAVE_EXPLICIT_BZERO=1",
+        "HAVE_GETAUXVAL=1",
+        "HAVE_POSIX_MEMALIGN=1",
+        "HAVE_CPUID_V=1",
+        "HAVE_GETENTROPY=1",
+        "HAVE_WEAK_SYMBOLS=1",
+        "HAVE_TI_MODE_V=1",
+        "HAVE_MADVISE=1",
+        "HAVE_SYS_RANDOM_H=1",
+        "HAVE_MMAP=1",
+        "__STDC_WANT_IEC_60559_EXT__=1",
+        "HAVE_DLFCN_H=1",
+        "HAVE_COMMONCRYPTO_COMMONRANDOM_H=1",
+        "HAVE_ARC4RANDOM=1",
+        "HAVE_MLOCK=1",
+        "HAVE_ARC4RANDOM_BUF=1",
+        "HAVE_MEMSET_S=1",
+        "ASM_HIDE_SYMBOL=.private_extern",
+    ],
+    "@platforms//os:windows": ["HAVE_INTRIN_H=1"],
+    "//conditions:default": [],
+})
 
 cc_library(
     name = "utils",
@@ -189,19 +224,8 @@ cc_library(
         "src/libsodium/include/sodium/*.h",
         "src/libsodium/include/sodium/private/*.h",
     ]),
-    copts = select({
-        "@platforms//cpu:aarch64": [],
-        "//conditions:default": [],
-    }) + COMMON_COTPS + ["-I$(GENDIR)/external/libsodium/src/libsodium/include/sodium"],
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES,
-        "@platforms//os:linux": LINUX_DEFINES,
-        "@platforms//os:windows": WINDOWS_DEFINES,
-        "//conditions:default": [],
-    }),
+    copts = COMMON_COTPS,
+    local_defines = COMMON_DEFINES,
 )
 
 cc_library(
@@ -309,27 +333,19 @@ cc_library(
         #"src/libsodium/sodium/runtime.c",
         #"src/libsodium/sodium/utils.c",
         #"src/libsodium/sodium/version.c",
-    ] + [
-        "src/libsodium/crypto_scalarmult/curve25519/sandy2x/sandy2x.S",
-        "src/libsodium/crypto_stream/salsa20/xmm6/salsa20_xmm6-asm.S",
-    ],
+    ] + select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+        "//conditions:default": [
+            "src/libsodium/crypto_scalarmult/curve25519/sandy2x/sandy2x.S",
+            "src/libsodium/crypto_stream/salsa20/xmm6/salsa20_xmm6-asm.S",
+        ],
+    }),
     hdrs = glob([
         "src/libsodium/**/*.h",
         "src/libsodium/crypto_scalarmult/curve25519/sandy2x/*.S",
     ]),
-    copts = select({
-        "@platforms//cpu:aarch64": [],
-        "//conditions:default": [],
-    }) + COMMON_COTPS + ["-Iexternal/libsodium/src/libsodium/include/sodium"],
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES + ["ASM_HIDE_SYMBOL=.private_extern"],
-        "@platforms//os:linux": LINUX_DEFINES + ["ASM_HIDE_SYMBOL=.hidden"],
-        "@platforms//os:windows": WINDOWS_DEFINES + [],
-        "//conditions:default": ["ASM_HIDE_SYMBOL=.hidden"],
-    }),
+    copts = COMMON_COTPS,
+    local_defines = COMMON_DEFINES,
     deps = [":utils"],
 )
 
@@ -347,24 +363,7 @@ cc_library(
             "-mrdrnd",
         ],
     }) + COMMON_COTPS,
-    linkopts = select({
-        "@platforms//os:windows": [],
-        "@platforms//os:osx": [],
-        "//conditions:default": [
-            "-Wl,-z,relro",
-            "-Wl,-z,now",
-            "-Wl,-z,noexecstack",
-        ],
-    }),
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES,
-        "@platforms//os:linux": LINUX_DEFINES,
-        "@platforms//os:windows": WINDOWS_DEFINES + [],
-        "//conditions:default": [],
-    }),
+    local_defines = COMMON_DEFINES,
     deps = [":common"],
 )
 
@@ -383,24 +382,7 @@ cc_library(
             "-msse2",
         ],
     }) + COMMON_COTPS,
-    linkopts = select({
-        "@platforms//os:windows": [],
-        "@platforms//os:osx": [],
-        "//conditions:default": [
-            "-Wl,-z,relro",
-            "-Wl,-z,now",
-            "-Wl,-z,noexecstack",
-        ],
-    }),
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES,
-        "@platforms//os:linux": LINUX_DEFINES,
-        "@platforms//os:windows": WINDOWS_DEFINES + [],
-        "//conditions:default": [],
-    }),
+    local_defines = COMMON_DEFINES,
 )
 
 cc_library(
@@ -420,24 +402,7 @@ cc_library(
             "-mssse3",
         ],
     }) + COMMON_COTPS,
-    linkopts = select({
-        "@platforms//os:windows": [],
-        "@platforms//os:osx": [],
-        "//conditions:default": [
-            "-Wl,-z,relro",
-            "-Wl,-z,now",
-            "-Wl,-z,noexecstack",
-        ],
-    }),
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES,
-        "@platforms//os:linux": LINUX_DEFINES,
-        "@platforms//os:windows": WINDOWS_DEFINES + [],
-        "//conditions:default": [],
-    }),
+    local_defines = COMMON_DEFINES,
     deps = [":common"],
 )
 
@@ -458,24 +423,7 @@ cc_library(
             "-mssse3",
         ],
     }) + COMMON_COTPS,
-    linkopts = select({
-        "@platforms//os:windows": [],
-        "@platforms//os:osx": [],
-        "//conditions:default": [
-            "-Wl,-z,relro",
-            "-Wl,-z,now",
-            "-Wl,-z,noexecstack",
-        ],
-    }),
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES,
-        "@platforms//os:linux": LINUX_DEFINES,
-        "@platforms//os:windows": WINDOWS_DEFINES + [],
-        "//conditions:default": [],
-    }),
+    local_defines = COMMON_DEFINES,
     deps = [":common"],
 )
 
@@ -499,24 +447,7 @@ cc_library(
             "-mpclmul",
         ],
     }) + COMMON_COTPS,
-    linkopts = select({
-        "@platforms//os:windows": [],
-        "@platforms//os:osx": [],
-        "//conditions:default": [
-            "-Wl,-z,relro",
-            "-Wl,-z,now",
-            "-Wl,-z,noexecstack",
-        ],
-    }),
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES,
-        "@platforms//os:linux": LINUX_DEFINES,
-        "@platforms//os:windows": WINDOWS_DEFINES + [],
-        "//conditions:default": [],
-    }),
+    local_defines = COMMON_DEFINES,
     deps = [":common"],
 )
 
@@ -536,24 +467,7 @@ cc_library(
             "-msse4.1",
         ],
     }) + COMMON_COTPS,
-    linkopts = select({
-        "@platforms//os:windows": [],
-        "@platforms//os:osx": [],
-        "//conditions:default": [
-            "-Wl,-z,relro",
-            "-Wl,-z,now",
-            "-Wl,-z,noexecstack",
-        ],
-    }),
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES,
-        "@platforms//os:linux": LINUX_DEFINES,
-        "@platforms//os:windows": WINDOWS_DEFINES + [],
-        "//conditions:default": [],
-    }),
+    local_defines = COMMON_DEFINES,
     deps = [":common"],
 )
 
@@ -578,24 +492,7 @@ cc_library(
             "-mavx2",
         ],
     }) + COMMON_COTPS,
-    linkopts = select({
-        "@platforms//os:windows": [],
-        "@platforms//os:osx": [],
-        "//conditions:default": [
-            "-Wl,-z,relro",
-            "-Wl,-z,now",
-            "-Wl,-z,noexecstack",
-        ],
-    }),
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES,
-        "@platforms//os:linux": LINUX_DEFINES,
-        "@platforms//os:windows": WINDOWS_DEFINES + [],
-        "//conditions:default": [],
-    }),
+    local_defines = COMMON_DEFINES,
     deps = [":common"],
 )
 
@@ -618,24 +515,7 @@ cc_library(
             "-mavx512f",
         ],
     }) + COMMON_COTPS,
-    linkopts = select({
-        "@platforms//os:windows": [],
-        "@platforms//os:osx": [],
-        "//conditions:default": [
-            "-Wl,-z,relro",
-            "-Wl,-z,now",
-            "-Wl,-z,noexecstack",
-        ],
-    }),
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES,
-        "@platforms//os:linux": LINUX_DEFINES,
-        "@platforms//os:windows": WINDOWS_DEFINES + [],
-        "//conditions:default": [],
-    }),
+    local_defines = COMMON_DEFINES,
     deps = [":common"],
 )
 
@@ -657,24 +537,7 @@ cc_library(
             "-mssse3",
         ],
     }) + COMMON_COTPS,
-    linkopts = select({
-        "@platforms//os:windows": [],
-        "@platforms//os:osx": [],
-        "//conditions:default": [
-            "-Wl,-z,relro",
-            "-Wl,-z,now",
-            "-Wl,-z,noexecstack",
-        ],
-    }),
-    local_defines = COMMON_DEFINES + select({
-        "@platforms//cpu:aarch64": AARCH64_DEFINES,
-        "//conditions:default": X86_64_DEFINES,
-    }) + select({
-        "@platforms//os:osx": OSX_DEFINES,
-        "@platforms//os:linux": LINUX_DEFINES,
-        "@platforms//os:windows": WINDOWS_DEFINES + [],
-        "//conditions:default": [],
-    }),
+    local_defines = COMMON_DEFINES,
     deps = [
         ":aesni",
         ":armcrypto",

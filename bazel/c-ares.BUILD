@@ -4,12 +4,7 @@ load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "te
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + selects.with_or({
-    ("@bazel_template//bazel:gcc", "@bazel_template//bazel:clang"): [
-        "-Wall",
-        "-Wextra",
-        "-g",
-        "-O3",
-    ],
+    ("@bazel_template//bazel:gcc", "@bazel_template//bazel:clang"): [],
     "@bazel_template//bazel:msvc": ["/std:c11"],
     "//conditions:default": [],
 }) + select({
@@ -17,8 +12,7 @@ COPTS = GLOBAL_COPTS + selects.with_or({
         "-std=c90",
         "-fPIC",
     ],
-    "@bazel_template//bazel:windows_x86_64_msvc": [
-    ],
+    "@bazel_template//bazel:windows_x86_64_msvc": [],
     "//conditions:default": ["-std=gnu90"],
 })
 

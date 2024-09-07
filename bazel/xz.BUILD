@@ -1,6 +1,4 @@
-load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS")
 
 package(default_visibility = ["//visibility:public"])
 

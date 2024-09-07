@@ -1,3 +1,7 @@
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
 cc_library(
     name = "lz4",
     srcs = [
@@ -16,20 +20,16 @@ cc_library(
         "lib/xxhash.c",
         "lib/xxhash.h",
     ],
-    copts = [
-        "-O3",
-        "-Wpointer-arith",
-        "-Wstrict-prototypes",
-        "-Wdeclaration-after-statement",
-        "-Wswitch-enum",
-        "-Wshadow",
-        "-Wcast-align",
-        "-Wcast-qual",
-        "-Wundef",
-        "-Wextra",
-        "-Wall",
-        "-Iexternal/lz4/lib",
-    ],
+    copts = GLOBAL_COPTS + select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "/Ox",
+            "/Iexternal/lz4/lib",
+        ],
+        "//conditions:default": [
+            "-O3",
+            "-Iexternal/lz4/lib",
+        ],
+    }),
     linkopts = [],
     local_defines = [
         "NDEBUG",
@@ -63,15 +63,22 @@ cc_library(
         "programs/timefn.h",
         "programs/util.h",
     ],
-    copts = [
-        "-O3",
-        "-Iexternal/lz4/programs",
-        "-Iexternal/lz4/lib",
-    ],
-    local_defines = [
+    copts = GLOBAL_COPTS + select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "/Ox",
+            "/Iexternal/lz4/lib",
+            "/Iexternal/lz4/programs",
+        ],
+        "//conditions:default": [
+            "-O3",
+            "-Iexternal/lz4/lib",
+            "-Iexternal/lz4/programs",
+        ],
+    }),
+    local_defines = GLOBAL_LOCAL_DEFINES + [
         "XXH_NAMESPACE=LZ4_",
-        "LZ4IO_MULTITHREAD",
         "ENABLE_LZ4C_LEGACY_OPTIONS",
+        "LZ4IO_MULTITHREAD=0",
     ],
     deps = [
         ":lz4",
@@ -83,14 +90,20 @@ cc_binary(
     srcs = [
         "programs/lz4cli.c",
     ],
-    copts = [
-        "-O3",
-        "-Iexternal/lz4/programs",
-        "-Iexternal/lz4/lib",
-    ],
+    copts = GLOBAL_COPTS + select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "/Ox",
+            "/Iexternal/lz4/lib",
+            "/Iexternal/lz4/programs",
+        ],
+        "//conditions:default": [
+            "-O3",
+            "-Iexternal/lz4/lib",
+            "-Iexternal/lz4/programs",
+        ],
+    }),
     local_defines = [
         "XXH_NAMESPACE=LZ4_",
-        "LZ4IO_MULTITHREAD",
         "ENABLE_LZ4C_LEGACY_OPTIONS",
     ],
     deps = [

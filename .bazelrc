@@ -107,10 +107,11 @@ build:opt --compilation_mode=opt
 build:opt --copt=-Wframe-larger-than=16384
 build:dbg --compilation_mode=dbg
 
-startup --output_base=C:/x --windows_enable_symlinks
+startup --output_base=D:/x --windows_enable_symlinks
 build:windows --cxxopt='/std:c++17'
 build:windows --host_cxxopt='/std:c++17'
 build:windows --compiler='msvc-cl'
+build:windows --cpu='x64_windows_msvc'
 
 build:macos --copt='-mmacosx-version-min=10.15'
 build:macos --copt='-g'

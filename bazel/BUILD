@@ -271,6 +271,14 @@ selects.config_setting_group(
 )
 
 selects.config_setting_group(
+    name = "cross_compiling_for_osx",
+    match_all = [
+        ":cross_compiling",
+        "@platforms//os:osx",
+    ],
+)
+
+selects.config_setting_group(
     name = "not_cross_compiling_on_osx",
     match_all = [
         ":not_cross_compiling",
@@ -288,6 +296,14 @@ selects.config_setting_group(
 )
 
 selects.config_setting_group(
+    name = "cross_compiling_for_windows",
+    match_all = [
+        ":cross_compiling",
+        "@platforms//os:windows",
+    ],
+)
+
+selects.config_setting_group(
     name = "not_cross_compiling_on_windows",
     match_all = [
         ":not_cross_compiling",
@@ -295,4 +311,3 @@ selects.config_setting_group(
         ":msvc",
     ],
 )
-

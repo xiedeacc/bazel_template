@@ -1,5 +1,5 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -12,7 +12,8 @@ alias(
 alias(
     name = "libbzip2",
     actual = selects.with_or({
-        ("@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): ":bz2lib_system",
+        #("@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): ":bz2lib_system",
+        ("@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): ":bz2lib_source",
         "//conditions:default": ":bz2lib_source",
     }),
     visibility = ["//visibility:public"],

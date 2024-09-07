@@ -2,17 +2,33 @@ load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_c
 
 GLOBAL_COPTS = select({
     "@bazel_template//bazel:cross_compiling_for_osx_gcc": [
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-g",
         "-mmacosx-version-min=10.15",
     ],
     "@bazel_template//bazel:cross_compiling_for_osx_clang": [
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-g",
         "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_osx": [
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-g",
         "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
     ],
     "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
+        "-Wall",
+        "-Wextra",
+        "-O2",
+        "-g",
         "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
     ],
@@ -24,6 +40,7 @@ GLOBAL_COPTS = select({
         #"/Zi",
         "/O2",
         "/Ob2",
+        "/Oi",
         "/Gm-",
         "/fp:precise",
         "/Zc:forScope",
@@ -31,12 +48,22 @@ GLOBAL_COPTS = select({
         "/MD",
         "/diagnostics:column",
         "/nologo",
+        "_UNICODE",
+        "UNICODE",
     ],
     "//conditions:default": [
         "-Wall",
         "-Wextra",
         "-O2",
         "-g",
+        "-Wpointer-arith",
+        "-Wstrict-prototypes",
+        "-Wdeclaration-after-statement",
+        "-Wswitch-enum",
+        "-Wshadow",
+        "-Wcast-align",
+        "-Wcast-qual",
+        "-Wundef",
     ],
 })
 
@@ -48,8 +75,12 @@ GLOBAL_LOCAL_DEFINES = select({
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
         "_MBCS",
         "WIN32",
+        "_WIN32",
         "_WINDOWS",
         "NDEBUG",
+        #"_MSC_VER=1941",
+        "WIN64",
+        "_WIN64",
     ],
     "//conditions:default": [
         "-Wall",
@@ -60,20 +91,29 @@ GLOBAL_LOCAL_DEFINES = select({
 })
 
 GLOBAL_LINKOPTS = select({
-    "@bazel_template//bazel:cross_compiling_for_osx": [
+    "@bazel_template//bazel:cross_compiling_for_osx_gcc": [
         "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
+        "-pthread",
+    ],
+    "@bazel_template//bazel:cross_compiling_for_osx_clang": [
+        "-stdlib=libc++",
+        "-mmacosx-version-min=10.15",
+        "-pthread",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_osx": [
         "-stdlib=libc++",
         "-lc++abi",
         "-mmacosx-version-min=10.15",
+        "-pthread",
     ],
-    "@bazel_template//bazel:cross_compiling_for_windows": [
+    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
+        "-pthread",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/MD",
     ],
-    "//conditions:default": [],
+    "//conditions:default": ["-pthread"],
 })
 
 def dict_union(x, y):
