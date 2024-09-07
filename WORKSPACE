@@ -194,6 +194,27 @@ new_git_repository(
 )
 
 http_archive(
+    name = "nasm",
+    build_file = "//bazel:nasm.BUILD",
+    sha256 = "f5c93c146f52b4f1664fa3ce6579f961a910e869ab0dae431bd871bdd2584ef2",
+    strip_prefix = "nasm-2.15.05",
+    urls = [
+        "https://mirror.bazel.build/www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip",
+        "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip",
+    ],
+)
+
+http_archive(
+    name = "perl",
+    build_file = "//bazel:perl.BUILD",
+    sha256 = "aeb973da474f14210d3e1a1f942dcf779e2ae7e71e4c535e6c53ebabe632cc98",
+    urls = [
+        "https://mirror.bazel.build/strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip",
+        "https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip",
+    ],
+)
+
+http_archive(
     name = "openssl",
     build_file = "//bazel:openssl.make.BUILD",
     patch_args = ["-p1"],

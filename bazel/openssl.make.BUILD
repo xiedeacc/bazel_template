@@ -1,5 +1,5 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@rules_foreign_cc//foreign_cc:defs.bzl", "configure_make", "configure_make_variant")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "configure_make")
 load("@rules_foreign_cc//toolchains/native_tools:native_tools_toolchain.bzl", "native_tool_toolchain")
 
 package(default_visibility = ["//visibility:public"])
@@ -50,13 +50,7 @@ alias(
 
 alias(
     name = "openssl",
-    #actual = ":openssl_static",
-    actual = select({
-        "@platforms//os:linux": ":openssl_static",
-        "@platforms//os:osx": ":openssl_static",
-        "@platforms//os:windows": ":openssl_static",
-        "//conditions:default": ":openssl_static",
-    }),
+    actual = ":openssl_static",
 )
 
 native_tool_toolchain(
@@ -81,66 +75,34 @@ toolchain(
     toolchain_type = "@rules_foreign_cc//toolchains:make_toolchain",
 )
 
-configure_make(
-    name = "openssl_shared",
-    args = ["-j4"],
-    configure_command = "Configure",
-    configure_in_place = True,
-    configure_options = CONFIGURE_OPTIONS + select({
-        "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
-        "@bazel_template//bazel:osx_x86_64": [
-            #"darwin64-x86_64-cc",
-            "enable-shared",
-        ],
-        "@bazel_template//bazel:windows_x86_64": [
-            "mingw64",
-            "no-shared",
-        ],
-        "//conditions:default": [],
-    }),
-    env = select({
-        "@bazel_template//bazel:osx_x86_64": {"ARFLAGS": "-static -o"},
-        "//conditions:default": {},
-    }),
-    lib_name = LIB_NAME,
-    lib_source = ":all_srcs",
-    out_lib_dir = selects.with_or({
-        ("@platforms//cpu:aarch64", "@platforms//os:osx"): "lib",
-        "//conditions:default": "lib64",
-    }),
-    out_shared_libs = select({
-        "@platforms//os:osx": [
-            "libssl.dylib",
-            "libcrypto.dylib",
-            "libssl.3.dylib",
-            "libcrypto.3.dylib",
-        ],
-        "@platforms//os:linux": [
-            "libssl.so",
-            "libcrypto.so",
-        ],
-        "@platforms//os:windows": [
-            "libssl.dll",
-            "libcrypto.dll",
-        ],
-        "//conditions:default": [],
-    }),
-    targets = MAKE_TARGETS,
-    deps = [
-        "@brotli//:brotlicommon",
-        "@brotli//:brotlidec",
-        "@brotli//:brotlienc",
-        "@zlib//:z",
-        "@zstd",
+native_tool_toolchain(
+    name = "preinstalled_nmake",
+    path = "nmake.exe",
+)
+
+toolchain(
+    name = "preinstalled_nmake_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:windows",
     ],
+    toolchain = ":preinstalled_nmake",
+    toolchain_type = "@rules_foreign_cc//toolchains:make_toolchain",
 )
 
 configure_make(
     name = "openssl_static",
-    args = ["-j4"],
+    args = select({
+        "@bazel_template//bazel:not_cross_compiling_on_osx": ["-j4"],
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+        "//conditions:default": ["-j"],
+    }),
     build_data = select({
         "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
             "@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres",
+        ],
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "@nasm//:nasm",
+            "@perl//:perl",
         ],
         "//conditions:default": [],
     }),
@@ -158,11 +120,19 @@ configure_make(
         "@bazel_template//bazel:not_cross_compiling_on_windows": [
             "VC-WIN64A",
             "no-shared",
+            "ASFLAGS=\" \"",
+            #"CFLAGS=-Zi",
         ],
         "//conditions:default": [],
     }),
+    configure_prefix = "$$PERL",
     env = select({
         "@platforms//os:osx": {"ARFLAGS": "-static -o"},
+        "@bazel_template//bazel:not_cross_compiling_on_windows": {
+            "PATH": "$$(dirname $(execpath @nasm//:nasm)):$$PATH",
+            "PERL": "$(execpath @perl//:perl)",
+            "CFLAGS": "-Zi",
+        },
         "@bazel_template//bazel:cross_compiling_for_windows": {
             "WINDRES": "x86_64-w64-mingw32-windres",
             "PATH": "$$(dirname $(execpath @cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres)):$$PATH",
@@ -175,10 +145,16 @@ configure_make(
         ("@platforms//cpu:aarch64", "@platforms//os:osx", "@platforms//os:windows"): "lib",
         "//conditions:default": "lib64",
     }),
-    out_static_libs = [
-        "libssl.a",
-        "libcrypto.a",
-    ],
+    out_static_libs = select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "libssl.lib",
+            "libcrypto.lib",
+        ],
+        "//conditions:default": [
+            "libssl.a",
+            "libcrypto.a",
+        ],
+    }),
     targets = MAKE_TARGETS,
     deps = [
         "@brotli//:brotlicommon",
