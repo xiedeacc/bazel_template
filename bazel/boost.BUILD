@@ -113,7 +113,14 @@ BOOST_CTX_ASM_SOURCES = selects.with_or({
         "libs/context/src/asm/ontop_x86_64_sysv_elf_gas.S",
     ],
     ("@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): ["apple_ctx_asm_sources"],
-    ":windows_x86_64": ["@bazel_template//lib:boost_context_lib"],
+    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
+        "@bazel_template//lib:boost_context_lib",
+    ],
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "libs/context/src/asm/make_x86_64_ms_pe_masm.asm",
+        "libs/context/src/asm/jump_x86_64_ms_pe_masm.asm",
+        "libs/context/src/asm/ontop_x86_64_ms_pe_masm.asm",
+    ],
     "//conditions:default": [],
 })
 
@@ -144,8 +151,8 @@ boost_library(
         ("@platforms//os:linux", "@platforms//os:android", "@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): [
             "libs/context/src/posix/stack_traits.cpp",
         ],
-        ":windows_x86_64": [
-            #"libs/context/src/windows/stack_traits.cpp",
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "libs/context/src/windows/stack_traits.cpp",
         ],
         "//conditions:default": [],
     }),
@@ -155,7 +162,7 @@ boost_library(
         "libs/context/src/continuation.cpp",
     ],
     local_defines = select({
-        #":windows_x86_64": ["BOOST_CONTEXT_EXPORT="],
+        ":windows_x86_64": ["BOOST_CONTEXT_EXPORT="],
         "//conditions:default": [],
     }),
     visibility = ["//visibility:public"],

@@ -9,8 +9,6 @@ filegroup(
     srcs = glob(["**"]),
 )
 
-#EXT_BUILD_DEPS introduced by rules_foreign_cc,it will generate a directory
-#like openssl.ext_build_deps
 CONFIGURE_OPTIONS = [
     "enable-brotli",
     "enable-egd",
@@ -21,15 +19,17 @@ CONFIGURE_OPTIONS = [
     "enable-zstd",
     "enable-rfc3779",
     "enable-cms",
-    "enable-ec_nistp_64_gcc_128",
     "no-tests",
-    "--with-zlib-include=$$EXT_BUILD_DEPS$$/include",
-    "--with-zlib-lib=$$EXT_BUILD_DEPS$$/lib",
-    "--with-zstd-include=$$EXT_BUILD_DEPS$$/include",
-    "--with-zstd-lib=$$EXT_BUILD_DEPS$$/lib",
-    "--with-brotli-include=$$EXT_BUILD_DEPS$$/include",
-    "--with-brotli-lib=$$EXT_BUILD_DEPS$$/lib",
-]
+    "--with-zlib-include=$$$$EXT_BUILD_DEPS$$$$/include",
+    "--with-zlib-lib=$$$$EXT_BUILD_DEPS$$$$/lib",
+    "--with-zstd-include=$$$$EXT_BUILD_DEPS$$$$/include",
+    "--with-zstd-lib=$$$$EXT_BUILD_DEPS$$$$/lib",
+    "--with-brotli-include=$$$$EXT_BUILD_DEPS$$$$/include",
+    "--with-brotli-lib=$$$$EXT_BUILD_DEPS$$$$/lib",
+] + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": ["enable-ec_nistp_64_gcc_128"],
+})
 
 LIB_NAME = "openssl"
 
@@ -121,17 +121,23 @@ configure_make(
             "VC-WIN64A",
             "no-shared",
             "ASFLAGS=\" \"",
-            #"CFLAGS=-Zi",
+            "CC=cl.exe",
+            "LD=link.exe",
+            "AR=lib.exe",
         ],
         "//conditions:default": [],
     }),
     configure_prefix = "$$PERL",
+    # copts = select({
+    #     "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    #     "//conditions:default": [],
+    # }),
     env = select({
         "@platforms//os:osx": {"ARFLAGS": "-static -o"},
         "@bazel_template//bazel:not_cross_compiling_on_windows": {
             "PATH": "$$(dirname $(execpath @nasm//:nasm)):$$PATH",
             "PERL": "$(execpath @perl//:perl)",
-            "CFLAGS": "-Zi",
+            "CL": "/MP16",
         },
         "@bazel_template//bazel:cross_compiling_for_windows": {
             "WINDRES": "x86_64-w64-mingw32-windres",

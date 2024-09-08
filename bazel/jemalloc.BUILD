@@ -1,8 +1,8 @@
-load("@bazel_template//bazel:common.bzl", "extract_symbols", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES", "extract_symbols", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
-COPTS = select({
+COPTS = GLOBAL_COPTS + select({
     "@platforms//os:linux": [
         "-I$(GENDIR)/external/libunwind/include",
         "-Iexternal/libunwind/src",
@@ -11,32 +11,28 @@ COPTS = select({
         "-Iexternal/libunwind/include/tdep",
         "-Iexternal/libunwind/src/mi",
     ],
-    "@platforms//os:windows": [],
-    "@platforms//os:osx": [],
     "//conditions:default": [],
-}) + [
-    "-std=gnu11",
-    "-Wall",
-    "-Wextra",
-    "-Wsign-compare",
-    "-Wundef",
-    "-Wno-format-zero-length",
-    "-Wpointer-arith",
-    "-Wno-missing-braces",
-    "-Wno-missing-field-initializers",
-    "-Wno-missing-attributes",
-    "-pipe",
-    "-g3",
-    "-fvisibility=hidden",
-    "-Wimplicit-fallthrough",
-    "-Wdeprecated-declarations",
-    "-O3",
-    "-funroll-loops",
-    "-Iexternal/jemalloc/include",
-    "-I$(GENDIR)/external/jemalloc/include",
-]
+}) + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/std:c11",
+        "/Iexternal/jemalloc/include",
+        "/I$(GENDIR)/external/jemalloc/include",
+    ],
+    "//conditions:default": [
+        "-std=gnu11",
+        "-pipe",
+        "-g3",
+        "-fvisibility=hidden",
+        "-Wimplicit-fallthrough",
+        "-Wdeprecated-declarations",
+        "-O3",
+        "-funroll-loops",
+        "-Iexternal/jemalloc/include",
+        "-I$(GENDIR)/external/jemalloc/include",
+    ],
+})
 
-LOCAL_DEFINES = [
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
     "_REENTRANT",
 ] + select({
     "@platforms//os:linux": ["_GNU_SOURCE"],
@@ -590,7 +586,11 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    copts = COPTS,
+    copts = COPTS + select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "/Iexternal/jemalloc/include/msvc_compat",
+        ],
+    }),
     linkopts = ["-lpthread"],
     local_defines = [
         "JEMALLOC_NO_PRIVATE_NAMESPACE",
@@ -638,7 +638,11 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    copts = COPTS,
+    copts = COPTS + select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "/Iexternal/jemalloc/include/msvc_compat",
+        ],
+    }),
     linkopts = ["-lpthread"],
     local_defines = LOCAL_DEFINES,
     deps = [":jemalloc_headers"] + select({

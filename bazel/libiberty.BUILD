@@ -82,18 +82,25 @@ cc_library(
         "include/*.h",
         "include/dwarf2.def",
     ]),
-    copts = [
-        "-Wwrite-strings",
-        "-Wc++-compat",
-        "-Wstrict-prototypes",
-        "-Wshadow=local",
-        "-pedantic",
-        "-I$(GENDIR)/external/libiberty/libiberty",
-        "-Iexternal/libiberty/include",
-    ] + select({
+    copts = select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "/I$(GENDIR)/external/libiberty/libiberty",
+            "/Iexternal/libiberty/include",
+        ],
+        "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
+            "-pedantic",
+            "-I$(GENDIR)/external/libiberty/libiberty",
+            "-Iexternal/libiberty/include",
+        ],
         "@bazel_template//bazel:linux_aarch64": [
+            "-pedantic",
+            "I$(GENDIR)/external/libiberty/libiberty",
+            "-Iexternal/libiberty/include",
         ],
         "@bazel_template//bazel:linux_x86_64": [
+            "-pedantic",
+            "-I$(GENDIR)/external/libiberty/libiberty",
+            "-Iexternal/libiberty/include",
             "-fcf-protection",
         ],
         "//conditions:default": [],

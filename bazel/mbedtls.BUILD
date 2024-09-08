@@ -1,3 +1,5 @@
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -10,30 +12,23 @@ cc_library(
         ],
         exclude = ["include/mbedtls/mbedtls_config.h"],
     ),
-    copts = [
-        "-Wall",
-        "-Wextra",
-    ],
+    copts = GLOBAL_COPTS,
     includes = [
         "include",
         "library",
     ],
-    visibility = ["//visibility:public"],
     deps = [":mbedtls_config"],
 )
 
 cc_library(
     name = "mbedtls_default_config",
     hdrs = ["include/mbedtls/mbedtls_config.h"],
-    includes = [
-        "include",
-    ],
+    includes = ["include"],
 )
 
 label_flag(
     name = "mbedtls_config",
     build_setting_default = ":mbedtls_default_config",
-    visibility = ["//visibility:public"],
 )
 
 cc_binary(

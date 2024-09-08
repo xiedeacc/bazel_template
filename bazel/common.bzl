@@ -45,11 +45,12 @@ GLOBAL_COPTS = select({
         "/fp:precise",
         "/Zc:forScope",
         "/Gd",
-        "/MD",
+        #"/MD",
         "/diagnostics:column",
         "/nologo",
         "_UNICODE",
         "UNICODE",
+        "/MP",
     ],
     "//conditions:default": [
         "-Wall",
@@ -78,16 +79,13 @@ GLOBAL_LOCAL_DEFINES = select({
         "_WIN32",
         "_WINDOWS",
         "NDEBUG",
-        #"_MSC_VER=1941",
+        "_MSC_VER=1941",
         "WIN64",
         "_WIN64",
+        "_CRT_SECURE_NO_DEPRECATE",
+        "_CRT_NONSTDC_NO_DEPRECATE",
     ],
-    "//conditions:default": [
-        "-Wall",
-        "-Wextra",
-        "-O2",
-        "-g",
-    ],
+    "//conditions:default": [],
 })
 
 GLOBAL_LINKOPTS = select({

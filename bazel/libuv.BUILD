@@ -83,40 +83,41 @@ cc_library(
             "include/uv/unix.h",
         ],
     }),
-    copts = [
-        "-Iexternal/libuv/src",
-        "-std=c11",
-        "-pedantic",
-        "-O3",
-        "-Wno-error",
-        "-Wno-strict-aliasing",
-        "-Wstrict-aliasing",
-        "-Wno-implicit-function-declaration",
-        "-Wno-unused-function",
-        "-Wno-unused-variable",
-        "-pthread",
-    ] + select({
+    copts = select({
         "@platforms//os:android": [],
         "@platforms//os:macos": [
             "-D_DARWIN_USE_64_BIT_INODE=1",
             "-D_DARWIN_UNLIMITED_SELECT=1",
+            "-Iexternal/libuv/src",
+            "-std=c11",
+            "-pedantic",
+            "-O3",
+            "-pthread",
         ],
-        "@platforms//os:windows": [
+        "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
             "-Iexternal/libuv/src/win",
             "-O2",
             "-DWIN32_LEAN_AND_MEAN",
             "-D_WIN32_WINNT=0x0601",
         ],
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "/std:c11",
+            "/Iexternal/libuv/src",
+        ],
         "//conditions:default": [
             "-Iexternal/libuv/src/unix",
             "-Wno-tree-vrp",
             "-Wno-omit-frame-pointer",
+            "-Iexternal/libuv/src",
+            "-std=c11",
+            "-pedantic",
+            "-O3",
+            "-pthread",
         ],
     }),
     includes = ["include"],
     linkopts = select({
-        "@platforms//os:windows": [
-        ],
+        "@platforms//os:windows": [],
         "//conditions:default": [
             "-lpthread",
             "-ldl",
@@ -132,22 +133,24 @@ cc_library(
         "HAVE_STRING_H=1",
         "HAVE_INTTYPES_H=1",
         "HAVE_STDINT_H=1",
-        "HAVE_STRINGS_H=1",
         "HAVE_SYS_STAT_H=1",
         "HAVE_SYS_TYPES_H=1",
-        "HAVE_UNISTD_H=1",
         "STDC_HEADERS=1",
     ] + select({
-        "@platforms//os:windows": [
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
         ],
         "@platforms//os:osx": [
             "_DARWIN_USE_64_BIT_INODE=1",
             "_DARWIN_UNLIMITED_SELECT=1",
             "HAVE_DLFCN_H=1",
             "HAVE_PTHREAD_PRIO_INHERIT=1",
+            "HAVE_STRINGS_H=1",
+            "HAVE_UNISTD_H=1",
         ],
         "//conditions:default": [
             "_GNU_SOURCE",
+            "HAVE_STRINGS_H=1",
+            "HAVE_UNISTD_H=1",
         ],
     }),
 )
