@@ -82,8 +82,6 @@ GLOBAL_LOCAL_DEFINES = select({
         "_MSC_VER=1941",
         "WIN64",
         "_WIN64",
-        "_CRT_SECURE_NO_DEPRECATE",
-        "_CRT_NONSTDC_NO_DEPRECATE",
     ],
     "//conditions:default": [],
 })

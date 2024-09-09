@@ -1,35 +1,50 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
-COPTS = [
-    "-Iexternal/libdwarf/src/lib/libdwarf",
-    "-isystem external/libiberty/include",
-    "-isystem external/folly",
-    "-isystem $(GENDIR)/external/folly",
-    "-isystem external/zstd/lib",
-    "-isystem external/double-conversion",
-    "-isystem external/lz4/lib",
-    "-isystem external/bzip2",
-    "-isystem external/com_github_google_snappy",
-    "-isystem external/libsodium/src/libsodium/include",
-    "-Iexternal/libsodium/src/libsodium/include/sodium",
-    "-isystem $(GENDIR)/external/libsodium/src/libsodium/include",
-    "-Wall",
-    "-Wno-deprecated",
-    "-Wno-deprecated-declarations",
-    "-Wno-sign-compare",
-    "-Wno-unused",
-    "-Wunused-label",
-    "-Wunused-result",
-    "-Wuninitialized",
-    "-Wshadow-compatible-local",
-    "-Wno-noexcept-type",
-    "-finput-charset=UTF-8",
-    "-fsigned-char",
-    "-faligned-new",
-] + select({
+COPTS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/Iexternal/libdwarf/src/lib/libdwarf",
+        "/Iexternal/folly",
+        "/I$(GENDIR)/external/folly",
+        "/Iexternal/zstd/lib",
+        "/Iexternal/double-conversion",
+        "/Iexternal/lz4/lib",
+        "/Iexternal/bzip2",
+        "/Iexternal/com_github_google_snappy",
+        "/Iexternal/libsodium/src/libsodium/include",
+        "/Iexternal/libsodium/src/libsodium/include/sodium",
+        "/I$(GENDIR)/external/libsodium/src/libsodium/include",
+    ],
+    "//conditions:default": [
+        "-Iexternal/libdwarf/src/lib/libdwarf",
+        "-isystem external/libiberty/include",
+        "-isystem external/folly",
+        "-isystem $(GENDIR)/external/folly",
+        "-isystem external/zstd/lib",
+        "-isystem external/double-conversion",
+        "-isystem external/lz4/lib",
+        "-isystem external/bzip2",
+        "-isystem external/com_github_google_snappy",
+        "-isystem external/libsodium/src/libsodium/include",
+        "-Iexternal/libsodium/src/libsodium/include/sodium",
+        "-isystem $(GENDIR)/external/libsodium/src/libsodium/include",
+        "-Wall",
+        "-Wno-deprecated",
+        "-Wno-deprecated-declarations",
+        "-Wno-sign-compare",
+        "-Wno-unused",
+        "-Wunused-label",
+        "-Wunused-result",
+        "-Wuninitialized",
+        "-Wshadow-compatible-local",
+        "-Wno-noexcept-type",
+        "-finput-charset=UTF-8",
+        "-fsigned-char",
+        "-faligned-new",
+    ],
+}) + select({
     "@platforms//os:linux": [
         "-I$(GENDIR)/external/libunwind/include",
         "-Iexternal/libunwind/src",
@@ -43,28 +58,38 @@ COPTS = [
     "@platforms//os:osx": [],
     "@platforms//os:windows": [],
     "//conditions:default": [],
-}) + GLOBAL_COPTS
+})
 
-LOCAL_DEFINES = [
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
     "HAVE_CONFIG_H",
     "_GNU_SOURCE",
     "_REENTRANT",
     "_LARGEFILE64_SOURCE",
-    "BOOST_ATOMIC_DYN_LINK",
-    "BOOST_ATOMIC_NO_LIB",
-    "BOOST_CONTEXT_DYN_LINK",
-    "BOOST_CONTEXT_NO_LIB",
-    "BOOST_FILESYSTEM_DYN_LINK",
-    "BOOST_FILESYSTEM_NO_LIB",
-    "BOOST_PROGRAM_OPTIONS_DYN_LINK",
-    "BOOST_PROGRAM_OPTIONS_NO_LIB",
-    "BOOST_REGEX_DYN_LINK",
-    "BOOST_REGEX_NO_LIB",
-    "BOOST_SYSTEM_DYN_LINK",
-    "BOOST_SYSTEM_NO_LIB",
-    "BOOST_THREAD_DYN_LINK",
-    "BOOST_THREAD_NO_LIB",
-]
+    # "BOOST_ATOMIC_DYN_LINK",
+    # "BOOST_ATOMIC_NO_LIB",
+    # "BOOST_CONTEXT_DYN_LINK",
+    # "BOOST_CONTEXT_NO_LIB",
+    # "BOOST_FILESYSTEM_DYN_LINK",
+    # "BOOST_FILESYSTEM_NO_LIB",
+    # "BOOST_PROGRAM_OPTIONS_DYN_LINK",
+    # "BOOST_PROGRAM_OPTIONS_NO_LIB",
+    # "BOOST_REGEX_DYN_LINK",
+    # "BOOST_REGEX_NO_LIB",
+    # "BOOST_SYSTEM_DYN_LINK",
+    # "BOOST_SYSTEM_NO_LIB",
+    # "BOOST_THREAD_DYN_LINK",
+    # "BOOST_THREAD_NO_LIB",
+] + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "_CRT_NONSTDC_NO_WARNINGS",
+        "_CRT_SECURE_NO_WARNINGS",
+        "_SCL_SECURE_NO_WARNINGS",
+        "_ENABLE_EXTENDED_ALIGNED_STORAGE",
+        "_STL_EXTRA_DISABLED_WARNINGS=4774 4987",
+        "WIN32_LEAN_AND_MEAN",
+    ],
+    "//conditions:default": [],
+})
 
 cc_library(
     name = "MathOperation_AVX2",
@@ -137,8 +162,8 @@ cc_library(
 
 cc_library(
     name = "assemble",
-    srcs = select({
-        "@platforms//cpu:x86_64": [
+    srcs = selects.with_or({
+        ("@bazel_template//bazel:linux_x86_64", "@bazel_template//bazel:osx_x86_64"): [
             "folly/memcpy.S",
             #"folly/memset.S",
         ],
@@ -148,6 +173,7 @@ cc_library(
             "folly/external/aor/memcpy_sve.S",
             "folly/external/aor/memset-advsimd.S",
         ],
+        "//conditions:default": [],
     }),
     copts = COPTS + ["-x assembler-with-cpp"],
     local_defines = LOCAL_DEFINES + select({
@@ -176,7 +202,6 @@ cc_library(
             "folly/hash/detail/Crc32CombineDetail.cpp",
             "folly/hash/detail/Crc32cDetail.cpp",
             "folly/io/tool/HugePageUtil.cpp",
-            "folly/experimental/symbolizer/tool/Addr2Line.cpp",
             "folly/json/tool/JSONSchemaTester.cpp",
             "folly/tool/BenchmarkCompare.cpp",
             "folly/build/**",
@@ -188,6 +213,7 @@ cc_library(
             "folly/Subprocess.cpp",
             "folly/debugging/exception_tracer/*.cpp",
             "folly/executors/ManualExecutor.cpp",
+            "folly/experimental/symbolizer/tool/*.cpp",
         ],
     ) + select({
         "@platforms//os:windows": [],
@@ -241,6 +267,7 @@ cc_library(
         "@boost//:multi_index",
         "@boost//:preprocessor",
         "@boost//:program_options",
+        "@boost//:thread",
         "@boost//:utility",
         "@com_github_gflags_gflags//:gflags",
         "@com_github_glog_glog//:glog",
@@ -251,7 +278,6 @@ cc_library(
         "@libdwarf//:dwarf",
         "@libevent//:event",
         "@libevent//:event_openssl",
-        "@libiberty//:iberty",
         "@libsodium//:sodium",
         "@openssl//:ssl",
         "@zstd",
@@ -260,8 +286,14 @@ cc_library(
         "@bazel_template//bazel:tcmalloc": ["@tcmalloc//tcmalloc"],
         "//conditions:default": [],
     }) + select({
+        "@bazel_template//bazel:cross_compiling_for_windows_gcc": ["@libiberty//:iberty"],
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+        "@platforms//os:osx": [
+            "@libiberty//:iberty",
+        ],
         "@platforms//os:linux": [
             "@libaio//:aio",
+            "@libiberty//:iberty",
             "@libunwind//:unwind",
             "@liburing//:liburing-ffi",
         ],
@@ -309,7 +341,7 @@ genrule(
         "#define FOLLY_HAVE_LIBGFLAGS 1",
         "#define FOLLY_GFLAGS_NAMESPACE gflags",
         "#define FOLLY_HAVE_LIBGLOG 1",
-        "#define FOLLY_USE_JEMALLOC 1",
+        "#define FOLLY_USE_JEMALLOC 0",
         "#if __has_include(<features.h>)",
         "#include <features.h>",
         "#endif",
@@ -358,9 +390,9 @@ template_rule(
     src = ":folly-config_h_in",
     out = "folly/folly-config.h",
     substitutions = select({
-        "@bazel_template//bazel:jemalloc": {"#define FOLLY_USE_JEMALLOC 1": "#define FOLLY_USE_JEMALLOC 1"},
-        "@bazel_template//bazel:tcmalloc": {"#define FOLLY_USE_JEMALLOC 1": ""},
-        "//conditions:default": {"#define FOLLY_USE_JEMALLOC 1": ""},
+        "@bazel_template//bazel:jemalloc": {"#define FOLLY_USE_JEMALLOC 0": "#define FOLLY_USE_JEMALLOC 1"},
+        "@bazel_template//bazel:tcmalloc": {"#define FOLLY_USE_JEMALLOC 0": ""},
+        "//conditions:default": {"#define FOLLY_USE_JEMALLOC 0": ""},
     }) | select({
         "@bazel_template//bazel:linux_aarch64": {
             "#define FOLLY_HAVE_SWAPCONTEXT 1": "",
@@ -384,7 +416,7 @@ template_rule(
             "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1": "/* #undef FOLLY_HAVE_SHADOW_LOCAL_WARNINGS */",
             "#define FOLLY_ELF_NATIVE_CLASS 64": "",
         },
-        "@platforms//os:windows": {
+        "@bazel_template//bazel:cross_compiling_for_windows_gcc": {
             "#define FOLLY_HAVE_ACCEPT4 1": "/* #undef FOLLY_HAVE_ACCEPT4 */",
             "#define FOLLY_HAVE_GETRANDOM 1": "#define FOLLY_HAVE_GETRANDOM 0",
             "#define FOLLY_HAVE_PIPE2 1": "/* #undef FOLLY_HAVE_PIPE2 */",
@@ -403,6 +435,31 @@ template_rule(
             "#define FOLLY_HAVE_DWARF 1": "/* #undef FOLLY_HAVE_DWARF */",
             "#define FOLLY_HAVE_SWAPCONTEXT 1": "/* #undef FOLLY_HAVE_SWAPCONTEXT */",
             "#define FOLLY_HAVE_BACKTRACE 1": "/* #undef FOLLY_HAVE_BACKTRACE */",
+        },
+        "@bazel_template//bazel:not_cross_compiling_on_windows": {
+            "#define FOLLY_HAVE_ACCEPT4 1": "/* #undef FOLLY_HAVE_ACCEPT4 */",
+            "#define FOLLY_HAVE_GETRANDOM 1": "#define FOLLY_HAVE_GETRANDOM 0",
+            "#define FOLLY_HAVE_PIPE2 1": "/* #undef FOLLY_HAVE_PIPE2 */",
+            "#define FOLLY_HAVE_IFUNC 1": "/* #undef FOLLY_HAVE_IFUNC */",
+            "#define FOLLY_HAVE_WEAK_SYMBOLS 1": "#define FOLLY_HAVE_WEAK_SYMBOLS 0",
+            "#define FOLLY_HAVE_LINUX_VDSO 1": "/* #undef FOLLY_HAVE_LINUX_VDSO */",
+            "#define FOLLY_HAVE_MALLOC_USABLE_SIZE 1": "/* #undef FOLLY_HAVE_MALLOC_USABLE_SIZE */",
+            "#define HAVE_VSNPRINTF_ERRORS 1": "/* #undef HAVE_VSNPRINTF_ERRORS */",
+            "#define FOLLY_HAVE_LIBUNWIND 1": "/* #undef FOLLY_HAVE_LIBUNWIND */",
+            "#define FOLLY_HAVE_ELF 1": "/* #undef FOLLY_HAVE_ELF */",
+            "#define FOLLY_USE_SYMBOLIZER 1": "/* #undef FOLLY_USE_SYMBOLIZER */",
+            "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1": "/* #undef FOLLY_HAVE_SHADOW_LOCAL_WARNINGS */",
+            "#define FOLLY_ELF_NATIVE_CLASS 64": "",
+            "#define FOLLY_HAVE_PREADV 1": "/* #undef FOLLY_HAVE_PREADV */",
+            "#define FOLLY_HAVE_PWRITEV 1": "/* #undef FOLLY_HAVE_PWRITEV */",
+            "#define FOLLY_HAVE_DWARF 1": "/* #undef FOLLY_HAVE_DWARF */",
+            "#define FOLLY_HAVE_SWAPCONTEXT 1": "/* #undef FOLLY_HAVE_SWAPCONTEXT */",
+            "#define FOLLY_HAVE_BACKTRACE 1": "/* #undef FOLLY_HAVE_BACKTRACE */",
+            "#define FOLLY_HAVE_PTHREAD 1": "/* #undef FOLLY_HAVE_PTHREAD */",
+            "#define FOLLY_HAVE_PTHREAD_ATFORK 1": "/* #undef FOLLY_HAVE_PTHREAD_ATFORK */",
+            "#define FOLLY_HAVE_CLOCK_GETTIME 1": "/* #undef FOLLY_HAVE_CLOCK_GETTIME */",
+            "#define FOLLY_HAVE_VLA 1": "/* #undef FOLLY_HAVE_VLA */",
+            "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "/* #undef FOLLY_HAVE_EXTRANDOM_SFMT19937 */",
         },
     }),
 )

@@ -1,8 +1,10 @@
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "template_rule")
+
 package(default_visibility = ["//visibility:public"])
 
 genrule(
-    name = "config_h",
-    outs = ["config.h"],
+    name = "config_h_in",
+    outs = ["config.h.in"],
     cmd = "\n".join([
         "cat <<'EOF' >$@",
         "",
@@ -114,15 +116,33 @@ genrule(
     ]),
 )
 
+template_rule(
+    name = "config_h",
+    src = ":config_h_in",
+    out = "config.h",
+    substitutions = select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": {
+            "#define HAVE_UNISTD_H 1": "/* #undef HAVE_UNISTD_H */",
+            "#define HAVE_SYS_TYPES_H 1": "/* #undef HAVE_SYS_TYPES_H */",
+        },
+        "//conditions:default": {},
+    }),
+)
+
 cc_library(
     name = "dwarf",
     srcs = [":config_h"] + glob(["src/lib/libdwarf/*.c"]),
     hdrs = glob(["src/lib/libdwarf/*.h"]),
-    copts = [
-        "-g",
-        "-O2",
-        "-isystem $(GENDIR)/external/libdwarf",
-    ],
+    copts = GLOBAL_COPTS + select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "/I$(GENDIR)/external/libdwarf",
+        ],
+        "//conditions:default": [
+            "-g",
+            "-O2",
+            "-isystem $(GENDIR)/external/libdwarf",
+        ],
+    }),
     local_defines = [
         "HAVE_CONFIG_H",
         "LIBDWARF_BUILD",
@@ -138,12 +158,18 @@ cc_library(
     name = "dwarfp",
     srcs = [":config_h"] + glob(["src/lib/libdwarfp/*.c"]),
     hdrs = glob(["src/lib/libdwarfp/*.h"]),
-    copts = [
-        "-g",
-        "-O2",
-        "-isystem $(GENDIR)/external/libdwarf",
-        "-Iexternal/libdwarf/src/lib/libdwarf",
-    ],
+    copts = GLOBAL_COPTS + select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+            "/I$(GENDIR)/external/libdwarf",
+            "/Iexternal/libdwarf/src/lib/libdwarf",
+        ],
+        "//conditions:default": [
+            "-g",
+            "-O2",
+            "-isystem $(GENDIR)/external/libdwarf",
+            "-Iexternal/libdwarf/src/lib/libdwarf",
+        ],
+    }),
     local_defines = [
         "HAVE_CONFIG_H",
         "LIBDWARF_BUILD",
