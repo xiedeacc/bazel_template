@@ -1,4 +1,4 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 

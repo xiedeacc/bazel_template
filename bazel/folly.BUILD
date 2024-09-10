@@ -62,9 +62,6 @@ COPTS = GLOBAL_COPTS + select({
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
     "HAVE_CONFIG_H",
-    "_GNU_SOURCE",
-    "_REENTRANT",
-    "_LARGEFILE64_SOURCE",
     # "BOOST_ATOMIC_DYN_LINK",
     # "BOOST_ATOMIC_NO_LIB",
     # "BOOST_CONTEXT_DYN_LINK",
@@ -85,10 +82,14 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
         "_CRT_SECURE_NO_WARNINGS",
         "_SCL_SECURE_NO_WARNINGS",
         "_ENABLE_EXTENDED_ALIGNED_STORAGE",
-        "_STL_EXTRA_DISABLED_WARNINGS=4774 4987",
+        #"_STL_EXTRA_DISABLED_WARNINGS=4774 4987",
         "WIN32_LEAN_AND_MEAN",
     ],
-    "//conditions:default": [],
+    "//conditions:default": [
+        "_GNU_SOURCE",
+        "_REENTRANT",
+        "_LARGEFILE64_SOURCE",
+    ],
 })
 
 cc_library(
@@ -211,9 +212,10 @@ cc_library(
             "folly/**/test/**/*.cpp",
             "folly/**/*Test.cpp",
             "folly/Subprocess.cpp",
+            "folly/debugging/symbolizer/tool/*.cpp",  #not support windows
             "folly/debugging/exception_tracer/*.cpp",
             "folly/executors/ManualExecutor.cpp",
-            "folly/experimental/symbolizer/tool/*.cpp",
+            "folly/experimental/symbolizer/tool/*.cpp",  #not support windows
         ],
     ) + select({
         "@platforms//os:windows": [],
@@ -279,7 +281,7 @@ cc_library(
         "@libevent//:event",
         "@libevent//:event_openssl",
         "@libsodium//:sodium",
-        "@openssl//:ssl",
+        "@openssl",
         "@zstd",
     ] + select({
         "@bazel_template//bazel:jemalloc": ["@jemalloc"],
@@ -372,11 +374,11 @@ genrule(
         "#define FOLLY_DEMANGLE_MAX_SYMBOL_SIZE 1024",
         "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1",
         "#define FOLLY_HAVE_LIBLZ4 1",
-        "#define FOLLY_HAVE_LIBLZMA 1",
+        #"#define FOLLY_HAVE_LIBLZMA 1",
         "#define FOLLY_HAVE_LIBSNAPPY 1",
         "#define FOLLY_HAVE_LIBZ 1",
         "#define FOLLY_HAVE_LIBZSTD 1",
-        "#define FOLLY_HAVE_LIBBZ2 1",
+        #"#define FOLLY_HAVE_LIBBZ2 1",
         "#define FOLLY_LIBRARY_SANITIZE_ADDRESS 0",
         "/* #undef FOLLY_SUPPORT_SHARED_LIBRARY */",
         "#define FOLLY_HAVE_LIBRT 0",

@@ -33,24 +33,41 @@ GLOBAL_COPTS = select({
         "-mmacosx-version-min=10.15",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
-        "/GS",
-        "/W1",
+        "/GS",  #enable buffer security checks
+        "/Gy",  #enables function-level linking
         "/Wall",
+        "/Qpar",  #enables automatic parallelization of loops
+        "/O2",  #enables full optimization for speed
+        "/Ob2",  #enables aggressive inlining of functions.
+        "/Oi",  #enables the use of intrinsic functions
+        "/Ot",  #optimizes code for speed by favoring fast execution over smaller code size
+        "/WX-",  #Disable Treat Warnings as Errors:
+        "/FC",  #displays the full path of source file names in diagnostic messages
+        "/GR",  #Enable Run-Time Type Information (RTTI):
+        "/EHs",  #enables C++ exception handling and assumes that functions declared with throw() do not throw exceptions
+        "/permissive-",  #enable standards-conforming behavior in the compiler
+        "/fp:precise",
+        "/GF",  #Enable String Pooling
+        "/Zc:referenceBinding",  #Ensures that temporary object lifetimes are correctly extended in reference binding scenarios according to the C++ standard
+        "/Zc:implicitNoexcept",  #Treats move constructors and move assignment operators as noexcept by default if they do not explicitly throw
+        "/Zc:strictStrings",  # Enforces const-correctness for string literals, preventing accidental modification
+        "/Zc:threadSafeInit",
+        "/Zc:throwingNew",
+        "/favor:blend",
+        "/Gw",  #Enables data-level optimization across multiple translation units, improving runtime performance.
+        "/Zc:rvalueCast",  #enforces standard behavior for rvalue casts
         "/Zc:wchar_t",
         #"/Zi",
-        "/O2",
-        "/Ob2",
-        "/Oi",
-        "/Gm-",
-        "/fp:precise",
-        "/Zc:forScope",
-        "/Gd",
-        #"/MD",
+        "/Zc:forScope",  #Enforce Standard for Loop Scope
+        "/Zc:inline",  #enforces standard C++ behavior for inline functions
+        "/Gd",  #__cdecl Calling Convention
+        "/Gm-",  #disables minimal rebuild
         "/diagnostics:column",
-        "/nologo",
-        "_UNICODE",
-        "UNICODE",
+        "/nologo",  #suppresses the display of the startup banner and informational messages during compilation
+        #"/MD",
         "/MP",
+        #"/errorReport:prompt",  #permission to send error reports to Microsoft
+        "/showIncludes",  #
     ],
     "//conditions:default": [
         "-Wall",
@@ -82,6 +99,8 @@ GLOBAL_LOCAL_DEFINES = select({
         "_MSC_VER=1941",
         "WIN64",
         "_WIN64",
+        "_UNICODE",
+        "UNICODE",
     ],
     "//conditions:default": [],
 })
@@ -107,7 +126,10 @@ GLOBAL_LINKOPTS = select({
         "-pthread",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
-        "/MD",
+        "/MACHINE:X64",
+        "Ws2_32.Lib",
+        "Crypt32.Lib",
+        "User32.lib",
     ],
     "//conditions:default": ["-pthread"],
 })

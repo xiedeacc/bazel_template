@@ -1,23 +1,40 @@
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 load("@bazel_template//bazel:rules_fbthrift.bzl", "fbthrift_cpp_gen", "fbthrift_service_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
 
-COPTS = [
-    "-isystem external/libsodium/src/libsodium/include",
-    "-isystem external/fbthrift",
-    "-isystem $(GENDIR)/external/fbthrift",
-    "-isystem external/double-conversion",
-    "-isystem external/xxhash",
-    "-isystem external/com_googlesource_code_re2",
-    "-isystem external/fatal",
-    "-isystem $(GENDIR)/external/folly",
-    "-isystem $(GENDIR)/external/fizz",
-    "-isystem external/folly",
-    "-isystem external/fizz",
-    "-isystem external/wangle",
-    "-isystem external/mvfst",
-    "-D_LARGEFILE64_SOURCE",
-] + select({
+COPTS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/Iexternal/libsodium/src/libsodium/include",
+        "/Iexternal/fbthrift",
+        "/I$(GENDIR)/external/fbthrift",
+        "/Iexternal/double-conversion",
+        "/Iexternal/xxhash",
+        "/Iexternal/com_googlesource_code_re2",
+        "/Iexternal/fatal",
+        "/I$(GENDIR)/external/folly",
+        "/I$(GENDIR)/external/fizz",
+        "/Iexternal/folly",
+        "/Iexternal/fizz",
+        "/Iexternal/wangle",
+        "/Iexternal/mvfst",
+    ],
+    "//conditions:default": [
+        "-isystem external/libsodium/src/libsodium/include",
+        "-isystem external/fbthrift",
+        "-isystem $(GENDIR)/external/fbthrift",
+        "-isystem external/double-conversion",
+        "-isystem external/xxhash",
+        "-isystem external/com_googlesource_code_re2",
+        "-isystem external/fatal",
+        "-isystem $(GENDIR)/external/folly",
+        "-isystem $(GENDIR)/external/fizz",
+        "-isystem external/folly",
+        "-isystem external/fizz",
+        "-isystem external/wangle",
+        "-isystem external/mvfst",
+    ],
+}) + select({
     "@platforms//os:linux": [
         "-isystem external/libunwind/include",
         "-I$(GENDIR)/external/libunwind/include",
@@ -27,9 +44,25 @@ COPTS = [
     "//conditions:default": [],
 })
 
-LOCAL_DEFINES = [
-    "NDEBUG",
-]
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": ["_LARGEFILE64_SOURCE"],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LINKOPTS = GLOBAL_LINKOPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
 
 cc_binary(
     name = "compiler_generate_build_templates",
@@ -249,6 +282,7 @@ cc_binary(
     name = "thrift1",
     srcs = ["thrift/compiler/main.cc"],
     copts = COPTS,
+    linkopts = LINKOPTS,
     deps = [
         ":compiler_generators",
         "@folly",
