@@ -286,6 +286,7 @@ cc_binary(
     deps = [
         ":compiler_generators",
         "@folly",
+        "@libsodium//:sodium",
         "@mvfst",
         "@openssl",
         "@wangle",

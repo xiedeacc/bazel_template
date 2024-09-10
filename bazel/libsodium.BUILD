@@ -347,6 +347,7 @@ cc_library(
     copts = COMMON_COTPS,
     local_defines = COMMON_DEFINES,
     deps = [":utils"],
+    alwayslink = True,
 )
 
 cc_library(
@@ -372,6 +373,8 @@ cc_library(
     srcs = [
         "src/libsodium/crypto_onetimeauth/poly1305/sse2/poly1305_sse2.c",
         "src/libsodium/crypto_pwhash/scryptsalsa208sha256/sse/pwhash_scryptsalsa208sha256_sse.c",
+        "src/libsodium/crypto_stream/salsa20/ref/salsa20_ref.c",
+        "src/libsodium/crypto_stream/salsa20/xmm6int/salsa20_xmm6int-sse2.c",
     ],
     hdrs = glob([
         "src/libsodium/**/*.h",
@@ -383,6 +386,7 @@ cc_library(
         ],
     }) + COMMON_COTPS,
     local_defines = COMMON_DEFINES,
+    alwayslink = True,
 )
 
 cc_library(
@@ -404,6 +408,7 @@ cc_library(
     }) + COMMON_COTPS,
     local_defines = COMMON_DEFINES,
     deps = [":common"],
+    alwayslink = True,
 )
 
 cc_library(
@@ -425,6 +430,7 @@ cc_library(
     }) + COMMON_COTPS,
     local_defines = COMMON_DEFINES,
     deps = [":common"],
+    alwayslink = True,
 )
 
 cc_library(
@@ -449,6 +455,7 @@ cc_library(
     }) + COMMON_COTPS,
     local_defines = COMMON_DEFINES,
     deps = [":common"],
+    alwayslink = True,
 )
 
 cc_library(
@@ -469,6 +476,7 @@ cc_library(
     }) + COMMON_COTPS,
     local_defines = COMMON_DEFINES,
     deps = [":common"],
+    alwayslink = True,
 )
 
 cc_library(
@@ -494,6 +502,7 @@ cc_library(
     }) + COMMON_COTPS,
     local_defines = COMMON_DEFINES,
     deps = [":common"],
+    alwayslink = True,
 )
 
 cc_library(
@@ -517,6 +526,7 @@ cc_library(
     }) + COMMON_COTPS,
     local_defines = COMMON_DEFINES,
     deps = [":common"],
+    alwayslink = True,
 )
 
 cc_library(
@@ -537,6 +547,7 @@ cc_library(
             "-mssse3",
         ],
     }) + COMMON_COTPS,
+    #linkstatic = True,
     local_defines = COMMON_DEFINES,
     deps = [
         ":aesni",
@@ -549,4 +560,5 @@ cc_library(
         ":sse41",
         ":ssse3",
     ],
+    #alwayslink = True,
 )

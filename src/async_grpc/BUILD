@@ -14,20 +14,39 @@
 
 # Top-level proto and C++ targets for Cartographer's gRPC server.
 
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES")
+
 licenses(["notice"])  # Apache 2.0
 
 package(default_visibility = ["//visibility:public"])
 
+COPTS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": ["-Wno-sign-compare"],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "BUILD_TRACING=0",
+        "GLOG_NO_ABBREVIATED_SEVERITIES",
+    ],
+    "//conditions:default": ["BUILD_TRACING=0"],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
 proto_library(
     name = "protos",
-    srcs = glob(
-        [
-            "**/*.proto",
-        ],
-    ),
-    deps = [
-        "@com_google_protobuf//:empty_proto",
-    ],
+    srcs = glob(["**/*.proto"]),
+    deps = ["@com_google_protobuf//:empty_proto"],
 )
 
 cc_proto_library(
@@ -62,9 +81,9 @@ cc_library(
         ],
         exclude = ["common/make_unique.h"],
     ),
-    copts = ["-Wno-sign-compare"],
-    defines = ["BUILD_TRACING=0"],
+    copts = COPTS,
     includes = ["."],
+    local_defines = LOCAL_DEFINES,
     deps = [
         ":cc_protos",
         "@com_github_glog_glog//:glog",

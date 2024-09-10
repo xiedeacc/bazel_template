@@ -1,5 +1,5 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -12,6 +12,36 @@ COPTS = GLOBAL_COPTS + select({
         "-fno-strict-aliasing",
         "-I$(GENDIR)/external/libevent/include",
     ],
+})
+
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "_CRT_SECURE_NO_WARNINGS",
+        "_CRT_NONSTDC_NO_DEPRECATE",
+        "TINYTEST_LOCAL",
+        "LITTLE_ENDIAN",
+        "HAVE_CONFIG_H",
+    ],
+    "//conditions:default": [
+        "HAVE_CONFIG_H",
+        "NDEBUG",
+        "LITTLE_ENDIAN",
+    ],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LINKOPTS = GLOBAL_LINKOPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
 })
 
 cc_library(
@@ -92,11 +122,24 @@ cc_library(
         "//conditions:default": [],
     }),
     includes = ["include"],
-    local_defines = [
-        "HAVE_CONFIG_H",
-        "NDEBUG",
-        "LITTLE_ENDIAN",
+    linkopts = LINKOPTS + [
+        "kernel32.lib",
+        "user32.lib",
+        "ws2_32.lib",
+        "shell32.lib",
+        "advapi32.lib",
+        "bcrypt.lib",
+        "iphlpapi.lib",
+        "kernel32.lib",
+        "user32.lib",
+        "gdi32.lib",
+        "winspool.lib",
+        "ole32.lib",
+        "oleaut32.lib",
+        "uuid.lib",
+        "comdlg32.lib",
     ],
+    local_defines = LOCAL_DEFINES,
 )
 
 cc_library(
