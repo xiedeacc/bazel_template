@@ -1,34 +1,69 @@
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES")
 load("@bazel_template//bazel:proxygen.bzl", "is_external", "proxygen_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
 
-COPTS = [
-    "-Iexternal/libdwarf/src/lib/libdwarf",
-    "-isystem external/libsodium/src/libsodium/include",
-    "-isystem external/proxygen",
-    "-isystem $(GENDIR)/external/proxygen",
-    "-isystem external/fbthrift",
-    "-isystem $(GENDIR)/external/fbthrift",
-    "-isystem external/fb303",
-    "-isystem $(GENDIR)/external/fb303",
-    "-isystem external/double-conversion",
-    "-isystem external/xxhash",
-    "-isystem external/com_googlesource_code_re2",
-    "-isystem external/fatal",
-    "-isystem $(GENDIR)/external/folly",
-    "-isystem $(GENDIR)/external/fizz",
-    "-isystem external/folly",
-    "-isystem external/fizz",
-    "-isystem external/wangle",
-    "-isystem external/mvfst",
-    "-std=c++17",
-    "-Wno-register",
-    "-fsized-deallocation",
-]
+COPTS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/Iexternal/libdwarf/src/lib/libdwarf",
+        "/Iexternal/libsodium/src/libsodium/include",
+        "/Iexternal/proxygen",
+        "/I$(GENDIR)/external/proxygen",
+        "/Iexternal/fbthrift",
+        "/I$(GENDIR)/external/fbthrift",
+        "/Iexternal/fb303",
+        "/I$(GENDIR)/external/fb303",
+        "/Iexternal/double-conversion",
+        "/Iexternal/xxhash",
+        "/Iexternal/com_googlesource_code_re2",
+        "/Iexternal/fatal",
+        "/I$(GENDIR)/external/folly",
+        "/I$(GENDIR)/external/fizz",
+        "/Iexternal/folly",
+        "/Iexternal/fizz",
+        "/Iexternal/wangle",
+        "/Iexternal/mvfst",
+        "/std:c++17",
+    ],
+    "//conditions:default": [
+        "-Iexternal/libdwarf/src/lib/libdwarf",
+        "-isystem external/libsodium/src/libsodium/include",
+        "-isystem external/proxygen",
+        "-isystem $(GENDIR)/external/proxygen",
+        "-isystem external/fbthrift",
+        "-isystem $(GENDIR)/external/fbthrift",
+        "-isystem external/fb303",
+        "-isystem $(GENDIR)/external/fb303",
+        "-isystem external/double-conversion",
+        "-isystem external/xxhash",
+        "-isystem external/com_googlesource_code_re2",
+        "-isystem external/fatal",
+        "-isystem $(GENDIR)/external/folly",
+        "-isystem $(GENDIR)/external/fizz",
+        "-isystem external/folly",
+        "-isystem external/fizz",
+        "-isystem external/wangle",
+        "-isystem external/mvfst",
+        "-std=c++17",
+        "-Wno-register",
+        "-fsized-deallocation",
+    ],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
 
-LOCAL_DEFINES = [
-    "NDEBUG",
-]
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
 
 sh_binary(
     name = "gen_HTTPCommonHeaders_sh",
@@ -82,14 +117,14 @@ genrule(
         "proxygen/lib/utils/TraceFieldType.cpp",
         "proxygen/lib/utils/TraceEventType.cpp",
     ],
-    cmd = """
-/usr/bin/python3 $(location :proxygen/lib/utils/gen_trace_event_constants.py) \
---output_type=cpp \
---input_files=$(location :proxygen/lib/utils/samples/TraceEventType.txt),$(location :proxygen/lib/utils/samples/TraceFieldType.txt) \
---output_scope=proxygen \
---header_path=proxygen/lib/utils \
---install_dir=$(GENDIR)/external/proxygen/proxygen/lib/utils \
---fbcode_dir=external/proxygen
+    cmd = """\r
+python3 $(location :proxygen/lib/utils/gen_trace_event_constants.py) \\\r
+--output_type=cpp \\\r
+--input_files=$(location :proxygen/lib/utils/samples/TraceEventType.txt),$(location :proxygen/lib/utils/samples/TraceFieldType.txt) \\\r
+--output_scope=proxygen \\\r
+--header_path=proxygen/lib/utils \\\r
+--install_dir=$(GENDIR)/external/proxygen/proxygen/lib/utils \\\r
+--fbcode_dir=external/proxygen\r
 """,
 )
 
@@ -111,16 +146,15 @@ cc_library(
             "proxygen/**/test/**/*.cpp",
             "proxygen/**/tests/**/*.cpp",
             "proxygen/**/samples/**/*.cpp",
+            "proxygen/lib/transport/AsyncUDPSocketFactory.cpp",
         ],
-    ),
-    hdrs = glob(
-        [
-            "proxygen/**/*.h",
-        ],
-        exclude = [
-        ],
-    ),
+    ) + select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+        "//conditions:default": ["proxygen/lib/transport/AsyncUDPSocketFactory.cpp"],
+    }),
+    hdrs = glob(["proxygen/**/*.h"]),
     copts = COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [
         "@c-ares",
         "@fb303",

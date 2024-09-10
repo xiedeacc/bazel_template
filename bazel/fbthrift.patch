@@ -1,47 +1,26 @@
-diff --git a/thrift/lib/cpp/concurrency/PosixThreadFactory.cpp b/thrift/lib/cpp/concurrency/PosixThreadFactory.cpp
-index 5f7f247e66..6011c1602d 100644
---- a/thrift/lib/cpp/concurrency/PosixThreadFactory.cpp
-+++ b/thrift/lib/cpp/concurrency/PosixThreadFactory.cpp
-@@ -140,7 +140,7 @@ void PthreadThread::join() {
- }
-
- Thread::id_t PthreadThread::getId() {
--#ifdef _WIN32
-+#if defined(_WIN32) && !defined(__MINGW32__)
-   return (Thread::id_t)pthread_getw32threadid_np(pthread_);
- #else
-   return (Thread::id_t)pthread_;
-diff --git a/thrift/lib/cpp/util/PausableTimer.cpp b/thrift/lib/cpp/util/PausableTimer.cpp
-index 7f6a2e8b79..e7c945a84a 100644
---- a/thrift/lib/cpp/util/PausableTimer.cpp
-+++ b/thrift/lib/cpp/util/PausableTimer.cpp
-@@ -48,6 +48,28 @@ void PausableTimer::start() {
+diff --git a/thrift/compiler/detail/system.cc b/thrift/compiler/detail/system.cc
+index a8dccc3ee4..368c2b3e35 100644
+--- a/thrift/compiler/detail/system.cc
++++ b/thrift/compiler/detail/system.cc
+@@ -40,7 +40,7 @@ std::filesystem::path make_abs_path(
+       return base_path / path;
+     }
+   });
+-  if (platform_is_windows()) {
++  if (platform_is_windows() && base_path.is_absolute()) {
+     return format_abs_path(abs_path.lexically_normal().string());
    }
- }
-
-+#if defined(__MINGW32__)
-+void timersub(const struct timeval* a, const struct timeval* b, struct timeval* result) {
-+    result->tv_sec = a->tv_sec - b->tv_sec;
-+    result->tv_usec = a->tv_usec - b->tv_usec;
-+
-+    if (result->tv_usec < 0) {
-+        result->tv_sec -= 1;
-+        result->tv_usec += 1000000;
-+    }
-+}
-+
-+void timeradd(const struct timeval* a, const struct timeval* b, struct timeval* result) {
-+    result->tv_sec = a->tv_sec + b->tv_sec;
-+    result->tv_usec = a->tv_usec + b->tv_usec;
-+
-+    if (result->tv_usec >= 1000000) {
-+        result->tv_sec += 1;
-+        result->tv_usec -= 1000000;
-+    }
-+}
-+#endif
-+
- void PausableTimer::stop() {
-   if (isTimeLimitFinite_) {
-     if (!paused_) {
-
+   return abs_path;
+diff --git a/thrift/compiler/generate/t_mstch_generator.cc b/thrift/compiler/generate/t_mstch_generator.cc
+index f98181e8ff..b89d4c1717 100644
+--- a/thrift/compiler/generate/t_mstch_generator.cc
++++ b/thrift/compiler/generate/t_mstch_generator.cc
+@@ -445,7 +445,7 @@ void t_mstch_generator::write_output(
+   if (!ofs) {
+     std::ostringstream err;
+     err << "Couldn't open \"" << abs_path.string() << "\" for writing.";
+-    throw std::runtime_error{err.str()};
++    // throw std::runtime_error{err.str()};
+   }
+   ofs << data;
+   if (!is_last_char(data, '\n')) {

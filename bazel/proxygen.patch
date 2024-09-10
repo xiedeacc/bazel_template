@@ -1,3 +1,63 @@
+diff --git a/proxygen/lib/http/HTTPPriorityFunctions.cpp b/proxygen/lib/http/HTTPPriorityFunctions.cpp
+index 5a1500dd0..3a126747c 100644
+--- a/proxygen/lib/http/HTTPPriorityFunctions.cpp
++++ b/proxygen/lib/http/HTTPPriorityFunctions.cpp
+@@ -48,8 +48,8 @@ folly::Optional<HTTPPriority> httpPriorityFromString(
+   bool logBadHeader = false;
+   SCOPE_EXIT {
+     if (logBadHeader) {
+-      LOG_EVERY_N(ERROR, 100)
+-          << "Received ill-formated priority header=" << priority;
++      // LOG_EVERY_N(ERROR, 100)
++          // << "Received ill-formated priority header=" << priority;
+     }
+   };
+   StructuredHeadersDecoder decoder(priority);
+diff --git a/proxygen/lib/http/structuredheaders/StructuredHeadersBuffer.cpp b/proxygen/lib/http/structuredheaders/StructuredHeadersBuffer.cpp
+index 97a778ef9..49fcb9a63 100644
+--- a/proxygen/lib/http/structuredheaders/StructuredHeadersBuffer.cpp
++++ b/proxygen/lib/http/structuredheaders/StructuredHeadersBuffer.cpp
+@@ -294,10 +294,10 @@ DecodeError StructuredHeadersBuffer::removeSymbol(const std::string& symbol,
+ }
+
+ DecodeError StructuredHeadersBuffer::handleDecodeError(const DecodeError& err) {
+-  LOG_EVERY_N(ERROR, 1000)
+-      << "Error message: " << decodeErrorDescription.at(err)
+-      << ". Number of characters parsed before error:" << getNumCharsParsed()
+-      << ". Header Content:" << originalContent_.str();
++  // LOG_EVERY_N(ERROR, 1000)
++      // << "Error message: " << decodeErrorDescription.at(err)
++      // << ". Number of characters parsed before error:" << getNumCharsParsed()
++      // << ". Header Content:" << originalContent_.str();
+   return err;
+ }
+
+diff --git a/proxygen/lib/http/structuredheaders/StructuredHeadersEncoder.cpp b/proxygen/lib/http/structuredheaders/StructuredHeadersEncoder.cpp
+index 355732f02..643c44325 100644
+--- a/proxygen/lib/http/structuredheaders/StructuredHeadersEncoder.cpp
++++ b/proxygen/lib/http/structuredheaders/StructuredHeadersEncoder.cpp
+@@ -229,16 +229,16 @@ EncodeError StructuredHeadersEncoder::encodeIdentifier(
+ EncodeError StructuredHeadersEncoder::handleEncodeError(
+     EncodeError err, const std::string& culprit) {
+
+-  LOG_EVERY_N(ERROR, 1000)
+-      << "Error message: " << encodeErrorDescription.at(err)
+-      << " .The culprit was: " << culprit;
++  // LOG_EVERY_N(ERROR, 1000)
++      // << "Error message: " << encodeErrorDescription.at(err)
++      // << " .The culprit was: " << culprit;
+   return err;
+ }
+
+ // Used to print more general error messages (eg: empty data structure)
+ EncodeError StructuredHeadersEncoder::handleEncodeError(EncodeError err) {
+-  LOG_EVERY_N(ERROR, 1000) << "Error message: "
+-                           << encodeErrorDescription.at(err);
++  // LOG_EVERY_N(ERROR, 1000) << "Error message: "
++                           // << encodeErrorDescription.at(err);
+   return err;
+ }
+
 diff --git a/proxygen/lib/services/RequestWorkerThread.cpp b/proxygen/lib/services/RequestWorkerThread.cpp
 index 9cbb34243..8e35e9f1a 100644
 --- a/proxygen/lib/services/RequestWorkerThread.cpp
@@ -32,4 +92,33 @@ index 3c422db04..03b95d4fb 100644
    sigset_t ss;
 
    // Ignore some signals
+diff --git a/proxygen/lib/transport/H3DatagramAsyncSocket.cpp b/proxygen/lib/transport/H3DatagramAsyncSocket.cpp
+index b38b50cdd..28c0c485a 100644
+--- a/proxygen/lib/transport/H3DatagramAsyncSocket.cpp
++++ b/proxygen/lib/transport/H3DatagramAsyncSocket.cpp
+@@ -118,7 +118,7 @@ void H3DatagramAsyncSocket::onDatagram(
+       // buffer until reads are resumed
+       readBuf_.emplace_back(std::move(datagram));
+     } else {
+-      VLOG_EVERY_N(2, 1000) << "Dropped incoming datagram.";
++      // VLOG_EVERY_N(2, 1000) << "Dropped incoming datagram.";
+     }
+     return;
+   }
+diff --git a/proxygen/lib/utils/StateMachine.h b/proxygen/lib/utils/StateMachine.h
+index b757a6664..6bc5c4b05 100644
+--- a/proxygen/lib/utils/StateMachine.h
++++ b/proxygen/lib/utils/StateMachine.h
+@@ -30,9 +30,9 @@ class StateMachine {
 
+     std::tie(newState, ok) = T::find(state, event);
+     if (!ok) {
+-      LOG_EVERY_N(ERROR, 100)
+-          << T::getName() << ": invalid transition tried: " << state << " "
+-          << event;
++      // LOG_EVERY_N(ERROR, 100)
++          // << T::getName() << ": invalid transition tried: " << state << " "
++          // << event;
+       return false;
+     } else {
+       VLOG(6) << T::getName() << ": transitioning from " << state << " to "

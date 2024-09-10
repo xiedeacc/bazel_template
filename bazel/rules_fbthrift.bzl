@@ -1,7 +1,6 @@
 def list_to_set(lst):
     return {item: True for item in lst}
 
-# Check if an element is in the set-like dictionary
 def element_in_set(set_dict, element):
     return element in set_dict
 
