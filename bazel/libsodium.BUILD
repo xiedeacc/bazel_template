@@ -138,10 +138,8 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
         "HAVE_INLINE_ASM=1",
         "HAVE_ALLOCA=1",
         "HAVE_C_VARARRAYS=1",
+        "HAVE_GCC_MEMORY_FENCES=1",
     ],
-}) + select({
-    "@bazel_template//bazel:gcc": ["HAVE_GCC_MEMORY_FENCES=1"],
-    "//conditions:default": [],
 }) + select({
     "@bazel_template//bazel:not_cross_compiling_on_windows": [],
     "@platforms//cpu:aarch64": ["HAVE_ARMCRYPTO=1"],
@@ -233,13 +231,10 @@ cc_library(
     name = "common",
     srcs = [
         "src/libsodium/crypto_aead/aegis128l/aead_aegis128l.c",
-        "src/libsodium/crypto_aead/aegis128l/aegis128l_armcrypto.c",
         "src/libsodium/crypto_aead/aegis128l/aegis128l_soft.c",
         "src/libsodium/crypto_aead/aegis256/aead_aegis256.c",
-        "src/libsodium/crypto_aead/aegis256/aegis256_armcrypto.c",
         "src/libsodium/crypto_aead/aegis256/aegis256_soft.c",
         "src/libsodium/crypto_aead/aes256gcm/aead_aes256gcm.c",
-        "src/libsodium/crypto_aead/aes256gcm/armcrypto/aead_aes256gcm_armcrypto.c",
         "src/libsodium/crypto_aead/chacha20poly1305/aead_chacha20poly1305.c",
         "src/libsodium/crypto_aead/xchacha20poly1305/aead_xchacha20poly1305.c",
         "src/libsodium/crypto_auth/crypto_auth.c",
@@ -548,7 +543,7 @@ cc_library(
             "-mssse3",
         ],
     }) + COPTS,
-    #linkstatic = True,
+    linkstatic = True,
     local_defines = LOCAL_DEFINES,
     deps = [
         ":aesni",
@@ -561,5 +556,4 @@ cc_library(
         ":sse41",
         ":ssse3",
     ],
-    #alwayslink = True,
 )
