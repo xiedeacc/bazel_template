@@ -182,8 +182,8 @@ template_rule(
     src = "src/glog/vlog_is_on.h.in",
     out = "src/glog/vlog_is_on.h",
     substitutions = select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
-        "@bazel_template//bazel:cross_compiling_for_windows": windows_config,
+        "@bazel_template//bazel:not_cross_compiling_on_windows": windows_config,
+        "@bazel_template//bazel:cross_compiling_for_windows": mingw64_config,
         "//conditions:default": posix_config,
     }),
 )
@@ -193,8 +193,8 @@ template_rule(
     src = "src/glog/stl_logging.h.in",
     out = "src/glog/stl_logging.h",
     substitutions = select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
-        "@bazel_template//bazel:cross_compiling_for_windows": windows_config,
+        "@bazel_template//bazel:not_cross_compiling_on_windows": windows_config,
+        "@bazel_template//bazel:cross_compiling_for_windows": mingw64_config,
         "//conditions:default": posix_config,
     }),
 )
@@ -204,8 +204,8 @@ template_rule(
     src = "src/glog/raw_logging.h.in",
     out = "src/glog/raw_logging.h",
     substitutions = select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
-        "@bazel_template//bazel:cross_compiling_for_windows": windows_config,
+        "@bazel_template//bazel:not_cross_compiling_on_windows": windows_config,
+        "@bazel_template//bazel:cross_compiling_for_windows": mingw64_config,
         "//conditions:default": posix_config,
     }),
 )
@@ -215,8 +215,8 @@ template_rule(
     src = "src/glog/logging.h.in",
     out = "src/glog/logging.h",
     substitutions = select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
-        "@bazel_template//bazel:cross_compiling_for_windows": windows_config,
+        "@bazel_template//bazel:not_cross_compiling_on_windows": windows_config,
+        "@bazel_template//bazel:cross_compiling_for_windows": mingw64_config,
         "//conditions:default": posix_config,
     }),
 )
