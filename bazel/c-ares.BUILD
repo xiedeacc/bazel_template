@@ -163,6 +163,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
+    alwayslink = True,
 )
 
 genrule(
