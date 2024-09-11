@@ -87,23 +87,11 @@ cc_library(
             "/I$(GENDIR)/external/libiberty/libiberty",
             "/Iexternal/libiberty/include",
         ],
-        "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
+        "//conditions:default": [
             "-pedantic",
             "-I$(GENDIR)/external/libiberty/libiberty",
             "-Iexternal/libiberty/include",
         ],
-        "@bazel_template//bazel:linux_aarch64": [
-            "-pedantic",
-            "I$(GENDIR)/external/libiberty/libiberty",
-            "-Iexternal/libiberty/include",
-        ],
-        "@bazel_template//bazel:linux_x86_64": [
-            "-pedantic",
-            "-I$(GENDIR)/external/libiberty/libiberty",
-            "-Iexternal/libiberty/include",
-            "-fcf-protection",
-        ],
-        "//conditions:default": [],
     }),
     local_defines = [
         "HAVE_CONFIG_H",
