@@ -170,7 +170,7 @@ template_rule(
         "//conditions:default": posix_config,
     }) | select({
         "@bazel_template//bazel:not_cross_compiling_on_windows": {
-            "@ac_cv_have_uint16_t@": "0",
+            "@ac_cv_have_unistd_h@": "1",
         },
         "//conditions:default": {},
     }),
@@ -185,7 +185,7 @@ template_rule(
         "//conditions:default": posix_config,
     }) | select({
         "@bazel_template//bazel:not_cross_compiling_on_windows": {
-            "@ac_cv_have_uint16_t@": "0",
+            "@ac_cv_have_unistd_h@": "1",
         },
         "//conditions:default": {},
     }),
@@ -200,7 +200,7 @@ template_rule(
         "//conditions:default": posix_config,
     }) | select({
         "@bazel_template//bazel:not_cross_compiling_on_windows": {
-            "@ac_cv_have_uint16_t@": "0",
+            "@ac_cv_have_unistd_h@": "1",
         },
         "//conditions:default": {},
     }),
@@ -215,7 +215,7 @@ template_rule(
         "//conditions:default": posix_config,
     }) | select({
         "@bazel_template//bazel:not_cross_compiling_on_windows": {
-            "@ac_cv_have_uint16_t@": "0",
+            "@ac_cv_have_unistd_h@": "1",
         },
         "//conditions:default": {},
     }),
