@@ -89,6 +89,7 @@ build:ubsan --action_env=UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1:suppre
 
 
 #####################################################################
+
 build --announce_rc
 
 build --strip='never'
@@ -106,7 +107,6 @@ build:opt --compilation_mode=opt
 build:opt --copt=-Wframe-larger-than=16384
 build:dbg --compilation_mode=dbg
 
-startup --output_base=D:/x --windows_enable_symlinks
 build:windows --cxxopt='/std:c++17'
 build:windows --host_cxxopt='/std:c++17'
 build:windows --compiler='msvc-cl'
@@ -114,6 +114,7 @@ build:windows --cpu='x64_windows'
 build:windows --extra_toolchains='@openssl//:preinstalled_nmake_toolchain'
 build:windows --extra_toolchains='@openssl//:preinstalled_pkgconfig_toolchain'
 build:windows --workspace_status_command=bazel/workspace_status.bat
+startup --output_base=D:/x --windows_enable_symlinks
 
 build:macos --copt='-mmacosx-version-min=10.15'
 build:macos --copt='-g'
