@@ -145,7 +145,7 @@ posix_config = dict_union(
     },
 )
 
-windows_config = dict_union(
+mingw64_config = dict_union(
     common_config,
     {
         "@ac_cv_have_unistd_h@": "1",
@@ -161,18 +161,30 @@ windows_config = dict_union(
     },
 )
 
+windows_config = dict_union(
+    common_config,
+    {
+        "@ac_cv_have_unistd_h@": "0",
+        "@ac_cv_have_stdint_h@": "0",
+        "@ac_cv_have_systypes_h@": "0",
+        "@ac_cv_have_uint16_t@": "0",
+        "@ac_cv_have___uint16@": "1",
+        "@ac_cv_have___builtin_expect@": "0",
+        "@ac_cv_have_libgflags@": "0",
+        "@ac_cv___attribute___noinline@": "",
+        "@ac_cv___attribute___noreturn@": "__declspec(noreturn)",
+        "@ac_cv___attribute___printf_4_5@": "",
+    },
+)
+
 template_rule(
     name = "vlog_is_on_h",
     src = "src/glog/vlog_is_on.h.in",
     out = "src/glog/vlog_is_on.h",
     substitutions = select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
         "@platforms//os:windows": windows_config,
         "//conditions:default": posix_config,
-    }) | select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
-            "@ac_cv_have_unistd_h@": "0",
-        },
-        "//conditions:default": {},
     }),
 )
 
@@ -181,13 +193,9 @@ template_rule(
     src = "src/glog/stl_logging.h.in",
     out = "src/glog/stl_logging.h",
     substitutions = select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
         "@platforms//os:windows": windows_config,
         "//conditions:default": posix_config,
-    }) | select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
-            "@ac_cv_have_unistd_h@": "0",
-        },
-        "//conditions:default": {},
     }),
 )
 
@@ -196,13 +204,9 @@ template_rule(
     src = "src/glog/raw_logging.h.in",
     out = "src/glog/raw_logging.h",
     substitutions = select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
         "@platforms//os:windows": windows_config,
         "//conditions:default": posix_config,
-    }) | select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
-            "@ac_cv_have_unistd_h@": "0",
-        },
-        "//conditions:default": {},
     }),
 )
 
@@ -211,13 +215,9 @@ template_rule(
     src = "src/glog/logging.h.in",
     out = "src/glog/logging.h",
     substitutions = select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
         "@platforms//os:windows": windows_config,
         "//conditions:default": posix_config,
-    }) | select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
-            "@ac_cv_have_unistd_h@": "0",
-        },
-        "//conditions:default": {},
     }),
 )
 
