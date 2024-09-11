@@ -1,5 +1,5 @@
 # features
-* include most popular C/C++ libraries, eg. grpc, protobuf, boost, abseil, folly, proxygen, mvfst, jemalloc, zstd, curl ...
+* include most popular C/C++ libraries, eg. grpc, protobuf, boost, abseil, folly, proxygen, mvfst, jemalloc, zstd, curl, openssl ...
 * include grpc server and client example
 * include http server and client example
 * include protobuf plugin example
