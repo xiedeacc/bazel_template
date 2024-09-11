@@ -46,6 +46,7 @@ COPTS = GLOBAL_COPTS + select({
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
     "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@bazel_template//bazel:cross_compiling_for_windows": ["_LARGEFILE64_SOURCE"],
     "//conditions:default": [],
 }) + select({
     "@platforms//os:linux": ["_LARGEFILE64_SOURCE"],

@@ -77,6 +77,7 @@ cc_library(
         "zlib.h",
     ],
     copts = COPTS,
+    includes = ["."],
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
 )

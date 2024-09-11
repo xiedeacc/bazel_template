@@ -253,14 +253,15 @@ git_repository(
 
 new_git_repository(
     name = "com_github_gflags_gflags",
-    #build_file = "//bazel:gflags.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:gflags.patch"],
     remote = "git@code.xiamu.com:gflags/gflags.git",
     tag = "v2.2.2",
 )
 
 new_git_repository(
     name = "com_github_glog_glog",
-    #build_file = "//bazel:glog.BUILD",
+    build_file = "//bazel:glog.BUILD",
     remote = "git@code.xiamu.com:google/glog.git",
     repo_mapping = {
         "@gflags": "@com_github_gflags_gflags",

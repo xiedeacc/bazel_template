@@ -680,6 +680,7 @@ template_rule(
             "/* #undef HAVE_WINDOWS_H */": "#define HAVE_WINDOWS_H 1",
             "/* #undef HAVE_WINSOCK2_H */": "#define HAVE_WINSOCK2_H 1",
             "/* #undef HAVE_WINSOCK_H */": "#define HAVE_WINSOCK_H 1",
+            "#define GETSERVBYNAME_R_ARGS 6": "#define GETSERVBYNAME_R_ARGS",
             "/* #undef HAVE_MSWSOCK_H */": "#define HAVE_MSWSOCK_H 1",
             "/* #undef HAVE_WINTERNL_H */": "#define HAVE_WINTERNL_H 1",
             "/* #undef HAVE_NTSTATUS_H */": "#define HAVE_NTSTATUS_H 1",
@@ -744,6 +745,8 @@ template_rule(
             "/* #undef _FILE_OFFSET_BITS */": "#define _FILE_OFFSET_BITS 64",
             "#define HAVE_SYS_IOCTL_H 1": "/* #undef HAVE_SYS_IOCTL_H */",
             "#define GETSERVBYPORT_R_ARGS 6": "/* #undef GETSERVBYPORT_R_ARGS */",
+            "#define HAVE_MSG_NOSIGNAL 1": "/* #undef HAVE_MSG_NOSIGNAL */",
+            "#define HAVE_GETSERVBYNAME_R 1": "/* #undef HAVE_GETSERVBYNAME_R */",
         },
         "@bazel_template//bazel:not_cross_compiling_on_windows": {
             "/* #undef GETSERVBYPORT_R_ARGS */": "#define GETSERVBYPORT_R_ARGS",

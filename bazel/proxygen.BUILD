@@ -117,14 +117,14 @@ genrule(
         "proxygen/lib/utils/TraceFieldType.cpp",
         "proxygen/lib/utils/TraceEventType.cpp",
     ],
-    cmd = """\r
-python3 $(location :proxygen/lib/utils/gen_trace_event_constants.py) \\\r
---output_type=cpp \\\r
---input_files=$(location :proxygen/lib/utils/samples/TraceEventType.txt),$(location :proxygen/lib/utils/samples/TraceFieldType.txt) \\\r
---output_scope=proxygen \\\r
---header_path=proxygen/lib/utils \\\r
---install_dir=$(GENDIR)/external/proxygen/proxygen/lib/utils \\\r
---fbcode_dir=external/proxygen\r
+    cmd = """
+python3 $(location :proxygen/lib/utils/gen_trace_event_constants.py) \
+--output_type=cpp \
+--input_files=$(location :proxygen/lib/utils/samples/TraceEventType.txt),$(location :proxygen/lib/utils/samples/TraceFieldType.txt) \
+--output_scope=proxygen \
+--header_path=proxygen/lib/utils \
+--install_dir=$(GENDIR)/external/proxygen/proxygen/lib/utils \
+--fbcode_dir=external/proxygen
 """,
 )
 

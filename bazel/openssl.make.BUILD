@@ -9,6 +9,12 @@ filegroup(
     srcs = glob(["**"]),
 )
 
+filegroup(
+    name = "gen_dir",
+    srcs = [":openssl"],
+    output_group = "gen_dir",
+)
+
 CONFIGURE_OPTIONS = [
     "enable-brotli",
     "enable-egd",
@@ -50,7 +56,10 @@ alias(
 
 alias(
     name = "openssl",
-    actual = ":openssl_static",
+    actual = select({
+        "@bazel_template//bazel:not_cross_compiling_on_windows": ":openssl_windows",
+        "//conditions:default": ":openssl_static",
+    }),
 )
 
 native_tool_toolchain(
@@ -93,16 +102,11 @@ configure_make(
     name = "openssl_static",
     args = select({
         "@bazel_template//bazel:not_cross_compiling_on_osx": ["-j4"],
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [],
         "//conditions:default": ["-j"],
     }),
     build_data = select({
         "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
             "@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres",
-        ],
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
-            "@nasm//:nasm",
-            "@perl//:perl",
         ],
         "//conditions:default": [],
     }),
@@ -117,27 +121,10 @@ configure_make(
             "mingw64",
             "no-shared",
         ],
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
-            "VC-WIN64A",
-            "no-shared",
-            "ASFLAGS=\" \"",
-            "CC=cl.exe",
-            "LD=link.exe",
-            "AR=lib.exe",
-        ],
         "//conditions:default": [],
     }),
-    configure_prefix = "$$PERL",
-    # copts = select({
-    #     "@bazel_template//bazel:not_cross_compiling_on_windows": [],
-    #     "//conditions:default": [],
-    # }),
     env = select({
         "@platforms//os:osx": {"ARFLAGS": "-static -o"},
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
-            "PATH": "$$(dirname $(execpath @nasm//:nasm)):$$PATH",
-            "PERL": "$(execpath @perl//:perl)",
-        },
         "@bazel_template//bazel:cross_compiling_for_windows": {
             "WINDRES": "x86_64-w64-mingw32-windres",
             "PATH": "$$(dirname $(execpath @cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres)):$$PATH",
@@ -147,14 +134,10 @@ configure_make(
     lib_name = LIB_NAME,
     lib_source = ":all_srcs",
     out_lib_dir = selects.with_or({
-        ("@platforms//cpu:aarch64", "@platforms//os:osx", "@platforms//os:windows"): "lib",
+        ("@platforms//cpu:aarch64", "@platforms//os:osx"): "lib",
         "//conditions:default": "lib64",
     }),
     out_static_libs = select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
-            "libssl.lib",
-            "libcrypto.lib",
-        ],
         "//conditions:default": [
             "libssl.a",
             "libcrypto.a",
@@ -170,8 +153,40 @@ configure_make(
     ],
 )
 
-filegroup(
-    name = "gen_dir",
-    srcs = [":openssl"],
-    output_group = "gen_dir",
+configure_make(
+    name = "openssl_windows",
+    build_data = [
+        "@nasm//:nasm",
+        "@perl//:perl",
+    ],
+    configure_command = "Configure",
+    configure_in_place = True,
+    configure_options = CONFIGURE_OPTIONS + [
+        "VC-WIN64A",
+        "no-shared",
+        "ASFLAGS=\" \"",
+        "CC=cl.exe",
+        "LD=link.exe",
+        "AR=lib.exe",
+    ],
+    configure_prefix = "$$PERL",
+    env = {
+        "PATH": "$$(dirname $(execpath @nasm//:nasm)):$$PATH",
+        "PERL": "$(execpath @perl//:perl)",
+    },
+    lib_name = LIB_NAME,
+    lib_source = ":all_srcs",
+    out_lib_dir = "lib64",
+    out_static_libs = [
+        "libssl.lib",
+        "libcrypto.lib",
+    ],
+    targets = MAKE_TARGETS,
+    deps = [
+        "@brotli//:brotlicommon",
+        "@brotli//:brotlidec",
+        "@brotli//:brotlienc",
+        "@zlib//:z",
+        "@zstd",
+    ],
 )

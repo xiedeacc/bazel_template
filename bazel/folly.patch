@@ -695,10 +695,21 @@ index 74f8f27b1..83e385932 100644
  long sysconf(int tp) {
    switch (tp) {
 diff --git a/folly/portability/Unistd.h b/folly/portability/Unistd.h
-index 2262210a1..419249db9 100644
+index 2262210a1..fed91f76b 100644
 --- a/folly/portability/Unistd.h
 +++ b/folly/portability/Unistd.h
-@@ -44,7 +44,6 @@ ssize_t pread64(int fd, void* buf, size_t count, off64_t offset);
+@@ -31,6 +31,10 @@ ssize_t pread64(int fd, void* buf, size_t count, off64_t offset);
+
+ #else
+
++#if defined(__MINGW32__)
++#include <unistd.h>
++#endif
++
+ #include <cstdint>
+
+ #include <process.h> // @manual
+@@ -44,7 +48,6 @@ ssize_t pread64(int fd, void* buf, size_t count, off64_t offset);
  // such as close(), where we need to override the definition of an existing
  // function. To avoid conflicts at link time, everything here is in a namespace
  // which is then used globally.
@@ -706,7 +717,7 @@ index 2262210a1..419249db9 100644
  #define _SC_PAGESIZE 1
  #define _SC_PAGE_SIZE _SC_PAGESIZE
  #define _SC_NPROCESSORS_ONLN 2
-@@ -71,35 +70,47 @@ namespace folly {
+@@ -71,35 +74,47 @@ namespace folly {
  namespace portability {
  namespace unistd {
  using off64_t = int64_t;
@@ -755,7 +766,7 @@ index 2262210a1..419249db9 100644
  } // namespace unistd
  } // namespace portability
  } // namespace folly
-@@ -108,4 +119,5 @@ FOLLY_PUSH_WARNING
+@@ -108,4 +123,5 @@ FOLLY_PUSH_WARNING
  FOLLY_CLANG_DISABLE_WARNING("-Wheader-hygiene")
  /* using override */ using namespace folly::portability::unistd;
  FOLLY_POP_WARNING
