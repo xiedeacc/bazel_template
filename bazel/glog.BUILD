@@ -38,7 +38,6 @@ darwin_only_copts = [
 ]
 
 windows_only_copts = [
-    "-DHAVE_SNPRINTF",
     "-DGLOG_NO_SYMBOLIZE_DETECTION",
     "-Iexternal/com_github_glog_glog/src/windows",
 ]
