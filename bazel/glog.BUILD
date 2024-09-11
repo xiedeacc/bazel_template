@@ -183,7 +183,7 @@ template_rule(
     out = "src/glog/vlog_is_on.h",
     substitutions = select({
         "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
-        "@platforms//os:windows": windows_config,
+        "@bazel_template//bazel:cross_compiling_for_windows": windows_config,
         "//conditions:default": posix_config,
     }),
 )
@@ -194,7 +194,7 @@ template_rule(
     out = "src/glog/stl_logging.h",
     substitutions = select({
         "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
-        "@platforms//os:windows": windows_config,
+        "@bazel_template//bazel:cross_compiling_for_windows": windows_config,
         "//conditions:default": posix_config,
     }),
 )
@@ -205,7 +205,7 @@ template_rule(
     out = "src/glog/raw_logging.h",
     substitutions = select({
         "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
-        "@platforms//os:windows": windows_config,
+        "@bazel_template//bazel:cross_compiling_for_windows": windows_config,
         "//conditions:default": posix_config,
     }),
 )
@@ -216,7 +216,7 @@ template_rule(
     out = "src/glog/logging.h",
     substitutions = select({
         "@bazel_template//bazel:not_cross_compiling_on_windows": mingw64_config,
-        "@platforms//os:windows": windows_config,
+        "@bazel_template//bazel:cross_compiling_for_windows": windows_config,
         "//conditions:default": posix_config,
     }),
 )
