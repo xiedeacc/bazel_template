@@ -176,7 +176,7 @@ configure_make(
     },
     lib_name = LIB_NAME,
     lib_source = ":all_srcs",
-    out_lib_dir = "lib64",
+    out_lib_dir = "lib",
     out_static_libs = [
         "libssl.lib",
         "libcrypto.lib",
