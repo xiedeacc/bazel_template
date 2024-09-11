@@ -1,10 +1,11 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
         "/std:c11",
+        "/Ox",
         "/Iexternal/xz/src/common",
         "/Iexternal/xz/src/liblzma/api",  #https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html
         "/Iexternal/xz/src/liblzma/check",
@@ -14,8 +15,11 @@ COPTS = GLOBAL_COPTS + select({
         "/Iexternal/xz/src/liblzma/lzma",
         "/Iexternal/xz/src/liblzma/rangecoder",
         "/Iexternal/xz/src/liblzma/simple",
+        "/Iexternal/xz/lib",
     ],
     "//conditions:default": [
+        "-std=c11",
+        "-O3",
         "-Iexternal/xz/src/common",
         "-iquote external/xz/src/liblzma/api",  #https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html
         "-Iexternal/xz/src/liblzma/check",
@@ -25,12 +29,12 @@ COPTS = GLOBAL_COPTS + select({
         "-Iexternal/xz/src/liblzma/lzma",
         "-Iexternal/xz/src/liblzma/rangecoder",
         "-Iexternal/xz/src/liblzma/simple",
-        "-std=c11",
-        "-g",
+        "-Iexternal/xz/lib",
     ],
 })
 
-LOCAL_DEFINES = [
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
+    "ASSUME_RAM=128",
     "HAVE_CHECK_CRC32",
     "HAVE_CHECK_CRC64",
     "HAVE_CHECK_SHA256",
@@ -57,14 +61,31 @@ LOCAL_DEFINES = [
     "HAVE__MM_MOVEMASK_EPI8",
     "TUKLIB_FAST_UNALIGNED_ACCESS",
     "HAVE___BUILTIN_ASSUME_ALIGNED",
-    "NDEBUG",
     "PACKAGE_BUGREPORT=\\\"xz@tukaani.org\\\"",
     "PACKAGE_NAME=\\\"XZUtils\\\"",
     "PACKAGE_URL=\\\"https://tukaani.org/xz/\\\"",
     "TUKLIB_PHYSMEM_SYSCONF",
     "TUKLIB_SYMBOL_PREFIX=lzma_",
+    "HAVE_VISIBILITY=1",
 ] + select({
-    "@bazel_template//bazel:osx_x86_64": [
+    "@platforms//os:linux": [
+        "HAVE___BUILTIN_BSWAPXX",
+        "HAVE_FUNC_ATTRIBUTE_CONSTRUCTOR",
+        "HAVE_STRINGS_H",
+        "HAVE_CLOCK_GETTIME",
+        "HAVE_CLOCK_MONOTONIC",
+        "HAVE_CPUID_H",
+        "HAVE_SYS_CDEFS_H",
+        "HAVE_SYS_PARAM_H",
+        "HAVE_UNISTD_H",
+        "HAVE_WCHAR_H",
+        "SIZEOF_SIZE_T=8",
+        "ENABLE_NLS=1",
+        "_GNU_SOURCE",
+        "MYTHREAD_POSIX",
+        "HAVE_PTHREAD_CONDATTR_SETCLOCK",
+    ],
+    "@platforms//os:osx": [
         "HAVE___BUILTIN_BSWAPXX",
         "HAVE_FUNC_ATTRIBUTE_CONSTRUCTOR",
         "HAVE_STRINGS_H",
@@ -81,8 +102,6 @@ LOCAL_DEFINES = [
         "HAVE_CFLOCALECOPYPREFERREDLANGUAGES=1",
         "HAVE_CFPREFERENCESCOPYAPPVALUE=1",
         "HAVE_DLFCN_H=1",
-        "HAVE_DECODER_X86",
-        "HAVE_ENCODER_X86",
         "HAVE_FUTIMENS=1",
         "HAVE_GETOPT_H=1",
         "HAVE_GETOPT_LONG=1",
@@ -95,7 +114,6 @@ LOCAL_DEFINES = [
         "HAVE_STRUCT_STAT_ST_ATIMESPEC_TV_NSEC",
         "HAVE_UINTPTR_T",
         "HAVE_USABLE_CLMUL",
-        "HAVE_VISIBILITY=1",
         "HAVE_WCWIDTH=1",
         "STDC_HEADERS=1",
         "MYTHREAD_POSIX",
@@ -110,66 +128,25 @@ LOCAL_DEFINES = [
         "__STDC_WANT_LIB_EXT2__=1",
         "__STDC_WANT_MATH_SPEC_FUNCS__=1",
     ],
-    "@bazel_template//bazel:osx_aarch64": [
-        "HAVE___BUILTIN_BSWAPXX",
-        "HAVE_FUNC_ATTRIBUTE_CONSTRUCTOR",
-        "HAVE_STRINGS_H",
-        "HAVE_WCHAR_H",
-        "HAVE_CLOCK_GETTIME",
-        "HAVE_CLOCK_MONOTONIC",
-        "HAVE_CPUID_H",
-        "SIZEOF_SIZE_T=8",
-        "ENABLE_NLS=1",
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//cpu:x86_64": [
+        "HAVE_DECODER_X86",
+        "HAVE_ENCODER_X86",
+    ],
+    "@platforms//cpu:aarch64": [
         "HAVE_ENCODER_ARM64",
         "HAVE_DECODER_ARM64",
-        "MYTHREAD_POSIX",
-        "HAVE_SYS_CDEFS_H",
-        "HAVE_SYS_PARAM_H",
-        "HAVE_UNISTD_H",
     ],
+}) + select({
     "@bazel_template//bazel:linux_x86_64": [
-        "HAVE___BUILTIN_BSWAPXX",
-        "HAVE_FUNC_ATTRIBUTE_CONSTRUCTOR",
-        "HAVE_STRINGS_H",
-        "HAVE_CLOCK_GETTIME",
-        "HAVE_CLOCK_MONOTONIC",
-        "HAVE_CPUID_H",
-        "HAVE_SYS_CDEFS_H",
-        "HAVE_SYS_PARAM_H",
-        "HAVE_UNISTD_H",
-        "HAVE_WCHAR_H",
-        "SIZEOF_SIZE_T=8",
-        "ENABLE_NLS=1",
-        "HAVE_VISIBILITY=0",
         "TUKLIB_CPUCORES_SCHED_GETAFFINITY",
-        "HAVE_PTHREAD_CONDATTR_SETCLOCK",
-        "HAVE_DECODER_X86",
-        "HAVE_ENCODER_X86",
         "HAVE_USABLE_CLMUL",
         "HAVE_IMMINTRIN_H",
-        "_GNU_SOURCE",
-        "MYTHREAD_POSIX",
     ],
-    "@bazel_template//bazel:linux_aarch64": [
-        "HAVE___BUILTIN_BSWAPXX",
-        "HAVE_FUNC_ATTRIBUTE_CONSTRUCTOR",
-        "HAVE_STRINGS_H",
-        "HAVE_CLOCK_GETTIME",
-        "HAVE_CLOCK_MONOTONIC",
-        "HAVE_CPUID_H",
-        "HAVE_SYS_CDEFS_H",
-        "HAVE_SYS_PARAM_H",
-        "HAVE_UNISTD_H",
-        "HAVE_WCHAR_H",
-        "SIZEOF_SIZE_T=8",
-        "ENABLE_NLS=1",
-        "HAVE_PTHREAD_CONDATTR_SETCLOCK",
-        "HAVE_ENCODER_ARM64",
-        "HAVE_DECODER_ARM64",
-        "_GNU_SOURCE",
-        "MYTHREAD_POSIX",
-    ],
-    "@bazel_template//bazel:windows_x86_64_gcc": [
+    "@bazel_template//bazel:linux_aarch64": [],
+    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
         "HAVE___BUILTIN_BSWAPXX",
         "HAVE_FUNC_ATTRIBUTE_CONSTRUCTOR",
         "HAVE_STRINGS_H",
@@ -183,19 +160,26 @@ LOCAL_DEFINES = [
         "SIZEOF_SIZE_T=8",
         "ENABLE_NLS=1",
         "MYTHREAD_POSIX",
-        "HAVE_ENCODER_X86",
-        "HAVE_DECODER_X86",
     ],
-    "@bazel_template//bazel:windows_x86_64_msvc": [
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
         "HAVE_IMMINTRIN_H",
         "HAVE_USABLE_CLMUL",
-        "HAVE_VISIBILITY=1",
         "MYTHREAD_VISTA",
-        "HAVE_ENCODER_X86",
-        "HAVE_DECODER_X86",
+        "HAVE_MBRTOWC",
+        "HAVE__FUTIME",
+        "__GETOPT_PREFIX=rpl_",
     ],
-    "//conditions:default": [
-    ],
+    "//conditions:default": [],
+})
+
+LINKOPTS = GLOBAL_LINKOPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
 })
 
 cc_library(
@@ -203,7 +187,7 @@ cc_library(
     srcs = select({
         "@platforms//cpu:aarch64": ["src/liblzma/simple/arm64.c"],
         "@platforms//cpu:riscv64": ["src/liblzma/simple/riscv.c"],
-        "//conditions:default": ["src/liblzma/simple/x86.c"],
+        "@platforms//cpu:x86_64": ["src/liblzma/simple/x86.c"],
     }) + [
         "src/common/tuklib_cpucores.c",
         "src/common/tuklib_physmem.c",
@@ -361,11 +345,7 @@ cc_library(
     ],
     copts = COPTS,
     includes = ["src/liblzma/api"],
-    linkopts = select({
-        "@platforms//os:android": [],
-        "@platforms//os:windows": [],
-        "//conditions:default": ["-pthread"],
-    }),
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     alwayslink = select({
         "@platforms//os:windows": True,
@@ -423,22 +403,9 @@ cc_binary(
         ],
         "//conditions:default": [],
     }),
-    copts = COPTS + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
-            "/Iexternal/xz/lib",
-        ],
-        "//conditions:default": [],
-    }),
-    local_defines = LOCAL_DEFINES + [
-        "ASSUME_RAM=128",
-        "HAVE_MBRTOWC",
-        "HAVE__FUTIME",
-        "__GETOPT_PREFIX=rpl_",
-        "WIN32",
-        "_WIN32",
-        "_MBCS",
-        "_WINDOWS",
-    ],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [":lzma"],
 )
 

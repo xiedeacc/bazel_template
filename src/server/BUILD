@@ -1,4 +1,4 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
 load("//bazel:cpplint.bzl", "cpplint")
 
@@ -65,7 +65,7 @@ cc_binary(
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
-        #":version_info",
+        ":version_info",
         "//src/server/http_handler",
         "@folly",
         "@openssl//:crypto",
@@ -82,7 +82,7 @@ cc_binary(
     local_defines = LOCAL_DEFINES,
     deps = [
         ":grpc_server_impl",
-        #":version_info",
+        ":version_info",
         #"@jemalloc",
         "@openssl//:crypto",
         "@openssl//:ssl",
@@ -129,26 +129,26 @@ cc_library(
     ],
 )
 
-# version_info(
-#     name = "version_info_h",
-#     out = "version_info.h",
-#     exec_tool = "//bazel:gen_local_config_git",
-# )
+version_info(
+    name = "version_info_h",
+    out = "version_info.h",
+    exec_tool = "//bazel:gen_local_config_git",
+)
 
-# cc_library(
-#     name = "version_info",
-#     hdrs = [":version_info_h"],
-#     visibility = ["//visibility:public"],
-# )
+cc_library(
+    name = "version_info",
+    hdrs = [":version_info_h"],
+    visibility = ["//visibility:public"],
+)
 
-# cc_test(
-#     name = "version_info_test",
-#     srcs = ["version_info_test.cc"],
-#     deps = [
-#         ":version_info",
-#         "@com_github_glog_glog//:glog",
-#         "@com_google_googletest//:gtest",
-#     ],
-# )
+cc_test(
+    name = "version_info_test",
+    srcs = ["version_info_test.cc"],
+    deps = [
+        ":version_info",
+        "@com_github_glog_glog//:glog",
+        "@com_google_googletest//:gtest",
+    ],
+)
 
 cpplint()

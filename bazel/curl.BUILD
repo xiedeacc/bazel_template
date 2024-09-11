@@ -1,11 +1,53 @@
-load("@bazel_skylib//lib:selects.bzl", "selects")
-
 #https://github.com/tensorflow/tensorflow/blob/51d480498b07346b8b6e2ee3fbd3dc486f60ed96/third_party/curl.BUILD
 #https://github.com/googleapis/google-cloud-cpp/blob/main/bazel/curl.BUILD
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
+
+COPTS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/std:c11",
+        "/Ox",
+        "/Iexternal/curl/lib",
+    ],
+    "//conditions:default": [
+        "-std=c11",
+        "-O3",
+        "-Iexternal/curl/lib",
+    ],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
+    "CURL_STATICLIB",
+    "BUILDING_LIBCURL",
+    "HAVE_CONFIG_H",
+    "CURL_DISABLE_FTP",
+    "CURL_DISABLE_NTLM",  # turning it off in configure is not enough
+    "HAVE_LIBZ",
+    "HAVE_ZLIB_H",
+    #"CURL_STRICTER",
+] + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [
+        "_GNU_SOURCE",
+        "CURL_MAX_WRITE_SIZE=65536",
+    ],
+    "@platforms//os:osx": [
+        "_GNU_SOURCE",
+        "CURL_MAX_WRITE_SIZE=65536",
+    ],
+    "@platforms//os:windows": ["CURL_MAX_WRITE_SIZE=16384"],
+    "//conditions:default": [],
+})
 
 cc_library(
     name = "curl",
@@ -198,37 +240,9 @@ cc_library(
         "include/curl/urlapi.h",
         "include/curl/websockets.h",
     ],
-    copts = GLOBAL_COPTS + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
-            "/Iexternal/curl/lib",
-        ],
-        "//conditions:default": [
-            "-Iexternal/curl/lib",
-            "-Wno-string-plus-int",
-        ],
-    }),
+    copts = COPTS,
     includes = ["include"],
-    local_defines = [
-        "CURL_STATICLIB",
-        "BUILDING_LIBCURL",
-        "HAVE_CONFIG_H",
-        "CURL_DISABLE_FTP",
-        "CURL_DISABLE_NTLM",  # turning it off in configure is not enough
-        "HAVE_LIBZ",
-        "HAVE_ZLIB_H",
-        #"CURL_STRICTER",
-    ] + select({
-        "@platforms//os:windows": ["CURL_MAX_WRITE_SIZE=16384"],
-        "@platforms//os:linux": [
-            "_GNU_SOURCE",
-            "CURL_MAX_WRITE_SIZE=65536",
-        ],
-        "@platforms//os:osx": [
-            "_GNU_SOURCE",
-            "CURL_MAX_WRITE_SIZE=65536",
-        ],
-        "//conditions:default": [],
-    }),
+    local_defines = LOCAL_DEFINES,
     deps = [
         "@c-ares",
         "@openssl//:crypto",

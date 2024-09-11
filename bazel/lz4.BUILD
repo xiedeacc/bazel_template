@@ -1,6 +1,52 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
+
+COPTS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/Ox",
+        "/Iexternal/lz4/lib",
+        "/Iexternal/lz4/programs",
+    ],
+    "//conditions:default": [
+        "-O3",
+        "-Iexternal/lz4/lib",
+        "-Iexternal/lz4/programs",
+    ],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
+    "XXH_NAMESPACE=LZ4_",
+    #"lz4_shared_EXPORTS",
+] + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "ENABLE_LZ4C_LEGACY_OPTIONS",
+        "LZ4IO_MULTITHREAD=0",
+    ],
+    "//conditions:default": [
+        "ENABLE_LZ4C_LEGACY_OPTIONS",
+    ],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LINKOPTS = GLOBAL_LINKOPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
 
 cc_library(
     name = "lz4",
@@ -20,27 +66,13 @@ cc_library(
         "lib/xxhash.c",
         "lib/xxhash.h",
     ],
-    copts = GLOBAL_COPTS + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
-            "/Ox",
-            "/Iexternal/lz4/lib",
-        ],
-        "//conditions:default": [
-            "-O3",
-            "-Iexternal/lz4/lib",
-        ],
-    }),
-    linkopts = [],
-    local_defines = [
-        "NDEBUG",
-        "XXH_NAMESPACE=LZ4_",
-        "lz4_shared_EXPORTS",
-    ],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
     textual_hdrs = [
         "lib/xxhash.c",
         "lib/lz4.c",
     ],
-    visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -63,50 +95,17 @@ cc_library(
         "programs/timefn.h",
         "programs/util.h",
     ],
-    copts = GLOBAL_COPTS + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
-            "/Ox",
-            "/Iexternal/lz4/lib",
-            "/Iexternal/lz4/programs",
-        ],
-        "//conditions:default": [
-            "-O3",
-            "-Iexternal/lz4/lib",
-            "-Iexternal/lz4/programs",
-        ],
-    }),
-    local_defines = GLOBAL_LOCAL_DEFINES + [
-        "XXH_NAMESPACE=LZ4_",
-        "ENABLE_LZ4C_LEGACY_OPTIONS",
-        "LZ4IO_MULTITHREAD=0",
-    ],
-    deps = [
-        ":lz4",
-    ],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [":lz4"],
 )
 
 cc_binary(
     name = "lz4cli",
-    srcs = [
-        "programs/lz4cli.c",
-    ],
-    copts = GLOBAL_COPTS + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
-            "/Ox",
-            "/Iexternal/lz4/lib",
-            "/Iexternal/lz4/programs",
-        ],
-        "//conditions:default": [
-            "-O3",
-            "-Iexternal/lz4/lib",
-            "-Iexternal/lz4/programs",
-        ],
-    }),
-    local_defines = [
-        "XXH_NAMESPACE=LZ4_",
-        "ENABLE_LZ4C_LEGACY_OPTIONS",
-    ],
-    deps = [
-        ":lz4_util",
-    ],
+    srcs = ["programs/lz4cli.c"],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [":lz4_util"],
 )

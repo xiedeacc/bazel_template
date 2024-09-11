@@ -7,6 +7,7 @@ GLOBAL_COPTS = select({
         "-O2",
         "-g",
         "-mmacosx-version-min=10.15",
+        "-pthread",
     ],
     "@bazel_template//bazel:cross_compiling_for_osx_clang": [
         "-Wall",
@@ -15,6 +16,7 @@ GLOBAL_COPTS = select({
         "-g",
         "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
+        "-pthread",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_osx": [
         "-Wall",
@@ -23,14 +25,14 @@ GLOBAL_COPTS = select({
         "-g",
         "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
+        "-pthread",
     ],
     "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
         "-Wall",
         "-Wextra",
         "-O2",
         "-g",
-        "-stdlib=libc++",
-        "-mmacosx-version-min=10.15",
+        "-pthread",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
         "/GS",  #enable buffer security checks
@@ -74,6 +76,7 @@ GLOBAL_COPTS = select({
         "-Wextra",
         "-O2",
         "-g",
+        "-pthread",
         "-Wpointer-arith",
         "-Wstrict-prototypes",
         "-Wdeclaration-after-statement",
@@ -107,17 +110,14 @@ GLOBAL_LOCAL_DEFINES = select({
 
 GLOBAL_LINKOPTS = select({
     "@bazel_template//bazel:cross_compiling_for_osx_gcc": [
-        "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
         "-pthread",
     ],
     "@bazel_template//bazel:cross_compiling_for_osx_clang": [
-        "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
         "-pthread",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_osx": [
-        "-stdlib=libc++",
         "-lc++abi",
         "-mmacosx-version-min=10.15",
         "-pthread",
@@ -130,6 +130,17 @@ GLOBAL_LINKOPTS = select({
         "Ws2_32.Lib",
         "Crypt32.Lib",
         "User32.lib",
+        "kernel32.lib",
+        "shell32.lib",
+        "advapi32.lib",
+        "bcrypt.lib",
+        "iphlpapi.lib",
+        "gdi32.lib",
+        "winspool.lib",
+        "ole32.lib",
+        "oleaut32.lib",
+        "uuid.lib",
+        "comdlg32.lib",
     ],
     "//conditions:default": ["-pthread"],
 })
@@ -281,16 +292,11 @@ exports_files(
     glob(["gen/*"]),
 )
     """
-
-    if repository_ctx.os.name.startswith("windows") == "windows":
-        repository_ctx.file("BUILD.bazel", executable = False)
-        return None
-    else:
-        repository_ctx.file(
-            "BUILD.bazel",
-            content = local_config_git_build,
-            executable = False,
-        )
+    repository_ctx.file(
+        "BUILD.bazel",
+        content = local_config_git_build,
+        executable = False,
+    )
 
     workspace_root_path = str(repository_ctx.path(
         Label("//:BUILD"),
@@ -300,12 +306,6 @@ exports_files(
         Label("//bazel:gen_local_config_git.py"),
     )
     generated_files_path = repository_ctx.path("gen")
-
-    r = repository_ctx.execute(
-        ["test", "-f", "%s/.git/logs/HEAD" % workspace_root_path],
-    )
-    if r.return_code == 0:
-        unused_var = repository_ctx.path(Label("//:.git/HEAD"))  # pylint: disable=unused-variable
 
     result = repository_ctx.execute([
         _get_python_bin_path(repository_ctx),

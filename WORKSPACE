@@ -644,28 +644,9 @@ load("@contrib_rules_jvm//:setup.bzl", "contrib_rules_jvm_setup")
 
 contrib_rules_jvm_setup()
 
-#load("@rules_android//:prereqs.bzl", "rules_android_prereqs")
+load("@bazel_skylib//lib:versions.bzl", "versions")
 
-#rules_android_prereqs()
-
-#load("@rules_android//:defs.bzl", "rules_android_workspace")
-
-#rules_android_workspace()
-
-#load("@rules_android//rules:rules.bzl", "android_sdk_repository")
-
-#android_sdk_repository(
-#name = "androidsdk",
-#)
-
-#register_toolchains(
-#"@rules_android//toolchains/android:android_default_toolchain",
-#"@rules_android//toolchains/android_sdk:android_sdk_tools",
-#)
-
-#load("@bazel_skylib//lib:versions.bzl", "versions")
-
-#versions.check("7.2.0")
+versions.check("7.2.0")
 
 load("@bazel_features//:deps.bzl", "bazel_features_deps")
 load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")

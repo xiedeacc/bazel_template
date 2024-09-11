@@ -1,4 +1,4 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,13 +14,14 @@ template_rule(
     },
 )
 
-COMMON_COTPS = GLOBAL_COPTS + select({
+COPTS = GLOBAL_COPTS + select({
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
         "/DSODIUM_STATIC",
         "/Dinline=__inline",
         "/D_CRT_SECURE_NO_WARNINGS",
         "/D_LIB",
         "/std:c11",
+        "/Ox",
         "/I$(GENDIR)/external/libsodium/src/libsodium/include/sodium",
         "/Iexternal/libsodium/src/libsodium/include/sodium",
         "/Iexternal/libsodium/src/libsodium/crypto_aead/aegis128l",
@@ -55,6 +56,7 @@ COMMON_COTPS = GLOBAL_COPTS + select({
         "-Wno-deprecated-declarations",
         "-Wno-unknown-pragmas",
         "-std=c11",
+        "-O3",
         "-I$(GENDIR)/external/libsodium/src/libsodium/include/sodium",
         "-Iexternal/libsodium/src/libsodium/include/sodium",
         "-Iexternal/libsodium/src/libsodium/crypto_aead/aegis128l",
@@ -83,7 +85,7 @@ COMMON_COTPS = GLOBAL_COPTS + select({
     ],
 })
 
-COMMON_DEFINES = [
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
     "PACKAGE_NAME=\"libsodium\"",
     "PACKAGE_TARNAME=\"libsodium\"",
     "PACKAGE_VERSION=\"1.0.20\"",
@@ -122,7 +124,6 @@ COMMON_DEFINES = [
     "__STDC_WANT_IEC_60559_TYPES_EXT__=1",
     "__STDC_WANT_LIB_EXT2__=1",
     "__STDC_WANT_MATH_SPEC_FUNCS__=1",
-    "NDEBUG",
 ] + select({
     "@bazel_template//bazel:not_cross_compiling_on_windows": [],
     "//conditions:default": [
@@ -224,8 +225,8 @@ cc_library(
         "src/libsodium/include/sodium/*.h",
         "src/libsodium/include/sodium/private/*.h",
     ]),
-    copts = COMMON_COTPS,
-    local_defines = COMMON_DEFINES,
+    copts = COPTS,
+    local_defines = LOCAL_DEFINES,
 )
 
 cc_library(
@@ -344,8 +345,8 @@ cc_library(
         "src/libsodium/**/*.h",
         "src/libsodium/crypto_scalarmult/curve25519/sandy2x/*.S",
     ]),
-    copts = COMMON_COTPS,
-    local_defines = COMMON_DEFINES,
+    copts = COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [":utils"],
     alwayslink = True,
 )
@@ -363,8 +364,8 @@ cc_library(
         "//conditions:default": [
             "-mrdrnd",
         ],
-    }) + COMMON_COTPS,
-    local_defines = COMMON_DEFINES,
+    }) + COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
 
@@ -384,8 +385,8 @@ cc_library(
         "//conditions:default": [
             "-msse2",
         ],
-    }) + COMMON_COTPS,
-    local_defines = COMMON_DEFINES,
+    }) + COPTS,
+    local_defines = LOCAL_DEFINES,
     alwayslink = True,
 )
 
@@ -405,8 +406,8 @@ cc_library(
             "-msse2",
             "-mssse3",
         ],
-    }) + COMMON_COTPS,
-    local_defines = COMMON_DEFINES,
+    }) + COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
     alwayslink = True,
 )
@@ -427,8 +428,8 @@ cc_library(
             "-msse2",
             "-mssse3",
         ],
-    }) + COMMON_COTPS,
-    local_defines = COMMON_DEFINES,
+    }) + COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
     alwayslink = True,
 )
@@ -452,8 +453,8 @@ cc_library(
             "-maes",
             "-mpclmul",
         ],
-    }) + COMMON_COTPS,
-    local_defines = COMMON_DEFINES,
+    }) + COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
     alwayslink = True,
 )
@@ -473,8 +474,8 @@ cc_library(
             "-mssse3",
             "-msse4.1",
         ],
-    }) + COMMON_COTPS,
-    local_defines = COMMON_DEFINES,
+    }) + COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
     alwayslink = True,
 )
@@ -499,8 +500,8 @@ cc_library(
             "-mavx",
             "-mavx2",
         ],
-    }) + COMMON_COTPS,
-    local_defines = COMMON_DEFINES,
+    }) + COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
     alwayslink = True,
 )
@@ -523,8 +524,8 @@ cc_library(
             "-mavx2",
             "-mavx512f",
         ],
-    }) + COMMON_COTPS,
-    local_defines = COMMON_DEFINES,
+    }) + COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [":common"],
     alwayslink = True,
 )
@@ -546,9 +547,9 @@ cc_library(
             "-msse2",
             "-mssse3",
         ],
-    }) + COMMON_COTPS,
+    }) + COPTS,
     #linkstatic = True,
-    local_defines = COMMON_DEFINES,
+    local_defines = LOCAL_DEFINES,
     deps = [
         ":aesni",
         ":armcrypto",

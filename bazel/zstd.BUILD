@@ -6,11 +6,52 @@ COPTS = GLOBAL_COPTS + select({
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
         "/Ox",
         "/Iexternal/zstd/lib",
+        "/Iexternal/lz4/lib",
     ],
     "//conditions:default": [
         "-O3",
         "-Iexternal/zstd/lib",
+        "-Iexternal/lz4/lib",
     ],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
+    "ZSTD_LEGACY_SUPPORT=4",
+    "ZSTD_MULTITHREAD",
+    "XXH_NAMESPACE=ZSTD_",
+    "ZSTD_GZCOMPRESS",
+    "ZSTD_GZDECOMPRESS",
+    "ZSTD_LZ4COMPRESS",
+    "ZSTD_LZ4DECOMPRES",
+    "ZSTD_LZMACOMPRESS",
+    "ZSTD_LZMADECOMPRES",
+    "BACKTRACE_ENABLE=0",
+    "DEBUGLEVEL=0",
+    "ZSTD_MULTITHREAD",
+] + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [
+    ],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LINKOPTS = GLOBAL_LINKOPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
 })
 
 cc_library(
@@ -47,21 +88,8 @@ cc_library(
     ],
     copts = COPTS,
     includes = ["lib"],
-    linkopts = GLOBAL_LINKOPTS,
-    local_defines = GLOBAL_LOCAL_DEFINES + [
-        "ZSTD_LEGACY_SUPPORT=4",
-        "ZSTD_MULTITHREAD",
-        "XXH_NAMESPACE=ZSTD_",
-        "ZSTD_GZCOMPRESS",
-        "ZSTD_GZDECOMPRESS",
-        "ZSTD_LZ4COMPRESS",
-        "ZSTD_LZ4DECOMPRES",
-        "ZSTD_LZMACOMPRESS",
-        "ZSTD_LZMADECOMPRES",
-        "BACKTRACE_ENABLE=0",
-        "DEBUGLEVEL=0",
-        "ZSTD_MULTITHREAD",
-    ],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [
         "@lz4",
         "@xz//:lzma",
@@ -78,11 +106,9 @@ cc_library(
         "zlibWrapper/*.h",
     ]),
     copts = COPTS,
-    linkopts = GLOBAL_LINKOPTS,
-    deps = [
-        ":zstd",
-        "@zlib",
-    ],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [":zstd"],
 )
 
 cc_library(
@@ -115,18 +141,16 @@ cc_library(
         "programs/zstdcli_trace.h",
     ],
     copts = COPTS,
-    linkopts = GLOBAL_LINKOPTS,
-    deps = [
-        ":zstd",
-    ],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [":zstd"],
 )
 
 cc_binary(
     name = "zstdcli",
     srcs = ["programs/zstdcli.c"],
     copts = COPTS,
-    deps = [
-        ":zstd",
-        ":zstd_util",
-    ],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [":zstd_util"],
 )

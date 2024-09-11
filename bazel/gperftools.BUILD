@@ -8,6 +8,7 @@ COPTS = [
     "-Iexternal/gperftools/src",
     "-Iexternal/gperftools/benchmark",
     "-Wall",
+    "-O3",
     "-Wwrite-strings",
     "-Woverloaded-virtual",
     "-Wno-sign-compare",
@@ -55,12 +56,10 @@ cc_library(
         ":config_h",
     ],
     copts = COPTS,
-    defines = [
-        "FORCED_FRAME_POINTERS",
-    ],
     linkopts = LINKOPTS,
     local_defines = [
         "ENABLE_EMERGENCY_MALLOC",
+        "FORCED_FRAME_POINTERS",
         "HAVE_CONFIG_H",
         "NDEBUG",
     ],

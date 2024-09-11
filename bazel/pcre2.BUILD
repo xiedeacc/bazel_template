@@ -1,4 +1,30 @@
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+COPTS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": ["/Ox"],
+    "//conditions:default": ["-O3"],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
+    "HAVE_CONFIG_H",
+    "PCRE2_CODE_UNIT_WIDTH=8",
+] + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
 
 copy_file(
     name = "config_h_generic",
@@ -53,19 +79,15 @@ cc_library(
         ":config_h_generic",
         ":pcre2_h_generic",
     ],
+    copts = COPTS,
     defines = ["PCRE2_STATIC"],
     includes = ["src"],
-    local_defines = [
-        "HAVE_CONFIG_H",
-        "PCRE2_CODE_UNIT_WIDTH=8",
-    ],
+    local_defines = LOCAL_DEFINES,
     strip_include_prefix = "src",
-    visibility = ["//visibility:public"],
 )
 
 cc_binary(
     name = "pcre2demo",
     srcs = ["src/pcre2demo.c"],
-    visibility = ["//visibility:public"],
     deps = [":pcre2"],
 )

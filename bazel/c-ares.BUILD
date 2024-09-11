@@ -1,19 +1,37 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
-COPTS = GLOBAL_COPTS + selects.with_or({
-    ("@bazel_template//bazel:gcc", "@bazel_template//bazel:clang"): [],
-    "@bazel_template//bazel:msvc": ["/std:c11"],
+COPTS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/std:c11",
+        "/Ox",
+        "/Iexternal/c-ares/src/lib",
+        "/I$(GENDIR)/external/c-ares/src/lib",
+    ],
+    "//conditions:default": [
+        "-std=c11",
+        "-O3",
+        "-fPIC",
+        "-Iexternal/c-ares/src/lib",
+        "-I$(GENDIR)/external/c-ares/src/lib",
+    ],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
     "//conditions:default": [],
 }) + select({
-    "@bazel_template//bazel:windows_x86_64_gcc": [
-        "-std=c90",
-        "-fPIC",
-    ],
-    "@bazel_template//bazel:windows_x86_64_msvc": [],
-    "//conditions:default": ["-std=gnu90"],
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
 })
 
 alias(
@@ -118,15 +136,13 @@ cc_library(
         "include/*.h",
         "src/lib/*.h",
     ]),
-    copts = COPTS + [
-        "-Iexternal/c-ares/src/lib",
-        "-I$(GENDIR)/external/c-ares/src/lib",
-    ],
-    defines = [
+    copts = COPTS,
+    includes = ["include"],
+    local_defines = LOCAL_DEFINES + [
         "CARES_BUILDING_LIBRARY",
         "HAVE_CONFIG_H=1",
-        #"CARES_STATICLIB",
-        "c_ares_EXPORTS",
+        "CARES_STATICLIB",
+        #"c_ares_EXPORTS",
     ] + select({
         "@platforms//os:linux": [
             "_XOPEN_SOURCE=700",
@@ -147,9 +163,6 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    includes = [
-        "include",
-    ],
 )
 
 genrule(

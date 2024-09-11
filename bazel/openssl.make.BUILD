@@ -137,7 +137,6 @@ configure_make(
         "@bazel_template//bazel:not_cross_compiling_on_windows": {
             "PATH": "$$(dirname $(execpath @nasm//:nasm)):$$PATH",
             "PERL": "$(execpath @perl//:perl)",
-            "CL": "/MP16",
         },
         "@bazel_template//bazel:cross_compiling_for_windows": {
             "WINDRES": "x86_64-w64-mingw32-windres",

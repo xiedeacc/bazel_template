@@ -1,7 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 STRICT_C_OPTIONS = select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@bazel_template//bazel:not_cross_compiling_on_windows": ["/Ox"],
     "//conditions:default": [
         "--pedantic-errors",
         "-Wall",
@@ -13,6 +13,7 @@ STRICT_C_OPTIONS = select({
         "-Wno-strict-aliasing",
         "-Wshadow",
         "-Wsign-compare",
+        "-O3",
     ],
 })
 

@@ -90,7 +90,6 @@ build:ubsan --action_env=UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1:suppre
 
 #####################################################################
 build --announce_rc
-#build --workspace_status_command=bazel/workspace_status.sh
 
 build --strip='never'
 build --output_filter="^//"
@@ -114,6 +113,7 @@ build:windows --compiler='msvc-cl'
 build:windows --cpu='x64_windows'
 build:windows --extra_toolchains='@openssl//:preinstalled_nmake_toolchain'
 build:windows --extra_toolchains='@openssl//:preinstalled_pkgconfig_toolchain'
+build:windows --workspace_status_command=bazel/workspace_status.bat
 
 build:macos --copt='-mmacosx-version-min=10.15'
 build:macos --copt='-g'
@@ -127,6 +127,7 @@ build:macos --host_copt='-O2'
 build:macos --host_copt='-Wall'
 build:macos --host_cxxopt='-std=c++17'
 build:macos --dynamic_mode=off
+build:macos --workspace_status_command=bazel/workspace_status.sh
 
 build:linux --copt='-g'
 build:linux --copt='-O2'
@@ -138,6 +139,7 @@ build:linux --host_copt='-O2'
 build:linux --host_copt='-Wall'
 build:linux --host_cxxopt='-std=c++17'
 build:linux --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+build:linux --workspace_status_command=bazel/workspace_status.sh
 
 build:android --noenable_platform_specific_config
 build:ios --noenable_platform_specific_config

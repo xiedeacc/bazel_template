@@ -7,8 +7,6 @@ filegroup(
     srcs = glob(["**"]),
 )
 
-exports_files(glob(["**"]))
-
 py_binary(
     name = "gen_local_config_git",
     srcs = ["gen_local_config_git.py"],
