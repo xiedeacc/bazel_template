@@ -3,12 +3,7 @@ load("@bazel_template//bazel:common.bzl", "dict_union", "template_rule")
 common_copts = [
     "-I$(GENDIR)/external/com_github_glog_glog/glog_internal",
     "-DGLOG_BAZEL_BUILD",
-    "-DGOOGLE_NAMESPACE=google",
-    "-DHAVE_CXX11_NULLPTR_T",
-    "-DHAVE_STDINT_H",
     "-DHAVE_STRING_H",
-    "-DHAVE_UNWIND_H",
-    "-DHAVE_LIB_GFLAGS",
 ]
 
 wasm_copts = [
@@ -25,8 +20,8 @@ wasm_copts = [
 ]
 
 linux_or_darwin_copts = wasm_copts + [
+    "-D_GNU_SOURCE",
     "-DHAVE_SYS_SYSCALL_H",
-    "-DHAVE_UNISTD_H",
 ]
 
 freebsd_only_copts = [
@@ -97,7 +92,6 @@ cc_library(
             "GLOG_NO_SYMBOLIZE_DETECTION",
             "GFLAGS_DLL_DECLARE_FLAG=GOOGLE_GLOG_DLL_DECL",
             "GFLAGS_IS_A_DLL=0",
-            "GLOG_BAZEL_BUILD",
         ],
         "//conditions:default": [],
     }),
