@@ -161,15 +161,12 @@ windows_config = dict_union(
     },
 )
 
-windows_config = dict_union(
-    windows_config,
-    select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
-            "@ac_cv_have_uint16_t@": "0",
-        },
-        "//conditions:default": {},
-    }),
-)
+windows_config = windows_config | select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": {
+        "@ac_cv_have_uint16_t@": "0",
+    },
+    "//conditions:default": {},
+})
 
 template_rule(
     name = "vlog_is_on_h",
