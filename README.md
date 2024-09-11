@@ -6,7 +6,7 @@
 * include swig for Java and Python example
 * support multiple os, eg: linux, macosx, windows
 * support multiple cpu, eg: x86_64, aarch64
-* all source code compiled successful by clang, gcc, msvc-cl both
+* all source code compiled successful by clang, gcc, msvc-cl
 * include compile_commands.json generator
 * include cpu and memory profiling
 * include memory leak, corruption detection
