@@ -236,6 +236,7 @@ template_rule(
             "#define HAVE___SYNC_VAL_COMPARE_AND_SWAP": "/* #undef HAVE___SYNC_VAL_COMPARE_AND_SWAP */",
             "/* #undef HAVE_SYMBOLIZE */": "#define HAVE_SYMBOLIZE",
             "#define GLOG_THREAD_LOCAL_STORAGE __thread": "#define GLOG_THREAD_LOCAL_STORAGE __declspec(thread)",
+            "#define HAVE_PTHREAD": "/* #undef HAVE_PTHREAD */",
         },
         "@platforms//os:linux": {},
         "@platforms//os:osx": {},
