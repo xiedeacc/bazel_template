@@ -2,6 +2,16 @@ load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS")
 
 package(default_visibility = ["//visibility:public"])
 
+COPTS = GLOBAL_COPTS + select({
+    "@bazel_template//bazel:not_cross_compiling_on_windows": ["/Ox"],
+    "//conditions:default": ["-O3"],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
 cc_library(
     name = "mbedtls",
     srcs = glob(["library/*.c"]),
@@ -12,7 +22,7 @@ cc_library(
         ],
         exclude = ["include/mbedtls/mbedtls_config.h"],
     ),
-    copts = GLOBAL_COPTS,
+    copts = COPTS,
     includes = [
         "include",
         "library",
@@ -38,6 +48,5 @@ cc_binary(
         "//conditions:default": [],
     }),
     linkshared = True,
-    visibility = ["//visibility:private"],
-    deps = ["mbedtls"],
+    deps = [":mbedtls"],
 )

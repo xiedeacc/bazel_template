@@ -5,6 +5,7 @@ package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "/Ox",
         "/Iexternal/libdwarf/src/lib/libdwarf",
         "/Iexternal/folly",
         "/I$(GENDIR)/external/folly",
@@ -31,6 +32,7 @@ COPTS = GLOBAL_COPTS + select({
         "-Iexternal/libsodium/src/libsodium/include/sodium",
         "-isystem $(GENDIR)/external/libsodium/src/libsodium/include",
         "-Wall",
+        "-O3",
         "-Wno-deprecated",
         "-Wno-deprecated-declarations",
         "-Wno-sign-compare",
@@ -62,27 +64,12 @@ COPTS = GLOBAL_COPTS + select({
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
     "HAVE_CONFIG_H",
-    # "BOOST_ATOMIC_DYN_LINK",
-    # "BOOST_ATOMIC_NO_LIB",
-    # "BOOST_CONTEXT_DYN_LINK",
-    # "BOOST_CONTEXT_NO_LIB",
-    # "BOOST_FILESYSTEM_DYN_LINK",
-    # "BOOST_FILESYSTEM_NO_LIB",
-    # "BOOST_PROGRAM_OPTIONS_DYN_LINK",
-    # "BOOST_PROGRAM_OPTIONS_NO_LIB",
-    # "BOOST_REGEX_DYN_LINK",
-    # "BOOST_REGEX_NO_LIB",
-    # "BOOST_SYSTEM_DYN_LINK",
-    # "BOOST_SYSTEM_NO_LIB",
-    # "BOOST_THREAD_DYN_LINK",
-    # "BOOST_THREAD_NO_LIB",
 ] + select({
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
         "_CRT_NONSTDC_NO_WARNINGS",
         "_CRT_SECURE_NO_WARNINGS",
         "_SCL_SECURE_NO_WARNINGS",
         "_ENABLE_EXTENDED_ALIGNED_STORAGE",
-        #"_STL_EXTRA_DISABLED_WARNINGS=4774 4987",
         "WIN32_LEAN_AND_MEAN",
     ],
     "//conditions:default": [
