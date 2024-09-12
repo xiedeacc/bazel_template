@@ -20,6 +20,7 @@ COPTS = GLOBAL_COPTS + select({
         "/Iexternal/mvfst",
     ],
     "//conditions:default": [
+        "-std=c++17",
         "-isystem external/libsodium/src/libsodium/include",
         "-isystem external/fbthrift",
         "-isystem $(GENDIR)/external/fbthrift",
@@ -284,6 +285,7 @@ cc_binary(
     srcs = ["thrift/compiler/main.cc"],
     copts = COPTS,
     linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [
         ":compiler_generators",
         "@folly",
@@ -639,6 +641,7 @@ cc_library(
         ],
     ),
     copts = COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [
         "@fatal",
         "@folly",

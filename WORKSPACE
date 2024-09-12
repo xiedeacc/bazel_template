@@ -711,7 +711,7 @@ http_archive(
 
 new_git_repository(
     name = "cc_toolchains",
-    commit = "4e65ea7b374024729060baf70a84488c3b5188b2",
+    commit = "0b3f7629069f5ca459a49aa944928995926f9787",
     remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
 )
 
@@ -994,6 +994,7 @@ cc_toolchains_setup(
                     "sysroot_include_directories": [],
                     "sysroot_lib_directories": [
                         "lib/gcc/aarch64-openwrt-linux-musl/12.3.0",
+                        "lib",
                     ],
                     "link_libs": [
                         "libgcc.a",
