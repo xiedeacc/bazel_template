@@ -1,6 +1,7 @@
 cc_binary(
     name = "libjni_config_manger.so",
     linkshared = True,
+    tags = ["ignore"],
     target_compatible_with = select({
         "@platforms//os:linux": [],
         "@platforms//os:windows": [],
@@ -16,6 +17,7 @@ cc_binary(
 java_library(
     name = "Loader",
     srcs = ["Loader.java"],
+    tags = ["ignore"],
     runtime_deps = select({
         "@platforms//os:linux": [":libjni_config_manger.so"],
         "@platforms//os:windows": [":libjni_config_manger.so"],

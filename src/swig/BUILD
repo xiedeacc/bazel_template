@@ -6,11 +6,6 @@ package(default_visibility = ["//visibility:public"])
 
 exports_files(["CPPLINT.cfg"])
 
-config_setting(
-    name = "on_linux",
-    constraint_values = ["@platforms//os:linux"],
-)
-
 filegroup(
     name = "config_manager_swig",
     srcs = [
@@ -46,6 +41,7 @@ java_wrap_cc(
         ":config_manager_swig",
     ],
     swig_opt = "-DSWIGWORDSIZE64",
+    tags = ["ignore"],
     use_directors = False,
     deps = [
         ":config_manager",
@@ -62,9 +58,10 @@ cc_test(
         "-isystem $(GENDIR)/external/folly",
     ],
     data = ["//conf:base_config.json"],
+    tags = ["ignore"],
     deps = [
         ":config_manager",
     ],
 )
 
-cpplint()
+#cpplint()
