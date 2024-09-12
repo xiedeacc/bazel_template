@@ -305,28 +305,6 @@ filegroup(
 )
 
 fbthrift_cpp_gen(
-    name = "lib_meta_thrift_cpp",
-    srcs = [
-        "thrift/lib/thrift/frozen.thrift",
-        "thrift/lib/thrift/metadata.thrift",
-    ],
-    data = [":fbthrift_libraries"],
-    gen_para = ["include_prefix=thrift/lib/thrift"],
-    includes = [
-        ## buildifier: leave-alone
-        "-I",
-        "external/fbthrift",
-        ## buildifier: leave-alone
-    ],
-    out_dir = "thrift/lib/thrift",
-    out_files = {
-        "thrift/lib/thrift/frozen.thrift": "frozen",
-        "thrift/lib/thrift/metadata.thrift": "metadata",
-    },
-    plugin = "mstch_cpp2",
-)
-
-fbthrift_cpp_gen(
     name = "annotation_thrift_cpp",
     srcs = [
         "thrift/annotation/cpp.thrift",
@@ -473,6 +451,28 @@ fbthrift_service_cpp_gen(
         "thrift/lib/thrift/RocketUpgrade.thrift": "RocketUpgrade",
         "thrift/lib/thrift/metadata.thrift": "ThriftMetadataService",
     },
+)
+
+fbthrift_cpp_gen(
+    name = "lib_meta_thrift_cpp",
+    srcs = [
+        "thrift/lib/thrift/frozen.thrift",
+        "thrift/lib/thrift/metadata.thrift",
+    ],
+    data = [":fbthrift_libraries"],
+    gen_para = ["include_prefix=thrift/lib/thrift"],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        "external/fbthrift",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "thrift/lib/thrift",
+    out_files = {
+        "thrift/lib/thrift/frozen.thrift": "frozen",
+        "thrift/lib/thrift/metadata.thrift": "metadata",
+    },
+    plugin = "mstch_cpp2",
 )
 
 fbthrift_cpp_gen(

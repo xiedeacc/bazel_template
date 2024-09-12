@@ -72,14 +72,6 @@ GLOBAL_COPTS = select({
         "-Wextra",
         "-O2",
         "-g",
-        "-Wpointer-arith",
-        "-Wstrict-prototypes",
-        "-Wdeclaration-after-statement",
-        "-Wswitch-enum",
-        "-Wshadow",
-        "-Wcast-align",
-        "-Wcast-qual",
-        "-Wundef",
     ],
 })
 
