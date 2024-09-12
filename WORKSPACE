@@ -709,10 +709,15 @@ http_archive(
     urls = ["https://code.xiamu.com/files/macosx14.2-x86_64_sysroot.tar.gz"],
 )
 
-new_git_repository(
+#new_git_repository(
+#name = "cc_toolchains",
+#commit = "3da994e556b6053c8c78a6c850f0ae597e093f7b",
+#remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
+#)
+
+local_repository(
     name = "cc_toolchains",
-    commit = "0b3f7629069f5ca459a49aa944928995926f9787",
-    remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
+    path = "../cc_toolchains",
 )
 
 load("@cc_toolchains//toolchain:cc_toolchains_setup.bzl", "cc_toolchains_setup")
@@ -1044,6 +1049,11 @@ cc_toolchains_setup(
                     ],
                     "link_libs": [
                         "libclang_rt.builtins.a",
+                        "Scrt1.o",
+                        "crti.o",
+                        "crtbeginS.o",
+                        "crtendS.o",
+                        "crtn.o",
                     ],
                     "supports_start_end_lib": True,
                     "debug": True,

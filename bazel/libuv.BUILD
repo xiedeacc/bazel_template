@@ -92,7 +92,6 @@ cc_library(
             "-std=c11",
             "-pedantic",
             "-O3",
-            "-pthread",
         ],
         "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
             "-Iexternal/libuv/src/win",
@@ -112,7 +111,6 @@ cc_library(
             "-std=c11",
             "-pedantic",
             "-O3",
-            "-pthread",
         ],
     }),
     includes = ["include"],

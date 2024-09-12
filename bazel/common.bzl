@@ -7,7 +7,6 @@ GLOBAL_COPTS = select({
         "-O2",
         "-g",
         "-mmacosx-version-min=10.15",
-        "-pthread",
     ],
     "@bazel_template//bazel:cross_compiling_for_osx_clang": [
         "-Wall",
@@ -16,7 +15,6 @@ GLOBAL_COPTS = select({
         "-g",
         "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
-        "-pthread",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_osx": [
         "-Wall",
@@ -25,14 +23,12 @@ GLOBAL_COPTS = select({
         "-g",
         "-stdlib=libc++",
         "-mmacosx-version-min=10.15",
-        "-pthread",
     ],
     "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
         "-Wall",
         "-Wextra",
         "-O2",
         "-g",
-        "-pthread",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
         "/GS",  #enable buffer security checks
@@ -76,7 +72,6 @@ GLOBAL_COPTS = select({
         "-Wextra",
         "-O2",
         "-g",
-        "-pthread",
         "-Wpointer-arith",
         "-Wstrict-prototypes",
         "-Wdeclaration-after-statement",
@@ -111,20 +106,15 @@ GLOBAL_LOCAL_DEFINES = select({
 GLOBAL_LINKOPTS = select({
     "@bazel_template//bazel:cross_compiling_for_osx_gcc": [
         "-mmacosx-version-min=10.15",
-        "-pthread",
     ],
     "@bazel_template//bazel:cross_compiling_for_osx_clang": [
         "-mmacosx-version-min=10.15",
-        "-pthread",
     ],
     "@bazel_template//bazel:not_cross_compiling_on_osx": [
         "-lc++abi",
         "-mmacosx-version-min=10.15",
-        "-pthread",
     ],
-    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
-        "-pthread",
-    ],
+    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [],
     "@bazel_template//bazel:not_cross_compiling_on_windows": [
         "/MACHINE:X64",
         "Ws2_32.Lib",
@@ -142,7 +132,7 @@ GLOBAL_LINKOPTS = select({
         "uuid.lib",
         "comdlg32.lib",
     ],
-    "//conditions:default": ["-pthread"],
+    "//conditions:default": [],
 })
 
 def dict_union(x, y):

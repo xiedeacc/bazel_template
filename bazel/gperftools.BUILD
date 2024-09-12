@@ -15,7 +15,6 @@ COPTS = [
     "-faligned-new",
     "-fsized-deallocation",
     "-fno-omit-frame-pointer",
-    "-pthread",
     "-fPIC",
     "-isystem external/libunwind/include",
     "-isystem $(GENDIR)/external/libunwind/include",
@@ -25,7 +24,6 @@ LINKOPTS = [
     "-fsized-deallocation",
     "-fno-omit-frame-pointer",
     "-momit-leaf-frame-pointer",
-    "-pthread",
     "-lpthread",
 ]
 

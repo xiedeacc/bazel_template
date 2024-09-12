@@ -86,8 +86,7 @@ build:ubsan --action_env=UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1:suppre
 # if you want to run ubsan locally, uncomment following three lines
 # build:ubsan --linkopt=-lgcc_s
 # build:ubsan --linkopt=-lubsan
-# build:ubsan --linkopt=--rtlib=compiler-rt
-
+# build:ubsan --linkopt=-rtlib=compiler-rt
 
 #####################################################################
 
