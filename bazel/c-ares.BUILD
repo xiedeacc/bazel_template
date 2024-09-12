@@ -137,7 +137,9 @@ cc_library(
         "src/lib/*.h",
     ]),
     copts = COPTS,
+    defines = ["CARES_STATICLIB"],
     includes = ["include"],
+    linkstatic = True,
     local_defines = LOCAL_DEFINES + [
         "CARES_BUILDING_LIBRARY",
         "HAVE_CONFIG_H=1",
