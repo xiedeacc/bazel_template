@@ -341,6 +341,7 @@ cc_library(
         "src/libsodium/crypto_scalarmult/curve25519/sandy2x/*.S",
     ]),
     copts = COPTS,
+    defines = ["SODIUM_STATIC"],
     local_defines = LOCAL_DEFINES,
     deps = [":utils"],
     alwayslink = True,
