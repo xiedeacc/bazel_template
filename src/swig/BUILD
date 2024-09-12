@@ -33,25 +33,25 @@ cc_library(
     alwayslink = True,
 )
 
-#java_wrap_cc(
-#name = "config_manager_swig_java",
-#src = "config_manager.i",
-#copts = [
-#"-isystem external/double-conversion",
-#"-isystem external/folly",
-#"-isystem $(GENDIR)/external/folly",
-#],
-#package = "com.xiedeacc.example",
-#swig_includes = [
-#":config_manager_swig",
-#],
-#swig_opt = "-DSWIGWORDSIZE64",
-#use_directors = False,
-#deps = [
-#":config_manager",
-#"//src/util:config_manager",
-#],
-#)
+java_wrap_cc(
+    name = "config_manager_swig_java",
+    src = "config_manager.i",
+    copts = [
+        "-isystem external/double-conversion",
+        "-isystem external/folly",
+        "-isystem $(GENDIR)/external/folly",
+    ],
+    package = "com.xiedeacc.example",
+    swig_includes = [
+        ":config_manager_swig",
+    ],
+    swig_opt = "-DSWIGWORDSIZE64",
+    use_directors = False,
+    deps = [
+        ":config_manager",
+        "//src/util:config_manager",
+    ],
+)
 
 cc_test(
     name = "config_manager_test",

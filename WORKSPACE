@@ -248,7 +248,6 @@ git_repository(
     name = "com_google_absl",
     remote = "git@code.xiamu.com:abseil/abseil-cpp.git",
     tag = "20240116.2",
-    #tag = "20230802.2",
 )
 
 new_git_repository(
@@ -404,7 +403,6 @@ http_archive(
 new_git_repository(
     name = "libunwind",
     build_file = "//bazel:libunwind.BUILD",
-    #tag = "v1.8.2",
     commit = "3c47821d681777e3cff33edb25c804d93102e1c6",
     remote = "git@code.xiamu.com:libunwind/libunwind.git",
 )
@@ -426,14 +424,12 @@ new_git_repository(
     name = "gperftools",
     build_file = "//bazel:gperftools.BUILD",
     commit = "285908e8c7cfa98659127a23532c060f8dcbd148",
-    #recursive_init_submodules = True,
     remote = "git@code.xiamu.com:gperftools/gperftools.git",
 )
 
 new_git_repository(
     name = "folly",
     build_file = "//bazel:folly.BUILD",
-    #commit = "5eb3a763b2ee6025c8f5c210b74e0b25fec197d5",
     patch_args = ["-p1"],
     patches = ["//bazel:folly.patch"],
     remote = "git@code.xiamu.com:facebook/folly.git",
