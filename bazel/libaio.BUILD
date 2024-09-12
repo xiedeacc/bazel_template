@@ -40,9 +40,7 @@ cc_library(
         "-g",
         "-O3",
         "-fomit-frame-pointer",
-        "-fPIC",
     ],
     includes = ["src"],
     linkstatic = True,
-    alwayslink = True,
 )
