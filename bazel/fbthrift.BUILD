@@ -1,5 +1,5 @@
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
-load("@bazel_template//bazel:rules_fbthrift.bzl", "fbthrift_cpp_gen", "fbthrift_service_cpp_gen")
+load("@bazel_template//bazel:rules_fbthrift.bzl", "fbthrift_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -327,7 +327,7 @@ fbthrift_cpp_gen(
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/annotation",
-    out_files = {
+    out_file_name = {
         "thrift/annotation/cpp.thrift": "cpp",
         "thrift/annotation/go.thrift": "go",
         "thrift/annotation/hack.thrift": "hack",
@@ -356,7 +356,7 @@ fbthrift_cpp_gen(
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/lib/thrift",
-    out_files = {
+    out_file_name = {
         "thrift/lib/thrift/reflection.thrift": "reflection",
     },
     plugin = "mstch_cpp2",
@@ -381,7 +381,7 @@ fbthrift_cpp_gen(
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/lib/thrift",
-    out_files = {
+    out_file_name = {
         "thrift/lib/thrift/RpcMetadata.thrift": "RpcMetadata",
         "thrift/lib/thrift/serverdbginfo.thrift": "serverdbginfo",
     },
@@ -414,7 +414,7 @@ fbthrift_cpp_gen(
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/lib/thrift",
-    out_files = {
+    out_file_name = {
         "thrift/lib/thrift/RocketUpgrade.thrift": "RocketUpgrade",
         "thrift/lib/thrift/any_rep.thrift": "any_rep",
         "thrift/lib/thrift/field_mask.thrift": "field_mask",
@@ -427,29 +427,8 @@ fbthrift_cpp_gen(
         "thrift/lib/thrift/type.thrift": "type",
         "thrift/lib/thrift/type_rep.thrift": "type_rep",
     },
-)
-
-fbthrift_service_cpp_gen(
-    name = "lib_rocket_service_thrift_cpp",
-    srcs = [
-        "thrift/lib/thrift/RocketUpgrade.thrift",
-        "thrift/lib/thrift/metadata.thrift",
-    ],
-    data = [":fbthrift_libraries"],
-    gen_para = [
-        "no_metadata",
-        "include_prefix=thrift/lib/thrift",
-    ],
-    includes = [
-        ## buildifier: leave-alone
-        "-I",
-        "external/fbthrift",
-        ## buildifier: leave-alone
-    ],
-    out_dir = "thrift/lib/thrift",
-    out_files = {
+    service_out_file_name = {
         "thrift/lib/thrift/RocketUpgrade.thrift": "RocketUpgrade",
-        "thrift/lib/thrift/metadata.thrift": "ThriftMetadataService",
     },
 )
 
@@ -468,11 +447,14 @@ fbthrift_cpp_gen(
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/lib/thrift",
-    out_files = {
+    out_file_name = {
         "thrift/lib/thrift/frozen.thrift": "frozen",
         "thrift/lib/thrift/metadata.thrift": "metadata",
     },
     plugin = "mstch_cpp2",
+    service_out_file_name = {
+        "thrift/lib/thrift/metadata.thrift": "ThriftMetadataService",
+    },
 )
 
 fbthrift_cpp_gen(
@@ -504,7 +486,7 @@ fbthrift_cpp_gen(
         ## buildifier: leave-alone
     ],
     out_dir = "thrift/conformance/if",
-    out_files = {
+    out_file_name = {
         "thrift/conformance/if/any.thrift": "any",
         "thrift/conformance/if/conformance.thrift": "conformance",
         "thrift/conformance/if/patch_data.thrift": "patch_data",
@@ -512,33 +494,7 @@ fbthrift_cpp_gen(
         "thrift/conformance/if/serialization.thrift": "serialization",
         "thrift/conformance/if/type.thrift": "type",
     },
-)
-
-fbthrift_service_cpp_gen(
-    name = "conformance_service_thrift_cpp",
-    srcs = [
-        "thrift/conformance/if/conformance.thrift",
-    ],
-    data = [":fbthrift_libraries"] + [
-        "thrift/conformance/if/any.thrift",
-        "thrift/conformance/if/conformance.thrift",
-        "thrift/conformance/if/patch_data.thrift",
-        "thrift/conformance/if/protocol.thrift",
-        "thrift/conformance/if/serialization.thrift",
-        "thrift/conformance/if/type.thrift",
-    ],
-    gen_para = [
-        "no_metadata",
-        "include_prefix=thrift/conformance/if",
-    ],
-    includes = [
-        ## buildifier: leave-alone
-        "-I",
-        "external/fbthrift",
-        ## buildifier: leave-alone
-    ],
-    out_dir = "thrift/conformance/if",
-    out_files = {
+    service_out_file_name = {
         "thrift/conformance/if/conformance.thrift": "ConformanceService",
     },
 )
@@ -547,12 +503,10 @@ cc_library(
     name = "fbthrift",
     srcs = [
         ":annotation_thrift_cpp",
-        ":conformance_service_thrift_cpp",
         ":conformance_thrift_cpp",
         ":lib_json_thrift_cpp",
         ":lib_meta_thrift_cpp",
         ":lib_reflection_thrift_cpp",
-        ":lib_rocket_service_thrift_cpp",
         ":lib_rocket_thrift_cpp",
     ] + glob(
         [
