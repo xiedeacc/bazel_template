@@ -89,8 +89,8 @@ GLOBAL_LOCAL_DEFINES = select({
         "_MSC_VER=1941",
         "WIN64",
         "_WIN64",
-        "_UNICODE",
-        "UNICODE",
+        #"_UNICODE",
+        #"UNICODE",
     ],
     "//conditions:default": [],
 })
