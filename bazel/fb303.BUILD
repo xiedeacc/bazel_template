@@ -1,5 +1,5 @@
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES")
-load("@bazel_template//bazel:rules_fbthrift.bzl", "fbthrift_cpp_gen", "fbthrift_service_cpp_gen")
+load("@bazel_template//bazel:rules_fbthrift.bzl", "fbthrift_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -67,24 +67,10 @@ fbthrift_cpp_gen(
         ## buildifier: leave-alone
     ],
     out_dir = "fb303/thrift",
-    out_files = {
+    out_file_name = {
         "fb303/thrift/fb303_core.thrift": "fb303_core",
     },
-)
-
-fbthrift_service_cpp_gen(
-    name = "fb303_core_thrift_service_cpp",
-    srcs = ["fb303/thrift/fb303_core.thrift"],
-    data = ["@fbthrift//:fbthrift_libraries"],
-    gen_para = ["include_prefix=fb303/thrift"],
-    includes = [
-        ## buildifier: leave-alone
-        "-I",
-        "external/fb303",
-        ## buildifier: leave-alone
-    ],
-    out_dir = "fb303/thrift",
-    out_files = {
+    service_out_file_name = {
         "fb303/thrift/fb303_core.thrift": "BaseService",
     },
 )
@@ -93,7 +79,6 @@ cc_library(
     name = "fb303",
     srcs = [
         ":fb303_core_thrift_cpp",
-        ":fb303_core_thrift_service_cpp",
     ] + glob(
         ["fb303/**/*.cpp"],
         exclude = ["fb303/**/test/*.cpp"],
