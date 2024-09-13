@@ -709,15 +709,10 @@ http_archive(
     urls = ["https://code.xiamu.com/files/macosx14.2-x86_64_sysroot.tar.gz"],
 )
 
-#new_git_repository(
-#name = "cc_toolchains",
-#commit = "3da994e556b6053c8c78a6c850f0ae597e093f7b",
-#remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
-#)
-
-local_repository(
+new_git_repository(
     name = "cc_toolchains",
-    path = "../cc_toolchains",
+    commit = "51c74bb373300159a65a7a6cff923023902b2594",
+    remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
 )
 
 load("@cc_toolchains//toolchain:cc_toolchains_setup.bzl", "cc_toolchains_setup")
