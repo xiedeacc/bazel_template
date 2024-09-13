@@ -1,15 +1,15 @@
 # features
 * include most popular C/C++ libraries, eg. grpc, protobuf, boost, abseil, folly, proxygen, mvfst, jemalloc, zstd, curl, openssl ...
-* include grpc server and client example
-* include http server and client example
-* include protobuf plugin example
-* include swig for Java and Python example
+* grpc server and client example
+* http server and client example
+* protobuf plugin example
+* swig for Java and Python example
 * support multiple os, eg: linux, macosx, windows
 * support multiple cpu, eg: x86_64, aarch64
 * all source code compiled successful by clang, gcc, msvc-cl
-* include compile_commands.json generator
-* include cpu and memory profiling
-* include memory leak, corruption detection
+* compile_commands.json generator
+* cpu and memory profiling
+* memory leak, corruption detection
 * automatic code style detect
 
 # future todo:
@@ -41,13 +41,16 @@ clear && bazel test --config=clang --config=sanitize //...
 
 clear && bazel build --config=gcc --config=tcmalloc //...
 clear && bazel build --config=gcc --config=jemalloc //...
+clear && bazel build --config=gcc //...
 clear && bazel build --config=gcc_macosx_x86_64 //...
+clear && bazel build --config=gcc_windows_x86_64 //...
 clear && bazel build --config=openwrt_aarch64 //...
 
 clear && bazel build --config=clang --config=tcmalloc //...
 clear && bazel build --config=clang --config=jemalloc //...
-clear && bazel build --config=clang_aarch64 //...
 clear && bazel build --config=clang_macosx_x86_64 //...
+clear && bazel build --config=clang_windows_x86_64 //...
+clear && bazel build --config=clang_linux_aarch64 //...
 
 clear && bazel coverage //...
 
@@ -119,3 +122,8 @@ cat /proc/21880/stack
 strace -Ff -tt -p 56509 2>&1 | tee strace.log
 pstack 56509
 ```
+
+# notice
+* user have to make own cross build tools and headers if need cross compile
+* substitute code.xiamu.com to github.com
+* comment .bazelrc common --experimental_downloader_config=.bazel_downloader.cfg
