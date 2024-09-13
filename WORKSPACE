@@ -711,7 +711,7 @@ http_archive(
 
 new_git_repository(
     name = "cc_toolchains",
-    commit = "51c74bb373300159a65a7a6cff923023902b2594",
+    commit = "d52a3974b37e01ab7774694d5cd8ed8ae120f16e",
     remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
 )
 

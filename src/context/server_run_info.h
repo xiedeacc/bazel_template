@@ -13,14 +13,15 @@ namespace context {
 
 class ServerRunInfo {
  public:
-  ServerRunInfo() { is_inited.store(false); }
+  ServerRunInfo() { is_inited_.store(false); }
 
-  void MarkedServerInitedDone() { is_inited.store(true); }
+  void MarkedServerInitedDone() { is_inited_.store(true); }
 
-  bool IsInitYet() { return is_inited.load(); }
+  bool IsInitYet() { return is_inited_.load(); }
 
  private:
-  std::atomic_bool is_inited;
+  std::atomic_bool is_inited_;
+  std::string git_commit_;
 };
 
 }  // namespace context

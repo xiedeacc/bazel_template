@@ -15,12 +15,9 @@ int main(int argc, char **argv) {
   // ProfilerStart("bazel_template_profile");
 
   folly::Init init(&argc, &argv, false);
-  // google::InitGoogleLogging(argv[0]); // called in folly::Init
+  // google::InitGoogleLogging(argv[0]); // already called in folly::Init
   google::SetStderrLogging(google::GLOG_INFO);
   gflags::ParseCommandLineFlags(&argc, &argv, false);
-
-  LOG(INFO) << "Program initializing ...";
-  LOG(INFO) << "CommandLine: " << google::GetArgv();
 
   bazel_template::common::InitAllModules(&argc, &argv);
 
@@ -29,7 +26,11 @@ int main(int argc, char **argv) {
 
   bazel_template::server::GrpcServer server(
       bazel_template::util::ConfigManager::Instance()->GrpcServerPort());
-  // server.WaitForShutdown();
+
+  LOG(INFO) << "Program initializing ...";
+  LOG(INFO) << "CommandLine: " << google::GetArgv();
+
+  server.WaitForShutdown();
 
   // ProfilerStop();
   return 0;
