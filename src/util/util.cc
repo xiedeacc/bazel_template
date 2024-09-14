@@ -45,12 +45,12 @@ namespace util {
 const char *Util::kPathDelimeter = "/";
 
 string Util::GetServerIp() {
-  //common::IPAddress ip_address;
-  //if (!common::IPAddress::GetFirstPrivateAddress(&ip_address)) {
-    //LOG(ERROR) << "Failed to get local ip address";
-    //return "";
+  // common::IPAddress ip_address;
+  // if (!common::IPAddress::GetFirstPrivateAddress(&ip_address)) {
+  // LOG(ERROR) << "Failed to get local ip address";
+  // return "";
   //}
-  //return ip_address.ToString();
+  // return ip_address.ToString();
   return "";
 }
 
@@ -82,16 +82,22 @@ uint64_t Util::StrTimeToTimestamp(const string &time, int32_t offset) {
   return absl::ToUnixMillis(t) + offset;
 }
 
-string Util::ToTimeString(const int64_t ts) {
+string Util::ToTimeStr(const int64_t ts) {
   TimeZone time_zone;
   LoadTimeZone("Asia/Shanghai", &time_zone);
   return FormatTime("%Y-%m-%d %H:%M:%S", FromUnixMillis(ts), time_zone);
 }
 
-string Util::GetTodayString() {
+string Util::TodayStr() {
   absl::Time now = absl::Now();
   absl::TimeZone loc = absl::LocalTimeZone();
   return absl::FormatTime("%Y-%m-%d", now, loc);
+}
+
+string Util::DetailTimeStr() {
+  absl::Time now = absl::Now();
+  absl::TimeZone loc = absl::LocalTimeZone();
+  return absl::FormatTime("%Y-%m-%d%ET%H:%M:%E3S%Ez", now, loc);
 }
 
 int64_t Util::Random(int64_t start, int64_t end) {
@@ -780,7 +786,6 @@ int64_t Util::Hash64(const string &str) {
 void Util::PrintProtoMessage(const google::protobuf::Message &msg) {
   JsonPrintOptions option;
   option.add_whitespace = false;
-  // option.always_print_primitive_fields = true;
   option.preserve_proto_field_names = true;
   string json_value;
   if (!MessageToJsonString(msg, &json_value, option).ok()) {
@@ -792,7 +797,8 @@ void Util::PrintProtoMessage(const google::protobuf::Message &msg) {
 void Util::PrintProtoMessage(const google::protobuf::Message &msg,
                              string *json) {
   JsonPrintOptions option;
-
+  option.add_whitespace = false;
+  option.preserve_proto_field_names = true;
   if (!MessageToJsonString(msg, json, option).ok()) {
     LOG(ERROR) << "to json string failed";
   }

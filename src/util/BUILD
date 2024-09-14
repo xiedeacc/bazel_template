@@ -52,7 +52,6 @@ cc_library(
     srcs = ["util.cc"],
     hdrs = ["util.h"],
     deps = [
-        #"//src/common:net",
         "@boost//:algorithm",
         "@boost//:beast",
         "@boost//:iostreams",

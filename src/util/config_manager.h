@@ -32,6 +32,7 @@ class ConfigManager {
                  << ", content: " << content;
       return false;
     }
+    LOG(INFO) << "base config: " << ToString();
     return true;
   }
 
@@ -41,7 +42,8 @@ class ConfigManager {
   uint32_t MetricRatio() { return base_config_.metric_ratio(); }
   uint32_t MetricIntervalSec() { return base_config_.metric_interval_sec(); }
   uint32_t DiscardRatio() { return base_config_.discard_ratio(); }
-  uint32_t ThreadPoolSize() { return base_config_.thread_pool_size(); }
+  uint32_t GrpcThreads() { return base_config_.grpc_threads(); }
+  uint32_t EventThreads() { return base_config_.event_threads(); }
 
   std::string ToString() {
     std::string json;

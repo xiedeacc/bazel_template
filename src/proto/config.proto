@@ -9,5 +9,6 @@ message BaseConfig {
   uint32 metric_ratio = 4;
   uint32 metric_interval_sec = 5;
   uint32 discard_ratio = 6;
-  uint32 thread_pool_size = 7;
+  uint32 grpc_threads = 7;
+  uint32 event_threads = 8;
 }

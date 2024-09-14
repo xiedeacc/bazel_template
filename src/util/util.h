@@ -46,9 +46,11 @@ class Util final {
   static uint64_t StrTimeToTimestamp(const std::string &time,
                                      int32_t offset = 0);
 
-  static std::string ToTimeString(const int64_t ts);
+  static std::string ToTimeStr(const int64_t ts);
 
-  static std::string GetTodayString();
+  static std::string TodayStr();
+
+  static std::string DetailTimeStr();
 
   static int64_t Random(int64_t start, int64_t end);
 

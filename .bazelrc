@@ -101,7 +101,7 @@ build --host_features=-module_maps
 #build --features=-layering_check
 #build --host_features=-layering_check
 #build --remote_cache=http://192.168.1.101/bazel_cache
-#build --keep_going
+build --keep_going
 
 build:opt --compilation_mode=opt
 build:opt --copt=-Wframe-larger-than=16384

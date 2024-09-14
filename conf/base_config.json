@@ -5,5 +5,6 @@
     "metric_ratio": 1,
     "metric_interval_sec": 3,
     "discard_ratio": 1,
-    "thread_pool_size": 3
+    "grpc_threads": 3,
+    "event_threads": 5
 }

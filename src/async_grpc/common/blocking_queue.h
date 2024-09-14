@@ -23,7 +23,6 @@
 
 #include "glog/logging.h"
 #include "src/async_grpc/common/mutex.h"
-#include "src/async_grpc/common/port.h"
 #include "src/async_grpc/common/time.h"
 
 namespace async_grpc {

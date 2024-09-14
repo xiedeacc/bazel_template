@@ -31,16 +31,16 @@ double ToSeconds(const Duration duration) {
       .count();
 }
 
-Time FromUniversal(const int64 ticks) { return Time(Duration(ticks)); }
+Time FromUniversal(const int64_t ticks) { return Time(Duration(ticks)); }
 
-int64 ToUniversal(const Time time) { return time.time_since_epoch().count(); }
+int64_t ToUniversal(const Time time) { return time.time_since_epoch().count(); }
 
 std::ostream& operator<<(std::ostream& os, const Time time) {
   os << std::to_string(ToUniversal(time));
   return os;
 }
 
-common::Duration FromMilliseconds(const int64 milliseconds) {
+common::Duration FromMilliseconds(const int64_t milliseconds) {
   return std::chrono::duration_cast<Duration>(
       std::chrono::milliseconds(milliseconds));
 }
