@@ -15,6 +15,7 @@ generate() {
     echo "Copied $SOURCE_DIR to $TARGET_DIR"
     cd $TARGET_DIR
     rm -rf .git
+    rm -rf bazel-*
     sed -i "s/bazel_template/$1/g" `grep 'bazel_template' -rl .`
 }
 
@@ -23,9 +24,10 @@ if [ -d "$TARGET_DIR" ]; then
     read -p "Do you want to delete it? (yes/no): " choice
     if [ "$choice" = "yes" ]; then
         rm -r "$TARGET_DIR"
-    echo "Directory deleted."
-    else
+        echo "Directory deleted."
         generate $1
+    else
+        echo "No operation"
     fi
 else
     generate $1
