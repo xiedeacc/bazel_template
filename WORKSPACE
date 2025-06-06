@@ -7,115 +7,115 @@ load("//bazel:common.bzl", "gen_local_config_git")
 
 git_repository(
     name = "bazel_skylib",
-    remote = "git@code.xiamu.com:bazelbuild/bazel-skylib.git",
+    remote = "git@github.com:bazelbuild/bazel-skylib.git",
     tag = "1.7.1",
 )
 
 git_repository(
     name = "platforms",
-    remote = "git@code.xiamu.com:bazelbuild/platforms.git",
+    remote = "git@github.com:bazelbuild/platforms.git",
     tag = "0.0.9",
 )
 
 git_repository(
     name = "bazel_gazelle",
-    remote = "git@code.xiamu.com:bazelbuild/bazel-gazelle.git",
+    remote = "git@github.com:bazelbuild/bazel-gazelle.git",
     tag = "v0.37.0",
 )
 
 git_repository(
     name = "bazel_features",
-    remote = "git@code.xiamu.com:bazel-contrib/bazel_features.git",
+    remote = "git@github.com:bazel-contrib/bazel_features.git",
     tag = "v1.12.0",
 )
 
 git_repository(
     name = "rules_cc",
-    remote = "git@code.xiamu.com:bazelbuild/rules_cc.git",
+    remote = "git@github.com:bazelbuild/rules_cc.git",
     tag = "0.0.9",
 )
 
 git_repository(
     name = "rules_foreign_cc",
-    remote = "git@code.xiamu.com:bazelbuild/rules_foreign_cc.git",
+    remote = "git@github.com:bazelbuild/rules_foreign_cc.git",
     tag = "0.11.1",
 )
 
 git_repository(
     name = "rules_perl",
-    remote = "git@code.xiamu.com:bazelbuild/rules_perl.git",
+    remote = "git@github.com:bazelbuild/rules_perl.git",
     tag = "0.2.3",
 )
 
 git_repository(
     name = "rules_python",
-    remote = "git@code.xiamu.com:bazelbuild/rules_python.git",
+    remote = "git@github.com:bazelbuild/rules_python.git",
     tag = "0.33.0",
 )
 
 git_repository(
     name = "build_bazel_rules_swift",
-    remote = "git@code.xiamu.com:bazelbuild/rules_swift.git",
+    remote = "git@github.com:bazelbuild/rules_swift.git",
     tag = "1.18.0",
 )
 
 git_repository(
     name = "io_bazel_rules_go",
-    remote = "git@code.xiamu.com:bazelbuild/rules_go.git",
+    remote = "git@github.com:bazelbuild/rules_go.git",
     tag = "v0.48.0",
 )
 
 git_repository(
     name = "rules_pkg",
-    remote = "git@code.xiamu.com:bazelbuild/rules_pkg.git",
+    remote = "git@github.com:bazelbuild/rules_pkg.git",
     tag = "1.0.1",
 )
 
 git_repository(
     name = "io_bazel_rules_closure",
-    remote = "git@code.xiamu.com:bazelbuild/rules_closure.git",
+    remote = "git@github.com:bazelbuild/rules_closure.git",
     tag = "0.13.0",
 )
 
 git_repository(
     name = "rules_java",
-    remote = "git@code.xiamu.com:bazelbuild/rules_java.git",
+    remote = "git@github.com:bazelbuild/rules_java.git",
     tag = "7.5.0",
 )
 
 git_repository(
     name = "rules_jvm_external",
-    remote = "git@code.xiamu.com:bazelbuild/rules_jvm_external.git",
+    remote = "git@github.com:bazelbuild/rules_jvm_external.git",
     tag = "6.0",
 )
 
 git_repository(
     name = "contrib_rules_jvm",
-    remote = "git@code.xiamu.com:bazel-contrib/rules_jvm.git",
+    remote = "git@github.com:bazel-contrib/rules_jvm.git",
     tag = "v0.24.0",
 )
 
 git_repository(
     name = "io_bazel_rules_docker",
-    remote = "git@code.xiamu.com:bazelbuild/rules_docker.git",
+    remote = "git@github.com:bazelbuild/rules_docker.git",
     tag = "v0.25.0",
 )
 
 git_repository(
     name = "apple_rules_lint",
-    remote = "git@code.xiamu.com:apple/apple_rules_lint.git",
+    remote = "git@github.com:apple/apple_rules_lint.git",
     tag = "0.3.2",
 )
 
 git_repository(
     name = "build_bazel_rules_apple",
-    remote = "git@code.xiamu.com:bazelbuild/rules_apple.git",
+    remote = "git@github.com:bazelbuild/rules_apple.git",
     tag = "3.5.1",
 )
 
 git_repository(
     name = "build_bazel_apple_support",
-    remote = "git@code.xiamu.com:bazelbuild/apple_support.git",
+    remote = "git@github.com:bazelbuild/apple_support.git",
     tag = "1.15.1",
 )
 
@@ -123,22 +123,21 @@ new_git_repository(
     name = "cpplint",
     build_file = "//bazel:cpplint.BUILD",
     commit = "7b88b68187e3516540fab3caa900988d2179ed24",
-    remote = "git@code.xiamu.com:cpplint/cpplint.git",
+    remote = "git@github.com:cpplint/cpplint.git",
 )
 
 new_git_repository(
     name = "liburing",
     build_file = "//bazel:liburing.BUILD",
     commit = "7b3245583069bd481190c9da18f22e9fc8c3a805",
-    remote = "git@code.xiamu.com:axboe/liburing.git",
+    remote = "git@github.com:axboe/liburing.git",
 )
 
 new_git_repository(
     name = "libaio",
     build_file = "//bazel:libaio.BUILD",
     commit = "b8eadc9f89e8f7ab0338eacda9f98a6caea76883",
-    #remote = "https://pagure.io/libaio.git",
-    remote = "git@code.xiamu.com:root/libaio.git",
+    remote = "https://pagure.io/libaio.git",
 )
 
 new_git_repository(
@@ -147,13 +146,13 @@ new_git_repository(
     commit = "bf901dee5d4c46609645e50311c0cb2dfdcf9738",
     patch_args = ["-p1"],
     patches = ["//bazel:xz.patch"],
-    remote = "git@code.xiamu.com:tukaani-project/xz.git",
+    remote = "git@github.com:tukaani-project/xz.git",
 )
 
 new_git_repository(
     name = "zlib",
     build_file = "//bazel:zlib.BUILD",
-    remote = "git@code.xiamu.com:madler/zlib.git",
+    remote = "git@github.com:madler/zlib.git",
     tag = "v1.3.1",
 )
 
@@ -161,35 +160,34 @@ new_git_repository(
     name = "bzip2",
     build_file = "//bazel:bzip2.BUILD",
     commit = "66c46b8c9436613fd81bc5d03f63a61933a4dcc3",
-    #remote = "https://gitlab.com/bzip2/bzip2.git",
-    remote = "git@code.xiamu.com:bzip2/bzip2.git",
+    remote = "https://gitlab.com/bzip2/bzip2.git",
 )
 
 new_git_repository(
     name = "lz4",
     build_file = "//bazel:lz4.BUILD",
     commit = "5b0ccb8b62eba9f0ed4b46ff3680c442c3e58188",
-    remote = "git@code.xiamu.com:lz4/lz4.git",
+    remote = "git@github.com:lz4/lz4.git",
 )
 
 new_git_repository(
     name = "zstd",
     build_file = "//bazel:zstd.BUILD",
-    remote = "git@code.xiamu.com:facebook/zstd.git",
+    remote = "git@github.com:facebook/zstd.git",
     tag = "v1.5.6",
 )
 
 new_git_repository(
     name = "brotli",
     build_file = "//bazel:brotli.BUILD",
-    remote = "git@code.xiamu.com:google/brotli.git",
+    remote = "git@github.com:google/brotli.git",
     tag = "v1.1.0",
 )
 
 new_git_repository(
     name = "libsodium",
     build_file = "//bazel:libsodium.BUILD",
-    remote = "git@code.xiamu.com:jedisct1/libsodium.git",
+    remote = "git@github.com:jedisct1/libsodium.git",
     tag = "1.0.20-RELEASE",
 )
 
@@ -228,25 +226,25 @@ new_git_repository(
     name = "c-ares",
     build_file = "//bazel:c-ares.BUILD",
     commit = "5e1c3a7575e458ae51863da9b8d3d5d3ec6ffab8",
-    remote = "git@code.xiamu.com:c-ares/c-ares.git",
+    remote = "git@github.com:c-ares/c-ares.git",
 )
 
 new_git_repository(
     name = "curl",
     build_file = "//bazel:curl.BUILD",
     commit = "2d5aea9c93bae110ffe5107ba2c118b8442b495d",
-    remote = "git@code.xiamu.com:curl/curl.git",
+    remote = "git@github.com:curl/curl.git",
 )
 
 git_repository(
     name = "com_github_google_benchmark",
-    remote = "git@code.xiamu.com:google/benchmark.git",
+    remote = "git@github.com:google/benchmark.git",
     tag = "v1.9.0",
 )
 
 git_repository(
     name = "com_google_absl",
-    remote = "git@code.xiamu.com:abseil/abseil-cpp.git",
+    remote = "git@github.com:abseil/abseil-cpp.git",
     tag = "20240116.2",
 )
 
@@ -254,14 +252,14 @@ new_git_repository(
     name = "com_github_gflags_gflags",
     patch_args = ["-p1"],
     patches = ["//bazel:gflags.patch"],
-    remote = "git@code.xiamu.com:gflags/gflags.git",
+    remote = "git@github.com:gflags/gflags.git",
     tag = "v2.2.2",
 )
 
 new_git_repository(
     name = "com_github_glog_glog",
     build_file = "//bazel:glog.BUILD",
-    remote = "git@code.xiamu.com:google/glog.git",
+    remote = "git@github.com:google/glog.git",
     repo_mapping = {
         "@gflags": "@com_github_gflags_gflags",
     },
@@ -270,7 +268,7 @@ new_git_repository(
 
 git_repository(
     name = "com_google_googletest",
-    remote = "git@code.xiamu.com:google/googletest.git",
+    remote = "git@github.com:google/googletest.git",
     repo_mapping = {
         "@abseil-cpp": "@com_google_absl",
     },
@@ -279,13 +277,13 @@ git_repository(
 
 git_repository(
     name = "com_github_google_snappy",
-    remote = "git@code.xiamu.com:google/snappy.git",
+    remote = "git@github.com:google/snappy.git",
     tag = "1.2.1",
 )
 
 git_repository(
     name = "com_googlesource_code_re2",
-    remote = "git@code.xiamu.com:google/re2.git",
+    remote = "git@github.com:google/re2.git",
     repo_mapping = {
         "@abseil-cpp": "@com_google_absl",
     },
@@ -294,13 +292,13 @@ git_repository(
 
 git_repository(
     name = "double-conversion",
-    remote = "git@code.xiamu.com:google/double-conversion.git",
+    remote = "git@github.com:google/double-conversion.git",
     tag = "v3.3.0",
 )
 
 git_repository(
     name = "com_google_protobuf",
-    remote = "git@code.xiamu.com:protocolbuffers/protobuf.git",
+    remote = "git@github.com:protocolbuffers/protobuf.git",
     repo_mapping = {
         "@com_github_google_glog": "@com_github_glog_glog",
         "@com_github_curl_curl": "@curl",
@@ -310,7 +308,7 @@ git_repository(
 
 git_repository(
     name = "rules_proto",
-    remote = "git@code.xiamu.com:bazelbuild/rules_proto.git",
+    remote = "git@github.com:bazelbuild/rules_proto.git",
     repo_mapping = {
         "@abseil-cpp": "@com_google_absl",
         "@protobuf": "@com_google_protobuf",
@@ -321,7 +319,7 @@ git_repository(
 git_repository(
     name = "com_github_nelhage_rules_boost",
     commit = "45ed6bf51f659c7db830fd15ddd4495dadc5afd1",
-    remote = "git@code.xiamu.com:nelhage/rules_boost.git",
+    remote = "git@github.com:nelhage/rules_boost.git",
     repo_mapping = {
         "@boringssl": "@openssl",
         "@org_lzma_lzma": "@xz",
@@ -348,7 +346,7 @@ http_archive(
 new_git_repository(
     name = "fmt",
     build_file = "//bazel:fmt.BUILD",
-    remote = "git@code.xiamu.com:fmtlib/fmt.git",
+    remote = "git@github.com:fmtlib/fmt.git",
     tag = "9.1.0",
 )
 
@@ -357,14 +355,14 @@ new_git_repository(
     build_file = "//bazel:libdwarf.BUILD",
     patch_args = ["-p1"],
     patches = ["//bazel:libdwarf.patch"],
-    remote = "git@code.xiamu.com:davea42/libdwarf-code.git",
+    remote = "git@github.com:davea42/libdwarf-code.git",
     tag = "v0.10.1",
 )
 
 new_git_repository(
     name = "mbedtls",
     build_file = "//bazel:mbedtls.BUILD",
-    remote = "git@code.xiamu.com:Mbed-TLS/mbedtls.git",
+    remote = "git@github.com:Mbed-TLS/mbedtls.git",
     tag = "v3.6.0",
 )
 
@@ -372,7 +370,7 @@ new_git_repository(
     name = "libevent",
     build_file = "//bazel:libevent.BUILD",
     commit = "90b9520f3ca04dd1278c831e61a82859e3be090e",
-    remote = "git@code.xiamu.com:libevent/libevent.git",
+    remote = "git@github.com:libevent/libevent.git",
 )
 
 http_archive(
@@ -388,7 +386,7 @@ http_archive(
 new_git_repository(
     name = "libuv",
     build_file = "//bazel:libuv.BUILD",
-    remote = "git@code.xiamu.com:libuv/libuv.git",
+    remote = "git@github.com:libuv/libuv.git",
     tag = "v1.48.0",
 )
 
@@ -404,27 +402,27 @@ new_git_repository(
     name = "libunwind",
     build_file = "//bazel:libunwind.BUILD",
     commit = "3c47821d681777e3cff33edb25c804d93102e1c6",
-    remote = "git@code.xiamu.com:libunwind/libunwind.git",
+    remote = "git@github.com:libunwind/libunwind.git",
 )
 
 new_git_repository(
     name = "jemalloc",
     build_file = "//bazel:jemalloc.BUILD",
     commit = "8dc97b11089be6d58a52009ea3da610bf90331d3",
-    remote = "git@code.xiamu.com:jemalloc/jemalloc.git",
+    remote = "git@github.com:jemalloc/jemalloc.git",
 )
 
 new_git_repository(
     name = "tcmalloc",
     commit = "bd13fb84b359f6cdc7e0d393b91226dbb904bf75",
-    remote = "git@code.xiamu.com:google/tcmalloc.git",
+    remote = "git@github.com:google/tcmalloc.git",
 )
 
 new_git_repository(
     name = "gperftools",
     build_file = "//bazel:gperftools.BUILD",
     commit = "285908e8c7cfa98659127a23532c060f8dcbd148",
-    remote = "git@code.xiamu.com:gperftools/gperftools.git",
+    remote = "git@github.com:gperftools/gperftools.git",
 )
 
 new_git_repository(
@@ -432,35 +430,35 @@ new_git_repository(
     build_file = "//bazel:folly.BUILD",
     patch_args = ["-p1"],
     patches = ["//bazel:folly.patch"],
-    remote = "git@code.xiamu.com:facebook/folly.git",
+    remote = "git@github.com:facebook/folly.git",
     tag = "v2024.07.08.00",
 )
 
 new_git_repository(
     name = "fizz",
     build_file = "//bazel:fizz.BUILD",
-    remote = "git@code.xiamu.com:facebookincubator/fizz.git",
+    remote = "git@github.com:facebookincubator/fizz.git",
     tag = "v2024.07.08.00",
 )
 
 new_git_repository(
     name = "mvfst",
     build_file = "//bazel:mvfst.BUILD",
-    remote = "git@code.xiamu.com:facebook/mvfst.git",
+    remote = "git@github.com:facebook/mvfst.git",
     tag = "v2024.07.08.00",
 )
 
 new_git_repository(
     name = "wangle",
     build_file = "//bazel:wangle.BUILD",
-    remote = "git@code.xiamu.com:facebook/wangle.git",
+    remote = "git@github.com:facebook/wangle.git",
     tag = "v2024.07.08.00",
 )
 
 new_git_repository(
     name = "fatal",
     build_file = "//bazel:fatal.BUILD",
-    remote = "git@code.xiamu.com:facebook/fatal.git",
+    remote = "git@github.com:facebook/fatal.git",
     tag = "v2024.07.08.00",
 )
 
@@ -468,13 +466,13 @@ new_git_repository(
     name = "xxhash",
     build_file = "//bazel:xxhash.BUILD",
     commit = "d5fe4f54c47bc8b8e76c6da9146c32d5c720cd79",
-    remote = "git@code.xiamu.com:Cyan4973/xxHash.git",
+    remote = "git@github.com:Cyan4973/xxHash.git",
 )
 
 git_repository(
     name = "yaml-cpp",
     commit = "1d8ca1f35eb3a9c9142462b28282a848e5d29a91",
-    remote = "git@code.xiamu.com:jbeder/yaml-cpp.git",
+    remote = "git@github.com:jbeder/yaml-cpp.git",
     repo_mapping = {
         "@abseil-cpp": "@com_google_absl",
     },
@@ -485,14 +483,14 @@ new_git_repository(
     build_file = "//bazel:fbthrift.BUILD",
     patch_args = ["-p1"],
     patches = ["//bazel:fbthrift.patch"],
-    remote = "git@code.xiamu.com:facebook/fbthrift.git",
+    remote = "git@github.com:facebook/fbthrift.git",
     tag = "v2024.07.08.00",
 )
 
 new_git_repository(
     name = "fb303",
     build_file = "//bazel:fb303.BUILD",
-    remote = "git@code.xiamu.com:facebook/fb303.git",
+    remote = "git@github.com:facebook/fb303.git",
     tag = "v2024.07.08.00",
 )
 
@@ -501,7 +499,7 @@ new_git_repository(
     build_file = "//bazel:proxygen.BUILD",
     patch_args = ["-p1"],
     patches = ["//bazel:proxygen.patch"],
-    remote = "git@code.xiamu.com:facebook/proxygen.git",
+    remote = "git@github.com:facebook/proxygen.git",
     tag = "v2024.07.08.00",
 )
 
@@ -509,13 +507,13 @@ new_git_repository(
     name = "smhasher",
     build_file = "//bazel:smhasher.BUILD",
     commit = "61a0530f28277f2e850bfc39600ce61d02b518de",
-    remote = "git@code.xiamu.com:aappleby/smhasher.git",
+    remote = "git@github.com:aappleby/smhasher.git",
 )
 
 git_repository(
     name = "com_google_googleapis",
     commit = "ba245fa19c1e6f1f2a13055a437f0c815c061867",
-    remote = "git@code.xiamu.com:googleapis/googleapis.git",
+    remote = "git@github.com:googleapis/googleapis.git",
 )
 
 http_archive(
@@ -528,25 +526,25 @@ http_archive(
 git_repository(
     name = "envoy_api",
     commit = "4118c17a2905aaf20554d0154bb8d0cd424163c4",
-    remote = "git@code.xiamu.com:envoyproxy/data-plane-api.git",
+    remote = "git@github.com:envoyproxy/data-plane-api.git",
 )
 
 git_repository(
     name = "com_envoyproxy_protoc_gen_validate",
-    remote = "git@code.xiamu.com:envoyproxy/protoc-gen-validate.git",
+    remote = "git@github.com:envoyproxy/protoc-gen-validate.git",
     tag = "v1.0.4",
 )
 
 git_repository(
     name = "cel-spec",
-    remote = "git@code.xiamu.com:google/cel-spec.git",
+    remote = "git@github.com:google/cel-spec.git",
     tag = "v0.15.0",
 )
 
 git_repository(
     name = "com_github_cncf_xds",
     commit = "024c85f92f20cab567a83acc50934c7f9711d124",
-    remote = "git@code.xiamu.com:cncf/xds.git",
+    remote = "git@github.com:cncf/xds.git",
     repo_mapping = {
         "@dev_cel": "@cel-spec",
     },
@@ -564,7 +562,7 @@ git_repository(
     name = "com_github_grpc_grpc",
     patch_args = ["-p1"],
     patches = ["//bazel:grpc.patch"],
-    remote = "git@code.xiamu.com:grpc/grpc.git",
+    remote = "git@github.com:grpc/grpc.git",
     repo_mapping = {
         "@com_github_cares_cares": "@c-ares",
         "@boringssl": "@openssl",
@@ -577,21 +575,21 @@ new_git_repository(
     build_file = "//bazel:swig.BUILD",
     patch_args = ["-p1"],
     patches = ["//bazel:swig.patch"],
-    remote = "git@code.xiamu.com:swig/swig.git",
+    remote = "git@github.com:swig/swig.git",
     tag = "v4.2.0",
 )
 
 new_git_repository(
     name = "pcre2",
     build_file = "//bazel:pcre2.BUILD",
-    remote = "git@code.xiamu.com:PCRE2Project/pcre2.git",
+    remote = "git@github.com:PCRE2Project/pcre2.git",
     tag = "pcre2-10.42",
 )
 
 git_repository(
     name = "hedron_compile_commands",
     commit = "e43e8eaeed3e252ac7c02983f4b1792bdff2e2f0",
-    remote = "git@code.xiamu.com:xiedeacc/bazel-compile-commands-extractor.git",
+    remote = "git@github.com:xiedeacc/bazel-compile-commands-extractor.git",
 )
 
 gen_local_config_git(name = "local_config_git")
@@ -698,7 +696,7 @@ http_archive(
     build_file = "//bazel:cc_toolchain.BUILD",
     sha256 = "95e32680f2f439773edd85640e5072bab099c399506008298cd1251be2d2df39",
     strip_prefix = "clang18.1.8-linux-aarch64_sysroot",
-    urls = ["https://code.xiamu.com/files/clang18.1.8-linux-aarch64_sysroot.tar.gz"],
+    urls = ["https://github.com/files/clang18.1.8-linux-aarch64_sysroot.tar.gz"],
 )
 
 http_archive(
@@ -706,13 +704,13 @@ http_archive(
     build_file = "//bazel:cc_toolchain.BUILD",
     sha256 = "d75e540388ade4056c0c91a5623b927f884bfc3f622b96e23ed31aacf226535d",
     strip_prefix = "macosx14.2-x86_64_sysroot",
-    urls = ["https://code.xiamu.com/files/macosx14.2-x86_64_sysroot.tar.gz"],
+    urls = ["https://github.com/files/macosx14.2-x86_64_sysroot.tar.gz"],
 )
 
 new_git_repository(
     name = "cc_toolchains",
     commit = "d52a3974b37e01ab7774694d5cd8ed8ae120f16e",
-    remote = "git@code.xiamu.com:xiedeacc/cc_toolchains.git",
+    remote = "git@github.com:xiedeacc/cc_toolchains.git",
 )
 
 load("@cc_toolchains//toolchain:cc_toolchains_setup.bzl", "cc_toolchains_setup")
@@ -727,7 +725,7 @@ cc_toolchains_setup(
                     "libc": "glibc",
                     "compiler": "gcc",
                     "triple": "x86_64-pc-linux-gnu",
-                    "url": "https://code.xiamu.com/files/gcc14.1.0-linux-x86_64_toolchain.tar.gz",
+                    "url": "https://github.com/files/gcc14.1.0-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "gcc14.1.0-linux-x86_64_toolchain",
                     "sha256sum": "6e6a8a5c33a5e4d64a198619a7b34746be6dee1da2a734396dde8f851b63910c",
                     "sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_gcc",
@@ -768,7 +766,7 @@ cc_toolchains_setup(
                     "libc": "glibc",
                     "compiler": "clang",
                     "triple": "x86_64-unknown-linux-gnu",
-                    "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
+                    "url": "https://github.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
                     "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
                     "sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_clang",
@@ -815,7 +813,7 @@ cc_toolchains_setup(
                     "libc": "macosx",
                     "compiler": "gcc",
                     "triple": "x86_64-apple-darwin23.3",
-                    "url": "https://code.xiamu.com/files/gcc14.1.0-darwin23.3-x86_64_toolchain.tar.gz",
+                    "url": "https://github.com/files/gcc14.1.0-darwin23.3-x86_64_toolchain.tar.gz",
                     "strip_prefix": "gcc14.1.0-darwin23.3-x86_64_toolchain",
                     "sha256sum": "e9fab8943971a4f9733d41c7106e3349ea9e26a2c08f98194cba38d3bfa34d5c",
                     "sysroot": "@macosx14.2-x86_64_sysroot",
@@ -861,7 +859,7 @@ cc_toolchains_setup(
                     "libc": "macosx",
                     "compiler": "clang",
                     "triple": "x86_64-apple-darwin",
-                    "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
+                    "url": "https://github.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
                     "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
                     "sysroot": "@macosx14.2-x86_64_sysroot",
@@ -908,7 +906,7 @@ cc_toolchains_setup(
                     "libc": "mingw-w64",
                     "compiler": "gcc",
                     "triple": "x86_64-w64-mingw32",
-                    "url": "https://code.xiamu.com/files/gcc14.2.0-windows-x86_64_toolchain.tar.gz",
+                    "url": "https://github.com/files/gcc14.2.0-windows-x86_64_toolchain.tar.gz",
                     #"url": "/root/src/software/gcc14.2.0-windows-x86_64_toolchain",
                     "strip_prefix": "gcc14.2.0-windows-x86_64_toolchain",
                     "sha256sum": "a31b7c1a97f8dad9eb5096538dabc2f31381b62fc85c9f1487ae9d28381a933b",
@@ -965,7 +963,7 @@ cc_toolchains_setup(
                     "libc": "musl",
                     "compiler": "gcc",
                     "triple": "aarch64-openwrt-linux-musl",
-                    "url": "https://code.xiamu.com/files/gcc12.3.0-openwrt23.4-aarch64_toolchain.tar.gz",
+                    "url": "https://github.com/files/gcc12.3.0-openwrt23.4-aarch64_toolchain.tar.gz",
                     "strip_prefix": "gcc12.3.0-openwrt23.4-aarch64_toolchain",
                     "sha256sum": "03f9bfda848f9d044ec3f4cebf1fce1f82f9c6363d9a3ef36affae522590f52a",
                     "sysroot": "@cc_toolchain_repo_aarch64_linux_openwrt_musl_gcc",
@@ -1007,7 +1005,7 @@ cc_toolchains_setup(
                     "libc": "glibc",
                     "compiler": "clang",
                     "triple": "aarch64-unknown-linux-gnu",
-                    "url": "https://code.xiamu.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
+                    "url": "https://github.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
                     "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
                     "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
                     "sysroot": "@clang18.1.8-aarch64_sysroot",
