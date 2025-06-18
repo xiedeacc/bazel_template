@@ -1,3 +1,4 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
@@ -15,7 +16,7 @@ template_rule(
 )
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/DSODIUM_STATIC",
         "/Dinline=__inline",
         "/D_CRT_SECURE_NO_WARNINGS",
@@ -125,7 +126,7 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
     "__STDC_WANT_LIB_EXT2__=1",
     "__STDC_WANT_MATH_SPEC_FUNCS__=1",
 ] + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": [
         "HAVE_SYS_PARAM_H=1",
         "HAVE_STRINGS_H=1",
@@ -140,10 +141,9 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
         "HAVE_C_VARARRAYS=1",
         "HAVE_GCC_MEMORY_FENCES=1",
     ],
-}) + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+}) + selects.with_or({
     "@platforms//cpu:aarch64": ["HAVE_ARMCRYPTO=1"],
-    "@platforms//cpu:x86_64": [
+    ("@bazel_template//bazel:linux_x86_64", "@bazel_template//bazel:osx_x86_64"): [
         "HAVE_EMMINTRIN_H=1",
         "HAVE_MMINTRIN_H=1",
         "HAVE_PMMINTRIN_H=1",
@@ -163,6 +163,7 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
         "HAVE_CATCHABLE_ABRT=1",
         "HAVE_CPUID=1",
     ],
+    "//conditions:default": [],
 }) + select({
     "@platforms//os:linux": [
         "HAVE_SYS_AUXV_H=1",
@@ -330,7 +331,7 @@ cc_library(
         #"src/libsodium/sodium/utils.c",
         #"src/libsodium/sodium/version.c",
     ] + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+        "@platforms//os:windows": [],
         "//conditions:default": [
             "src/libsodium/crypto_scalarmult/curve25519/sandy2x/sandy2x.S",
             "src/libsodium/crypto_stream/salsa20/xmm6/salsa20_xmm6-asm.S",
@@ -344,7 +345,6 @@ cc_library(
     defines = ["SODIUM_STATIC"],
     local_defines = LOCAL_DEFINES,
     deps = [":utils"],
-    alwayslink = True,
 )
 
 cc_library(
@@ -383,7 +383,6 @@ cc_library(
         ],
     }) + COPTS,
     local_defines = LOCAL_DEFINES,
-    alwayslink = True,
 )
 
 cc_library(
@@ -405,7 +404,6 @@ cc_library(
     }) + COPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
-    alwayslink = True,
 )
 
 cc_library(
@@ -427,7 +425,6 @@ cc_library(
     }) + COPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
-    alwayslink = True,
 )
 
 cc_library(
@@ -452,7 +449,6 @@ cc_library(
     }) + COPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
-    alwayslink = True,
 )
 
 cc_library(
@@ -473,7 +469,6 @@ cc_library(
     }) + COPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
-    alwayslink = True,
 )
 
 cc_library(
@@ -499,7 +494,6 @@ cc_library(
     }) + COPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
-    alwayslink = True,
 )
 
 cc_library(
@@ -523,7 +517,6 @@ cc_library(
     }) + COPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
-    alwayslink = True,
 )
 
 cc_library(
@@ -544,7 +537,6 @@ cc_library(
             "-mssse3",
         ],
     }) + COPTS,
-    linkstatic = True,
     local_defines = LOCAL_DEFINES,
     deps = [
         ":aesni",

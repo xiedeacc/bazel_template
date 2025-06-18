@@ -4,6 +4,6 @@ package bazel_template.proto;
 
 enum ErrCode {
   SUCCESS = 0;
-  FAST_FAIL = 1;
+  FINISH = 1;
   FAIL = 2;
 }

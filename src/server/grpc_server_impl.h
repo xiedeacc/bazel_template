@@ -3,13 +3,17 @@
  * All rights reserved.
  *******************************************************************************/
 
+#ifndef BAZEL_TEMPLATE_SERVER_GRPC_SERVER_IMPL_H_
+#define BAZEL_TEMPLATE_SERVER_GRPC_SERVER_IMPL_H_
+
 #include <memory>
 #include <string>
 
 #include "absl/strings/str_cat.h"
 #include "src/async_grpc/server.h"
-#include "src/server/grpc_handler/get_runing_sum_handler.h"
-#include "src/server/grpc_handler/get_sum_handler.h"
+#include "src/server/grpc_handler/account_state_handler.h"
+#include "src/server/grpc_handler/file_handler.h"
+#include "src/server/grpc_handler/load_folder_handler.h"
 #include "src/server/server_context.h"
 #include "src/util/config_manager.h"
 
@@ -18,7 +22,8 @@ namespace server {
 
 class GrpcServer final {
  public:
-  GrpcServer() : terminated(false) {
+  GrpcServer(std::shared_ptr<ServerContext> server_context)
+      : terminated(false) {
     async_grpc::Server::Builder server_builder;
     std::string addr_port =
         util::ConfigManager::Instance()->ServerAddr() + ":" +
@@ -29,23 +34,25 @@ class GrpcServer final {
     server_builder.SetNumEventThreads(
         util::ConfigManager::Instance()->EventThreads());
 
-    server_builder
-        .RegisterHandler<bazel_template::server::grpc_handler::GetSumHandler>();
+    // Register handlers
     server_builder.RegisterHandler<
-        bazel_template::server::grpc_handler::GetRunningSumHandler>();
-    server_ = server_builder.Build();
-    server_->SetExecutionContext(std::make_unique<ServerContext>());
-    server_->Start();
+        bazel_template::server::grpc_handler::LoadFolderHandler>();
 
-    server_->GetContext<ServerContext>()->MarkedServerInitedDone();
+    server_ = server_builder.Build();
+    server_->SetExecutionContext(server_context);
   }
 
  public:
+  void Start() {
+    server_->Start();
+    server_->GetContext<ServerContext>()->MarkedGrpcServerInitedDone();
+  }
+
+  void Shutdown() { server_->Shutdown(); }
   void WaitForShutdown() { server_->WaitForShutdown(); }
 
  private:
   std::unique_ptr<async_grpc::Server> server_;
-  std::atomic<int64_t> next_log_info_time_;
 
  public:
   std::atomic_bool terminated;
@@ -53,3 +60,5 @@ class GrpcServer final {
 
 }  // namespace server
 }  // namespace bazel_template
+
+#endif  // BAZEL_TEMPLATE_SERVER_GRPC_SERVER_IMPL_H_

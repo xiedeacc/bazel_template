@@ -33,7 +33,7 @@ CONFIGURE_OPTIONS = [
     "--with-brotli-include=$$$$EXT_BUILD_DEPS$$$$/include",
     "--with-brotli-lib=$$$$EXT_BUILD_DEPS$$$$/lib",
 ] + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": ["enable-ec_nistp_64_gcc_128"],
 })
 
@@ -57,7 +57,7 @@ alias(
 alias(
     name = "openssl",
     actual = select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": ":openssl_windows",
+        "@platforms//os:windows": ":openssl_windows",
         "//conditions:default": ":openssl_static",
     }),
 )
@@ -104,31 +104,22 @@ configure_make(
         "@bazel_template//bazel:not_cross_compiling_on_osx": ["-j4"],
         "//conditions:default": ["-j"],
     }),
-    build_data = select({
-        "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
-            "@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres",
-        ],
-        "//conditions:default": [],
-    }),
     configure_command = "Configure",
     configure_in_place = True,
     configure_options = CONFIGURE_OPTIONS + select({
-        "@bazel_template//bazel:linux_aarch64": ["linux-aarch64"],
-        "@bazel_template//bazel:cross_compiling_for_osx": [
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64": [
+            "linux-aarch64",
+        ],
+        "@bazel_template//bazel:cross_compiling_for_osx_x86_64": [
             "darwin64-x86_64-cc",
         ],
-        "@bazel_template//bazel:cross_compiling_for_windows": [
-            "mingw64",
-            "no-shared",
+        "@bazel_template//bazel:cross_compiling_for_osx_aarch64": [
+            "darwin64-arm64-cc",
         ],
         "//conditions:default": [],
-    }),
+    }) + ["no-shared"],
     env = select({
         "@platforms//os:osx": {"ARFLAGS": "-static -o"},
-        "@bazel_template//bazel:cross_compiling_for_windows": {
-            "WINDRES": "x86_64-w64-mingw32-windres",
-            "PATH": "$$(dirname $(execpath @cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc//:windres)):$$PATH",
-        },
         "//conditions:default": {},
     }),
     lib_name = LIB_NAME,

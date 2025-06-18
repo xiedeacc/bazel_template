@@ -3,8 +3,8 @@
  * All rights reserved.
  *******************************************************************************/
 
-#ifndef BAZEL_TEMPLATE_SWIG_CONFIG_MANAGER_H
-#define BAZEL_TEMPLATE_SWIG_CONFIG_MANAGER_H
+#ifndef BAZEL_TEMPLATE_SWIG_CONFIG_MANAGER_H_
+#define BAZEL_TEMPLATE_SWIG_CONFIG_MANAGER_H_
 
 #include <map>
 #include <string>
@@ -26,4 +26,4 @@ class ConfigManager {
 }  // namespace swig
 }  // namespace bazel_template
 
-#endif  // BAZEL_TEMPLATE_SWIG_CONFIG_MANAGER_H
+#endif  // BAZEL_TEMPLATE_SWIG_CONFIG_MANAGER_H_

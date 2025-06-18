@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package bazel_template.proto;
+
+// OpCode enum for WebSocket message operations
+enum OpCode {
+  // Default value, should not be used
+  OP_UNUSED = 0;
+
+  // Load folder structure
+  OP_LOAD_FOLDER = 1;
+
+  // File key operation
+  OP_FILE_KEY = 2;
+
+  // File upload operation
+  OP_FILE_UPLOAD = 3;
+}

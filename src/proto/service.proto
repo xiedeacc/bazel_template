@@ -1,74 +1,22 @@
 syntax = "proto3";
 package bazel_template.proto;
 import "src/proto/error.proto";
+import "src/proto/enums.proto";
 
-// service Service {
-// rpc ServerStatus(ServerStatusRequest) returns (ServerStatusResponse);
-// rpc IpInfo(IpInfoRequest) returns (IpInfoResponse);
-// rpc PostIpInfo(stream PostIpInfoRequest) returns (PostIpInfoResponse) {}
-//}
-
-service Math {
-  rpc GetSum(stream GetSumRequest) returns (GetSumResponse);
-  rpc GetSquare(GetSquareRequest) returns (GetSquareResponse);
-  rpc GetRunningSum(stream GetSumRequest) returns (stream GetSumResponse);
-  rpc GetEcho(GetEchoRequest) returns (GetEchoResponse);
-  rpc GetSequence(GetSequenceRequest) returns (stream GetSequenceResponse);
+service MEGAService {
+  // Load folder structure from server
+  rpc LoadFolder(LoadFolderRequest) returns (LoadFolderResponse) {}
 }
 
-message RequestConfig {
-  string name = 1;
+// Request message for LoadFolder
+message LoadFolderRequest {
+  OpCode op = 1;
+  string folder_id = 2;  // The ID of the folder to load
 }
 
-message ServerStatusRequest {
-  string request_id = 1;
-  RequestConfig config = 2;
+// Response message for LoadFolder
+message LoadFolderResponse {
+  ErrCode err_code = 1;
+  string folder_structure = 2;  // JSON string containing folder structure
+  int32 status = 3;             // Status of the response (1 means last chunk)
 }
-
-message ServerStatusResponse {
-  string msg = 1;
-}
-
-message IpInfoRequest {
-  string request_id = 1;
-  RequestConfig config = 2;
-}
-
-message IpInfoResponse {
-  string msg = 1;
-}
-
-message GetSumRequest {
-  int32 input = 1;
-}
-
-message GetSumResponse {
-  int32 output = 1;
-  ErrCode err_code = 2;
-}
-
-message GetSquareRequest {
-  int32 input = 1;
-}
-
-message GetSquareResponse {
-  int32 output = 1;
-}
-
-message GetEchoRequest {
-  int32 input = 1;
-}
-
-message GetEchoResponse {
-  int32 output = 1;
-}
-
-message GetSequenceRequest {
-  int32 input = 1;
-}
-
-message GetSequenceResponse {
-  int32 output = 1;
-}
-
-// Provides information about the gRPC server.

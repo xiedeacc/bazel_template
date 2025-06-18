@@ -4,7 +4,7 @@ load("@bazel_template//bazel:proxygen.bzl", "is_external", "proxygen_cpp_gen")
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/Iexternal/libdwarf/src/lib/libdwarf",
         "/Iexternal/libsodium/src/libsodium/include",
         "/Iexternal/proxygen",
@@ -56,7 +56,7 @@ COPTS = GLOBAL_COPTS + select({
 })
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": [],
 }) + select({
     "@platforms//os:linux": [],
@@ -149,7 +149,7 @@ cc_library(
             "proxygen/lib/transport/AsyncUDPSocketFactory.cpp",
         ],
     ) + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+        "@platforms//os:windows": [],
         "//conditions:default": ["proxygen/lib/transport/AsyncUDPSocketFactory.cpp"],
     }),
     hdrs = glob(["proxygen/**/*.h"]),

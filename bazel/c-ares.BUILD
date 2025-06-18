@@ -1,10 +1,10 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/std:c11",
         "/Ox",
         "/Iexternal/c-ares/src/lib",
@@ -24,8 +24,10 @@ COPTS = GLOBAL_COPTS + select({
     "//conditions:default": [],
 })
 
+DEFINES = GLOBAL_DEFINES
+
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": [],
 }) + select({
     "@platforms//os:linux": [],
@@ -137,14 +139,14 @@ cc_library(
         "src/lib/*.h",
     ]),
     copts = COPTS,
-    defines = ["CARES_STATICLIB"],
+    defines = select({
+        "@platforms//os:windows": ["CARES_STATICLIB"],
+        "//conditions:default": [],
+    }),
     includes = ["include"],
-    linkstatic = True,
     local_defines = LOCAL_DEFINES + [
         "CARES_BUILDING_LIBRARY",
         "HAVE_CONFIG_H=1",
-        "CARES_STATICLIB",
-        #"c_ares_EXPORTS",
     ] + select({
         "@platforms//os:linux": [
             "_XOPEN_SOURCE=700",
@@ -157,15 +159,12 @@ cc_library(
             "_DARWIN_C_SOURCE",
         ],
         "@platforms//os:windows": [
-            "_WIN32_WINNT=0x0601",
-            "WIN32_LEAN_AND_MEAN",
-            "_CRT_NONSTDC_NO_DEPRECATE",
             "CARES_NO_DEPRECATED",
+            "_CRT_NONSTDC_NO_DEPRECATE",
             "_CRT_SECURE_NO_DEPRECATE",
         ],
         "//conditions:default": [],
     }),
-    alwayslink = True,
 )
 
 genrule(
@@ -556,7 +555,17 @@ genrule(
         "/* #undef HAVE___SYSTEM_PROPERTY_GET */",
         "",
         "/* Define if have arc4random_buf() */",
+        "#if defined(__GLIBC__ )",
+        "#if __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 36)",
+        "#define HAVE_ARC4RANDOM_BUF 1",
+        "#else",
         "/* #undef HAVE_ARC4RANDOM_BUF */",
+        "#endif",
+        "#elif defined(__APPLE__)",
+        "#define HAVE_ARC4RANDOM_BUF 1",
+        "#else",
+        "/* #undef HAVE_ARC4RANDOM_BUF */",
+        "#endif",
         "",
         "/* Define if have getifaddrs() */",
         "#define HAVE_GETIFADDRS 1",
@@ -657,8 +666,7 @@ template_rule(
     src = ":ares_config_h_in",
     out = "src/lib/ares_config.h",
     substitutions = select({
-        "@platforms//os:linux": {
-        },
+        "@platforms//os:linux": {},
         "@platforms//os:osx": {
             "#define GETSERVBYPORT_R_ARGS 6": "#define GETSERVBYPORT_R_ARGS",
             "#define GETSERVBYNAME_R_ARGS 6": "#define GETSERVBYNAME_R_ARGS",
@@ -675,82 +683,9 @@ template_rule(
             "/* #undef HAVE_AVAILABILITYMACROS_H */": "#define HAVE_AVAILABILITYMACROS_H 1",
             "/* #undef HAVE_SYS_EVENT_H */": "#define HAVE_SYS_EVENT_H 1",
             "#define HAVE_SYS_EPOLL_H 1": "/* #undef HAVE_SYS_EPOLL_H */",
-            "/* #undef HAVE_ARC4RANDOM_BUF */": "#define HAVE_ARC4RANDOM_BUF 1",
             "/* #undef HAVE_INET_NET_PTON */": "#define HAVE_INET_NET_PTON 1",
         },
-        "@bazel_template//bazel:cross_compiling_for_windows_gcc": {
-            "/* #undef HAVE_WINDOWS_H */": "#define HAVE_WINDOWS_H 1",
-            "/* #undef HAVE_WINSOCK2_H */": "#define HAVE_WINSOCK2_H 1",
-            "/* #undef HAVE_WINSOCK_H */": "#define HAVE_WINSOCK_H 1",
-            "#define GETSERVBYNAME_R_ARGS 6": "#define GETSERVBYNAME_R_ARGS",
-            "/* #undef HAVE_MSWSOCK_H */": "#define HAVE_MSWSOCK_H 1",
-            "/* #undef HAVE_WINTERNL_H */": "#define HAVE_WINTERNL_H 1",
-            "/* #undef HAVE_NTSTATUS_H */": "#define HAVE_NTSTATUS_H 1",
-            "/* #undef HAVE_NTDEF_H */": "#define HAVE_NTDEF_H 1",
-            "/* #undef HAVE_WS2TCPIP_H */": "#define HAVE_WS2TCPIP_H 1",
-            "#define GETHOSTNAME_TYPE_ARG2 size_t": "#define GETHOSTNAME_TYPE_ARG2 int",
-            "#define HAVE_ARPA_INET_H 1": "/* #undef HAVE_ARPA_INET_H */",
-            "#define HAVE_ARPA_NAMESER_COMPAT_H 1": "/* #undef HAVE_ARPA_NAMESER_COMPAT_H */",
-            "#define HAVE_ARPA_NAMESER_H 1": "/* #undef HAVE_ARPA_NAMESER_H */",
-            "/* #undef HAVE_CLOSESOCKET */": "#define HAVE_CLOSESOCKET 1",
-            "#define HAVE_DLFCN_H 1": "/* #undef HAVE_DLFCN_H */",
-            "/* #undef HAVE_CXX11 */": "#define HAVE_CXX14 1",
-            "#define HAVE_EPOLL 1": "/* #undef HAVE_EPOLL */",
-            "#define HAVE_FCNTL 1": "/* #undef HAVE_FCNTL */",
-            "#define HAVE_GETIFADDRS 1": "/* #undef HAVE_GETIFADDRS */",
-            "#define CARES_SYMBOL_HIDING 1": "/* #undef CARES_SYMBOL_HIDING */",
-            "/* #undef HAVE_CONVERTINTERFACEINDEXTOLUID */": "#define HAVE_CONVERTINTERFACEINDEXTOLUID 1",
-            "/* #undef HAVE_CONVERTINTERFACELUIDTONAMEA */": "#define HAVE_CONVERTINTERFACELUIDTONAMEA 1",
-            "#define HAVE_FCNTL_O_NONBLOCK 1": "/* #undef HAVE_FCNTL_O_NONBLOCK */",
-            "#define HAVE_GETRANDOM 1": "/* #undef HAVE_GETRANDOM */",
-            "#define HAVE_GETSERVBYPORT_R 1": "/* #undef HAVE_GETSERVBYPORT_R */",
-            "#define HAVE_IFADDRS_H 1": "/* #undef HAVE_IFADDRS_H */",
-            "#define HAVE_INET_NET_PTON 1": "/* #undef HAVE_INET_NET_PTON */",
-            "#define HAVE_IOCTL 1": "/* #undef HAVE_IOCTL */",
-            "/* #undef HAVE_IOCTLSOCKET */": "#define HAVE_IOCTLSOCKET 1",
-            "/* #undef HAVE_IOCTLSOCKET_FIONBIO */": "#define HAVE_IOCTLSOCKET_FIONBIO 1",
-            "#define HAVE_IOCTL_FIONBIO 1": "/* #undef HAVE_IOCTL_FIONBIO */",
-            "/* #undef HAVE_IPHLPAPI_H */": "#define HAVE_IPHLPAPI_H 1",
-            "#define HAVE_NETDB_H 1": "/* #undef HAVE_NETDB_H */",
-            "#define HAVE_NETINET_IN_H 1": "/* #undef HAVE_NETINET_IN_H */",
-            "#define HAVE_NETINET_TCP_H 1": "/* #undef HAVE_NETINET_TCP_H */",
-            "/* #undef HAVE_NETIOAPI_H */": "#define HAVE_NETIOAPI_H 1",
-            "#define HAVE_NET_IF_H 1": "/* #undef HAVE_NET_IF_H */",
-            "#define HAVE_PIPE 1": "/* #undef HAVE_PIPE */",
-            "#define HAVE_PIPE2 1": "/* #undef HAVE_PIPE2 */",
-            "#define HAVE_POLL 1": "/* #undef HAVE_POLL */",
-            "#define HAVE_POLL_H 1": "/* #undef HAVE_POLL_H */",
-            "#define HAVE_PTHREAD_H 1": "/* #undef HAVE_PTHREAD_H */",
-            "#define HAVE_PTHREAD_PRIO_INHERIT 1": "/* #undef HAVE_PTHREAD_PRIO_INHERIT */",
-            "/* #undef HAVE_STRICMP */": "#define HAVE_STRICMP 1",
-            "/* #undef HAVE_STRNICMP */": "#define HAVE_STRNICMP 1",
-            "#define HAVE_SYS_EPOLL_H 1": "/* #undef HAVE_SYS_EPOLL_H */",
-            "#define HAVE_SYS_RANDOM_H 1": "/* #undef HAVE_SYS_RANDOM_H */",
-            "#define HAVE_SYS_SELECT_H 1": "/* #undef HAVE_SYS_SELECT_H */",
-            "#define HAVE_SYS_SOCKET_H 1": "/* #undef HAVE_SYS_SOCKET_H */",
-            "#define HAVE_SYS_UIO_H 1": "/* #undef HAVE_SYS_UIO_H */",
-            "#define HAVE_USER_NAMESPACE 1": "/* #undef HAVE_USER_NAMESPACE */",
-            "#define HAVE_UTS_NAMESPACE 1": "/* #undef HAVE_UTS_NAMESPACE */",
-            "#define HAVE_WRITEV 1": "/* #undef HAVE_WRITEV */",
-            "/* #undef HAVE_WS2IPDEF_H */": "#define HAVE_WS2IPDEF_H 1",
-            "#define RECVFROM_TYPE_ARG1 int": "#define RECVFROM_TYPE_ARG1 SOCKET",
-            "#define RECVFROM_TYPE_ARG2 void *": "#define RECVFROM_TYPE_ARG2 char *",
-            "#define RECVFROM_TYPE_ARG3 size_t": "#define RECVFROM_TYPE_ARG3 int",
-            "#define RECVFROM_TYPE_RETV ssize_t": "#define RECVFROM_TYPE_RETV int",
-            "#define RECV_TYPE_ARG1 int": "#define RECV_TYPE_ARG1 SOCKET",
-            "#define RECV_TYPE_ARG2 void *": "#define RECV_TYPE_ARG2 char *",
-            "#define RECV_TYPE_ARG3 size_t": "#define RECV_TYPE_ARG3 int",
-            "#define RECV_TYPE_RETV ssize_t": "#define RECV_TYPE_RETV int",
-            "#define SEND_TYPE_ARG1 int": "#define SEND_TYPE_ARG1 SOCKET",
-            "#define SEND_TYPE_ARG3 size_t": "#define SEND_TYPE_ARG3 int",
-            "#define SEND_TYPE_RETV ssize_t": "#define SEND_TYPE_RETV int",
-            "/* #undef _FILE_OFFSET_BITS */": "#define _FILE_OFFSET_BITS 64",
-            "#define HAVE_SYS_IOCTL_H 1": "/* #undef HAVE_SYS_IOCTL_H */",
-            "#define GETSERVBYPORT_R_ARGS 6": "/* #undef GETSERVBYPORT_R_ARGS */",
-            "#define HAVE_MSG_NOSIGNAL 1": "/* #undef HAVE_MSG_NOSIGNAL */",
-            "#define HAVE_GETSERVBYNAME_R 1": "/* #undef HAVE_GETSERVBYNAME_R */",
-        },
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
+        "@platforms//os:windows": {
             "/* #undef GETSERVBYPORT_R_ARGS */": "#define GETSERVBYPORT_R_ARGS",
             "#define GETSERVBYNAME_R_ARGS 6": "#define GETSERVBYNAME_R_ARGS",
             "#define HAVE_CLOCK_GETTIME_MONOTONIC 1": "/* #undef HAVE_CLOCK_GETTIME_MONOTONIC */",
@@ -831,6 +766,12 @@ template_rule(
             "#define HAVE_WRITEV 1": "/* #undef HAVE_WRITEV */",
         },
         "//conditions:default": {},
+    }) | select({
+        "@bazel_template//bazel:musl-abi": {
+            "#define EVENT__HAVE_SYS_QUEUE_H 1": "#define EVENT__HAVE_SYS_QUEUE_H 0",
+            "#define EVENT__HAVE_MMAP64 1": "/* #undef EVENT__HAVE_MMAP64 */",
+        },
+        "//conditions:default": {},
     }),
 )
 
@@ -888,16 +829,7 @@ template_rule(
     src = "include/ares_build.h.in",
     out = "include/ares_build.h",
     substitutions = selects.with_or({
-        "@bazel_template//bazel:cross_compiling_for_windows_gcc": {
-            "/* #undef CARES_HAVE_WINDOWS_H */": "#define CARES_HAVE_WINDOWS_H 1",
-            "/* #undef CARES_HAVE_WS2TCPIP_H */": "#define CARES_HAVE_WS2TCPIP_H 1",
-            "/* #undef CARES_HAVE_WINSOCK2_H */": "#define CARES_HAVE_WINSOCK2_H 1",
-            "#define CARES_HAVE_SYS_SOCKET_H 1": "/* #undef CARES_HAVE_SYS_SOCKET_H */",
-            "#define CARES_HAVE_SYS_SELECT_H 1": "/* #undef CARES_HAVE_SYS_SELECT_H */",
-            "#define CARES_HAVE_ARPA_NAMESER_H 1": "/* #undef CARES_HAVE_ARPA_NAMESER_H */",
-            "#define CARES_HAVE_ARPA_NAMESER_COMPAT_H 1": "/* #undef CARES_HAVE_ARPA_NAMESER_COMPAT_H */",
-        },
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
+        "@platforms//os:windows": {
             "/* #undef CARES_HAVE_WINDOWS_H */": "#define CARES_HAVE_WINDOWS_H 1",
             "/* #undef CARES_HAVE_WS2TCPIP_H */": "#define CARES_HAVE_WS2TCPIP_H 1",
             "/* #undef CARES_HAVE_WINSOCK2_H */": "#define CARES_HAVE_WINSOCK2_H 1",

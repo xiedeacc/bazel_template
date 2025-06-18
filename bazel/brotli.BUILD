@@ -1,7 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 STRICT_C_OPTIONS = select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": ["/Ox"],
+    "@platforms//os:windows": ["/Ox"],
     "//conditions:default": [
         "--pedantic-errors",
         "-Wall",
@@ -64,8 +64,8 @@ cc_library(
     srcs = [":common_sources"],
     hdrs = [":common_headers"],
     copts = STRICT_C_OPTIONS,
-    linkstatic = 1,
     deps = [":brotli_inc"],
+    linkstatic = True,
 )
 
 cc_library(
@@ -74,6 +74,7 @@ cc_library(
     hdrs = [":dec_headers"],
     copts = STRICT_C_OPTIONS,
     deps = [":brotlicommon"],
+    linkstatic = True,
 )
 
 cc_library(
@@ -82,17 +83,17 @@ cc_library(
     hdrs = [":enc_headers"],
     copts = STRICT_C_OPTIONS,
     linkopts = select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+        "@platforms//os:windows": [],
         "//conditions:default": ["-lm"],
     }),
     deps = [":brotlicommon"],
+    linkstatic = True,
 )
 
 cc_binary(
     name = "brotli",
     srcs = ["c/tools/brotli.c"],
     copts = STRICT_C_OPTIONS,
-    linkstatic = 1,
     deps = [
         ":brotlidec",
         ":brotlienc",

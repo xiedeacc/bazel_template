@@ -239,7 +239,7 @@ void Server::Shutdown() {
 }
 
 void Server::SetExecutionContext(
-    std::unique_ptr<ExecutionContext> execution_context) {
+    std::shared_ptr<ExecutionContext> execution_context) {
   // After the server has been started the 'ExecutionHandle' cannot be changed
   // anymore.
   CHECK(!server_);

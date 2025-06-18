@@ -1,107 +1,61 @@
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 load("//bazel:build.bzl", "cc_test")
 load("//bazel:cpplint.bzl", "cpplint")
+load("//bazel:pb_code_gen_plugin.bzl", "cc_proto_plugin")
 
 package(default_visibility = ["//visibility:public"])
 
-cc_library(
-    name = "blocking_list",
-    #    srcs = ["blocking_queue.cc"],
-    hdrs = ["blocking_list.h"],
-    deps = [
-    ],
-)
-
-cc_library(
-    name = "dependency_map",
-    srcs = ["dependency_map.cc"],
-    hdrs = ["dependency_map.h"],
-)
-
-cc_library(
-    name = "module",
-    srcs = ["module.cc"],
-    hdrs = ["module.h"],
-    copts = [
-        "-isystem external/double-conversion",
-        "-isystem external/folly",
-        "-isystem $(GENDIR)/external/folly",
-    ],
-    deps = [
-        ":dependency_map",
-        "@com_github_gflags_gflags//:gflags",
-        "@com_github_glog_glog//:glog",
-        "@folly",
-    ],
-)
-
-cc_library(
-    name = "garbage_collector",
-    srcs = ["garbage_collector.cc"],
-    hdrs = [
-        "garbage_collector.h",
-    ],
-    copts = [
-        "-isystem external/double-conversion",
-        "-isystem external/folly",
-        "-isystem $(GENDIR)/external/folly",
-    ],
-    defines = [
-        "BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION=1",
-        "BOOST_THREAD_PROVIDES_EXECUTORS",
-        "BOOST_THREAD_BUILD_LIB=1",
-        "BOOST_THREAD_USES_CHRONO",
-        "BOOST_THREAD_USES_MOVE",
-    ] + select({
-        "@platforms//os:windows": [
-            "BOOST_THREAD_PLATFORM_WIN32",
-            "BOOST_THREAD_WIN32",
-        ],
-        "//conditions:default": [
-            "BOOST_THREAD_PLATFORM_PTHREAD",
-            "BOOST_THREAD_POSIX",
-        ],
-    }),
-    deps = [
-        ":module",
-        "//src/util",
-    ],
-)
-
-#cc_library(
-#name = "net",
-#srcs = [
-#"host_spec.cc",
-#"ip_address.cc",
-#],
-#hdrs = [
-#"host_spec.h",
-#"ip_address.h",
-#],
-#deps = [
-#"@com_google_absl//absl/strings",
-#],
-#)
-
-#cc_test(
-#name = "ip_address_test",
-#timeout = "short",
-#srcs = [
-#"ip_address_test.cc",
-#],
-#deps = [
-#":net",
-#],
-#)
-
-#cc_test(
-#name = "host_spec_test",
-#timeout = "short",
-#srcs = [
-#"host_spec_test.cc",
-#],
-#deps = [
-#":net",
-#],
-#)
-
 cpplint()
+
+COPTS = GLOBAL_COPTS
+
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES
+
+LINKOPTS = GLOBAL_LINKOPTS
+
+cc_library(
+    name = "defs",
+    hdrs = ["defs.h"],
+    deps = [
+        ":blocking_queue",
+        "//src/proto:cc_error",
+        "//src/proto:cc_service",
+    ],
+)
+
+cc_library(
+    name = "blocking_queue",
+    hdrs = ["blocking_queue.h"],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [],
+)
+
+cc_test(
+    name = "blocking_queue_test",
+    srcs = ["blocking_queue_test.cc"],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        ":blocking_queue",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_proto_plugin(
+    name = "error_code",
+    src = "//src/proto:error.proto",
+    outs = ["error.h"],
+    data = ["//src/common/template:error.h"],
+    plugin = "//src/common/proto_plugin:pb_code_generator",
+    proto_deps = [
+        "//src/proto:error.proto",
+    ],
+    proto_paths = [
+        ".",
+    ],
+    protoc = "@com_google_protobuf//:protoc",
+    template_dir = "src/common/template",
+)

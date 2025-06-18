@@ -4,7 +4,7 @@ load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GL
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": ["/Ox"],
+    "@platforms//os:windows": ["/Ox"],
     "//conditions:default": ["-O3"],
 }) + select({
     "@platforms//os:linux": [],
@@ -17,7 +17,7 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
     "HAVE_CONFIG_H",
     "PCRE2_CODE_UNIT_WIDTH=8",
 ] + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": [],
 }) + select({
     "@platforms//os:linux": [],

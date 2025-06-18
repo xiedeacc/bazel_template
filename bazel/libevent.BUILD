@@ -1,10 +1,10 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/I$(GENDIR)/external/libevent/include",
     ],
     "//conditions:default": [
@@ -14,13 +14,21 @@ COPTS = GLOBAL_COPTS + select({
     ],
 })
 
+DEFINES = GLOBAL_DEFINES
+
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "_CRT_SECURE_NO_WARNINGS",
         "_CRT_NONSTDC_NO_DEPRECATE",
         "TINYTEST_LOCAL",
         "LITTLE_ENDIAN",
         "HAVE_CONFIG_H",
+    ],
+    "@platforms//os:linux": [
+        "_GNU_SOURCE",
+        "HAVE_CONFIG_H",
+        "NDEBUG",
+        "LITTLE_ENDIAN",
     ],
     "//conditions:default": [
         "HAVE_CONFIG_H",
@@ -35,7 +43,7 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
 })
 
 LINKOPTS = GLOBAL_LINKOPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": [],
 }) + select({
     "@platforms//os:linux": [],
@@ -88,7 +96,6 @@ cc_library(
         ],
         "@platforms//os:linux": [
             "epoll.c",
-            "epoll_sub.c",
             "epolltable-internal.h",
             "evthread_pthread.c",
             "poll.c",
@@ -96,6 +103,12 @@ cc_library(
             "signalfd.c",
         ],
         "//conditions:default": [],
+        #}) + select({
+        #"@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [],
+        #"@bazel_template//bazel:linux_gnu": [
+        #"epoll_sub.c",
+        #],
+        #"//conditions:default": [],
     }),
     hdrs = [
         "arc4random.c",
@@ -112,6 +125,9 @@ cc_library(
             "WIN32-Code/tree.h",
             "compat/sys/queue.h",
         ],
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
+            "compat/sys/queue.h",
+        ],
         "//conditions:default": [],
     }),
     copts = COPTS + select({
@@ -119,8 +135,12 @@ cc_library(
             "-Iexternal/libevent/compat",
             "-Iexternal/libevent/WIN32-Code",
         ],
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
+            "-Iexternal/libevent/compat",
+        ],
         "//conditions:default": [],
     }),
+    defines = DEFINES,
     includes = ["include"],
     linkopts = LINKOPTS + [
     ],
@@ -148,12 +168,18 @@ cc_library(
             "WIN32-Code/tree.h",
             "compat/sys/queue.h",
         ],
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
+            "compat/sys/queue.h",
+        ],
         "//conditions:default": [],
     }),
     copts = COPTS + select({
         "@platforms//os:windows": [
             "-Iexternal/libevent/compat",
             "-Iexternal/libevent/WIN32-Code",
+        ],
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
+            "-Iexternal/libevent/compat",
         ],
         "//conditions:default": [],
     }),
@@ -190,12 +216,18 @@ cc_library(
             "WIN32-Code/tree.h",
             "compat/sys/queue.h",
         ],
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
+            "compat/sys/queue.h",
+        ],
         "//conditions:default": [],
     }),
     copts = COPTS + select({
         "@platforms//os:windows": [
             "-Iexternal/libevent/compat",
             "-Iexternal/libevent/WIN32-Code",
+        ],
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
+            "-Iexternal/libevent/compat",
         ],
         "//conditions:default": [],
     }),
@@ -231,6 +263,9 @@ genrule(
         "/* config.h.  Generated from config.h.in by configure.  */",
         "/* config.h.in.  Generated from configure.ac by autoheader.  */",
         "",
+        "#if defined(__linux__) || defined(__APPLE__)",
+        "#include <features.h>",
+        "#endif",
         "/* Define if building universal (internal helper macro) */",
         "/* #undef EVENT__AC_APPLE_UNIVERSAL_BUILD */",
         "",
@@ -250,13 +285,25 @@ genrule(
         "/* #undef EVENT__HAVE_AFUNIX_H */",
         "",
         "/* Define to 1 if you have the 'arc4random' function. */",
-        "/* #undef EVENT__HAVE_ARC4RANDOM */",
-        "",
-        "/* Define to 1 if you have the 'arc4random_addrandom' function. */",
+        "#if defined(__GLIBC__)",
+        "#if __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 36)",
+        "#define EVENT__HAVE_ARC4RANDOM 1",
+        "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
         "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
-        "",
-        "/* Define to 1 if you have the 'arc4random_buf' function. */",
+        "#else",
+        "/* #undef EVENT__HAVE_ARC4RANDOM */",
         "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */",
+        "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
+        "#endif",
+        "#elif defined(__APPLE__)",
+        "#define EVENT__HAVE_ARC4RANDOM 1",
+        "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
+        "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
+        "#else",
+        "/* #undef EVENT__HAVE_ARC4RANDOM */",
+        "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */",
+        "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
+        "#endif",
         "",
         "/* Define to 1 if you have the <arpa/inet.h> header file. */",
         "#define EVENT__HAVE_ARPA_INET_H 1",
@@ -927,78 +974,7 @@ template_rule(
             "#define EVENT__HAVE_SYS_EPOLL_H 1": "/* #undef EVENT__HAVE_SYS_EPOLL_H */",
             "/* #undef EVENT__HAVE_SYS_EVENT_H */": "#define EVENT__HAVE_SYS_EVENT_H 1",
         },
-        "@bazel_template//bazel:cross_compiling_for_windows_gcc": {
-            "#define EVENT__HAVE_STRINGS_H 1": "/* #undef EVENT__HAVE_STRINGS_H */",
-            "#define EVENT__HAVE_ACCEPT4 1": "/* #undef EVENT__HAVE_ACCEPT4 */",
-            "#define EVENT__HAVE_ARPA_INET_H 1": "/* #undef EVENT__HAVE_ARPA_INET_H */",
-            "#define EVENT__HAVE_DLFCN_H 1": "/* #undef EVENT__HAVE_DLFCN_H */",
-            "#define EVENT__HAVE_EPOLL 1": "/* #undef EVENT__HAVE_EPOLL */",
-            "#define EVENT__HAVE_EPOLL_CREATE1 1": "/* #undef EVENT__HAVE_EPOLL_CREATE1 */",
-            "#define EVENT__HAVE_EPOLL_CTL 1": "/* #undef EVENT__HAVE_EPOLL_CTL */",
-            "#define EVENT__HAVE_EPOLL_PWAIT2 1": "/* #undef EVENT__HAVE_EPOLL_PWAIT2 */",
-            "#define EVENT__HAVE_EVENTFD 1": "/* #undef EVENT__HAVE_EVENTFD */",
-            "#define EVENT__HAVE_FCNTL 1": "/* #undef EVENT__HAVE_FCNTL */",
-            "#define EVENT__HAVE_FD_MASK 1": "/* #undef EVENT__HAVE_FD_MASK */",
-            "#define EVENT__HAVE_GETEGID 1": "/* #undef EVENT__HAVE_GETEGID */",
-            "#define EVENT__HAVE_GETEUID 1": "/* #undef EVENT__HAVE_GETEUID */",
-            "#define EVENT__HAVE_GETIFADDRS 1": "/* #undef EVENT__HAVE_GETIFADDRS */",
-            "#define EVENT__HAVE_GETRANDOM 1": "/* #undef EVENT__HAVE_GETRANDOM */",
-            "#define EVENT__HAVE_IFADDRS_H 1": "/* #undef EVENT__HAVE_IFADDRS_H */",
-            "/* #undef EVENT__HAVE_LIBIPHLPAPI */": "#define EVENT__HAVE_LIBIPHLPAPI 1",
-            "/* #undef EVENT__HAVE_LIBWS2_32 */": "#define EVENT__HAVE_LIBWS2_32 1",
-            "#define EVENT__HAVE_MMAP 1": "/* #undef EVENT__HAVE_MMAP */",
-            "#define EVENT__HAVE_MMAP64 1": "/* #undef EVENT__HAVE_MMAP64 */",
-            "#define EVENT__HAVE_NETDB_H 1": "/* #undef EVENT__HAVE_NETDB_H */",
-            "#define EVENT__HAVE_NETINET_IN_H 1": "/* #undef EVENT__HAVE_NETINET_IN_H */",
-            "#define EVENT__HAVE_NETINET_TCP_H 1": "/* #undef EVENT__HAVE_NETINET_TCP_H */",
-            "#define EVENT__HAVE_PIPE 1": "/* #undef EVENT__HAVE_PIPE */",
-            "#define EVENT__HAVE_PIPE2 1": "/* #undef EVENT__HAVE_PIPE2 */",
-            "#define EVENT__HAVE_POLL 1": "/* #undef EVENT__HAVE_POLL */",
-            "#define EVENT__HAVE_POLL_H 1": "/* #undef EVENT__HAVE_POLL_H */",
-            "#define EVENT__HAVE_PREAD 1": "/* #undef EVENT__HAVE_PREAD */",
-            "#define EVENT__HAVE_PTHREADS 1": "/* #undef EVENT__HAVE_PTHREADS */",
-            "#define EVENT__HAVE_PTHREAD_MUTEXATTR_SETPROTOCOL 1": "/* #undef EVENT__HAVE_PTHREAD_MUTEXATTR_SETPROTOCOL */",
-            "#define EVENT__HAVE_PTHREAD_PRIO_INHERIT 1": "/* #undef EVENT__HAVE_PTHREAD_PRIO_INHERIT */",
-            "#define EVENT__HAVE_SA_FAMILY_T 1": "/* #undef EVENT__HAVE_SA_FAMILY_T */",
-            "#define EVENT__HAVE_SELECT 1": "/* #undef EVENT__HAVE_SELECT */",
-            "#define EVENT__HAVE_SENDFILE 1": "/* #undef EVENT__HAVE_SENDFILE */",
-            "#define EVENT__HAVE_SETENV 1": "/* #undef EVENT__HAVE_SETENV */",
-            "#define EVENT__HAVE_SETFD 1": "/* #undef EVENT__HAVE_SETFD */",
-            "#define EVENT__HAVE_SETRLIMIT 1": "/* #undef EVENT__HAVE_SETRLIMIT */",
-            "#define EVENT__HAVE_SIGACTION 1": "/* #undef EVENT__HAVE_SIGACTION */",
-            "#define EVENT__HAVE_SOCKETPAIR 1": "/* #undef EVENT__HAVE_SOCKETPAIR */",
-            "#define EVENT__HAVE_STRSEP 1": "/* #undef EVENT__HAVE_STRSEP */",
-            "#define EVENT__HAVE_STRSIGNAL 1": "/* #undef EVENT__HAVE_STRSIGNAL */",
-            "#define EVENT__HAVE_STRUCT_IN6_ADDR_S6_ADDR16 1": "/* #undef EVENT__HAVE_STRUCT_IN6_ADDR_S6_ADDR16 */",
-            "#define EVENT__HAVE_STRUCT_IN6_ADDR_S6_ADDR32 1": "/* #undef EVENT__HAVE_STRUCT_IN6_ADDR_S6_ADDR32 */",
-            "#define EVENT__HAVE_STRUCT_SOCKADDR_UN 1": "/* #undef EVENT__HAVE_STRUCT_SOCKADDR_UN */",
-            "#define EVENT__HAVE_SYS_EPOLL_H 1": "/* #undef EVENT__HAVE_SYS_EPOLL_H */",
-            "#define EVENT__HAVE_SYS_EVENTFD_H 1": "/* #undef EVENT__HAVE_SYS_EVENTFD_H */",
-            "#define EVENT__HAVE_SYS_IOCTL_H 1": "/* #undef EVENT__HAVE_SYS_IOCTL_H */",
-            "#define EVENT__HAVE_SYS_MMAN_H 1": "/* #undef EVENT__HAVE_SYS_MMAN_H */",
-            "#define EVENT__HAVE_SYS_QUEUE_H 1": "/* #undef EVENT__HAVE_SYS_QUEUE_H */",
-            "#define EVENT__HAVE_SYS_RANDOM_H 1": "/* #undef EVENT__HAVE_SYS_RANDOM_H */",
-            "#define EVENT__HAVE_SYS_RESOURCE_H 1": "/* #undef EVENT__HAVE_SYS_RESOURCE_H */",
-            "#define EVENT__HAVE_SYS_SELECT_H 1": "/* #undef EVENT__HAVE_SYS_SELECT_H */",
-            "#define EVENT__HAVE_SYS_SENDFILE_H 1": "/* #undef EVENT__HAVE_SYS_SENDFILE_H */",
-            "#define EVENT__HAVE_SYS_SIGNALFD_H 1": "/* #undef EVENT__HAVE_SYS_SIGNALFD_H */",
-            "#define EVENT__HAVE_SYS_SOCKET_H 1": "/* #undef EVENT__HAVE_SYS_SOCKET_H */",
-            "#define EVENT__HAVE_SYS_TIMERFD_H 1": "/* #undef EVENT__HAVE_SYS_TIMERFD_H */",
-            "#define EVENT__HAVE_SYS_UIO_H 1": "/* #undef EVENT__HAVE_SYS_UIO_H */",
-            "#define EVENT__HAVE_SYS_UN_H 1": "/* #undef EVENT__HAVE_SYS_UN_H */",
-            "#define EVENT__HAVE_SYS_WAIT_H 1": "/* #undef EVENT__HAVE_SYS_WAIT_H */",
-            "#define EVENT__HAVE_TIMERADD 1": "/* #undef EVENT__HAVE_TIMERADD */",
-            "#define EVENT__HAVE_TIMERFD_CREATE 1": "/* #undef EVENT__HAVE_TIMERFD_CREATE */",
-            "#define EVENT__HAVE_UNSETENV 1": "/* #undef EVENT__HAVE_UNSETENV */",
-            "/* #undef EVENT__HAVE_WEPOLL */": "#define EVENT__HAVE_WEPOLL 1",
-            "/* #undef EVENT__HAVE__GMTIME64_S */": "#define EVENT__HAVE__GMTIME64_S 1",
-            "#define EVENT__SIZEOF_LONG 8": "#define EVENT__SIZEOF_LONG 4",
-            "#define EVENT__SIZEOF_PTHREAD_T 8": "/* #undef EVENT__SIZEOF_PTHREAD_T */",
-            "/* #undef _FILE_OFFSET_BITS */": "#define _FILE_OFFSET_BITS 64",
-            "#define EVENT__SIZEOF_SOCKLEN_T 8": "#define EVENT__SIZEOF_SOCKLEN_T 4",
-            "#define EVENT__SIZEOF_OFF_T 8": "#define EVENT__SIZEOF_OFF_T 4",
-        },
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
+        "@platforms//os:windows": {
             "#define EVENT__HAVE_UMASK 1": "/* #undef EVENT__HAVE_UMASK */",
             "#define EVENT__HAVE_WCHAR_H 1": "/* #undef EVENT__HAVE_WCHAR_H */",
             "#define EVENT__HAVE_LIBIPHLPAPI 1": "/* EVENT__HAVE_LIBIPHLPAPI */",
@@ -1093,19 +1069,12 @@ template_rule(
         },
         "//conditions:default": {
         },
-    }) | selects.with_or({
-        "@bazel_template//bazel:osx_x86_64": {
-            "/* #undef EVENT__HAVE_ARC4RANDOM */": "#define EVENT__HAVE_ARC4RANDOM 1",
-            "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */": "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
-            "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */": "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
+    }) | select({
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": {
+            "#define EVENT__HAVE_SYS_QUEUE_H 1": "/* #undef EVENT__HAVE_SYS_QUEUE_H */",
+            "#define EVENT__HAVE_MMAP64 1": "/* #undef EVENT__HAVE_MMAP64 */",
         },
-        "@bazel_template//bazel:linux_aarch64": {
-            "/* #undef EVENT__HAVE_ARC4RANDOM */": "#define EVENT__HAVE_ARC4RANDOM 1",
-            "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */": "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
-            #"/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */": "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
-        },
-        "//conditions:default": {
-        },
+        "//conditions:default": {},
     }),
 )
 
@@ -1180,10 +1149,6 @@ template_rule(
     out = "include/evconfig-private.h",
     substitutions = select({
         "@platforms//os:osx": {"#define _GNU_SOURCE 1": "/* #undef _GNU_SOURCE */"},
-        "@bazel_template//bazel:cross_compiling_for_windows_gcc": {
-            "/* #undef _FILE_OFFSET_BITS */": "#define _FILE_OFFSET_BITS 64",
-        },
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {},
         "//conditions:default": {},
     }),
 )

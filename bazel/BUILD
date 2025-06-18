@@ -31,11 +31,6 @@ config_setting(
 )
 
 config_setting(
-    name = "arch",
-    define_values = {"distro": "arch"},
-)
-
-config_setting(
     name = "debian",
     define_values = {"distro": "debian"},
 )
@@ -51,193 +46,94 @@ config_setting(
         "@platforms//os:windows",
         "@platforms//cpu:x86_64",
     ],
-    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "windows_aarch64",
+    constraint_values = [
+        "@platforms//os:windows",
+        "@platforms//cpu:aarch64",
+    ],
 )
 
 config_setting(
     name = "linux_x86_64",
     constraint_values = [
-        "@platforms//cpu:x86_64",
         "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
     ],
 )
 
 config_setting(
     name = "linux_aarch64",
     constraint_values = [
-        "@platforms//cpu:aarch64",
         "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
     ],
 )
 
 config_setting(
     name = "osx_x86_64",
     constraint_values = [
-        "@platforms//cpu:x86_64",
         "@platforms//os:osx",
+        "@platforms//cpu:x86_64",
     ],
 )
 
 config_setting(
     name = "osx_aarch64",
     constraint_values = [
+        "@platforms//os:osx",
         "@platforms//cpu:aarch64",
-        "@platforms//os:osx",
-    ],
-)
-
-selects.config_setting_group(
-    name = "osx_gcc",
-    match_all = [
-        "@platforms//os:osx",
-        ":gcc",
-    ],
-)
-
-selects.config_setting_group(
-    name = "osx_clang",
-    match_all = [
-        "@platforms//os:osx",
-        ":clang",
-    ],
-)
-
-selects.config_setting_group(
-    name = "windows_x86_64_gcc",
-    match_all = [
-        ":windows_x86_64",
-        ":gcc",
-    ],
-)
-
-selects.config_setting_group(
-    name = "windows_x86_64_clang",
-    match_all = [
-        ":windows_x86_64",
-        ":clang",
-    ],
-)
-
-selects.config_setting_group(
-    name = "windows_x86_64_msvc",
-    match_all = [
-        ":windows_x86_64",
-        ":msvc",
-    ],
-)
-
-selects.config_setting_group(
-    name = "linux_x86_64_gcc",
-    match_all = [
-        ":linux_x86_64",
-        ":gcc",
-    ],
-)
-
-selects.config_setting_group(
-    name = "linux_x86_64_clang",
-    match_all = [
-        ":linux_x86_64",
-        ":clang",
-    ],
-)
-
-selects.config_setting_group(
-    name = "linux_aarch64_gcc",
-    match_all = [
-        ":linux_aarch64",
-        ":gcc",
-    ],
-)
-
-selects.config_setting_group(
-    name = "linux_aarch64_clang",
-    match_all = [
-        ":linux_aarch64",
-        ":clang",
-    ],
-)
-
-selects.config_setting_group(
-    name = "osx_x86_64_gcc",
-    match_all = [
-        ":osx_x86_64",
-        ":gcc",
-    ],
-)
-
-selects.config_setting_group(
-    name = "osx_x86_64_clang",
-    match_all = [
-        ":osx_x86_64",
-        ":clang",
-    ],
-)
-
-selects.config_setting_group(
-    name = "osx_aarch64_gcc",
-    match_all = [
-        ":osx_aarch64",
-        ":gcc",
-    ],
-)
-
-selects.config_setting_group(
-    name = "osx_aarch64_clang",
-    match_all = [
-        ":osx_aarch64",
-        ":clang",
     ],
 )
 
 platform(
     name = "windows_x86_64_platform",
     constraint_values = [
-        "@platforms//cpu:x86_64",
         "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+platform(
+    name = "windows_aarch64_platform",
+    constraint_values = [
+        "@platforms//os:windows",
+        "@platforms//cpu:aarch64",
     ],
 )
 
 platform(
     name = "linux_x86_64_platform",
     constraint_values = [
-        "@platforms//cpu:x86_64",
         "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
     ],
 )
 
 platform(
     name = "linux_aarch64_platform",
     constraint_values = [
-        "@platforms//cpu:aarch64",
         "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
     ],
 )
 
 platform(
     name = "osx_x86_64_platform",
     constraint_values = [
-        "@platforms//cpu:x86_64",
         "@platforms//os:osx",
+        "@platforms//cpu:x86_64",
     ],
 )
 
 platform(
     name = "osx_aarch64_platform",
     constraint_values = [
-        "@platforms//cpu:aarch64",
         "@platforms//os:osx",
+        "@platforms//cpu:aarch64",
     ],
-)
-
-config_setting(
-    name = "jemalloc",
-    define_values = {"profiling_type": "jemalloc"},
-)
-
-config_setting(
-    name = "tcmalloc",
-    define_values = {"profiling_type": "tcmalloc"},
 )
 
 config_setting(
@@ -250,29 +146,58 @@ config_setting(
     define_values = {"cross_compiling": "false"},
 )
 
+config_setting(
+    name = "gnu-abi",
+    define_values = {"abi": "gnu"},
+)
+
+config_setting(
+    name = "musl-abi",
+    define_values = {"abi": "musl"},
+)
+
 selects.config_setting_group(
-    name = "cross_compiling_for_osx_gcc",
+    name = "cross_compiling_for_linux_aarch64",
     match_all = [
         ":cross_compiling",
-        "@platforms//os:osx",
-        ":gcc",
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
     ],
 )
 
 selects.config_setting_group(
-    name = "cross_compiling_for_osx_clang",
+    name = "cross_compiling_for_linux_aarch64_musl",
     match_all = [
+        ":musl-abi",
         ":cross_compiling",
-        "@platforms//os:osx",
-        ":clang",
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
     ],
 )
 
 selects.config_setting_group(
-    name = "cross_compiling_for_osx",
+    name = "linux_gnu",
+    match_all = [
+        ":gnu-abi",
+        "@platforms//os:linux",
+    ],
+)
+
+selects.config_setting_group(
+    name = "cross_compiling_for_osx_x86_64",
     match_all = [
         ":cross_compiling",
         "@platforms//os:osx",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "cross_compiling_for_osx_aarch64",
+    match_all = [
+        ":cross_compiling",
+        "@platforms//os:osx",
+        "@platforms//cpu:aarch64",
     ],
 )
 
@@ -284,28 +209,12 @@ selects.config_setting_group(
     ],
 )
 
-selects.config_setting_group(
-    name = "cross_compiling_for_windows_gcc",
-    match_all = [
-        ":cross_compiling",
-        "@platforms//os:windows",
-        ":gcc",
-    ],
+config_setting(
+    name = "jemalloc",
+    define_values = {"profiling_type": "jemalloc"},
 )
 
-selects.config_setting_group(
-    name = "cross_compiling_for_windows",
-    match_all = [
-        ":cross_compiling",
-        "@platforms//os:windows",
-    ],
-)
-
-selects.config_setting_group(
-    name = "not_cross_compiling_on_windows",
-    match_all = [
-        ":not_cross_compiling",
-        "@platforms//os:windows",
-        ":msvc",
-    ],
+config_setting(
+    name = "tcmalloc",
+    define_values = {"profiling_type": "tcmalloc"},
 )

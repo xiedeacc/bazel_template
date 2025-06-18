@@ -21,7 +21,7 @@ licenses(["notice"])  # Apache 2.0
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": ["-Wno-sign-compare"],
 }) + select({
     "@platforms//os:linux": [],
@@ -30,18 +30,7 @@ COPTS = GLOBAL_COPTS + select({
     "//conditions:default": [],
 })
 
-LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
-        "BUILD_TRACING=0",
-        "GLOG_NO_ABBREVIATED_SEVERITIES",
-    ],
-    "//conditions:default": ["BUILD_TRACING=0"],
-}) + select({
-    "@platforms//os:linux": [],
-    "@platforms//os:osx": [],
-    "@platforms//os:windows": [],
-    "//conditions:default": [],
-})
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES
 
 proto_library(
     name = "protos",

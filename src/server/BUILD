@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 cpplint()
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/Iexternal/double-conversion",
         "/Iexternal/folly",
         "/Iexternal/double-conversion",
@@ -39,11 +39,6 @@ COPTS = GLOBAL_COPTS + select({
 })
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
-        "GLOG_NO_ABBREVIATED_SEVERITIES",
-    ],
-    "//conditions:default": ["BUILD_TRACING=0"],
-}) + select({
     "@platforms//os:linux": [],
     "@platforms//os:osx": [],
     "@platforms//os:windows": [],
@@ -51,7 +46,7 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
 })
 
 LINKOPTS = GLOBAL_LINKOPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": [],
 }) + select({
     "@platforms//os:linux": [],
@@ -60,79 +55,12 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
     "//conditions:default": [],
 })
 
-cc_binary(
-    name = "http_server",
-    srcs = ["http_server.cc"],
-    copts = COPTS,
-    linkopts = LINKOPTS,
-    local_defines = LOCAL_DEFINES,
-    deps = [
-        ":server_context",
-        "//src/server/http_handler",
-        "@folly",
-        "@openssl//:crypto",
-        "@openssl//:ssl",
-        "@proxygen",
-    ],
-)
-
-cc_binary(
-    name = "grpc_server",
-    srcs = ["grpc_server.cc"],
-    copts = COPTS,
-    linkopts = LINKOPTS,
-    local_defines = LOCAL_DEFINES,
-    deps = [
-        ":grpc_server_impl",
-        #"@jemalloc",
-        "@openssl//:crypto",
-        "@openssl//:ssl",
-        "@libsodium//:sodium",
-        "//src/common:module",
-    ],
-)
-
-cc_library(
-    name = "grpc_server_impl",
-    srcs = ["grpc_server_impl.cc"],
-    hdrs = [
-        "grpc_server_impl.h",
-    ],
-    copts = COPTS,
-    defines = [
-        "BOOST_BIND_GLOBAL_PLACEHOLDERS",
-        "BOOST_THREAD_PROVIDES_FUTURE_CONTINUATION=1",
-        "BOOST_THREAD_PROVIDES_EXECUTORS",
-        "BOOST_THREAD_BUILD_LIB=1",
-        "BOOST_THREAD_USES_CHRONO",
-        "BOOST_THREAD_USES_MOVE",
-    ] + select({
-        "@platforms//os:windows": [
-            "BOOST_THREAD_PLATFORM_WIN32",
-            "BOOST_THREAD_WIN32",
-        ],
-        "//conditions:default": [
-            "BOOST_THREAD_PLATFORM_PTHREAD",
-            "BOOST_THREAD_POSIX",
-        ],
-    }),
-    local_defines = LOCAL_DEFINES,
-    deps = [
-        "//src/async_grpc",
-        "//src/proto:cc_grpc_service",
-        "//src/server:server_context",
-        "//src/server/grpc_handler",
-        "//src/util:config_manager",
-    ],
-)
-
 cc_library(
     name = "server_context",
     hdrs = ["server_context.h"],
     local_defines = LOCAL_DEFINES,
     deps = [
         ":version_info",
-        "//src/async_grpc",
         "//src/util:config_manager",
         "@fmt",
     ],
@@ -154,4 +82,54 @@ cc_test(
     name = "version_info_test",
     srcs = ["version_info_test.cc"],
     deps = [":version_info"],
+)
+
+cc_library(
+    name = "grpc_server_impl",
+    hdrs = ["grpc_server_impl.h"],
+    copts = COPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        "//src/async_grpc",
+        "//src/proto:cc_grpc_service",
+        "//src/server:server_context",
+        "//src/server/grpc_handler",
+        "//src/util:config_manager",
+    ],
+)
+
+cc_library(
+    name = "http_server_impl",
+    hdrs = ["http_server_impl.h"],
+    copts = COPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        "//src/server:server_context",
+        "//src/util:config_manager",
+        "@proxygen",
+    ],
+)
+
+cc_binary(
+    name = "server",
+    srcs = ["server.cc"],
+    copts = COPTS,
+    linkopts = LINKOPTS + select({
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [],
+        "//conditions:default": [],
+    }),
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        ":server_context",
+        "//src/proto:cc_grpc_service",
+        "//src/server/http_handler",
+        "@folly",
+        "@libsodium//:sodium",
+        "@openssl//:crypto",
+        ":http_server_impl",
+        #"@jemalloc",
+        "@boost//:url",
+        "@openssl//:ssl",
+        "@xz//:lzma",
+    ],
 )

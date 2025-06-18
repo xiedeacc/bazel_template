@@ -3,35 +3,25 @@
  * All rights reserved.
  *******************************************************************************/
 
-#ifndef BAZEL_TEMPLATE_SERVER_GRPC_HANDLERS_META_H
-#define BAZEL_TEMPLATE_SERVER_GRPC_HANDLERS_META_H
+#ifndef bazel_template_SERVER_GRPC_HANDLER_META_H_
+#define bazel_template_SERVER_GRPC_HANDLER_META_H_
 
-#include "src/async_grpc/type_traits.h"
 #include "src/proto/service.pb.h"
 
 namespace bazel_template {
 namespace server {
 namespace grpc_handler {
 
-struct GetSumMethod {
+struct LoadFolderMethod {
   static constexpr const char* MethodName() {
-    return "/bazel_template.proto.Math/GetSum";
+    return "/bazel_template.proto.MEGAService/LoadFolder";
   }
-  using IncomingType = async_grpc::Stream<bazel_template::proto::GetSumRequest>;
-  using OutgoingType = bazel_template::proto::GetSumResponse;
-};
-
-struct GetRunningSumMethod {
-  static constexpr const char* MethodName() {
-    return "/bazel_template.proto.Math/GetRunningSum";
-  }
-  using IncomingType = async_grpc::Stream<bazel_template::proto::GetSumRequest>;
-  using OutgoingType =
-      async_grpc::Stream<bazel_template::proto::GetSumResponse>;
+  using IncomingType = bazel_template::proto::LoadFolderRequest;
+  using OutgoingType = bazel_template::proto::LoadFolderResponse;
 };
 
 }  // namespace grpc_handler
 }  // namespace server
 }  // namespace bazel_template
 
-#endif  // BAZEL_TEMPLATE_SERVER_GRPC_HANDLERS_META_H
+#endif  // bazel_template_SERVER_GRPC_HANDLER_META_H_

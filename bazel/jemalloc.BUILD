@@ -13,7 +13,7 @@ COPTS = GLOBAL_COPTS + select({
     ],
     "//conditions:default": [],
 }) + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/std:c11",
         "/Iexternal/jemalloc/include",
         "/I$(GENDIR)/external/jemalloc/include",
@@ -587,9 +587,10 @@ cc_library(
         "//conditions:default": [],
     }),
     copts = COPTS + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "@platforms//os:windows": [
             "/Iexternal/jemalloc/include/msvc_compat",
         ],
+        "//conditions:default": [],
     }),
     linkopts = ["-lpthread"],
     local_defines = [
@@ -639,9 +640,10 @@ cc_library(
         "//conditions:default": [],
     }),
     copts = COPTS + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "@platforms//os:windows": [
             "/Iexternal/jemalloc/include/msvc_compat",
         ],
+        "//conditions:default": [],
     }),
     linkopts = ["-lpthread"],
     local_defines = LOCAL_DEFINES,
@@ -651,7 +653,6 @@ cc_library(
         "@platforms//os:osx": [],
         "//conditions:default": [],
     }),
-    alwayslink = True,
 )
 
 cc_library(
@@ -675,7 +676,6 @@ cc_library(
     ],
     local_defines = LOCAL_DEFINES,
     deps = [":jemalloc_private"],
-    alwayslink = True,
 )
 
 cc_library(
@@ -684,5 +684,4 @@ cc_library(
         ":jemalloc_cpp",
         ":jemalloc_private",
     ],
-    alwayslink = True,
 )

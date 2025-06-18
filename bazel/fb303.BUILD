@@ -4,7 +4,7 @@ load("@bazel_template//bazel:rules_fbthrift.bzl", "fbthrift_cpp_gen")
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/Iexternal/fbthrift",
         "/I$(GENDIR)/external/fbthrift",
         "/Iexternal/fb303",
@@ -46,7 +46,7 @@ COPTS = GLOBAL_COPTS + select({
 })
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": [],
 }) + select({
     "@platforms//os:linux": [],

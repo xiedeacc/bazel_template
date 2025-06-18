@@ -121,7 +121,7 @@ template_rule(
     src = ":config_h_in",
     out = "config.h",
     substitutions = select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
+        "@platforms//os:windows": {
             "#define HAVE_UNISTD_H 1": "/* #undef HAVE_UNISTD_H */",
             "#define HAVE_SYS_TYPES_H 1": "/* #undef HAVE_SYS_TYPES_H */",
         },
@@ -134,7 +134,7 @@ cc_library(
     srcs = [":config_h"] + glob(["src/lib/libdwarf/*.c"]),
     hdrs = glob(["src/lib/libdwarf/*.h"]),
     copts = GLOBAL_COPTS + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "@platforms//os:windows": [
             "/I$(GENDIR)/external/libdwarf",
         ],
         "//conditions:default": [
@@ -159,7 +159,7 @@ cc_library(
     srcs = [":config_h"] + glob(["src/lib/libdwarfp/*.c"]),
     hdrs = glob(["src/lib/libdwarfp/*.h"]),
     copts = GLOBAL_COPTS + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "@platforms//os:windows": [
             "/I$(GENDIR)/external/libdwarf",
             "/Iexternal/libdwarf/src/lib/libdwarf",
         ],

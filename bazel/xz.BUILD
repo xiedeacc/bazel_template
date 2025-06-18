@@ -3,7 +3,7 @@ load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GL
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/std:c11",
         "/Ox",
         "/Iexternal/xz/src/common",
@@ -66,7 +66,6 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
     "PACKAGE_URL=\\\"https://tukaani.org/xz/\\\"",
     "TUKLIB_PHYSMEM_SYSCONF",
     "TUKLIB_SYMBOL_PREFIX=lzma_",
-    "HAVE_VISIBILITY=1",
 ] + select({
     "@platforms//os:linux": [
         "HAVE___BUILTIN_BSWAPXX",
@@ -84,6 +83,7 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
         "_GNU_SOURCE",
         "MYTHREAD_POSIX",
         "HAVE_PTHREAD_CONDATTR_SETCLOCK",
+        "HAVE_VISIBILITY=1",
     ],
     "@platforms//os:osx": [
         "HAVE___BUILTIN_BSWAPXX",
@@ -107,13 +107,11 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
         "HAVE_GETOPT_LONG=1",
         "HAVE_GETTEXT=1",
         "HAVE_ICONV=1",
-        "HAVE_IMMINTRIN_H",
         "HAVE_MBRTOWC=1",
         "HAVE_OPTRESET=1",
         "HAVE_PTHREAD_PRIO_INHERIT",
         "HAVE_STRUCT_STAT_ST_ATIMESPEC_TV_NSEC",
         "HAVE_UINTPTR_T",
-        "HAVE_USABLE_CLMUL",
         "HAVE_WCWIDTH=1",
         "STDC_HEADERS=1",
         "MYTHREAD_POSIX",
@@ -127,13 +125,22 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
         "__STDC_WANT_IEC_60559_TYPES_EXT__=1",
         "__STDC_WANT_LIB_EXT2__=1",
         "__STDC_WANT_MATH_SPEC_FUNCS__=1",
+        "HAVE_VISIBILITY=1",
     ],
-    "@platforms//os:windows": [],
+    "@platforms//os:windows": [
+        "MYTHREAD_VISTA",
+        "HAVE_MBRTOWC",
+        "HAVE__FUTIME",
+        "__GETOPT_PREFIX=rpl_",
+        "HAVE_VISIBILITY=0",
+    ],
     "//conditions:default": [],
 }) + select({
     "@platforms//cpu:x86_64": [
+        "HAVE_USABLE_CLMUL",
         "HAVE_DECODER_X86",
         "HAVE_ENCODER_X86",
+        "HAVE_IMMINTRIN_H",
     ],
     "@platforms//cpu:aarch64": [
         "HAVE_ENCODER_ARM64",
@@ -142,38 +149,13 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
 }) + select({
     "@bazel_template//bazel:linux_x86_64": [
         "TUKLIB_CPUCORES_SCHED_GETAFFINITY",
-        "HAVE_USABLE_CLMUL",
-        "HAVE_IMMINTRIN_H",
     ],
     "@bazel_template//bazel:linux_aarch64": [],
-    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
-        "HAVE___BUILTIN_BSWAPXX",
-        "HAVE_FUNC_ATTRIBUTE_CONSTRUCTOR",
-        "HAVE_STRINGS_H",
-        "HAVE_CLOCK_GETTIME",
-        "HAVE_CLOCK_MONOTONIC",
-        "HAVE_CPUID_H",
-        "HAVE_SYS_CDEFS_H",
-        "HAVE_SYS_PARAM_H",
-        "HAVE_UNISTD_H",
-        "HAVE_WCHAR_H",
-        "SIZEOF_SIZE_T=8",
-        "ENABLE_NLS=1",
-        "MYTHREAD_POSIX",
-    ],
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
-        "HAVE_IMMINTRIN_H",
-        "HAVE_USABLE_CLMUL",
-        "MYTHREAD_VISTA",
-        "HAVE_MBRTOWC",
-        "HAVE__FUTIME",
-        "__GETOPT_PREFIX=rpl_",
-    ],
     "//conditions:default": [],
 })
 
 LINKOPTS = GLOBAL_LINKOPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": [],
 }) + select({
     "@platforms//os:linux": [],
@@ -345,68 +327,15 @@ cc_library(
     ],
     copts = COPTS,
     includes = ["src/liblzma/api"],
-    linkopts = LINKOPTS,
-    local_defines = LOCAL_DEFINES,
-    alwayslink = select({
-        "@platforms//os:windows": True,
-        "//conditions:default": False,
-    }),
-)
-
-cc_binary(
-    name = "xz",
-    srcs = [
-        "src/common/tuklib_exit.c",
-        "src/common/tuklib_mbstr_fw.c",
-        "src/common/tuklib_mbstr_width.c",
-        "src/common/tuklib_open_stdxxx.c",
-        "src/common/tuklib_progname.c",
-        "src/liblzma/api/lzma/version.h",
-        "src/xz/args.c",
-        "src/xz/args.h",
-        "src/xz/coder.c",
-        "src/xz/coder.h",
-        "src/xz/file_io.c",
-        "src/xz/file_io.h",
-        "src/xz/hardware.c",
-        "src/xz/hardware.h",
-        "src/xz/list.c",
-        "src/xz/list.h",
-        "src/xz/main.c",
-        "src/xz/main.h",
-        "src/xz/message.c",
-        "src/xz/message.h",
-        "src/xz/mytime.c",
-        "src/xz/mytime.h",
-        "src/xz/options.c",
-        "src/xz/options.h",
-        "src/xz/private.h",
-        "src/xz/sandbox.c",
-        "src/xz/sandbox.h",
-        "src/xz/signals.c",
-        "src/xz/signals.h",
-        "src/xz/suffix.c",
-        "src/xz/suffix.h",
-        "src/xz/util.c",
-        "src/xz/util.h",
-    ] + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
-            "lib/getopt.c",
-            "lib/getopt-cdefs.h",
-            "lib/getopt-core.h",
-            "lib/getopt-ext.h",
-            "lib/getopt-pfx-core.h",
-            "lib/getopt-pfx-ext.h",
-            "lib/getopt1.c",
-            "lib/getopt_int.h",
-            ":getopt_h",
-        ],
+    linkopts = LINKOPTS + select({
+        "@platforms//os:windows": ["/machine:x64"],
         "//conditions:default": [],
     }),
-    copts = COPTS,
-    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
-    deps = [":lzma"],
+    defines = select({
+        "@platforms//os:windows": ["LZMA_API_STATIC"],
+        "//conditions:default": [],
+    }),
 )
 
 genrule(

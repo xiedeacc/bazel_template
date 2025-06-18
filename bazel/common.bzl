@@ -1,39 +1,9 @@
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 
 GLOBAL_COPTS = select({
-    "@bazel_template//bazel:cross_compiling_for_osx_gcc": [
-        "-Wall",
-        "-Wextra",
-        "-O2",
-        "-g",
-        "-mmacosx-version-min=10.15",
-    ],
-    "@bazel_template//bazel:cross_compiling_for_osx_clang": [
-        "-Wall",
-        "-Wextra",
-        "-O2",
-        "-g",
-        "-stdlib=libc++",
-        "-mmacosx-version-min=10.15",
-    ],
-    "@bazel_template//bazel:not_cross_compiling_on_osx": [
-        "-Wall",
-        "-Wextra",
-        "-O2",
-        "-g",
-        "-stdlib=libc++",
-        "-mmacosx-version-min=10.15",
-    ],
-    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
-        "-Wall",
-        "-Wextra",
-        "-O2",
-        "-g",
-    ],
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/GS",  #enable buffer security checks
         "/Gy",  #enables function-level linking
-        "/Wall",
         "/Qpar",  #enables automatic parallelization of loops
         "/O2",  #enables full optimization for speed
         "/Ob2",  #enables aggressive inlining of functions.
@@ -55,32 +25,85 @@ GLOBAL_COPTS = select({
         "/Gw",  #Enables data-level optimization across multiple translation units, improving runtime performance.
         "/Zc:rvalueCast",  #enforces standard behavior for rvalue casts
         "/Zc:wchar_t",
-        #"/Zi",
         "/Zc:forScope",  #Enforce Standard for Loop Scope
         "/Zc:inline",  #enforces standard C++ behavior for inline functions
         "/Gd",  #__cdecl Calling Convention
         "/Gm-",  #disables minimal rebuild
         "/diagnostics:column",
         "/nologo",  #suppresses the display of the startup banner and informational messages during compilation
-        #"/MD",
         "/MP",
+        "/MD",
+        #"/Wall",
+        "/W3",
+        "/wd4200",
+        "/wd4005",
+        "/wd4061",
+        "/wd4100",
+        "/wd4127",
+        "/wd4191",
+        "/wd4267",
+        "/wd4355",
+        "/wd4365",
+        "/wd4456",
+        "/wd4457",
+        "/wd4459",
+        "/wd4464",
+        "/wd4577",
+        "/wd4582",
+        "/wd4623",
+        "/wd4625",
+        "/wd4626",
+        "/wd4668",
+        "/wd4710",
+        "/wd4711",
+        "/wd4800",
+        "/wd4820",
+        "/wd4946",
+        "/wd5026",
+        "/wd5027",
+        "/wd5031",
+        "/wd5039",
+        "/wd5045",
+        #"/W0",
+        #"/Zi",
+        #"/Od",
+        #"/Ob0 ",
         #"/errorReport:prompt",  #permission to send error reports to Microsoft
-        "/showIncludes",  #
+        #"/showIncludes",
     ],
-    "//conditions:default": [
+    "@bazel_template//bazel:linux_x86_64": [
         "-Wall",
         "-Wextra",
-        "-O2",
+        "-O3",
         "-g",
+        "-Wno-sign-compare",
     ],
+    "@bazel_template//bazel:linux_aarch64": [
+        "-Wall",
+        "-Wextra",
+        "-O3",
+        "-g",
+        "-Wno-sign-compare",
+    ],
+    "@bazel_template//bazel:osx_x86_64": [
+        "-Wall",
+        "-Wextra",
+        "-O3",
+        "-g",
+        "-mmacosx-version-min=10.15",
+    ],
+    "@bazel_template//bazel:osx_aarch64": [
+        "-Wall",
+        "-Wextra",
+        "-O3",
+        "-g",
+        "-mmacosx-version-min=10.15",
+    ],
+    "//conditions:default": [],
 })
 
 GLOBAL_LOCAL_DEFINES = select({
-    "@bazel_template//bazel:cross_compiling_for_osx_gcc": [],
-    "@bazel_template//bazel:cross_compiling_for_osx_clang": [],
-    "@bazel_template//bazel:not_cross_compiling_on_osx": [],
-    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [],
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "_MBCS",
         "WIN32",
         "_WIN32",
@@ -89,26 +112,21 @@ GLOBAL_LOCAL_DEFINES = select({
         "_MSC_VER=1941",
         "WIN64",
         "_WIN64",
-        #"_UNICODE",
-        #"UNICODE",
+        "WIN32_LEAN_AND_MEAN",
+        "_HAS_EXCEPTIONS=1",
+        "_WIN32_WINNT=0x0601",
+        "GLOG_NO_ABBREVIATED_SEVERITIES",
     ],
     "//conditions:default": [],
 })
 
+GLOBAL_DEFINES = select({
+    "//conditions:default": [],
+})
+
 GLOBAL_LINKOPTS = select({
-    "@bazel_template//bazel:cross_compiling_for_osx_gcc": [
-        "-mmacosx-version-min=10.15",
-    ],
-    "@bazel_template//bazel:cross_compiling_for_osx_clang": [
-        "-mmacosx-version-min=10.15",
-    ],
-    "@bazel_template//bazel:not_cross_compiling_on_osx": [
-        "-lc++abi",
-        "-mmacosx-version-min=10.15",
-    ],
-    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [],
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
-        "/MACHINE:X64",
+    "@platforms//os:windows": [
+        "/machine:x64",
         "Ws2_32.Lib",
         "Crypt32.Lib",
         "User32.lib",
@@ -123,6 +141,12 @@ GLOBAL_LINKOPTS = select({
         "oleaut32.lib",
         "uuid.lib",
         "comdlg32.lib",
+    ],
+    "@bazel_template//bazel:osx_x86_64": [
+        "-mmacosx-version-min=10.15",
+    ],
+    "@bazel_template//bazel:osx_aarch64": [
+        "-mmacosx-version-min=10.15",
     ],
     "//conditions:default": [],
 })

@@ -193,6 +193,7 @@ cc_library(
         "@platforms//cpu:x86_64": X86_64_COPTS,
         "@platforms//cpu:aarch64": AARCH64_COPTS,
     }),
+    linkstatic = True,
     local_defines = LOCAL_DEFINES,
     textual_hdrs = [
         "src/elfxx.c",

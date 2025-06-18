@@ -1,11 +1,13 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
 load("//bazel:cpplint.bzl", "cpplint")
 
 package(default_visibility = ["//visibility:public"])
 
+cpplint()
+
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/Iexternal/double-conversion",
         "/Iexternal/folly",
         "/I$(GENDIR)/external/folly",
@@ -28,20 +30,39 @@ COPTS = GLOBAL_COPTS + select({
     "//conditions:default": [],
 })
 
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LINKOPTS = GLOBAL_LINKOPTS + select({
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
 cc_library(
     name = "http_handler",
-    srcs = [
-        "http_handler.cc",
-    ],
     hdrs = [
-        "http_handler.h",
+        "http_handler_factory.h",
+        "load_folder_handler.h",
+        "websocket_handler.h",
     ],
     copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [
-        "//src/util",
+        "//src/common:defs",
         "//src/util:config_manager",
+        "@boost//:beast",
+        "@boost//:system",
+        "@boost//:url",
         "@proxygen",
     ],
 )
-
-cpplint()

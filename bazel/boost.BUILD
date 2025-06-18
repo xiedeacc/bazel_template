@@ -1,7 +1,7 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@bazel_template//bazel:boost.bzl", "boost_library", "boost_so_library", "default_copts", "default_defines", "hdr_list")
+load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_library", "boost_so_library", "default_copts", "default_defines", "hdr_list")
 
 _repo_dir = repository_name().removeprefix("@")
 
@@ -112,13 +112,10 @@ BOOST_CTX_ASM_SOURCES = selects.with_or({
         "libs/context/src/asm/ontop_x86_64_sysv_elf_gas.S",
     ],
     ("@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): ["apple_ctx_asm_sources"],
-    "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
-        "@bazel_template//lib:boost_context_lib",
-    ],
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
-        "libs/context/src/asm/make_x86_64_ms_pe_masm.asm",
-        "libs/context/src/asm/jump_x86_64_ms_pe_masm.asm",
-        "libs/context/src/asm/ontop_x86_64_ms_pe_masm.asm",
+    ":windows_x86_64": [
+        "libs/context/src/asm/make_x86_64_ms_pe_masm.S",
+        "libs/context/src/asm/jump_x86_64_ms_pe_masm.S",
+        "libs/context/src/asm/ontop_x86_64_ms_pe_masm.S",
     ],
     "//conditions:default": [],
 })
@@ -150,7 +147,7 @@ boost_library(
         ("@platforms//os:linux", "@platforms//os:android", "@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): [
             "libs/context/src/posix/stack_traits.cpp",
         ],
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        ":windows_x86_64": [
             "libs/context/src/windows/stack_traits.cpp",
         ],
         "//conditions:default": [],
@@ -205,7 +202,7 @@ boost_library(
     ],
     copts = select({
         ":windows_x86_64": [
-            "-D_WIN32_WINNT=0x0601",
+            "/D_WIN32_WINNT=0x0601",
         ],
         "//conditions:default": [],
     }),
@@ -1894,39 +1891,39 @@ BOOST_STACKTRACE_SOURCES = selects.with_or({
     "//conditions:default": [],
 })
 
-#boost_library(
-#name = "stacktrace",
-#srcs = BOOST_STACKTRACE_SOURCES,
-#defines = selects.with_or({
-#("@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): [
-#"BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED",
-#],
-#"//conditions:default": [],
-#}),
-#exclude_src = ["libs/stacktrace/src/*.cpp"],
-#linkopts = select({
-#":linux_ppc": [
-#"-lbacktrace -ldl",
-#],
-#":linux_x86_64": [
-#"-lbacktrace -ldl",
-#],
-#":linux_aarch64": [
-#"-lbacktrace -ldl",
-#],
-#"//conditions:default": [],
-#}),
-#deps = [
-#":array",
-#":config",
-#":core",
-#":detail",
-#":lexical_cast",
-#":predef",
-#":static_assert",
-#":type_traits",
-#],
-#)
+boost_library(
+    name = "stacktrace",
+    srcs = BOOST_STACKTRACE_SOURCES,
+    defines = selects.with_or({
+        ("@platforms//os:osx", "@platforms//os:ios", "@platforms//os:watchos", "@platforms//os:tvos"): [
+            "BOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED",
+        ],
+        "//conditions:default": [],
+    }),
+    exclude_src = ["libs/stacktrace/src/*.cpp"],
+    linkopts = select({
+        ":linux_ppc": [
+            "-lbacktrace -ldl",
+        ],
+        ":linux_x86_64": [
+            "-lbacktrace -ldl",
+        ],
+        ":linux_aarch64": [
+            "-lbacktrace -ldl",
+        ],
+        "//conditions:default": [],
+    }),
+    deps = [
+        ":array",
+        ":config",
+        ":core",
+        ":detail",
+        ":lexical_cast",
+        ":predef",
+        ":static_assert",
+        ":type_traits",
+    ],
+)
 
 boost_library(
     name = "static_assert",
@@ -2628,6 +2625,11 @@ boost_library(
 
 boost_library(
     name = "url",
+    srcs = glob([
+        "libs/url/src/detail/**/*.cpp",
+        "libs/url/src/grammar/**/*.cpp",
+        "libs/url/src/rfc/**/*.cpp",
+    ]),
     deps = [
         ":align",
         ":assert",

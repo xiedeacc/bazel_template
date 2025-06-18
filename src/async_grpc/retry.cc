@@ -36,21 +36,24 @@ RetryStrategy CreateRetryStrategy(RetryIndicator retry_indicator,
 }
 
 RetryIndicator CreateLimitedRetryIndicator(int max_attempts) {
-  return [max_attempts](int failed_attempts, const ::grpc::Status &status) {
-    return failed_attempts < max_attempts;
-  };
+  return
+      [max_attempts](int failed_attempts, const ::grpc::Status & /* status */) {
+        return failed_attempts < max_attempts;
+      };
 }
 
 RetryIndicator CreateUnlimitedRetryIndicator() {
-  return [](int failed_attempts, const ::grpc::Status &status) { return true; };
+  return [](int /* failed_attempts */, const ::grpc::Status & /* status */) {
+    return true;
+  };
 }
 
 RetryIndicator CreateUnlimitedRetryIndicator(
     const std::set<::grpc::StatusCode> &unrecoverable_codes) {
-  return
-      [unrecoverable_codes](int failed_attempts, const ::grpc::Status &status) {
-        return unrecoverable_codes.count(status.error_code()) <= 0;
-      };
+  return [unrecoverable_codes](int /* failed_attempts */,
+                               const ::grpc::Status &status) {
+    return unrecoverable_codes.count(status.error_code()) <= 0;
+  };
 }
 
 RetryDelayCalculator CreateBackoffDelayCalculator(Duration min_delay,
@@ -65,7 +68,7 @@ RetryDelayCalculator CreateBackoffDelayCalculator(Duration min_delay,
 }
 
 RetryDelayCalculator CreateConstantDelayCalculator(Duration delay) {
-  return [delay](int failed_attempts) -> Duration { return delay; };
+  return [delay](int /* failed_attempts */) -> Duration { return delay; };
 }
 
 RetryStrategy CreateLimitedBackoffStrategy(Duration min_delay,

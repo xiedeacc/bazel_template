@@ -138,14 +138,13 @@ new_git_repository(
     build_file = "//bazel:libaio.BUILD",
     commit = "b8eadc9f89e8f7ab0338eacda9f98a6caea76883",
     remote = "https://pagure.io/libaio.git",
+    #remote = "git@github.com:root/libaio.git",
 )
 
 new_git_repository(
     name = "xz",
     build_file = "//bazel:xz.BUILD",
     commit = "bf901dee5d4c46609645e50311c0cb2dfdcf9738",
-    patch_args = ["-p1"],
-    patches = ["//bazel:xz.patch"],
     remote = "git@github.com:tukaani-project/xz.git",
 )
 
@@ -161,6 +160,7 @@ new_git_repository(
     build_file = "//bazel:bzip2.BUILD",
     commit = "66c46b8c9436613fd81bc5d03f63a61933a4dcc3",
     remote = "https://gitlab.com/bzip2/bzip2.git",
+    #remote = "git@github.com:bzip2/bzip2.git",
 )
 
 new_git_repository(
@@ -177,7 +177,7 @@ new_git_repository(
     tag = "v1.5.6",
 )
 
-new_git_repository(
+git_repository(
     name = "brotli",
     build_file = "//bazel:brotli.BUILD",
     remote = "git@github.com:google/brotli.git",
@@ -250,15 +250,12 @@ git_repository(
 
 new_git_repository(
     name = "com_github_gflags_gflags",
-    patch_args = ["-p1"],
-    patches = ["//bazel:gflags.patch"],
     remote = "git@github.com:gflags/gflags.git",
     tag = "v2.2.2",
 )
 
 new_git_repository(
     name = "com_github_glog_glog",
-    build_file = "//bazel:glog.BUILD",
     remote = "git@github.com:google/glog.git",
     repo_mapping = {
         "@gflags": "@com_github_gflags_gflags",
@@ -329,6 +326,7 @@ git_repository(
 
 http_archive(
     name = "boost",
+    #build_file = "@com_github_nelhage_rules_boost//:boost.BUILD",
     build_file = "//bazel:boost.BUILD",
     patch_cmds = ["rm -f doc/pdf/BUILD"],
     patch_cmds_win = ["Remove-Item -Force doc/pdf/BUILD"],
@@ -376,11 +374,9 @@ new_git_repository(
 http_archive(
     name = "libev",
     build_file = "//bazel:libev.BUILD",
-    patch_args = ["-p1"],
-    patches = ["//bazel:libev.patch"],
     sha256 = "507eb7b8d1015fbec5b935f34ebed15bf346bed04a11ab82b8eee848c4205aea",
     strip_prefix = "libev-4.33",
-    url = "http://dist.schmorp.de/libev/libev-4.33.tar.gz",
+    url = "https://dist.schmorp.de/libev/libev-4.33.tar.gz",
 )
 
 new_git_repository(
@@ -462,13 +458,6 @@ new_git_repository(
     tag = "v2024.07.08.00",
 )
 
-new_git_repository(
-    name = "xxhash",
-    build_file = "//bazel:xxhash.BUILD",
-    commit = "d5fe4f54c47bc8b8e76c6da9146c32d5c720cd79",
-    remote = "git@github.com:Cyan4973/xxHash.git",
-)
-
 git_repository(
     name = "yaml-cpp",
     commit = "1d8ca1f35eb3a9c9142462b28282a848e5d29a91",
@@ -508,6 +497,13 @@ new_git_repository(
     build_file = "//bazel:smhasher.BUILD",
     commit = "61a0530f28277f2e850bfc39600ce61d02b518de",
     remote = "git@github.com:aappleby/smhasher.git",
+)
+
+new_git_repository(
+    name = "xxhash",
+    build_file = "//bazel:xxhash.BUILD",
+    commit = "d5fe4f54c47bc8b8e76c6da9146c32d5c720cd79",
+    remote = "git@github.com:Cyan4973/xxHash.git",
 )
 
 git_repository(
@@ -586,13 +582,39 @@ new_git_repository(
     tag = "pcre2-10.42",
 )
 
+new_git_repository(
+    name = "crc32c",
+    build_file = "//bazel:crc32c.BUILD",
+    commit = "1c51f87c9ad8157b4461e2216b9272f13fd0be3b",
+    remote = "git@github.com:google/crc32c.git",
+)
+
+new_git_repository(
+    name = "rapidjson",
+    build_file = "//bazel:rapidjson.BUILD",
+    commit = "815e6e7e7e14be44a6c15d9aefed232ff064cad0",
+    remote = "git@github.com:Tencent/rapidjson.git",
+)
+
 git_repository(
     name = "hedron_compile_commands",
     commit = "e43e8eaeed3e252ac7c02983f4b1792bdff2e2f0",
     remote = "git@github.com:xiedeacc/bazel-compile-commands-extractor.git",
 )
 
-gen_local_config_git(name = "local_config_git")
+new_git_repository(
+    name = "multipart-parser",
+    build_file = "//bazel:multipart-parser.BUILD",
+    commit = "61e234f2100f39d405b6e9c2689e2482b31f3976",
+    remote = "git@github.com:FooBarWidget/multipart-parser.git",
+)
+
+new_git_repository(
+    name = "simdjson",
+    build_file = "//bazel:simdjson.BUILD",
+    remote = "git@github.com:simdjson/simdjson.git",
+    tag = "v3.13.0",
+)
 
 #################### java ####################
 load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
@@ -686,26 +708,7 @@ hedron_compile_commands_setup_transitive_transitive()
 
 hedron_compile_commands_setup_transitive_transitive_transitive()
 
-register_toolchains(
-    "@openssl//:preinstalled_make_toolchain",
-    "@openssl//:preinstalled_pkgconfig_toolchain",
-)
-
-http_archive(
-    name = "clang18.1.8-aarch64_sysroot",
-    build_file = "//bazel:cc_toolchain.BUILD",
-    sha256 = "95e32680f2f439773edd85640e5072bab099c399506008298cd1251be2d2df39",
-    strip_prefix = "clang18.1.8-linux-aarch64_sysroot",
-    urls = ["https://github.com/files/clang18.1.8-linux-aarch64_sysroot.tar.gz"],
-)
-
-http_archive(
-    name = "macosx14.2-x86_64_sysroot",
-    build_file = "//bazel:cc_toolchain.BUILD",
-    sha256 = "d75e540388ade4056c0c91a5623b927f884bfc3f622b96e23ed31aacf226535d",
-    strip_prefix = "macosx14.2-x86_64_sysroot",
-    urls = ["https://github.com/files/macosx14.2-x86_64_sysroot.tar.gz"],
-)
+gen_local_config_git(name = "local_config_git")
 
 new_git_repository(
     name = "cc_toolchains",
@@ -719,141 +722,7 @@ cc_toolchains_setup(
     name = "cc_toolchains_setup",
     toolchains = {
         "x86_64": {
-            "linux": [
-                {
-                    "distro": "generic",
-                    "libc": "glibc",
-                    "compiler": "gcc",
-                    "triple": "x86_64-pc-linux-gnu",
-                    "url": "https://github.com/files/gcc14.1.0-linux-x86_64_toolchain.tar.gz",
-                    "strip_prefix": "gcc14.1.0-linux-x86_64_toolchain",
-                    "sha256sum": "6e6a8a5c33a5e4d64a198619a7b34746be6dee1da2a734396dde8f851b63910c",
-                    "sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_gcc",
-                    "tool_names": {
-                        "ar": "gcc-ar",
-                        "as": "as",
-                        "c++": "c++",
-                        "cpp": "cpp",
-                        "g++": "g++",
-                        "gcc": "gcc",
-                        "gcov": "gcov",
-                        "ld": "ld",
-                        "llvm-cov": "gcov",
-                        "nm": "gcc-nm",
-                        "objcopy": "objcopy",
-                        "objdump": "objdump",
-                        "strip": "strip",
-                    },
-                    "cxx_builtin_include_directories": [
-                        "/usr/include/x86_64-linux-gnu",
-                        "/usr/include",
-                        "include/c++/14.1.0/x86_64-pc-linux-gnu",
-                        "include/c++/14.1.0",
-                        "include/c++/14.1.0/backward",
-                        "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include",
-                        "lib/gcc/x86_64-pc-linux-gnu/14.1.0/include-fixed",
-                    ],
-                    "lib_directories": [
-                        "lib64",
-                        "lib/gcc/x86_64-pc-linux-gnu/14.1.0",
-                        "/usr/lib/x86_64-linux-gnu",
-                    ],
-                    "supports_start_end_lib": True,
-                    "debug": True,
-                },
-                {
-                    "distro": "generic",
-                    "libc": "glibc",
-                    "compiler": "clang",
-                    "triple": "x86_64-unknown-linux-gnu",
-                    "url": "https://github.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
-                    "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
-                    "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
-                    "sysroot": "@cc_toolchain_repo_x86_64_linux_generic_glibc_clang",
-                    "tool_names": {
-                        "ar": "llvm-ar",
-                        "as": "llvm-as",
-                        "c++": "clang++",
-                        "cpp": "clang-cpp",
-                        "g++": "clang++",
-                        "gcc": "clang",
-                        "gcov": "llvm-cov",
-                        "ld": "ld.lld",
-                        "llvm-cov": "llvm-cov",
-                        "nm": "llvm-nm",
-                        "objcopy": "llvm-objcopy",
-                        "objdump": "llvm-objdump",
-                        "strip": "llvm-strip",
-                    },
-                    "cxx_builtin_include_directories": [
-                        "/usr/include/x86_64-linux-gnu",
-                        "/usr/include",
-                        "include/x86_64-unknown-linux-gnu/c++/v1",
-                        "include/c++/v1",
-                        "lib/clang/18/include",
-                        "lib/clang/18/share",
-                        "include",
-                    ],
-                    "lib_directories": [
-                        "lib",
-                        "lib/x86_64-unknown-linux-gnu",
-                        "lib/clang/18/lib/x86_64-unknown-linux-gnu",
-                        "/usr/lib/x86_64-linux-gnu",
-                    ],
-                    "link_libs": [
-                        "libclang_rt.builtins.a",
-                    ],
-                    "supports_start_end_lib": True,
-                    "debug": True,
-                },
-            ],
             "osx": [
-                {
-                    "distro": "generic",
-                    "libc": "macosx",
-                    "compiler": "gcc",
-                    "triple": "x86_64-apple-darwin23.3",
-                    "url": "https://github.com/files/gcc14.1.0-darwin23.3-x86_64_toolchain.tar.gz",
-                    "strip_prefix": "gcc14.1.0-darwin23.3-x86_64_toolchain",
-                    "sha256sum": "e9fab8943971a4f9733d41c7106e3349ea9e26a2c08f98194cba38d3bfa34d5c",
-                    "sysroot": "@macosx14.2-x86_64_sysroot",
-                    "tool_names": {
-                        "ar": "x86_64-apple-darwin23.3-libtool",
-                        #"ar": "x86_64-apple-darwin23.3-ar",
-                        "as": "x86_64-apple-darwin23.3-as",
-                        "c++": "x86_64-apple-darwin23.3-g++",
-                        "cpp": "x86_64-apple-darwin23.3-cpp",
-                        "g++": "x86_64-apple-darwin23.3-g++",
-                        "gcc": "x86_64-apple-darwin23.3-gcc",
-                        "gcov": "x86_64-apple-darwin23.3-gcov",
-                        "ld": "ld",
-                        "llvm-cov": "None",
-                        "nm": "x86_64-apple-darwin23.3-nm",
-                        "objcopy": "x86_64-apple-darwin-objcopy",
-                        "objdump": "x86_64-apple-darwin-objdump",
-                        "strip": "x86_64-apple-darwin23.3-strip",
-                    },
-                    "cxx_builtin_include_directories": [
-                        "x86_64-apple-darwin23.3/include/c++/14.1.0/x86_64-apple-darwin23.3",
-                        "x86_64-apple-darwin23.3/include/c++/14.1.0",
-                        "x86_64-apple-darwin23.3/include/c++/14.1.0/backward",
-                        "lib/gcc/x86_64-apple-darwin23.3/14.1.0/include",
-                        "lib/gcc/x86_64-apple-darwin23.3/14.1.0/include-fixed",
-                    ],
-                    "lib_directories": [
-                        "x86_64-apple-darwin23.3/lib",
-                        "lib",
-                    ],
-                    "sysroot_include_directories": [
-                        "usr/include",
-                        "System/Library/Frameworks",
-                    ],
-                    "sysroot_lib_directories": [
-                        "usr/lib",
-                    ],
-                    "supports_start_end_lib": False,
-                    "debug": True,
-                },
                 {
                     "distro": "generic",
                     "libc": "macosx",
@@ -900,61 +769,6 @@ cc_toolchains_setup(
                     "debug": True,
                 },
             ],
-            "windows": [
-                {
-                    "distro": "generic",
-                    "libc": "mingw-w64",
-                    "compiler": "gcc",
-                    "triple": "x86_64-w64-mingw32",
-                    "url": "https://github.com/files/gcc14.2.0-windows-x86_64_toolchain.tar.gz",
-                    #"url": "/root/src/software/gcc14.2.0-windows-x86_64_toolchain",
-                    "strip_prefix": "gcc14.2.0-windows-x86_64_toolchain",
-                    "sha256sum": "a31b7c1a97f8dad9eb5096538dabc2f31381b62fc85c9f1487ae9d28381a933b",
-                    "sysroot": "@cc_toolchain_repo_x86_64_windows_generic_mingw-w64_gcc",
-                    "link_flags": [
-                        "-ladvapi32",
-                        "-lbcrypt",
-                        "-lonecore",
-                        "-ldbghelp",
-                    ],
-                    "tool_names": {
-                        "ar": "x86_64-w64-mingw32-ar",
-                        "as": "x86_64-w64-mingw32-as",
-                        "c++": "x86_64-w64-mingw32-c++",
-                        "cpp": "x86_64-w64-mingw32-cpp",
-                        "g++": "x86_64-w64-mingw32-g++",
-                        "gcc": "x86_64-w64-mingw32-gcc",
-                        "gcov": "x86_64-w64-mingw32-gcov",
-                        "ld": "x86_64-w64-mingw32-ld",
-                        "llvm-cov": "None",
-                        "nm": "x86_64-w64-mingw32-nm",
-                        "objcopy": "x86_64-w64-mingw32-objcopy",
-                        "objdump": "x86_64-w64-mingw32-objdump",
-                        "strip": "x86_64-w64-mingw32-strip",
-                        "windres": "x86_64-w64-mingw32-windres",
-                    },
-                    "cxx_builtin_include_directories": [
-                        "x86_64-w64-mingw32/include/c++/14.2.0/x86_64-w64-mingw32",
-                        "x86_64-w64-mingw32/include/c++/14.2.0",
-                        "x86_64-w64-mingw32/include/c++/14.2.0/backward",
-                        "lib/gcc/x86_64-w64-mingw32/14.2.0/include",
-                        "lib/gcc/x86_64-w64-mingw32/14.2.0/include-fixed",
-                        "x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/include",
-                    ],
-                    "lib_directories": [
-                        "lib/gcc/x86_64-w64-mingw32/14.2.0",
-                        "lib/gcc",
-                        "x86_64-w64-mingw32/sysroot/lib",
-                        "x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib",
-                    ],
-                    "sysroot_include_directories": [
-                    ],
-                    "sysroot_lib_directories": [
-                    ],
-                    "supports_start_end_lib": False,
-                    "debug": False,
-                },
-            ],
         },
         "aarch64": {
             "linux": [
@@ -996,57 +810,6 @@ cc_toolchains_setup(
                     ],
                     "link_libs": [
                         "libgcc.a",
-                    ],
-                    "supports_start_end_lib": True,
-                    "debug": True,
-                },
-                {
-                    "distro": "generic",
-                    "libc": "glibc",
-                    "compiler": "clang",
-                    "triple": "aarch64-unknown-linux-gnu",
-                    "url": "https://github.com/files/clang18.1.8-linux-x86_64_toolchain.tar.gz",
-                    "strip_prefix": "clang18.1.8-linux-x86_64_toolchain",
-                    "sha256sum": "be64a29251dd2b7ae6e8e783f99ab395b4bf2a75f98d8a6e03bf855e9d811434",
-                    "sysroot": "@clang18.1.8-aarch64_sysroot",
-                    "tool_names": {
-                        "ar": "llvm-ar",
-                        "as": "llvm-as",
-                        "c++": "clang++",
-                        "cpp": "clang-cpp",
-                        "g++": "clang++",
-                        "gcc": "clang",
-                        "gcov": "llvm-cov",
-                        "ld": "ld",
-                        "llvm-cov": "llvm-cov",
-                        "nm": "llvm-nm",
-                        "objcopy": "llvm-objcopy",
-                        "objdump": "llvm-objdump",
-                        "strip": "llvm-strip",
-                    },
-                    "cxx_builtin_include_directories": [
-                    ],
-                    "lib_directories": [
-                    ],
-                    "sysroot_include_directories": [
-                        "include/aarch64-unknown-linux-gnu/c++/v1",
-                        "include/c++/v1",
-                        "lib/clang/18/include",
-                        "usr/include",
-                    ],
-                    "sysroot_lib_directories": [
-                        "lib",
-                        "lib/aarch64-unknown-linux-gnu",
-                        "lib/clang/18/lib/aarch64-unknown-linux-gnu",
-                        "usr/lib",
-                    ],
-                    "link_libs": [
-                        "libclang_rt.builtins.a",
-                        "Scrt1.o",
-                        "crti.o",
-                        "crtbeginS.o",
-                        "crtendS.o",
-                        "crtn.o",
                     ],
                     "supports_start_end_lib": True,
                     "debug": True,

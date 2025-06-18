@@ -80,9 +80,9 @@ Rpc::Rpc(int method_index,
 }
 
 std::unique_ptr<Rpc> Rpc::Clone() {
-  return std::make_unique<Rpc>(
-      method_index_, server_completion_queue_, event_queue_, execution_context_,
-      rpc_handler_info_, service_, weak_ptr_factory_);
+  return std::make_unique<Rpc>(method_index_, server_completion_queue_,
+                               event_queue_, execution_context_,
+                               rpc_handler_info_, service_, weak_ptr_factory_);
 }
 
 void Rpc::OnConnection() {
@@ -292,7 +292,7 @@ void Rpc::PerformFinish(std::unique_ptr<::google::protobuf::Message> message,
 }
 
 void Rpc::PerformWrite(std::unique_ptr<::google::protobuf::Message> message,
-                       ::grpc::Status status) {
+                       ::grpc::Status /* status */) {
   CHECK(message) << "PerformWrite must be called with a non-null message";
   CHECK_NE(rpc_handler_info_.rpc_type, ::grpc::internal::RpcMethod::NORMAL_RPC);
   CHECK_NE(rpc_handler_info_.rpc_type,

@@ -1,0 +1,10 @@
+{
+    "server_addr": "0.0.0.0",
+    "grpc_server_port": 10001,
+    "http_server_port": 10003,
+    "metric_ratio": 1,
+    "metric_interval_sec": 3,
+    "discard_ratio": 1,
+    "grpc_threads": 3,
+    "event_threads": 5
+}

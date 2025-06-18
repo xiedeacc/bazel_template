@@ -4,7 +4,7 @@ load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GL
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/Ox",
         "/Iexternal/libdwarf/src/lib/libdwarf",
         "/Iexternal/folly",
@@ -66,7 +66,7 @@ COPTS = GLOBAL_COPTS + select({
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
     "HAVE_CONFIG_H",
 ] + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "_CRT_NONSTDC_NO_WARNINGS",
         "_CRT_SECURE_NO_WARNINGS",
         "_SCL_SECURE_NO_WARNINGS",
@@ -156,7 +156,7 @@ cc_library(
             "folly/memcpy.S",
             #"folly/memset.S",
         ],
-        "@platforms//cpu:aarch64": [
+        "@bazel_template//bazel:linux_aarch64": [
             "folly/external/aor/memcpy-advsimd.S",
             "folly/external/aor/memcpy-armv8.S",
             "folly/external/aor/memcpy_sve.S",
@@ -242,8 +242,13 @@ cc_library(
         "@platforms//cpu:aarch64": ["folly/external/aor/asmdefs.h"],
     }),
     copts = COPTS,
+    defines = select({
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
+            "FOLLY_STATIC_LIBSTDCXX=1",
+        ],
+        "//conditions:default": [],
+    }),
     linkopts = GLOBAL_LINKOPTS,
-    linkstatic = True,
     local_defines = LOCAL_DEFINES,
     deps = [
         "@boost//:algorithm",
@@ -276,8 +281,7 @@ cc_library(
         "@bazel_template//bazel:tcmalloc": ["@tcmalloc//tcmalloc"],
         "//conditions:default": [],
     }) + select({
-        "@bazel_template//bazel:cross_compiling_for_windows_gcc": ["@libiberty//:iberty"],
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+        "@platforms//os:windows": [],
         "@platforms//os:osx": [
             "@libiberty//:iberty",
         ],
@@ -293,7 +297,6 @@ cc_library(
 
 cc_library(
     name = "folly",
-    linkstatic = True,
     deps = [
         ":MathOperation",
         ":MathOperation_AVX2",
@@ -406,27 +409,7 @@ template_rule(
             "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1": "/* #undef FOLLY_HAVE_SHADOW_LOCAL_WARNINGS */",
             "#define FOLLY_ELF_NATIVE_CLASS 64": "",
         },
-        "@bazel_template//bazel:cross_compiling_for_windows_gcc": {
-            "#define FOLLY_HAVE_ACCEPT4 1": "/* #undef FOLLY_HAVE_ACCEPT4 */",
-            "#define FOLLY_HAVE_GETRANDOM 1": "#define FOLLY_HAVE_GETRANDOM 0",
-            "#define FOLLY_HAVE_PIPE2 1": "/* #undef FOLLY_HAVE_PIPE2 */",
-            "#define FOLLY_HAVE_IFUNC 1": "/* #undef FOLLY_HAVE_IFUNC */",
-            "#define FOLLY_HAVE_WEAK_SYMBOLS 1": "#define FOLLY_HAVE_WEAK_SYMBOLS 0",
-            "#define FOLLY_HAVE_LINUX_VDSO 1": "/* #undef FOLLY_HAVE_LINUX_VDSO */",
-            "#define FOLLY_HAVE_MALLOC_USABLE_SIZE 1": "/* #undef FOLLY_HAVE_MALLOC_USABLE_SIZE */",
-            "#define HAVE_VSNPRINTF_ERRORS 1": "/* #undef HAVE_VSNPRINTF_ERRORS */",
-            "#define FOLLY_HAVE_LIBUNWIND 1": "/* #undef FOLLY_HAVE_LIBUNWIND */",
-            "#define FOLLY_HAVE_ELF 1": "/* #undef FOLLY_HAVE_ELF */",
-            "#define FOLLY_USE_SYMBOLIZER 1": "/* #undef FOLLY_USE_SYMBOLIZER */",
-            "#define FOLLY_HAVE_SHADOW_LOCAL_WARNINGS 1": "/* #undef FOLLY_HAVE_SHADOW_LOCAL_WARNINGS */",
-            "#define FOLLY_ELF_NATIVE_CLASS 64": "",
-            "#define FOLLY_HAVE_PREADV 1": "/* #undef FOLLY_HAVE_PREADV */",
-            "#define FOLLY_HAVE_PWRITEV 1": "/* #undef FOLLY_HAVE_PWRITEV */",
-            "#define FOLLY_HAVE_DWARF 1": "/* #undef FOLLY_HAVE_DWARF */",
-            "#define FOLLY_HAVE_SWAPCONTEXT 1": "/* #undef FOLLY_HAVE_SWAPCONTEXT */",
-            "#define FOLLY_HAVE_BACKTRACE 1": "/* #undef FOLLY_HAVE_BACKTRACE */",
-        },
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
+        "@platforms//os:windows": {
             "#define FOLLY_HAVE_ACCEPT4 1": "/* #undef FOLLY_HAVE_ACCEPT4 */",
             "#define FOLLY_HAVE_GETRANDOM 1": "#define FOLLY_HAVE_GETRANDOM 0",
             "#define FOLLY_HAVE_PIPE2 1": "/* #undef FOLLY_HAVE_PIPE2 */",
@@ -451,5 +434,9 @@ template_rule(
             "#define FOLLY_HAVE_VLA 1": "/* #undef FOLLY_HAVE_VLA */",
             "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "/* #undef FOLLY_HAVE_EXTRANDOM_SFMT19937 */",
         },
+    }) | select({
+        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": {
+        },
+        "//conditions:default": {},
     }),
 )

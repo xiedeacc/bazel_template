@@ -3,7 +3,7 @@ load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES"
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/Iexternal/libdwarf/src/lib/libdwarf",
         "/Iexternal/mvfst",
         "/Iexternal/libsodium/src/libsodium/include",
@@ -37,7 +37,7 @@ COPTS = GLOBAL_COPTS + select({
 })
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "_MBCS",
         "WIN32",
         "_WINDOWS",

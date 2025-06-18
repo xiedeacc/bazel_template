@@ -27,7 +27,7 @@ cc_library(
         "@platforms//os:windows": ["ev_win32.c"],
     }),
     local_defines = ["HAVE_CONFIG_H"] + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "@platforms//os:windows": [
             "WIN32",
             "_WIN32",
         ],
@@ -63,26 +63,7 @@ template_rule(
         "@platforms//os:linux": {
             "#define HAVE_MEMORY_H 1": "/* #undef HAVE_MEMORY_H */",
         },
-        "@bazel_template//bazel:cross_compiling_for_windows_gcc": {
-            "#define HAVE_DLFCN_H 1": "/* #undef HAVE_DLFCN_H */",
-            "#define HAVE_EPOLL_CTL 1": "/* #undef HAVE_EPOLL_CTL */",
-            "#define HAVE_EVENTFD 1": "/* #undef HAVE_EVENTFD */",
-            "#define HAVE_INOTIFY_INIT 1": "/* #undef HAVE_INOTIFY_INIT */",
-            "#define HAVE_KERNEL_RWF_T 1": "/* #undef HAVE_KERNEL_RWF_T */",
-            "#define HAVE_LINUX_AIO_ABI_H 1": "/* #undef HAVE_LINUX_AIO_ABI_H */",
-            "#define HAVE_LINUX_FS_H 1": "/* #undef HAVE_LINUX_FS_H */",
-            "#define HAVE_POLL 1": "/* #undef HAVE_POLL */",
-            "#define HAVE_POLL_H 1": "/* #undef HAVE_POLL_H */",
-            "#define HAVE_SELECT 1": "/* #undef HAVE_SELECT */",
-            "#define HAVE_SIGNALFD 1": "/* #undef HAVE_SIGNALFD */",
-            "#define HAVE_SYS_EPOLL_H 1": "/* #undef HAVE_SYS_EPOLL_H */",
-            "#define HAVE_SYS_EVENTFD_H 1": "/* #undef HAVE_SYS_EVENTFD_H */",
-            "#define HAVE_SYS_INOTIFY_H 1": "/* #undef HAVE_SYS_INOTIFY_H */",
-            "#define HAVE_SYS_SELECT_H 1": "/* #undef HAVE_SYS_SELECT_H */",
-            "#define HAVE_SYS_SIGNALFD_H 1": "/* #undef HAVE_SYS_SIGNALFD_H */",
-            "#define HAVE_SYS_TIMERFD_H 1": "/* #undef HAVE_SYS_TIMERFD_H */",
-        },
-        "@bazel_template//bazel:not_cross_compiling_on_windows": {
+        "@platforms//os:windows": {
             "#define HAVE_DLFCN_H 1": "/* #undef HAVE_DLFCN_H */",
             "#define HAVE_EPOLL_CTL 1": "/* #undef HAVE_EPOLL_CTL */",
             "#define HAVE_EVENTFD 1": "/* #undef HAVE_EVENTFD */",

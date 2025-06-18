@@ -7,7 +7,13 @@ fi
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="../$1"
+SRC_REPO_NAME=$(basename $SOURCE_DIR)
+DST_REPO_NAME="${1}"
 
+echo $SOURCE_DIR
+echo $TARGET_DIR
+echo $SRC_REPO_NAME
+echo $DST_REPO_NAME
 
 generate() {
     echo "Now copy '$TARGET_DIR'..."
@@ -16,7 +22,12 @@ generate() {
     cd $TARGET_DIR
     rm -rf .git
     rm -rf bazel-*
-    sed -i "s/bazel_template/$1/g" `grep 'bazel_template' -rl .`
+    rm -rf external
+    sed -i "s/${SRC_REPO_NAME}/${DST_REPO_NAME}/g" `grep "${SRC_REPO_NAME}" -rl .`
+    sed -i "s/${SRC_REPO_NAME^^}/${DST_REPO_NAME^^}/g" `grep "${SRC_REPO_NAME^^}" -rl .`
+    git init
+    git add .
+    git commit -m "generate project from template"
 }
 
 if [ -d "$TARGET_DIR" ]; then

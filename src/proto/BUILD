@@ -1,4 +1,6 @@
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -9,6 +11,7 @@ cc_grpc_library(
     ],
     grpc_only = True,
     deps = [
+        ":cc_enums",
         ":cc_error",
         ":cc_service",
     ],
@@ -36,16 +39,19 @@ cc_proto_library(
 )
 
 cc_proto_library(
-    name = "cc_data",
+    name = "cc_enums",
     deps = [
-        ":data_proto",
+        ":enums_proto",
     ],
 )
 
 proto_library(
     name = "service_proto",
     srcs = ["service.proto"],
-    deps = [":error_proto"],
+    deps = [
+        ":enums_proto",
+        ":error_proto",
+    ],
 )
 
 proto_library(
@@ -61,9 +67,8 @@ proto_library(
 )
 
 proto_library(
-    name = "data_proto",
-    srcs = ["data.proto"],
-    deps = [],
+    name = "enums_proto",
+    srcs = ["enums.proto"],
 )
 
 filegroup(

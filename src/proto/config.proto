@@ -11,4 +11,5 @@ message BaseConfig {
   uint32 discard_ratio = 6;
   uint32 grpc_threads = 7;
   uint32 event_threads = 8;
+  uint32 client_worker_thread_pool_size = 9;
 }

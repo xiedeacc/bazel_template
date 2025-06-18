@@ -6,17 +6,6 @@ package(default_visibility = ["//visibility:public"])
 cpplint()
 
 cc_library(
-    name = "debug",
-    srcs = ["debug.cc"],
-    copts = [
-    ],
-    deps = [
-        "@com_github_gflags_gflags//:gflags",
-        "@com_github_glog_glog//:glog",
-    ],
-)
-
-cc_library(
     name = "test_main",
     srcs = ["test_main.cc"],
     copts = [

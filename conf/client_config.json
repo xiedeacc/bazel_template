@@ -1,0 +1,6 @@
+{
+    "server_addr": "0.0.0.0",
+    "grpc_server_port": 10001,
+    "http_server_port": 10003,
+    "client_worker_thread_pool_size": 3
+}

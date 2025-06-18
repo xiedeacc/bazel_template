@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 cpplint()
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
+    "@platforms//os:windows": [
         "/Iexternal/double-conversion",
         "/Iexternal/folly",
         "/Iexternal/double-conversion",
@@ -39,11 +39,6 @@ COPTS = GLOBAL_COPTS + select({
 })
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [
-        "GLOG_NO_ABBREVIATED_SEVERITIES",
-    ],
-    "//conditions:default": ["BUILD_TRACING=0"],
-}) + select({
     "@platforms//os:linux": [],
     "@platforms//os:osx": [],
     "@platforms//os:windows": [],
@@ -51,7 +46,7 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
 })
 
 LINKOPTS = GLOBAL_LINKOPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
+    "@platforms//os:windows": [],
     "//conditions:default": [],
 }) + select({
     "@platforms//os:linux": [],
@@ -63,8 +58,7 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
 cc_library(
     name = "grpc_handler",
     hdrs = [
-        "get_runing_sum_handler.h",
-        "get_sum_handler.h",
+        "load_folder_handler.h",
         "meta.h",
     ],
     copts = COPTS,

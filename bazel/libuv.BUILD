@@ -93,13 +93,13 @@ cc_library(
             "-pedantic",
             "-O3",
         ],
-        "@bazel_template//bazel:cross_compiling_for_windows_gcc": [
+        "@platforms//os:windows": [
             "-Iexternal/libuv/src/win",
             "-O2",
             "-DWIN32_LEAN_AND_MEAN",
             "-D_WIN32_WINNT=0x0601",
         ],
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "@platforms//os:windows": [
             "/std:c11",
             "/Iexternal/libuv/src",
         ],
@@ -135,7 +135,7 @@ cc_library(
         "HAVE_SYS_TYPES_H=1",
         "STDC_HEADERS=1",
     ] + select({
-        "@bazel_template//bazel:not_cross_compiling_on_windows": [
+        "@platforms//os:windows": [
         ],
         "@platforms//os:osx": [
             "_DARWIN_USE_64_BIT_INODE=1",

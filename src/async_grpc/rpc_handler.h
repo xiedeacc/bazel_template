@@ -19,7 +19,6 @@
 
 #include "glog/logging.h"
 #include "google/protobuf/message.h"
-#include "grpc++/grpc++.h"
 #include "src/async_grpc/execution_context.h"
 #include "src/async_grpc/rpc.h"
 #include "src/async_grpc/rpc_handler_interface.h"
@@ -107,9 +106,11 @@ class RpcHandler : public RpcHandlerInterface {
   }
   Writer GetWriter() { return Writer(rpc_->GetWeakPtr()); }
 
+ protected:
+  ExecutionContext* execution_context_;
+
  private:
   Rpc* rpc_;
-  ExecutionContext* execution_context_;
   std::unique_ptr<Span> span_;
 };
 
