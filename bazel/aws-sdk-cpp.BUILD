@@ -107,6 +107,19 @@ write_file(
     ],
 )
 
+write_file(
+    name = "Config_h",
+    out = "crt/aws-crt-cpp/generated/include/aws/crt/Config.h",
+    content = [
+        "#pragma once",
+        "#define AWS_CRT_CPP_VERSION \"0.32.8\"",
+        "#define AWS_CRT_CPP_VERSION_MAJOR 0",
+        "#define AWS_CRT_CPP_VERSION_MINOR 32",
+        "#define AWS_CRT_CPP_VERSION_PATCH 8",
+        "#define AWS_CRT_CPP_GIT_HASH \"05edb40f592813fab2b6f7ba141554fdcf86a7c9\"",
+    ],
+)
+
 template_rule(
     name = "config_h",
     src = ":config_h_in",
@@ -141,12 +154,16 @@ cc_library(
         "crt/aws-crt-cpp/crt/aws-lc/source",
         "crt/aws-crt-cpp/crt/s2n/source",
     ]),
-    hdrs = [":config_h"] + glob([
+    hdrs = [
+        ":Config_h",
+        ":config_h",
+    ] + glob([
         "crt/aws-crt-cpp/include/**/*.h",
         "crt/aws-crt-cpp/include/**/*.hpp",
         "crt/aws-crt-cpp/crt/aws-c-auth/include/**/*.h",
         "crt/aws-crt-cpp/crt/aws-c-cal/include/**/*.h",
         "crt/aws-crt-cpp/crt/aws-c-common/include/**/*.h",
+        "crt/aws-crt-cpp/crt/aws-c-common/include/**/*.inl",
         "crt/aws-crt-cpp/crt/aws-c-compression/include/**/*.h",
         "crt/aws-crt-cpp/crt/aws-c-event-stream/include/**/*.h",
         "crt/aws-crt-cpp/crt/aws-c-http/include/**/*.h",
@@ -159,8 +176,21 @@ cc_library(
         "crt/aws-crt-cpp/crt/s2n/include/**/*.h",
     ]),
     copts = COPTS + [
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-auth/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-cal/include",
         "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-common/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-compression/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-event-stream/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-http/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-io/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-mqtt/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-s3/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-sdkutils/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-checksums/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/include",
+        "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/s2n/include",
         "-I$(GENDIR)/external/aws-sdk-cpp/crt/aws-c-common/generated/include",
+        "-I$(GENDIR)/external/aws-sdk-cpp/crt/aws-crt-cpp/generated/include",
     ],
     includes = [
         "crt/aws-crt-cpp/crt/aws-c-common/include",
