@@ -118,7 +118,7 @@ def generate(arglist):
     else:
         old_branch = data["branch"]
         new_branch = parse_branch_ref(head_symlink)
-        print("old_branch: " + old_branch + ", new_branch: " + new_branch)
+        #print("old_branch: " + old_branch + ", new_branch: " + new_branch)
         if new_branch != old_branch:
             raise RuntimeError(
                 "Run ./configure again, branch was '%s' but is now '%s'" %

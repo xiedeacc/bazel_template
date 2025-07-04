@@ -289,7 +289,7 @@ genrule(
         "#if __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 36)",
         "#define EVENT__HAVE_ARC4RANDOM 1",
         "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
-        "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
+        "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
         "#else",
         "/* #undef EVENT__HAVE_ARC4RANDOM */",
         "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */",

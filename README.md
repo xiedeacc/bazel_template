@@ -127,3 +127,4 @@ pstack 56509
 * user have to make own cross build tools and headers if need cross compile
 * substitute code.xiamu.com to github.com
 * comment .bazelrc common --experimental_downloader_config=.bazel_downloader.cfg
+* apt install gperf

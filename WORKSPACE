@@ -138,7 +138,6 @@ new_git_repository(
     build_file = "//bazel:libaio.BUILD",
     commit = "b8eadc9f89e8f7ab0338eacda9f98a6caea76883",
     remote = "https://pagure.io/libaio.git",
-    #remote = "git@github.com:root/libaio.git",
 )
 
 new_git_repository(
@@ -160,7 +159,6 @@ new_git_repository(
     build_file = "//bazel:bzip2.BUILD",
     commit = "66c46b8c9436613fd81bc5d03f63a61933a4dcc3",
     remote = "https://gitlab.com/bzip2/bzip2.git",
-    #remote = "git@github.com:bzip2/bzip2.git",
 )
 
 new_git_repository(
@@ -468,6 +466,13 @@ git_repository(
 )
 
 new_git_repository(
+    name = "xxhash",
+    build_file = "//bazel:xxhash.BUILD",
+    commit = "d5fe4f54c47bc8b8e76c6da9146c32d5c720cd79",
+    remote = "https://github.com/Cyan4973/xxHash.git",
+)
+
+new_git_repository(
     name = "fbthrift",
     build_file = "//bazel:fbthrift.BUILD",
     patch_args = ["-p1"],
@@ -497,13 +502,6 @@ new_git_repository(
     build_file = "//bazel:smhasher.BUILD",
     commit = "61a0530f28277f2e850bfc39600ce61d02b518de",
     remote = "git@github.com:aappleby/smhasher.git",
-)
-
-new_git_repository(
-    name = "xxhash",
-    build_file = "//bazel:xxhash.BUILD",
-    commit = "d5fe4f54c47bc8b8e76c6da9146c32d5c720cd79",
-    remote = "git@github.com:Cyan4973/xxHash.git",
 )
 
 git_repository(
