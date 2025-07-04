@@ -614,6 +614,20 @@ new_git_repository(
     tag = "v3.13.0",
 )
 
+#new_git_repository(
+#name = "aws-sdk-cpp",
+#build_file = "//bazel:aws-sdk-cpp.BUILD",
+#remote = "git@github.com:aws/aws-sdk-cpp.git",
+#tag = "1.11.602",
+#init_submodules = True,
+#)
+
+new_local_repository(
+    name = "aws-sdk-cpp",
+    build_file = "//bazel:aws-sdk-cpp.BUILD",
+    path = "../aws-sdk-cpp",
+)
+
 #################### java ####################
 load("@rules_java//java:repositories.bzl", "rules_java_dependencies", "rules_java_toolchains")
 
