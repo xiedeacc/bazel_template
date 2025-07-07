@@ -400,6 +400,27 @@ new_git_repository(
 )
 
 new_git_repository(
+    name = "cjson",
+    build_file = "//bazel:cjson.BUILD",
+    remote = "git@github.com:DaveGamble/cJSON.git",
+    tag = "v1.7.18",
+)
+
+new_git_repository(
+    name = "tinyxml2",
+    build_file = "//bazel:tinyxml2.BUILD",
+    remote = "git@github.com:leethomason/tinyxml2.git",
+    tag = "10.1.0",
+)
+
+new_git_repository(
+    name = "libcbor",
+    build_file = "//bazel:libcbor.BUILD",
+    remote = "git@github.com:PJK/libcbor.git",
+    tag = "v0.12.0",
+)
+
+new_git_repository(
     name = "jemalloc",
     build_file = "//bazel:jemalloc.BUILD",
     commit = "8dc97b11089be6d58a52009ea3da610bf90331d3",
