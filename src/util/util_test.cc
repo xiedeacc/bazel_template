@@ -11,7 +11,7 @@ namespace util {
 
 TEST(Util, MemLeak) {
   char* arr = new char[8];
-  snprintf(arr, sizeof(arr), "%s", "test");
+  snprintf(arr, 8, "%s", "test");
   LOG(INFO) << arr;
   LOG(INFO) << "TEST";
 }

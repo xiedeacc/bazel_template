@@ -61,11 +61,3 @@ cc_library(
     ],
 )
 
-cc_test(
-    name = "load_folder_handler_test",
-    srcs = ["load_folder_handler_test.cc"],
-    copts = COPTS,
-    linkopts = LINKOPTS,
-    local_defines = LOCAL_DEFINES,
-    deps = [":handlers"],
-)

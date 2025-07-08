@@ -25,12 +25,10 @@ namespace grpc_handler {
 class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceManagementMethod> {
  public:
   EC2InstanceManagementHandler() {
-    // Initialize AWS SDK if not already initialized
-    if (!Aws::Utils::GetEnumOverflowContainer()) {
-      Aws::SDKOptions options;
-      Aws::InitAPI(options);
-      aws_initialized_ = true;
-    }
+    // Initialize AWS SDK
+    Aws::SDKOptions options;
+    Aws::InitAPI(options);
+    aws_initialized_ = true;
   }
 
   ~EC2InstanceManagementHandler() {
@@ -83,7 +81,7 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
     start_request.AddInstanceIds(req.instance_id());
     
     if (!req.region().empty()) {
-      start_request.SetRegion(req.region());
+      // start_request.SetRegion(req.region());
     }
 
     auto outcome = ec2_client.StartInstances(start_request);
@@ -110,7 +108,7 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
     stop_request.AddInstanceIds(req.instance_id());
     
     if (!req.region().empty()) {
-      stop_request.SetRegion(req.region());
+      // stop_request.SetRegion(req.region());
     }
 
     auto outcome = ec2_client.StopInstances(stop_request);

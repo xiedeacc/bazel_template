@@ -78,7 +78,7 @@ cc_library(
 java_wrap_cc(
     name = "config_manager_swig_java",
     src = "config_manager.i",
-    copts = COPTS,
+    copts = COPTS + ["-Wno-strict-aliasing"],
     package = "com.xiedeacc.example",
     swig_includes = [
         ":config_manager_swig",

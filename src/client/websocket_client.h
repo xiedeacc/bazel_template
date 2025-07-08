@@ -16,7 +16,6 @@
 #include "boost/beast/websocket/stream.hpp"
 #include "folly/executors/CPUThreadPoolExecutor.h"
 #include "glog/logging.h"
-#include "src/client/handler/load_folder_handler.h"
 #include "src/common/blocking_queue.h"
 #include "src/proto/enums.pb.h"
 

@@ -60,64 +60,11 @@ COPTS = GLOBAL_COPTS + select({
     "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-s3/include",
     "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-sdkutils/include",
     "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-checksums/include",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/include",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/tool",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/ssl",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/tool-openssl",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/decrepit/cast",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/spake25519",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/des",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/bio",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/dsa",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/err",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/pkcs7",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/x509",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/cipher_extra",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/hrss",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/lhash",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/chacha",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/evp",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/md5",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/hmac",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/cpucap",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/kem",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/kdf",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/curve25519",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/service_indicator",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/pqdsa",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/aes",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/bn",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/cipher",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/rand",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/dh",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/sha",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/modes",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/digest",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/ecdsa",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/ec",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/fipsmodule/rsa",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/pkcs8",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/conf",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/poly1305",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/trust_token",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/bytestring",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/pool",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/asn1",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/ocsp",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/evp_extra",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/pem",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/ec_extra",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-lc/crypto/rsa_extra",
     "-I$(GENDIR)/external/aws-sdk-cpp/crt/aws-c-common/generated/include",
     "-I$(GENDIR)/external/aws-sdk-cpp/crt/aws-crt-cpp/generated/include",
     "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-common/source",
     "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-common/source/external/libcbor",
     "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/s2n",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/s2n/api",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/s2n/include",
-    #"-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/s2n/utils",
 ]
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
@@ -550,71 +497,6 @@ cc_library(
     ],
 )
 
-# S3 Encryption library
-cc_library(
-    name = "aws-cpp-sdk-s3-encryption",
-    srcs = glob([
-        "src/aws-cpp-sdk-s3-encryption/source/**/*.cpp",
-    ]),
-    hdrs = glob([
-        "src/aws-cpp-sdk-s3-encryption/include/**/*.h",
-        "src/aws-cpp-sdk-s3-encryption/include/**/*.hpp",
-    ]),
-    copts = COPTS,
-    includes = [
-        "include",
-        "src/aws-cpp-sdk-s3-encryption/include",
-    ],
-    linkopts = LINKOPTS,
-    local_defines = LOCAL_DEFINES,
-    deps = [
-        ":aws-cpp-sdk-core",
-    ],
-)
-
-# Transfer library
-cc_library(
-    name = "aws-cpp-sdk-transfer",
-    srcs = glob([
-        "src/aws-cpp-sdk-transfer/source/**/*.cpp",
-    ]),
-    hdrs = glob([
-        "src/aws-cpp-sdk-transfer/include/**/*.h",
-        "src/aws-cpp-sdk-transfer/include/**/*.hpp",
-    ]),
-    copts = COPTS,
-    includes = [
-        "include",
-        "src/aws-cpp-sdk-transfer/include",
-    ],
-    linkopts = LINKOPTS,
-    local_defines = LOCAL_DEFINES,
-    deps = [
-        ":aws-cpp-sdk-core",
-    ],
-)
-
-# Queues library
-cc_library(
-    name = "aws-cpp-sdk-queues",
-    srcs = glob([
-        "src/aws-cpp-sdk-queues/source/**/*.cpp",
-    ]),
-    hdrs = glob([
-        "src/aws-cpp-sdk-queues/include/**/*.h",
-        "src/aws-cpp-sdk-queues/include/**/*.hpp",
-    ]),
-    copts = COPTS,
-    includes = [
-        "include",
-        "src/aws-cpp-sdk-queues/include",
-    ],
-    linkopts = LINKOPTS,
-    local_defines = LOCAL_DEFINES,
-    deps = [
-        ":aws-cpp-sdk-core",
-    ],
-)
 
 # Access Management library
 cc_library(
@@ -659,8 +541,6 @@ cc_library(
         ":aws-cpp-sdk-core",
     ],
 )
-
-
 
 # EC2 library (from generated sources)
 cc_library(
@@ -741,28 +621,6 @@ cc_library(
     copts = COPTS,
     includes = [
         "generated/src/aws-cpp-sdk-route53/include",
-        "include",
-    ],
-    linkopts = LINKOPTS,
-    local_defines = LOCAL_DEFINES,
-    deps = [
-        ":aws-cpp-sdk-core",
-    ],
-)
-
-# Config library (from generated sources)
-cc_library(
-    name = "aws-cpp-sdk-config",
-    srcs = glob([
-        "generated/src/aws-cpp-sdk-config/source/**/*.cpp",
-    ]),
-    hdrs = glob([
-        "generated/src/aws-cpp-sdk-config/include/**/*.h",
-        "generated/src/aws-cpp-sdk-config/include/**/*.hpp",
-    ]),
-    copts = COPTS,
-    includes = [
-        "generated/src/aws-cpp-sdk-config/include",
         "include",
     ],
     linkopts = LINKOPTS,

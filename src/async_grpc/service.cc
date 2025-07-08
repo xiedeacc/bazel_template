@@ -22,7 +22,7 @@
 
 namespace async_grpc {
 
-Service::Service(const std::string& service_name,
+Service::Service(const std::string& /*service_name*/,
                  const std::map<std::string, RpcHandlerInfo>& rpc_handler_infos,
                  EventQueueSelector event_queue_selector)
     : rpc_handler_infos_(rpc_handler_infos),
@@ -134,7 +134,7 @@ void Service::HandleFinish(Rpc* rpc, bool ok) {
   RemoveIfNotPending(rpc);
 }
 
-void Service::HandleDone(Rpc* rpc, bool ok) { RemoveIfNotPending(rpc); }
+void Service::HandleDone(Rpc* rpc, bool /*ok*/) { RemoveIfNotPending(rpc); }
 
 void Service::RemoveIfNotPending(Rpc* rpc) {
   if (!rpc->IsAnyEventPending()) {

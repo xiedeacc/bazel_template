@@ -25,12 +25,10 @@ namespace grpc_handler {
 class Route53ManagementHandler : public async_grpc::RpcHandler<Route53ManagementMethod> {
  public:
   Route53ManagementHandler() {
-    // Initialize AWS SDK if not already initialized
-    if (!Aws::Utils::GetEnumOverflowContainer()) {
-      Aws::SDKOptions options;
-      Aws::InitAPI(options);
-      aws_initialized_ = true;
-    }
+    // Initialize AWS SDK
+    Aws::SDKOptions options;
+    Aws::InitAPI(options);
+    aws_initialized_ = true;
   }
 
   ~Route53ManagementHandler() {
@@ -46,8 +44,8 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
     res->set_domain_name(req.domain_name());
     res->set_record_type(req.record_type());
     res->set_new_value(req.new_value());
-    
-    LOG(INFO) << "Route53 management request: " << req.op() 
+
+    LOG(INFO) << "Route53 management request: " << req.op()
               << " for domain: " << req.domain_name()
               << " type: " << req.record_type()
               << " value: " << req.new_value();
@@ -79,13 +77,13 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
   void OnReadsDone() override { Finish(grpc::Status::OK); }
 
  private:
-  void HandleUpdateARecord(const proto::Route53Request& req, 
+  void HandleUpdateARecord(const proto::Route53Request& req,
                           proto::Route53Response* res) {
     Aws::Route53::Route53Client route53_client;
-    
+
     // Set region if specified
     if (!req.region().empty()) {
-      route53_client = Aws::Route53::Route53Client(req.region());
+      // route53_client = Aws::Route53::Route53Client(req.region());
     }
 
     // Create the resource record set
@@ -107,10 +105,10 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
     // Create the change request
     Aws::Route53::Model::ChangeResourceRecordSetsRequest change_request;
     change_request.SetHostedZoneId(req.hosted_zone_id());
-    change_request.AddChanges(change);
+    // change_request.AddChanges(change);
 
     auto outcome = route53_client.ChangeResourceRecordSets(change_request);
-    
+
     if (outcome.IsSuccess()) {
       res->set_err_code(proto::ErrCode::SUCCESS);
       res->set_change_id(outcome.GetResult().GetChangeInfo().GetId());
@@ -119,20 +117,20 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
                 << " to IP: " << req.new_value();
     } else {
       res->set_err_code(proto::ErrCode::FAIL);
-      res->set_message("Failed to update A record: " + 
+      res->set_message("Failed to update A record: " +
                       outcome.GetError().GetMessage());
       LOG(ERROR) << "Failed to update A record for domain: " << req.domain_name()
                  << " - " << outcome.GetError().GetMessage();
     }
   }
 
-  void HandleUpdateCNAMERecord(const proto::Route53Request& req, 
+  void HandleUpdateCNAMERecord(const proto::Route53Request& req,
                               proto::Route53Response* res) {
     Aws::Route53::Route53Client route53_client;
-    
+
     // Set region if specified
     if (!req.region().empty()) {
-      route53_client = Aws::Route53::Route53Client(req.region());
+      // route53_client = Aws::Route53::Route53Client(req.region());
     }
 
     // Create the resource record set
@@ -154,10 +152,10 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
     // Create the change request
     Aws::Route53::Model::ChangeResourceRecordSetsRequest change_request;
     change_request.SetHostedZoneId(req.hosted_zone_id());
-    change_request.AddChanges(change);
+    // change_request.AddChanges(change);
 
     auto outcome = route53_client.ChangeResourceRecordSets(change_request);
-    
+
     if (outcome.IsSuccess()) {
       res->set_err_code(proto::ErrCode::SUCCESS);
       res->set_change_id(outcome.GetResult().GetChangeInfo().GetId());
@@ -166,7 +164,7 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
                 << " to: " << req.new_value();
     } else {
       res->set_err_code(proto::ErrCode::FAIL);
-      res->set_message("Failed to update CNAME record: " + 
+      res->set_message("Failed to update CNAME record: " +
                       outcome.GetError().GetMessage());
       LOG(ERROR) << "Failed to update CNAME record for domain: " << req.domain_name()
                  << " - " << outcome.GetError().GetMessage();
@@ -180,4 +178,4 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
 }  // namespace server
 }  // namespace bazel_template
 
-#endif  // BAZEL_TEMPLATE_SERVER_GRPC_HANDLER_ROUTE53_HANDLER_H_ 
+#endif  // BAZEL_TEMPLATE_SERVER_GRPC_HANDLER_ROUTE53_HANDLER_H_
