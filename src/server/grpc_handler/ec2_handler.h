@@ -13,7 +13,6 @@
 #include "aws/ec2/EC2Client.h"
 #include "aws/ec2/model/StartInstancesRequest.h"
 #include "aws/ec2/model/StopInstancesRequest.h"
-#include "aws/ec2/model/DescribeInstancesRequest.h"
 #include "glog/logging.h"
 #include "src/async_grpc/rpc_handler.h"
 #include "src/server/grpc_handler/meta.h"
@@ -42,8 +41,8 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
   void OnRequest(const proto::EC2InstanceRequest& req) override {
     auto res = std::make_unique<proto::EC2InstanceResponse>();
     res->set_instance_id(req.instance_id());
-    
-    LOG(INFO) << "EC2 instance management request: " << req.op() 
+
+    LOG(INFO) << "EC2 instance management request: " << req.op()
               << " for instance: " << req.instance_id();
 
     try {
@@ -73,19 +72,20 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
   void OnReadsDone() override { Finish(grpc::Status::OK); }
 
  private:
-  void HandleStartInstance(const proto::EC2InstanceRequest& req, 
+  void HandleStartInstance(const proto::EC2InstanceRequest& req,
                           proto::EC2InstanceResponse* res) {
     Aws::EC2::EC2Client ec2_client;
-    
-    Aws::EC2::Model::StartInstancesRequest start_request;
-    start_request.AddInstanceIds(req.instance_id());
-    
+
+    // Set region if specified
     if (!req.region().empty()) {
-      // start_request.SetRegion(req.region());
+      ec2_client = Aws::EC2::EC2Client(req.region());
     }
 
+    Aws::EC2::Model::StartInstancesRequest start_request;
+    start_request.AddInstanceIds(req.instance_id());
+
     auto outcome = ec2_client.StartInstances(start_request);
-    
+
     if (outcome.IsSuccess()) {
       res->set_err_code(proto::ErrCode::SUCCESS);
       res->set_status("starting");
@@ -93,26 +93,27 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
       LOG(INFO) << "Successfully started instance: " << req.instance_id();
     } else {
       res->set_err_code(proto::ErrCode::FAIL);
-      res->set_message("Failed to start instance: " + 
+      res->set_message("Failed to start instance: " +
                       outcome.GetError().GetMessage());
-      LOG(ERROR) << "Failed to start instance: " << req.instance_id() 
+      LOG(ERROR) << "Failed to start instance: " << req.instance_id()
                  << " - " << outcome.GetError().GetMessage();
     }
   }
 
-  void HandleStopInstance(const proto::EC2InstanceRequest& req, 
+  void HandleStopInstance(const proto::EC2InstanceRequest& req,
                          proto::EC2InstanceResponse* res) {
     Aws::EC2::EC2Client ec2_client;
-    
-    Aws::EC2::Model::StopInstancesRequest stop_request;
-    stop_request.AddInstanceIds(req.instance_id());
-    
+
+    // Set region if specified
     if (!req.region().empty()) {
-      // stop_request.SetRegion(req.region());
+      ec2_client = Aws::EC2::EC2Client(req.region());
     }
 
+    Aws::EC2::Model::StopInstancesRequest stop_request;
+    stop_request.AddInstanceIds(req.instance_id());
+
     auto outcome = ec2_client.StopInstances(stop_request);
-    
+
     if (outcome.IsSuccess()) {
       res->set_err_code(proto::ErrCode::SUCCESS);
       res->set_status("stopping");
@@ -120,9 +121,9 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
       LOG(INFO) << "Successfully stopped instance: " << req.instance_id();
     } else {
       res->set_err_code(proto::ErrCode::FAIL);
-      res->set_message("Failed to stop instance: " + 
+      res->set_message("Failed to stop instance: " +
                       outcome.GetError().GetMessage());
-      LOG(ERROR) << "Failed to stop instance: " << req.instance_id() 
+      LOG(ERROR) << "Failed to stop instance: " << req.instance_id()
                  << " - " << outcome.GetError().GetMessage();
     }
   }
@@ -134,4 +135,4 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
 }  // namespace server
 }  // namespace bazel_template
 
-#endif  // BAZEL_TEMPLATE_SERVER_GRPC_HANDLER_EC2_HANDLER_H_ 
+#endif  // BAZEL_TEMPLATE_SERVER_GRPC_HANDLER_EC2_HANDLER_H_

@@ -83,7 +83,7 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
 
     // Set region if specified
     if (!req.region().empty()) {
-      // route53_client = Aws::Route53::Route53Client(req.region());
+      route53_client = Aws::Route53::Route53Client(req.region());
     }
 
     // Create the resource record set
@@ -105,7 +105,7 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
     // Create the change request
     Aws::Route53::Model::ChangeResourceRecordSetsRequest change_request;
     change_request.SetHostedZoneId(req.hosted_zone_id());
-    // change_request.AddChanges(change);
+    change_request.AddChanges(change);
 
     auto outcome = route53_client.ChangeResourceRecordSets(change_request);
 
@@ -130,7 +130,7 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
 
     // Set region if specified
     if (!req.region().empty()) {
-      // route53_client = Aws::Route53::Route53Client(req.region());
+      route53_client = Aws::Route53::Route53Client(req.region());
     }
 
     // Create the resource record set
@@ -152,7 +152,7 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
     // Create the change request
     Aws::Route53::Model::ChangeResourceRecordSetsRequest change_request;
     change_request.SetHostedZoneId(req.hosted_zone_id());
-    // change_request.AddChanges(change);
+    change_request.AddChanges(change);
 
     auto outcome = route53_client.ChangeResourceRecordSets(change_request);
 
