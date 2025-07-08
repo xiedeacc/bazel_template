@@ -204,15 +204,23 @@ class WebSocketClient {
       case proto::OpCode::OP_UNUSED:
         LOG(INFO) << "Received OP_UNUSED message";
         break;
-      case proto::OpCode::OP_LOAD_FOLDER:
-        LOG(INFO) << "Received OP_LOAD_FOLDER message";
-        handler::FolderLoader::Instance()->Load(msg);
-        break;
       case proto::OpCode::OP_FILE_KEY:
         LOG(INFO) << "Received OP_FILE_KEY message";
         break;
       case proto::OpCode::OP_FILE_UPLOAD:
         LOG(INFO) << "Received OP_FILE_UPLOAD message";
+        break;
+      case proto::OpCode::OP_EC2_START:
+        LOG(INFO) << "Received OP_EC2_START message";
+        break;
+      case proto::OpCode::OP_EC2_STOP:
+        LOG(INFO) << "Received OP_EC2_STOP message";
+        break;
+      case proto::OpCode::OP_ROUTE53_UPDATE_A_RECORD:
+        LOG(INFO) << "Received OP_ROUTE53_UPDATE_A_RECORD message";
+        break;
+      case proto::OpCode::OP_ROUTE53_UPDATE_CNAME_RECORD:
+        LOG(INFO) << "Received OP_ROUTE53_UPDATE_CNAME_RECORD message";
         break;
       default:
         LOG(WARNING) << "Unknown op code: " << op_code;

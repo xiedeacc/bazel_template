@@ -12,8 +12,9 @@
 #include "absl/strings/str_cat.h"
 #include "src/async_grpc/server.h"
 #include "src/server/grpc_handler/account_state_handler.h"
+#include "src/server/grpc_handler/ec2_handler.h"
 #include "src/server/grpc_handler/file_handler.h"
-#include "src/server/grpc_handler/load_folder_handler.h"
+#include "src/server/grpc_handler/route53_handler.h"
 #include "src/server/server_context.h"
 #include "src/util/config_manager.h"
 
@@ -36,7 +37,9 @@ class GrpcServer final {
 
     // Register handlers
     server_builder.RegisterHandler<
-        bazel_template::server::grpc_handler::LoadFolderHandler>();
+        bazel_template::server::grpc_handler::EC2InstanceManagementHandler>();
+    server_builder.RegisterHandler<
+        bazel_template::server::grpc_handler::Route53ManagementHandler>();
 
     server_ = server_builder.Build();
     server_->SetExecutionContext(server_context);

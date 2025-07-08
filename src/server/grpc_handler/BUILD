@@ -25,7 +25,7 @@ COPTS = GLOBAL_COPTS + select({
         "-isystem external/double-conversion",
         "-isystem external/proxygen",
         "-isystem $(GENDIR)/external/proxygen",
-        "-isystem $(GENDIR)/external/fizz",
+        "-isystem external/fizz",
         "-isystem external/libsodium/src/libsodium/include",
         "-isystem external/fizz",
         "-isystem external/wangle",
@@ -58,8 +58,9 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
 cc_library(
     name = "grpc_handler",
     hdrs = [
-        "load_folder_handler.h",
+        "ec2_handler.h",
         "meta.h",
+        "route53_handler.h",
     ],
     copts = COPTS,
     local_defines = LOCAL_DEFINES,
@@ -67,5 +68,34 @@ cc_library(
         "//src/async_grpc",
         "//src/proto:cc_grpc_service",
         "//src/util",
+        "@aws-sdk-cpp//:aws-cpp-sdk-core",
+        "@aws-sdk-cpp//:aws-cpp-sdk-ec2",
+        "@aws-sdk-cpp//:aws-cpp-sdk-route53",
+    ],
+)
+
+cc_test(
+    name = "ec2_handler_test",
+    srcs = ["ec2_handler_test.cc"],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        ":grpc_handler",
+        "//src/proto:cc_service",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "route53_handler_test",
+    srcs = ["route53_handler_test.cc"],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        ":grpc_handler",
+        "//src/proto:cc_service",
+        "@com_google_googletest//:gtest_main",
     ],
 )

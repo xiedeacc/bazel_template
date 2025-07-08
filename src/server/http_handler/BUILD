@@ -51,7 +51,6 @@ cc_library(
     name = "http_handler",
     hdrs = [
         "http_handler_factory.h",
-        "load_folder_handler.h",
         "websocket_handler.h",
     ],
     copts = COPTS,

@@ -8,7 +8,6 @@
 
 #include "proxygen/httpserver/RequestHandler.h"
 #include "proxygen/httpserver/RequestHandlerFactory.h"
-#include "src/server/http_handler/load_folder_handler.h"
 
 namespace bazel_template {
 namespace server {
@@ -25,10 +24,7 @@ class HTTPHandlerFactory : public proxygen::RequestHandlerFactory {
     const std::string& path = msg->getPath();
     const std::string& method = msg->getMethodString();
 
-    if (method == "GET" && path == "/api/v1/folder/load") {
-      return new LoadFolderHandler();
-    }
-
+    // No handlers registered for now
     return nullptr;
   }
 };

@@ -12,12 +12,20 @@ namespace bazel_template {
 namespace server {
 namespace grpc_handler {
 
-struct LoadFolderMethod {
+struct EC2InstanceManagementMethod {
   static constexpr const char* MethodName() {
-    return "/bazel_template.proto.MEGAService/LoadFolder";
+    return "/bazel_template.proto.MEGAService/EC2InstanceManagement";
   }
-  using IncomingType = bazel_template::proto::LoadFolderRequest;
-  using OutgoingType = bazel_template::proto::LoadFolderResponse;
+  using IncomingType = bazel_template::proto::EC2InstanceRequest;
+  using OutgoingType = bazel_template::proto::EC2InstanceResponse;
+};
+
+struct Route53ManagementMethod {
+  static constexpr const char* MethodName() {
+    return "/bazel_template.proto.MEGAService/Route53Management";
+  }
+  using IncomingType = bazel_template::proto::Route53Request;
+  using OutgoingType = bazel_template::proto::Route53Response;
 };
 
 }  // namespace grpc_handler

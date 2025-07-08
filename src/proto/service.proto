@@ -4,19 +4,45 @@ import "src/proto/error.proto";
 import "src/proto/enums.proto";
 
 service MEGAService {
-  // Load folder structure from server
-  rpc LoadFolder(LoadFolderRequest) returns (LoadFolderResponse) {}
+  // EC2 instance management (start/stop)
+  rpc EC2InstanceManagement(EC2InstanceRequest) returns (EC2InstanceResponse) {}
+  
+  // Route53 DNS management (update A/CNAME records)
+  rpc Route53Management(Route53Request) returns (Route53Response) {}
 }
 
-// Request message for LoadFolder
-message LoadFolderRequest {
+// Request message for EC2 instance operations
+message EC2InstanceRequest {
   OpCode op = 1;
-  string folder_id = 2;  // The ID of the folder to load
+  string instance_id = 2;  // The EC2 instance ID
+  string region = 3;       // AWS region (optional, defaults to configured region)
 }
 
-// Response message for LoadFolder
-message LoadFolderResponse {
+// Response message for EC2 instance operations
+message EC2InstanceResponse {
   ErrCode err_code = 1;
-  string folder_structure = 2;  // JSON string containing folder structure
-  int32 status = 3;             // Status of the response (1 means last chunk)
+  string instance_id = 2;     // The EC2 instance ID
+  string status = 3;          // Current instance status
+  string message = 4;         // Additional information or error message
+}
+
+// Request message for Route53 DNS operations
+message Route53Request {
+  OpCode op = 1;
+  string hosted_zone_id = 2;  // Route53 hosted zone ID
+  string domain_name = 3;     // Domain name to update (e.g., "api.example.com")
+  string new_value = 4;       // New IP address (for A record) or domain (for CNAME)
+  string record_type = 5;     // Record type: "A" or "CNAME"
+  int32 ttl = 6;              // TTL in seconds (optional, defaults to 300)
+  string region = 7;          // AWS region (optional, defaults to configured region)
+}
+
+// Response message for Route53 DNS operations
+message Route53Response {
+  ErrCode err_code = 1;
+  string domain_name = 2;     // The domain name that was updated
+  string record_type = 3;     // The record type that was updated
+  string new_value = 4;       // The new value that was set
+  string change_id = 5;       // Route53 change ID for tracking
+  string message = 6;         // Additional information or error message
 }

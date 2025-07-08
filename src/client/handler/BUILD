@@ -10,26 +10,18 @@ COPTS = GLOBAL_COPTS + select({
     "@platforms//os:windows": [
         "/Iexternal/double-conversion",
         "/Iexternal/folly",
-        "/Iexternal/double-conversion",
+        "/I$(GENDIR)/external/folly",
         "/Iexternal/proxygen",
         "/I$(GENDIR)/external/proxygen",
-        "/I$(GENDIR)/external/fizz",
-        "/Iexternal/libsodium/src/libsodium/include",
-        "/Iexternal/fizz",
         "/Iexternal/wangle",
-        "/I$(GENDIR)/external/folly",
     ],
     "//conditions:default": [
         "-isystem external/double-conversion",
         "-isystem external/folly",
-        "-isystem external/double-conversion",
-        "-isystem external/proxygen",
-        "-isystem $(GENDIR)/external/proxygen",
-        "-isystem $(GENDIR)/external/fizz",
-        "-isystem external/libsodium/src/libsodium/include",
-        "-isystem external/fizz",
-        "-isystem external/wangle",
         "-isystem $(GENDIR)/external/folly",
+        "-isystem external/proxygen",
+        "-I$(GENDIR)/external/proxygen",
+        "-isystem external/wangle",
     ],
 }) + select({
     "@platforms//os:linux": [],
@@ -57,12 +49,7 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
 
 cc_library(
     name = "handlers",
-    srcs = [
-        "load_folder_handler.cc",
-    ],
-    hdrs = [
-        "load_folder_handler.h",
-    ],
+    hdrs = [],
     copts = COPTS,
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,

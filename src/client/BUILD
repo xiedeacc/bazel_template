@@ -25,7 +25,7 @@ COPTS = GLOBAL_COPTS + select({
         "-isystem external/double-conversion",
         "-isystem external/proxygen",
         "-isystem $(GENDIR)/external/proxygen",
-        "-isystem $(GENDIR)/external/fizz",
+        "-isystem external/fizz",
         "-isystem external/libsodium/src/libsodium/include",
         "-isystem external/fizz",
         "-isystem external/wangle",
@@ -105,9 +105,32 @@ cc_binary(
         "@libsodium//:sodium",
         "@openssl//:crypto",
         ":websocket_client",
-        #"@jemalloc",
         "@boost//:url",
         "@openssl//:ssl",
         "@xz//:lzma",
+    ],
+)
+
+cc_binary(
+    name = "ec2_client_example",
+    srcs = ["ec2_client_example.cc"],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        "//src/proto:cc_grpc_service",
+        "@com_github_grpc_grpc//:grpc++",
+    ],
+)
+
+cc_binary(
+    name = "route53_client_example",
+    srcs = ["route53_client_example.cc"],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        "//src/proto:cc_grpc_service",
+        "@com_github_grpc_grpc//:grpc++",
     ],
 )
