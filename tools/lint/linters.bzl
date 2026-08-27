@@ -11,11 +11,11 @@ load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
 clang_tidy = lint_clang_tidy_aspect(
     binary = Label("//tools/lint:clang_tidy"),
     global_config = [Label("//:.clang-tidy")],
-    # Left off on purpose. Both this and an explicit header_filter go through
+    # Left off on purpose. This and an explicit header_filter both go through
     # rules_lint's _quoted_arg, whose quotes survive literally on Windows, so
     # clang-tidy reads the pattern as a filename and dies with "no input files".
-    # Without it clang-tidy still reports diagnostics for each linted source,
-    # just not for headers pulled in along the way.
+    # Header coverage comes from HeaderFilterRegex in .clang-tidy instead, which
+    # takes the same regex without ever touching a command line.
     lint_target_headers = False,
     angle_includes_are_system = False,
     verbose = False,

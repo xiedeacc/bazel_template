@@ -118,19 +118,26 @@ clang-tidy still builds and tests normally; only `--config=lint` fails.
 
 **Linting does not currently fail the build.** `.clang-tidy` sets
 `WarningsAsErrors: ''`, so clang-tidy exits 0 on warnings and the
-`fail_on_violation` setting in `.bazelrc` never triggers. There are 134 existing
-findings across 34 files, so enforcing them is a deliberate cleanup, not a flip of
-a switch. To enforce, set `WarningsAsErrors` in `.clang-tidy` — the rest of the
+`fail_on_violation` setting in `.bazelrc` never triggers. There are 516 existing
+findings across 34 targets, so enforcing them is a deliberate cleanup, not a flip
+of a switch. To enforce, set `WarningsAsErrors` in `.clang-tidy` — the rest of the
 wiring is already in place.
+
+Which headers are reported is controlled by `HeaderFilterRegex` and
+`ExcludeHeaderFilterRegex` in `.clang-tidy`, not by the aspect. Headers reach
+clang-tidy through `-iquote` as `.\src/...`, so a `^`-anchored pattern never
+matches; the include pattern is unanchored and the exclude pattern drops
+everything under `external/`, `bazel-out/`, and `_virtual_includes/`.
 
 ### Formatting
 
 ```bash
-bazel run //tools/format                  # rewrite in place
-bazel run //tools/format -- --mode=check  # report only
+./format.sh          # rewrite in place
+./format.sh check    # report only, non-zero exit on violations
 ```
 
-Linux and macOS only — see *Known issues*.
+`format.sh` works on every platform. `bazel run //tools/format` does the same
+thing on Linux and macOS but not on Windows — see *Known issues*.
 
 ### Coverage
 
@@ -199,16 +206,11 @@ Windows is a supported first-class target, but a few things are specific to it:
 
 ## Known issues
 
-* **`//tools/format` does not run on Windows.** `format_multirun` generates a
-  `.bash` script, which Windows cannot execute directly, and invoking it through
-  bash fails inside rules_multirun with "Cannot find .runfiles directory". Use
-  clang-format directly on Windows, or run the target on Linux/macOS.
-* **clang-tidy reports nothing for headers.** `lint_target_headers` and an
-  explicit `header_filter` both route through rules_lint's `_quoted_arg`, whose
-  quotes survive literally on Windows, so clang-tidy reads the pattern as a
-  filename and exits with "no input files". The option is left unset, so
-  diagnostics are reported per linted source rather than for headers pulled in
-  along the way.
+* **`bazel run //tools/format` does not work on Windows.** `format_multirun`
+  emits a `.bash` script, which Bazel cannot CreateProcess, and the multirun
+  aggregator locates its runfiles next to `argv[0]`, which fails against
+  Windows' manifest-based layout even when started from bash by hand. `format.sh`
+  sidesteps both by calling the per-language script, which does not use multirun.
 * **`refresh_compile_commands` does not finish on Windows.** The Bazel 9 load
   errors are patched (`bazel/hedron-compile-commands-py-binary.patch`), so the
   target builds and runs, but the refresh itself still fails: it needs
