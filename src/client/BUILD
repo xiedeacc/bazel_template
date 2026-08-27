@@ -82,11 +82,16 @@ cc_test(
     local_defines = LOCAL_DEFINES,
     deps = [
         ":websocket_client",
+        # The fixture links proxygen, so it needs the pre-main WSAStartup
+        # registration that keeps proxygen static init alive on Windows.
+        "//src/common:winsock_init",
         "//src/proto:cc_service",
+        "//src/server/http_handler",
         "//src/util",
         "@boost//:asio",
         "@boost//:beast",
         "@com_google_googletest//:gtest_main",
+        "@proxygen",
     ],
 )
 
