@@ -51,7 +51,8 @@ class WebSocketHandler {
       : current_message_(std::make_unique<folly::IOBufQueue>()) {}
 
   // Add new function to assemble WebSocket frames
-  std::string AssembleFrame(const std::string& message, uint8_t opcode = 0x1) {
+  static std::string AssembleFrame(const std::string& message,
+                                   uint8_t opcode = 0x1) {
     std::string frame;
 
     // First byte: FIN (1) + opcode
@@ -97,7 +98,7 @@ class WebSocketHandler {
 
     // Parse frame header
     const uint8_t* data = frame->data();
-    WebSocketFrameHeader header;
+    WebSocketFrameHeader header{};
     header.fin = (data[0] & 0x80) != 0;
     header.opcode = data[0] & 0x0F;
     header.mask = (data[1] & 0x80) != 0;
@@ -191,7 +192,7 @@ class WebSocketHandler {
                                  sizeof(response_masking_key));
 
               // Add status code in network byte order
-              uint16_t response_code =
+              auto response_code =
                   folly::Endian::big<uint16_t>(1000);  // Normal Closure
               std::string response_payload;
               response_payload.append(reinterpret_cast<char*>(&response_code),
@@ -266,14 +267,16 @@ class WebSocketHandler {
     uint8_t length_field = data[1] & 0x7F;
     uint64_t payload_length = 0;
     if (length_field == 126) {
-      if (frame->length() < 4)
+      if (frame->length() < 4) {
         return false;
+      }
       payload_length =
           folly::Endian::big(*reinterpret_cast<const uint16_t*>(data + 2));
       header_size = 4;
     } else if (length_field == 127) {
-      if (frame->length() < 10)
+      if (frame->length() < 10) {
         return false;
+      }
       payload_length =
           folly::Endian::big(*reinterpret_cast<const uint64_t*>(data + 2));
       header_size = 10;
@@ -289,8 +292,9 @@ class WebSocketHandler {
 
     // Handle masking
     if (header.mask) {
-      if (frame->length() < header_size + 4)
+      if (frame->length() < header_size + 4) {
         return false;
+      }
       header.masking_key = folly::Endian::big(
           *reinterpret_cast<const uint32_t*>(data + header_size));
       header_size += 4;

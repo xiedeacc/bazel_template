@@ -18,8 +18,10 @@ using std::string;
 
 class ConfigManager {
  public:
-  bool Init(const string& base_config_path);
-  string ToString() { return util::ConfigManager::Instance()->ToString(); }
+  static bool Init(const string& base_config_path);
+  static string ToString() {
+    return util::ConfigManager::Instance()->ToString();
+  }
 };
 
 }  // namespace bazel_template::swig

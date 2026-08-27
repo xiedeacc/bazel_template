@@ -17,7 +17,6 @@ class PBCodeGenerator : public google::protobuf::compiler::CodeGenerator {
  public:
   PBCodeGenerator();
 
- public:
   bool Generate(const google::protobuf::FileDescriptor* file,
                 const std::string& parameter,
                 google::protobuf::compiler::GeneratorContext* generator_context,
@@ -26,11 +25,9 @@ class PBCodeGenerator : public google::protobuf::compiler::CodeGenerator {
  private:
   bool Generate() const;
 
- private:
   bool Print(const std::string& file_name, const std::string& content) const;
   std::string GetFullPath(const std::string& file_name) const;
 
- private:
   const mutable google::protobuf::FileDescriptor* file_{nullptr};
   mutable google::protobuf::compiler::GeneratorContext* generator_context_{
       nullptr};

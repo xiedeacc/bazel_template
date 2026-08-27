@@ -77,8 +77,8 @@ class Route53ManagementHandler
   void OnReadsDone() override { Finish(grpc::Status::OK); }
 
  private:
-  void HandleUpdateARecord(const proto::Route53Request& req,
-                           proto::Route53Response* res) {
+  static void HandleUpdateARecord(const proto::Route53Request& req,
+                                  proto::Route53Response* res) {
     // Set region if specified
     Aws::Route53::Route53ClientConfiguration client_config;
     if (!req.region().empty()) {
@@ -127,8 +127,8 @@ class Route53ManagementHandler
     }
   }
 
-  void HandleUpdateCNAMERecord(const proto::Route53Request& req,
-                               proto::Route53Response* res) {
+  static void HandleUpdateCNAMERecord(const proto::Route53Request& req,
+                                      proto::Route53Response* res) {
     // Set region if specified
     Aws::Route53::Route53ClientConfiguration client_config;
     if (!req.region().empty()) {

@@ -20,11 +20,11 @@ namespace bazel_template::util {
 void Util::ToHexStr(const string& in, string* out, const bool use_upper_case) {
   out->clear();
   out->reserve(in.size() * 2);
-  for (std::size_t i = 0; i < in.size(); ++i) {
+  for (char i : in) {
     if (use_upper_case) {
-      out->append(fmt::format("{:02X}", static_cast<unsigned char>(in[i])));
+      out->append(fmt::format("{:02X}", static_cast<unsigned char>(i)));
     } else {
-      out->append(fmt::format("{:02x}", static_cast<unsigned char>(in[i])));
+      out->append(fmt::format("{:02x}", static_cast<unsigned char>(i)));
     }
   }
 }
@@ -32,11 +32,11 @@ void Util::ToHexStr(const string& in, string* out, const bool use_upper_case) {
 string Util::ToHexStr(const string& in, const bool use_upper_case) {
   string out;
   out.reserve(in.size() * 2);
-  for (std::size_t i = 0; i < in.size(); ++i) {
+  for (char i : in) {
     if (use_upper_case) {
-      out.append(fmt::format("{:02X}", static_cast<unsigned char>(in[i])));
+      out.append(fmt::format("{:02X}", static_cast<unsigned char>(i)));
     } else {
-      out.append(fmt::format("{:02x}", static_cast<unsigned char>(in[i])));
+      out.append(fmt::format("{:02x}", static_cast<unsigned char>(i)));
     }
   }
   return out;
@@ -44,7 +44,7 @@ string Util::ToHexStr(const string& in, const bool use_upper_case) {
 
 EVP_MD_CTX* Util::HashInit(const EVP_MD* type) {
   EVP_MD_CTX* context = EVP_MD_CTX_new();
-  if (!context) {
+  if (context == nullptr) {
     return nullptr;
   }
   if (EVP_DigestInit_ex(context, type, nullptr) != 1) {

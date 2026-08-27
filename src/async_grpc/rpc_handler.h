@@ -49,18 +49,18 @@ class RpcHandler : public RpcHandlerInterface {
       }
       return false;
     }
-    bool WritesDone() const {
+    [[nodiscard]] bool WritesDone() const {
       if (auto rpc = rpc_.lock()) {
         rpc->Finish(::grpc::Status::OK);
         return true;
       }
       return false;
     }
-    bool Finish(const ::grpc::Status& status) const {
+    [[nodiscard]] bool Finish(const ::grpc::Status& status) const {
       if (auto rpc = rpc_.lock()) {
         rpc->Finish(status);
         auto* span = rpc->handler()->trace_span();
-        if (span) {
+        if (span != nullptr) {
           span->SetStatus(status);
         }
         return true;
@@ -109,10 +109,10 @@ class RpcHandler : public RpcHandlerInterface {
   Writer GetWriter() { return Writer(rpc_->GetWeakPtr()); }
 
  protected:
-  ExecutionContext* execution_context_;
+  ExecutionContext* execution_context_{};
 
  private:
-  Rpc* rpc_;
+  Rpc* rpc_{};
   std::unique_ptr<Span> span_;
 };
 

@@ -53,7 +53,7 @@ RetryIndicator CreateUnlimitedRetryIndicator(
     const std::set<::grpc::StatusCode>& unrecoverable_codes) {
   return [unrecoverable_codes](int /* failed_attempts */,
                                const ::grpc::Status& status) {
-    return unrecoverable_codes.count(status.error_code()) <= 0;
+    return !unrecoverable_codes.contains(status.error_code());
   };
 }
 

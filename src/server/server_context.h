@@ -20,7 +20,7 @@ class ServerContext {
  public:
   ServerContext() : is_inited_(false), git_commit_(GIT_VERSION) {}
 
-  void MarkedHttpServerInitedDone() {
+  static void MarkedHttpServerInitedDone() {
     LOG(INFO) << "http server started on: "
               << util::ConfigManager::Instance()->ServerAddr() << ", port: "
               << util::ConfigManager::Instance()->HttpServerPort();

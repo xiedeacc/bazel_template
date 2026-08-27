@@ -89,10 +89,10 @@ void Initialize(const std::string& program_name, const std::string& log_dir,
       const char* suffix;
       spdlog::level::level_enum level;
     } file_sinks[] = {
-        {"INFO", spdlog::level::info},
-        {"WARNING", spdlog::level::warn},
-        {"ERROR", spdlog::level::err},
-        {"FATAL", spdlog::level::critical},
+        {.suffix = "INFO", .level = spdlog::level::info},
+        {.suffix = "WARNING", .level = spdlog::level::warn},
+        {.suffix = "ERROR", .level = spdlog::level::err},
+        {.suffix = "FATAL", .level = spdlog::level::critical},
     };
 
     for (const auto& sink_config : file_sinks) {

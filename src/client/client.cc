@@ -5,8 +5,7 @@
 
 // #include "gperftools/profiler.h"
 
-#include <signal.h>
-
+#include <csignal>
 #include <string>
 
 #include "folly/init/Init.h"

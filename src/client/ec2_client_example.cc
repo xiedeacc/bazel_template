@@ -20,7 +20,7 @@ using grpc::Status;
 
 class EC2Client {
  public:
-  EC2Client(const std::shared_ptr<Channel>& channel)
+  explicit EC2Client(const std::shared_ptr<Channel>& channel)
       : stub_(MEGAService::NewStub(channel)) {}
 
   // Manage EC2 instance (start or stop based on op code)
@@ -50,7 +50,7 @@ class EC2Client {
     std::string operation_name =
         (operation == OpCode::OP_EC2_START) ? "Start" : "Stop";
     std::cout << operation_name << " request failed: " << status.error_message()
-              << std::endl;
+              << '\n';
     return false;
   }
 
@@ -105,6 +105,6 @@ int main(int argc, char** argv) {
     std::cout << "Operation completed successfully." << '\n';
     return 0;
   }
-  std::cout << "Operation failed." << std::endl;
+  std::cout << "Operation failed." << '\n';
   return 1;
 }

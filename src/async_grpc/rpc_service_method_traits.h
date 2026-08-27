@@ -54,13 +54,12 @@ struct RpcServiceMethodTraits {
       StripStream<typename RpcServiceMethodConcept::OutgoingType>;
 
   static_assert(
-      std::is_base_of<::google::protobuf::Message, RequestType>::value,
+      std::is_base_of_v<::google::protobuf::Message, RequestType>,
       "The RPC request type must be derived from ::google::protobuf::Message.");
 
-  static_assert(
-      std::is_base_of<::google::protobuf::Message, ResponseType>::value,
-      "The RPC response type must be derived from "
-      "::google::protobuf::Message.");
+  static_assert(std::is_base_of_v<::google::protobuf::Message, ResponseType>,
+                "The RPC response type must be derived from "
+                "::google::protobuf::Message.");
 
   // The streaming type of the service method. See also
   // ::grpc::internal::RpcMethod.

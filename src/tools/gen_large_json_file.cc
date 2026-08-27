@@ -39,7 +39,7 @@ void GenerateLargeJsonFile(const std::string& output_path) {
       first = false;
 
       // Write a simple object with just an 'f' field
-      out << "{\"f\":\"" << std::setw(8) << std::setfill('0') << count << "\"}";
+      out << R"({"f":")" << std::setw(8) << std::setfill('0') << count << "\"}";
 
       count++;
       total_written += 25;  // Approximate size of each element

@@ -58,7 +58,7 @@ class WebSocketUpgradeHandler : public proxygen::RequestHandler {
 
   void onEOM() noexcept override {}
 
-  void onUpgrade(proxygen::UpgradeProtocol) noexcept override {}
+  void onUpgrade(proxygen::UpgradeProtocol /*prot*/) noexcept override {}
 
   void requestComplete() noexcept override {
     ws_handler_.reset();

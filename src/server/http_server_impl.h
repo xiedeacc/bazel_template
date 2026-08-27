@@ -20,7 +20,7 @@ namespace bazel_template::server {
 
 class HttpServer final {
  public:
-  HttpServer(std::shared_ptr<ServerContext> server_context)
+  explicit HttpServer(std::shared_ptr<ServerContext> server_context)
       : server_context_(std::move(server_context)) {
     proxygen::HTTPServerOptions options;
     options.threads = static_cast<size_t>(sysconf(_SC_NPROCESSORS_ONLN));
@@ -43,7 +43,6 @@ class HttpServer final {
     server_->bind(IPs);
   }
 
- public:
   void Start() {
     server_->start();
     server_context_->MarkedHttpServerInitedDone();

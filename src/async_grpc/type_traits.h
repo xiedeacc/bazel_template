@@ -31,8 +31,10 @@
 // These stamp out a type whose name comes from a parameter. A template cannot
 // introduce a new identifier, so a macro is the only way to write them; C++20
 // concepts would replace the detection logic but still could not name the
-// resulting trait.
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// resulting trait. bugprone-macro-parentheses is off here too: it wants to
+// wrap traitsName in parentheses, but that is a declared name, not an
+// expression, and "class (traitsName)" does not compile.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage,bugprone-macro-parentheses)
 #define DEFINE_HAS_SIGNATURE(traitsName, funcName, signature)                  \
   template <typename U>                                                        \
   class traitsName {                                                           \
@@ -77,7 +79,7 @@
       return methodName;                                                 \
     }                                                                    \
   };
-// NOLINTEND(cppcoreguidelines-macro-usage)
+// NOLINTEND(cppcoreguidelines-macro-usage,bugprone-macro-parentheses)
 
 namespace async_grpc {
 

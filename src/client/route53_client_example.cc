@@ -20,7 +20,7 @@ using grpc::Status;
 
 class Route53Client {
  public:
-  Route53Client(const std::shared_ptr<Channel>& channel)
+  explicit Route53Client(const std::shared_ptr<Channel>& channel)
       : stub_(MEGAService::NewStub(channel)) {}
 
   // Manage Route53 DNS records (update A/CNAME based on op code)
@@ -63,7 +63,7 @@ class Route53Client {
             ? "A Record Update"
             : "CNAME Record Update";
     std::cout << operation_name << " failed: " << status.error_message()
-              << std::endl;
+              << '\n';
     return false;
   }
 
@@ -139,6 +139,6 @@ int main(int argc, char** argv) {
     std::cout << "DNS record update completed successfully." << '\n';
     return 0;
   }
-  std::cout << "DNS record update failed." << std::endl;
+  std::cout << "DNS record update failed." << '\n';
   return 1;
 }

@@ -14,7 +14,7 @@ namespace bazel_template::server::http_handler {
 
 class HTTPHandlerFactory : public proxygen::RequestHandlerFactory {
  public:
-  void onServerStart(folly::EventBase*) noexcept override {}
+  void onServerStart(folly::EventBase* /*evb*/) noexcept override {}
 
   void onServerStop() noexcept override {
     // proxygen declares this noexcept; logging allocates and can throw.
@@ -25,7 +25,8 @@ class HTTPHandlerFactory : public proxygen::RequestHandlerFactory {
   }
 
   proxygen::RequestHandler* onRequest(
-      proxygen::RequestHandler*, proxygen::HTTPMessage* msg) noexcept override {
+      proxygen::RequestHandler* /*unused*/,
+      proxygen::HTTPMessage* msg) noexcept override {
     // proxygen declares this noexcept, but reading the headers and allocating
     // the handler can both throw. Refusing the request is better than
     // terminating the server.

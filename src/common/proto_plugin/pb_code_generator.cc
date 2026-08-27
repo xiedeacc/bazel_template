@@ -43,12 +43,12 @@ bool LoadSmallFile(const string& path, string* content) {
   return true;
 }
 
-PBCodeGenerator::PBCodeGenerator() {}
+PBCodeGenerator::PBCodeGenerator() = default;
 
 bool PBCodeGenerator::Generate(const FileDescriptor* file,
                                const string& parameter,
                                GeneratorContext* generator_context,
-                               string*) const {
+                               string* /*error*/) const {
   generator_context_ = generator_context;
   file_ = file;
   template_dir_ = parameter.substr(0, parameter.find(','));
@@ -60,9 +60,9 @@ bool PBCodeGenerator::Generate(const FileDescriptor* file,
 bool PBCodeGenerator::Generate() const {
   string error_code_content;
   for (int idx = 0; idx < file_->enum_type_count(); ++idx) {
-    auto& enum_l1 = *(file_->enum_type(idx));
+    const auto& enum_l1 = *(file_->enum_type(idx));
     for (int j = 0; j < enum_l1.value_count(); ++j) {
-      auto* value_descriptor = enum_l1.value(j);
+      const auto* value_descriptor = enum_l1.value(j);
       error_code_content.append("#define Err_");
       error_code_content.append(value_descriptor->name());
       error_code_content.append(" ");
@@ -83,14 +83,14 @@ bool PBCodeGenerator::Generate() const {
 
 bool PBCodeGenerator::Print(const string& file_name,
                             const string& content) const {
-  if (file_name.size() <= 0 || content.size() <= 0) {
+  if (file_name.empty() || content.empty()) {
     LOG(ERROR) << "Empty file or context.file_name=" << file_name;
     return false;
   }
   std::unique_ptr<ZeroCopyOutputStream> output(
       generator_context_->Open(file_name));
   Printer printer(output.get(), '$', nullptr);
-  printer.Print(content.c_str());
+  printer.Print(content);
   return true;
 }
 

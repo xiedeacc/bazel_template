@@ -117,8 +117,9 @@ class WebSocketClient {
   }
 
   void Stop() {
-    if (!running_)
+    if (!running_) {
       return;
+    }
 
     LOG(INFO) << "Stopping WebSocket client...";
 
@@ -202,7 +203,7 @@ class WebSocketClient {
     LOG(INFO) << "Message processing thread finished";
   }
 
-  void HandleMessage(const std::string& msg) {
+  static void HandleMessage(const std::string& msg) {
     LOG(INFO) << "Handling message";
     if (msg.size() < 4) {
       LOG(ERROR) << "Message too short to contain op_code";
@@ -278,7 +279,6 @@ class WebSocketClient {
     });
   }
 
- private:
   std::string host_;
   std::string port_;
   boost::asio::io_context ioc_;

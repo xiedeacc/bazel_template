@@ -67,7 +67,8 @@ class CAPABILITY("mutex") Mutex {
   // conditions that get checked whenever the mutex is released.
   class SCOPED_CAPABILITY Locker {
    public:
-    Locker(Mutex* mutex) ACQUIRE(mutex) : mutex_(mutex), lock_(mutex->mutex_) {}
+    explicit Locker(Mutex* mutex) ACQUIRE(mutex)
+        : mutex_(mutex), lock_(mutex->mutex_) {}
 
     // A scoped lock owns the mutex for exactly its own lifetime.
     Locker(const Locker&) = delete;

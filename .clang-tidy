@@ -1,4 +1,8 @@
 ---
+# modernize-pass-by-value is off: rewriting a parameter to by-value plus
+# std::move is right for a constructor or setter that stores the value and a
+# pessimisation for a read-only parameter or a type whose move is not cheap,
+# so it is a decision per call site rather than a rule.
 Checks: >
   -*,
   bugprone-*,
@@ -22,10 +26,6 @@ Checks: >
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
   -readability-magic-numbers,
-  # Rewrites sink parameters to by-value + std::move. That is the right
-  # shape for constructors and setters that store the value, and a
-  # pessimisation for read-only parameters or types whose move is not
-  # cheap, so it is a judgement call per call site rather than a rule.
   -modernize-pass-by-value
 WarningsAsErrors: ''
 HeaderFilterRegex: '(src|test_data).'

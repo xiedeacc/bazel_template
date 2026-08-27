@@ -10,7 +10,9 @@ namespace bazel_template::util {
 static folly::Singleton<ConfigManager> config_manager;
 
 std::shared_ptr<ConfigManager> ConfigManager::Instance() {
-  return config_manager.try_get();
+  return folly::Singleton<bazel_template::util::ConfigManager,
+                          folly::detail::DefaultTag,
+                          folly::detail::DefaultTag>::try_get();
 }
 
 }  // namespace bazel_template::util

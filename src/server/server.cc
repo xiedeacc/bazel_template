@@ -3,7 +3,7 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include <signal.h>
+#include <csignal>
 
 // #include "gperftools/profiler.h"
 
