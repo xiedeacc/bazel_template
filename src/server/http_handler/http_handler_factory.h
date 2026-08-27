@@ -38,9 +38,11 @@ class HTTPHandlerFactory : public proxygen::RequestHandlerFactory {
         return new WebSocketUpgradeHandler();
       }
     } catch (const std::exception& e) {
-      LOG(ERROR) << "Failed to route request: " << e.what();
+      ::bazel_template::logging::ReportException("Failed to route request",
+                                                 e.what());
     } catch (...) {
-      LOG(ERROR) << "Failed to route request";
+      ::bazel_template::logging::ReportException("Failed to route request",
+                                                 nullptr);
     }
 
     return nullptr;

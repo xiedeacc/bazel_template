@@ -18,6 +18,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <memory>
 #include <thread>
 
 #include "src/common/logging.h"
@@ -51,9 +52,12 @@ RetryIndicator CreateUnlimitedRetryIndicator() {
 
 RetryIndicator CreateUnlimitedRetryIndicator(
     const std::set<::grpc::StatusCode>& unrecoverable_codes) {
-  return [unrecoverable_codes](int /* failed_attempts */,
-                               const ::grpc::Status& status) {
-    return !unrecoverable_codes.contains(status.error_code());
+  // Shared rather than captured by value: copying the returned std::function
+  // then neither allocates nor throws.
+  auto codes =
+      std::make_shared<const std::set<::grpc::StatusCode>>(unrecoverable_codes);
+  return [codes](int /* failed_attempts */, const ::grpc::Status& status) {
+    return !codes->contains(status.error_code());
   };
 }
 

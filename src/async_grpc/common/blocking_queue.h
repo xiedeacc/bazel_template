@@ -41,6 +41,7 @@ class BlockingQueue {
   BlockingQueue& operator=(const BlockingQueue&) = delete;
   BlockingQueue(BlockingQueue&&) = delete;
   BlockingQueue& operator=(BlockingQueue&&) = delete;
+  ~BlockingQueue() = default;
 
   // Constructs a blocking queue with a size of 'queue_size'.
   explicit BlockingQueue(const size_t queue_size) : queue_size_(queue_size) {}

@@ -17,6 +17,7 @@
 #ifndef ASYNC_GRPC_COMMON_COMPLETION_QUEUE_POOL_H_
 #define ASYNC_GRPC_COMMON_COMPLETION_QUEUE_POOL_H_
 
+#include <cstdint>
 #include <memory>
 #include <thread>
 #include <vector>
@@ -31,7 +32,7 @@ class AsyncClientInterface;
 class CompletionQueue {
  public:
   struct ClientEvent {
-    enum class Event { FINISH = 0, READ = 1, WRITE = 2 };
+    enum class Event : std::uint8_t { FINISH = 0, READ = 1, WRITE = 2 };
     ClientEvent(Event event, AsyncClientInterface* async_client)
         : event(event), async_client(async_client) {}
     Event event;

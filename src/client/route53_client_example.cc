@@ -8,6 +8,7 @@
 #include <string>
 
 #include "grpc++/grpc++.h"
+#include "src/common/logging.h"
 #include "src/proto/service.grpc.pb.h"
 
 using bazel_template::proto::MEGAService;
@@ -90,55 +91,68 @@ class Route53Client {
 };
 
 int main(int argc, char** argv) {
-  if (argc < 5) {
-    std::cout << "Usage: " << argv[0]
-              << " <server_address:port> <hosted_zone_id> <domain_name> "
-                 "<new_value> [record_type] [ttl] [region]"
-              << '\n';
-    std::cout << "Example A Record: " << argv[0]
-              << " localhost:50051 Z1234567890ABC api.example.com "
-                 "192.168.1.100 A 300 us-west-2"
-              << '\n';
-    std::cout << "Example CNAME Record: " << argv[0]
-              << " localhost:50051 Z1234567890ABC www.example.com example.com "
-                 "CNAME 600 us-east-1"
-              << '\n';
+  // An exception escaping main() calls std::terminate before anything is
+  // logged, which makes a failure look like a silent crash.
+  try {
+    if (argc < 5) {
+      std::cout << "Usage: " << argv[0]
+                << " <server_address:port> <hosted_zone_id> <domain_name> "
+                   "<new_value> [record_type] [ttl] [region]"
+                << '\n';
+      std::cout << "Example A Record: " << argv[0]
+                << " localhost:50051 Z1234567890ABC api.example.com "
+                   "192.168.1.100 A 300 us-west-2"
+                << '\n';
+      std::cout
+          << "Example CNAME Record: " << argv[0]
+          << " localhost:50051 Z1234567890ABC www.example.com example.com "
+             "CNAME 600 us-east-1"
+          << '\n';
+      return 1;
+    }
+
+    std::string server_address = argv[1];
+    std::string hosted_zone_id = argv[2];
+    std::string domain_name = argv[3];
+    std::string new_value = argv[4];
+    std::string record_type = (argc > 5) ? argv[5] : "A";
+    int32_t ttl = (argc > 6) ? std::stoi(argv[6]) : 300;
+    std::string region = (argc > 7) ? argv[7] : "";
+
+    // Create a gRPC channel
+    auto channel =
+        grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
+    Route53Client client(channel);
+
+    bool success = false;
+    if (record_type == "A") {
+      std::cout << "Updating A record for domain: " << domain_name
+                << " to IP: " << new_value << '\n';
+      success = client.UpdateARecord(hosted_zone_id, domain_name, new_value,
+                                     ttl, region);
+    } else if (record_type == "CNAME") {
+      std::cout << "Updating CNAME record for domain: " << domain_name
+                << " to: " << new_value << '\n';
+      success = client.UpdateCNAMERecord(hosted_zone_id, domain_name, new_value,
+                                         ttl, region);
+    } else {
+      std::cout << "Invalid record type. Use 'A' or 'CNAME'." << '\n';
+      return 1;
+    }
+
+    if (success) {
+      std::cout << "DNS record update completed successfully." << '\n';
+      return 0;
+    }
+    std::cout << "DNS record update failed." << '\n';
+    return 1;
+  } catch (const std::exception& e) {
+    ::bazel_template::logging::ReportException("route53_client_example failed",
+                                               e.what());
+    return 1;
+  } catch (...) {
+    ::bazel_template::logging::ReportException("route53_client_example failed",
+                                               nullptr);
     return 1;
   }
-
-  std::string server_address = argv[1];
-  std::string hosted_zone_id = argv[2];
-  std::string domain_name = argv[3];
-  std::string new_value = argv[4];
-  std::string record_type = (argc > 5) ? argv[5] : "A";
-  int32_t ttl = (argc > 6) ? std::stoi(argv[6]) : 300;
-  std::string region = (argc > 7) ? argv[7] : "";
-
-  // Create a gRPC channel
-  auto channel =
-      grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
-  Route53Client client(channel);
-
-  bool success = false;
-  if (record_type == "A") {
-    std::cout << "Updating A record for domain: " << domain_name
-              << " to IP: " << new_value << '\n';
-    success = client.UpdateARecord(hosted_zone_id, domain_name, new_value, ttl,
-                                   region);
-  } else if (record_type == "CNAME") {
-    std::cout << "Updating CNAME record for domain: " << domain_name
-              << " to: " << new_value << '\n';
-    success = client.UpdateCNAMERecord(hosted_zone_id, domain_name, new_value,
-                                       ttl, region);
-  } else {
-    std::cout << "Invalid record type. Use 'A' or 'CNAME'." << '\n';
-    return 1;
-  }
-
-  if (success) {
-    std::cout << "DNS record update completed successfully." << '\n';
-    return 0;
-  }
-  std::cout << "DNS record update failed." << '\n';
-  return 1;
 }

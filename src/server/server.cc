@@ -54,38 +54,48 @@ void RegisterSignalHandler() {
 }
 
 int main(int argc, char** argv) {
-  // ProfilerStart("bazel_template_profile");
-  LOG(INFO) << "Server initializing ...";
+  // An exception escaping main() calls std::terminate before anything is
+  // logged, which makes a failure look like a silent crash.
+  try {
+    // ProfilerStart("bazel_template_profile");
+    LOG(INFO) << "Server initializing ...";
 
-  gflags::ParseCommandLineFlags(&argc, &argv, false);
+    gflags::ParseCommandLineFlags(&argc, &argv, false);
 
-  folly::Init init(&argc, &argv, false);
-  bazel_template::logging::Initialize(argv[0], "./log");
-  LOG(INFO) << "CommandLine: "
-            << bazel_template::logging::CommandLine(argc, argv);
+    folly::Init init(&argc, &argv, false);
+    bazel_template::logging::Initialize(argv[0], "./log");
+    LOG(INFO) << "CommandLine: "
+              << bazel_template::logging::CommandLine(argc, argv);
 
-  bazel_template::util::ConfigManager::Instance()->Init(
-      "./conf/server_config.json");
+    bazel_template::util::ConfigManager::Instance()->Init(
+        "./conf/server_config.json");
 
-  RegisterSignalHandler();
+    RegisterSignalHandler();
 
-  std::thread shutdown_thread(ShutdownCheckingThread);
+    std::thread shutdown_thread(ShutdownCheckingThread);
 
-  std::shared_ptr<bazel_template::server::ServerContext> server_context =
-      std::make_shared<bazel_template::server::ServerContext>();
+    std::shared_ptr<bazel_template::server::ServerContext> server_context =
+        std::make_shared<bazel_template::server::ServerContext>();
 
-  bazel_template::server::HttpServer http_server(server_context);
+    bazel_template::server::HttpServer http_server(server_context);
 
-  ::http_server_ptr = &http_server;
+    ::http_server_ptr = &http_server;
 
-  http_server.Start();
+    http_server.Start();
 
-  LOG(INFO) << "Now stopped http server";
+    LOG(INFO) << "Now stopped http server";
 
-  if (shutdown_thread.joinable()) {
-    shutdown_thread.join();
+    if (shutdown_thread.joinable()) {
+      shutdown_thread.join();
+    }
+
+    // ProfilerStop();
+    return 0;
+  } catch (const std::exception& e) {
+    ::bazel_template::logging::ReportException("Server failed", e.what());
+    return 1;
+  } catch (...) {
+    ::bazel_template::logging::ReportException("Server failed", nullptr);
+    return 1;
   }
-
-  // ProfilerStop();
-  return 0;
 }

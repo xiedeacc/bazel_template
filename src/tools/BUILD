@@ -6,5 +6,6 @@ package(default_visibility = ["//visibility:public"])
 cc_binary(
     name = "gen_large_json_file",
     srcs = ["gen_large_json_file.cc"],
-    deps = ["//src/util"],
+    deps = [
+        "//src/common:logging","//src/util"],
 )

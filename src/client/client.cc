@@ -105,10 +105,10 @@ int main(int argc, char** argv) {
     // ProfilerStop();
     return 0;
   } catch (const std::exception& e) {
-    LOG(ERROR) << "Client failed: " << e.what();
+    ::bazel_template::logging::ReportException("Client failed", e.what());
     return 1;
   } catch (...) {
-    LOG(ERROR) << "Client failed with an unknown exception";
+    ::bazel_template::logging::ReportException("Client failed", nullptr);
     return 1;
   }
 }

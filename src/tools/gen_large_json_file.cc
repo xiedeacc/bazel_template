@@ -65,13 +65,25 @@ void GenerateLargeJsonFile(const std::string& output_path) {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  bazel_template::logging::Initialize(argv[0]);
+  // An exception escaping main() calls std::terminate before anything is
+  // logged, which makes a failure look like a silent crash.
+  try {
+    bazel_template::logging::Initialize(argv[0]);
 
-  if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " <output_file>" << '\n';
+    if (argc != 2) {
+      std::cerr << "Usage: " << argv[0] << " <output_file>" << '\n';
+      return 1;
+    }
+
+    GenerateLargeJsonFile(argv[1]);
+    return 0;
+  } catch (const std::exception& e) {
+    ::bazel_template::logging::ReportException("gen_large_json_file failed",
+                                               e.what());
+    return 1;
+  } catch (...) {
+    ::bazel_template::logging::ReportException("gen_large_json_file failed",
+                                               nullptr);
     return 1;
   }
-
-  GenerateLargeJsonFile(argv[1]);
-  return 0;
 }

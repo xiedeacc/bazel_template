@@ -11,6 +11,7 @@
 // the macros defined at the bottom of this file are the ones that survive no
 // matter where a translation unit includes this header. Nothing in this
 // project logs through glog itself.
+#include <cstdint>
 #include <cstdlib>
 #include <memory>
 #include <ostream>
@@ -21,7 +22,7 @@
 
 namespace bazel_template::logging {
 
-enum class Severity {
+enum class Severity : std::uint8_t {
   kInfo,
   kWarning,
   kError,
@@ -32,6 +33,11 @@ void Initialize(const std::string& program_name,
                 const std::string& log_dir = "./logs", bool write_logs = true);
 void Shutdown();
 std::string CommandLine(int argc, char** argv);
+
+// Reports a failure from a context that must not throw -- a catch handler in
+// main, a destructor, or a noexcept override. Logging allocates and can
+// itself throw, which is what this swallows.
+void ReportException(const char* context, const char* what) noexcept;
 
 class LogMessage {
  public:

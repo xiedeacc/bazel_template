@@ -134,6 +134,17 @@ std::string CommandLine(int argc, char** argv) {
   return oss.str();
 }
 
+void ReportException(const char* context, const char* what) noexcept {
+  try {
+    if (what != nullptr) {
+      LOG(ERROR) << context << ": " << what;
+    } else {
+      LOG(ERROR) << context << ": unknown exception";
+    }
+  } catch (...) {  // NOLINT(bugprone-empty-catch)
+  }
+}
+
 LogMessage::LogMessage(const char* file, int line, Severity severity)
     : file_(file), line_(line), severity_(severity) {}
 

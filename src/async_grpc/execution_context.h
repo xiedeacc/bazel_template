@@ -44,6 +44,7 @@ class ExecutionContext {
     Synchronized(Synchronized&&) = delete;
     Synchronized& operator=(const Synchronized&) = delete;
     Synchronized& operator=(Synchronized&&) = delete;
+    ~Synchronized() = default;
 
    private:
     common::MutexLocker locker_;

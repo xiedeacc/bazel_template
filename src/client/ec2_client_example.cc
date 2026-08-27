@@ -8,6 +8,7 @@
 #include <string>
 
 #include "grpc++/grpc++.h"
+#include "src/common/logging.h"
 #include "src/proto/service.grpc.pb.h"
 
 using bazel_template::proto::EC2InstanceRequest;
@@ -70,41 +71,54 @@ class EC2Client {
 };
 
 int main(int argc, char** argv) {
-  if (argc < 3) {
-    std::cout << "Usage: " << argv[0]
-              << " <server_address:port> <instance_id> [region] [start|stop]"
-              << '\n';
-    std::cout << "Example: " << argv[0]
-              << " localhost:50051 i-1234567890abcdef0 us-west-2 start" << '\n';
+  // An exception escaping main() calls std::terminate before anything is
+  // logged, which makes a failure look like a silent crash.
+  try {
+    if (argc < 3) {
+      std::cout << "Usage: " << argv[0]
+                << " <server_address:port> <instance_id> [region] [start|stop]"
+                << '\n';
+      std::cout << "Example: " << argv[0]
+                << " localhost:50051 i-1234567890abcdef0 us-west-2 start"
+                << '\n';
+      return 1;
+    }
+
+    std::string server_address = argv[1];
+    std::string instance_id = argv[2];
+    std::string region = (argc > 3) ? argv[3] : "";
+    std::string operation = (argc > 4) ? argv[4] : "start";
+
+    // Create a gRPC channel
+    auto channel =
+        grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
+    EC2Client client(channel);
+
+    bool success = false;
+    if (operation == "start") {
+      std::cout << "Starting EC2 instance: " << instance_id << '\n';
+      success = client.StartInstance(instance_id, region);
+    } else if (operation == "stop") {
+      std::cout << "Stopping EC2 instance: " << instance_id << '\n';
+      success = client.StopInstance(instance_id, region);
+    } else {
+      std::cout << "Invalid operation. Use 'start' or 'stop'." << '\n';
+      return 1;
+    }
+
+    if (success) {
+      std::cout << "Operation completed successfully." << '\n';
+      return 0;
+    }
+    std::cout << "Operation failed." << '\n';
+    return 1;
+  } catch (const std::exception& e) {
+    ::bazel_template::logging::ReportException("ec2_client_example failed",
+                                               e.what());
+    return 1;
+  } catch (...) {
+    ::bazel_template::logging::ReportException("ec2_client_example failed",
+                                               nullptr);
     return 1;
   }
-
-  std::string server_address = argv[1];
-  std::string instance_id = argv[2];
-  std::string region = (argc > 3) ? argv[3] : "";
-  std::string operation = (argc > 4) ? argv[4] : "start";
-
-  // Create a gRPC channel
-  auto channel =
-      grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
-  EC2Client client(channel);
-
-  bool success = false;
-  if (operation == "start") {
-    std::cout << "Starting EC2 instance: " << instance_id << '\n';
-    success = client.StartInstance(instance_id, region);
-  } else if (operation == "stop") {
-    std::cout << "Stopping EC2 instance: " << instance_id << '\n';
-    success = client.StopInstance(instance_id, region);
-  } else {
-    std::cout << "Invalid operation. Use 'start' or 'stop'." << '\n';
-    return 1;
-  }
-
-  if (success) {
-    std::cout << "Operation completed successfully." << '\n';
-    return 0;
-  }
-  std::cout << "Operation failed." << '\n';
-  return 1;
 }

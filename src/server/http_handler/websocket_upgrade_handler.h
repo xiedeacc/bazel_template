@@ -36,9 +36,11 @@ class WebSocketUpgradeHandler : public proxygen::RequestHandler {
     try {
       HandleUpgradeRequest(std::move(request));
     } catch (const std::exception& e) {
-      LOG(ERROR) << "WebSocket upgrade failed: " << e.what();
+      ::bazel_template::logging::ReportException("WebSocket upgrade failed",
+                                                 e.what());
     } catch (...) {
-      LOG(ERROR) << "WebSocket upgrade failed";
+      ::bazel_template::logging::ReportException("WebSocket upgrade failed",
+                                                 nullptr);
     }
   }
 

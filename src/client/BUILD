@@ -119,6 +119,7 @@ cc_binary(
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
+        "//src/common:logging",
         "//src/proto:cc_grpc_service",
         "@com_github_grpc_grpc//:grpc++",
     ],
@@ -131,6 +132,7 @@ cc_binary(
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
+        "//src/common:logging",
         "//src/proto:cc_grpc_service",
         "@com_github_grpc_grpc//:grpc++",
     ],

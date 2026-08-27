@@ -17,6 +17,7 @@
 #ifndef CPP_GRPC_RPC_H
 #define CPP_GRPC_RPC_H
 
+#include <cstdint>
 #include <memory>
 #include <queue>
 #include <unordered_set>
@@ -40,7 +41,7 @@ class Service;
 class Rpc {
  public:
   using WeakPtrFactory = std::function<std::weak_ptr<Rpc>(Rpc*)>;
-  enum class Event {
+  enum class Event : std::uint8_t {
     NEW_CONNECTION = 0,
     READ,
     WRITE_NEEDED,
@@ -66,7 +67,7 @@ class Rpc {
 
   class EventDeleter {
    public:
-    enum Action { DEL = 0, DO_NOT_DELETE };
+    enum Action : std::uint8_t { DEL = 0, DO_NOT_DELETE };
 
     // The default action 'DEL' is used implicitly, for instance for a
     // new UniqueEventPtr or a UniqueEventPtr that is created by
