@@ -714,6 +714,9 @@ maven.install(
         "org.junit.jupiter:junit-jupiter-engine:5.9.2",
     ],
     repositories = [
+        # Aliyun mirrors Maven Central and is an order of magnitude faster from
+        # here; repo1 stays as a fallback in case the mirror lacks an artifact.
+        "https://maven.aliyun.com/repository/public",
         "https://repo1.maven.org/maven2",
     ],
 )
