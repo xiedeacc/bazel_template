@@ -16,6 +16,8 @@
 
 #include "src/async_grpc/rpc.h"
 
+#include <utility>
+
 #include "glog/logging.h"
 #include "src/async_grpc/service.h"
 
@@ -26,7 +28,7 @@ namespace {
 // CLIENT_STREAMING. If no 'msg' is passed, we signal an error to the client as
 // the server is not honoring the gRPC call signature.
 template <typename ReaderWriter>
-void SendUnaryFinish(ReaderWriter* reader_writer, ::grpc::Status status,
+void SendUnaryFinish(ReaderWriter* reader_writer, const ::grpc::Status& status,
                      const google::protobuf::Message* msg,
                      Rpc::EventBase* rpc_event) {
   if (msg) {
@@ -62,7 +64,7 @@ Rpc::Rpc(int method_index,
       execution_context_(execution_context),
       rpc_handler_info_(rpc_handler_info),
       service_(service),
-      weak_ptr_factory_(weak_ptr_factory),
+      weak_ptr_factory_(std::move(weak_ptr_factory)),
       new_connection_event_(Event::NEW_CONNECTION, this),
       read_event_(Event::READ, this),
       write_event_(Event::WRITE, this),
@@ -95,11 +97,17 @@ void Rpc::OnConnection() {
   RequestStreamingReadIfNeeded();
 }
 
-void Rpc::OnRequest() { handler_->OnRequestInternal(request_.get()); }
+void Rpc::OnRequest() {
+  handler_->OnRequestInternal(request_.get());
+}
 
-void Rpc::OnReadsDone() { handler_->OnReadsDone(); }
+void Rpc::OnReadsDone() {
+  handler_->OnReadsDone();
+}
 
-void Rpc::OnFinish() { handler_->OnFinish(); }
+void Rpc::OnFinish() {
+  handler_->OnFinish();
+}
 
 void Rpc::RequestNextMethodInvocation() {
   // Ask gRPC to notify us when the connection terminates.
@@ -159,13 +167,15 @@ void Rpc::RequestStreamingReadIfNeeded() {
 }
 
 void Rpc::Write(std::unique_ptr<::google::protobuf::Message> message) {
-  EnqueueMessage(SendItem{std::move(message), ::grpc::Status::OK});
+  EnqueueMessage(
+      SendItem{.msg = std::move(message), .status = ::grpc::Status::OK});
   event_queue_->Push(UniqueEventPtr(
       new InternalRpcEvent(Event::WRITE_NEEDED, weak_ptr_factory_(this))));
 }
 
 void Rpc::Finish(::grpc::Status status) {
-  EnqueueMessage(SendItem{nullptr /* message */, status});
+  EnqueueMessage(
+      SendItem{.msg = nullptr /* message */, .status = std::move(status)});
   event_queue_->Push(UniqueEventPtr(
       new InternalRpcEvent(Event::WRITE_NEEDED, weak_ptr_factory_(this))));
 }
@@ -267,7 +277,7 @@ void Rpc::EnqueueMessage(SendItem&& send_item) {
 }
 
 void Rpc::PerformFinish(std::unique_ptr<::google::protobuf::Message> message,
-                        ::grpc::Status status) {
+                        const ::grpc::Status& status) {
   SetRpcEventState(Event::FINISH, true);
   switch (rpc_handler_info_.rpc_type) {
     case ::grpc::internal::RpcMethod::BIDI_STREAMING:
@@ -292,7 +302,7 @@ void Rpc::PerformFinish(std::unique_ptr<::google::protobuf::Message> message,
 }
 
 void Rpc::PerformWrite(std::unique_ptr<::google::protobuf::Message> message,
-                       ::grpc::Status /* status */) {
+                       const ::grpc::Status& /* status */) {
   CHECK(message) << "PerformWrite must be called with a non-null message";
   CHECK_NE(rpc_handler_info_.rpc_type, ::grpc::internal::RpcMethod::NORMAL_RPC);
   CHECK_NE(rpc_handler_info_.rpc_type,
@@ -308,7 +318,9 @@ void Rpc::SetRpcEventState(Event event, bool pending) {
   *GetRpcEventState(event) = pending;
 }
 
-bool Rpc::IsRpcEventPending(Event event) { return *GetRpcEventState(event); }
+bool Rpc::IsRpcEventPending(Event event) {
+  return *GetRpcEventState(event);
+}
 
 bool Rpc::IsAnyEventPending() {
   return IsRpcEventPending(Rpc::Event::DONE) ||
@@ -317,7 +329,9 @@ bool Rpc::IsAnyEventPending() {
          IsRpcEventPending(Rpc::Event::FINISH);
 }
 
-std::weak_ptr<Rpc> Rpc::GetWeakPtr() { return weak_ptr_factory_(this); }
+std::weak_ptr<Rpc> Rpc::GetWeakPtr() {
+  return weak_ptr_factory_(this);
+}
 
 ActiveRpcs::ActiveRpcs() : lock_() {}
 

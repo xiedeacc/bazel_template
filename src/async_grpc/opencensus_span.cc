@@ -33,7 +33,9 @@ void OpencensusSpan::SetStatus(const ::grpc::Status& status) {
   span_.SetStatus((opencensus::trace::StatusCode)status.error_code());
 }
 
-void OpencensusSpan::End() { span_.End(); }
+void OpencensusSpan::End() {
+  span_.End();
+}
 
 OpencensusSpan::OpencensusSpan(const std::string& name,
                                const OpencensusSpan* parent)

@@ -5,8 +5,7 @@
 
 #include "src/util/config_manager.h"
 
-namespace bazel_template {
-namespace util {
+namespace bazel_template::util {
 
 static folly::Singleton<ConfigManager> config_manager;
 
@@ -14,5 +13,4 @@ std::shared_ptr<ConfigManager> ConfigManager::Instance() {
   return config_manager.try_get();
 }
 
-}  // namespace util
-}  // namespace bazel_template
+}  // namespace bazel_template::util

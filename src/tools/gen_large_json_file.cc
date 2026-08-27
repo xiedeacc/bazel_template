@@ -57,10 +57,9 @@ void GenerateLargeJsonFile(const std::string& output_path) {
   out << "]}";
   out.close();
 
-  std::cout << "\nGenerated " << count << " nodes in " << output_path
-            << std::endl;
+  std::cout << "\nGenerated " << count << " nodes in " << output_path << '\n';
   std::cout << "Total size: " << (total_written / (1024 * 1024)) << "MB"
-            << std::endl;
+            << '\n';
 }
 
 }  // namespace
@@ -69,7 +68,7 @@ int main(int argc, char* argv[]) {
   google::InitGoogleLogging(argv[0]);
 
   if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " <output_file>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <output_file>" << '\n';
     return 1;
   }
 

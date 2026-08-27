@@ -18,6 +18,7 @@
 #define ASYNC_GRPC_ASYNC_CLIENT_H
 
 #include <memory>
+#include <utility>
 
 #include "completion_queue_pool.h"
 #include "glog/logging.h"
@@ -59,7 +60,7 @@ class AsyncClient<RpcServiceMethodConcept,
 
  public:
   AsyncClient(std::shared_ptr<::grpc::Channel> channel, CallbackType callback)
-      : channel_(channel),
+      : channel_(std::move(channel)),
         callback_(callback),
         completion_queue_(CompletionQueuePool::GetCompletionQueue()),
         rpc_method_name_(RpcServiceMethod::MethodName()),
@@ -84,7 +85,8 @@ class AsyncClient<RpcServiceMethodConcept,
         HandleFinishEvent(client_event);
         break;
       default:
-        LOG(FATAL) << "Unhandled event type: " << (int)client_event.event;
+        LOG(FATAL) << "Unhandled event type: "
+                   << static_cast<int>(client_event.event);
     }
   }
 
@@ -120,7 +122,7 @@ class AsyncClient<RpcServiceMethodConcept,
 
  public:
   AsyncClient(std::shared_ptr<::grpc::Channel> channel, CallbackType callback)
-      : channel_(channel),
+      : channel_(std::move(channel)),
         callback_(callback),
         completion_queue_(CompletionQueuePool::GetCompletionQueue()),
         rpc_method_name_(RpcServiceMethod::MethodName()),
@@ -151,7 +153,8 @@ class AsyncClient<RpcServiceMethodConcept,
         HandleFinishEvent(client_event);
         break;
       default:
-        LOG(FATAL) << "Unhandled event type: " << (int)client_event.event;
+        LOG(FATAL) << "Unhandled event type: "
+                   << static_cast<int>(client_event.event);
     }
   }
 
@@ -176,7 +179,8 @@ class AsyncClient<RpcServiceMethodConcept,
     if (client_event.ok) {
       if (callback_) {
         callback_(::grpc::Status(), &response_);
-        if (!client_event.ok) callback_ = nullptr;
+        if (!client_event.ok)
+          callback_ = nullptr;
       }
       response_reader_->Read(&response_, (void*)&read_event_);
     } else {

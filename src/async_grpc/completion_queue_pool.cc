@@ -30,8 +30,7 @@ size_t kDefaultNumberCompletionQueues = 2;
 
 void CompletionQueue::Start() {
   CHECK(!thread_) << "CompletionQueue already started.";
-  thread_ =
-      std::make_unique<std::thread>([this]() { RunCompletionQueue(); });
+  thread_ = std::make_unique<std::thread>([this]() { RunCompletionQueue(); });
 }
 
 void CompletionQueue::Shutdown() {
@@ -42,8 +41,8 @@ void CompletionQueue::Shutdown() {
 }
 
 void CompletionQueue::RunCompletionQueue() {
-  bool ok;
-  void* tag;
+  bool ok = false;
+  void* tag = nullptr;
   while (completion_queue_->Next(&tag, &ok)) {
     auto* client_event = static_cast<ClientEvent*>(tag);
     client_event->ok = ok;
@@ -61,7 +60,7 @@ void CompletionQueuePool::SetNumberCompletionQueues(
   CompletionQueuePool* pool = completion_queue_pool();
   CHECK(!pool->initialized_)
       << "Can't change number of completion queues after initialization.";
-  CHECK_GT(number_completion_queues, 0u);
+  CHECK_GT(number_completion_queues, 0U);
   pool->number_completion_queues_ = number_completion_queues;
 }
 

@@ -18,6 +18,7 @@
 #define CPP_GRPC_COMMON_COMPLETION_QUEUE_THREAD_H_
 
 #include <grpc++/grpc++.h>
+
 #include <memory>
 #include <thread>
 
@@ -33,7 +34,7 @@ class CompletionQueueThread {
 
   ::grpc::ServerCompletionQueue* completion_queue();
 
-  void Start(CompletionQueueRunner runner);
+  void Start(const CompletionQueueRunner& runner);
   void Shutdown();
 
  private:

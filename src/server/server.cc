@@ -15,21 +15,20 @@
 #include "src/util/config_manager.h"
 
 // https://github.com/grpc/grpc/issues/24884
-bazel_template::server::HttpServer *http_server_ptr = nullptr;
+bazel_template::server::HttpServer* http_server_ptr = nullptr;
 bool shutdown_required = false;
 std::mutex mutex;
 std::condition_variable cv;
 
-const char *SignalName(int sig);
+const char* SignalName(int sig);
 
 void SignalHandler(int sig) {
-  LOG(INFO) << "Got signal: " << SignalName(sig) << " (" << sig << ")"
-            << std::endl;
+  LOG(INFO) << "Got signal: " << SignalName(sig) << " (" << sig << ")" << '\n';
   shutdown_required = true;
   cv.notify_all();
 }
 
-const char *SignalName(int sig) {
+const char* SignalName(int sig) {
 #if defined(_WIN32)
   (void)sig;
   return "signal";
@@ -38,7 +37,7 @@ const char *SignalName(int sig) {
 #endif
 }
 
-void ShutdownCheckingThread(void) {
+void ShutdownCheckingThread() {
   std::unique_lock<std::mutex> lock(mutex);
   cv.wait(lock, []() { return shutdown_required; });
   http_server_ptr->Shutdown();
@@ -54,7 +53,7 @@ void RegisterSignalHandler() {
 #endif
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   // ProfilerStart("bazel_template_profile");
   LOG(INFO) << "Server initializing ...";
 

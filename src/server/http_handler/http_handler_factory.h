@@ -10,9 +10,7 @@
 #include "proxygen/httpserver/RequestHandlerFactory.h"
 #include "src/server/http_handler/websocket_upgrade_handler.h"
 
-namespace bazel_template {
-namespace server {
-namespace http_handler {
+namespace bazel_template::server::http_handler {
 
 class HTTPHandlerFactory : public proxygen::RequestHandlerFactory {
  public:
@@ -33,8 +31,6 @@ class HTTPHandlerFactory : public proxygen::RequestHandlerFactory {
   }
 };
 
-}  // namespace http_handler
-}  // namespace server
-}  // namespace bazel_template
+}  // namespace bazel_template::server::http_handler
 
 #endif  // BAZEL_TEMPLATE_SERVER_HTTP_HANDLER_HTTP_HANDLER_FACTORY_H_

@@ -17,11 +17,10 @@
 #include "src/async_grpc/rpc_handler.h"
 #include "src/server/grpc_handler/meta.h"
 
-namespace bazel_template {
-namespace server {
-namespace grpc_handler {
+namespace bazel_template::server::grpc_handler {
 
-class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceManagementMethod> {
+class EC2InstanceManagementHandler
+    : public async_grpc::RpcHandler<EC2InstanceManagementMethod> {
  public:
   EC2InstanceManagementHandler() {
     // Initialize AWS SDK
@@ -30,7 +29,7 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
     aws_initialized_ = true;
   }
 
-  ~EC2InstanceManagementHandler() {
+  ~EC2InstanceManagementHandler() override {
     // Cleanup AWS SDK if we initialized it
     if (aws_initialized_) {
       Aws::SDKOptions options;
@@ -56,7 +55,8 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
           break;
         default:
           res->set_err_code(proto::ErrCode::FAIL);
-          res->set_message("Invalid operation code for EC2 instance management");
+          res->set_message(
+              "Invalid operation code for EC2 instance management");
           LOG(ERROR) << "Invalid operation code: " << req.op();
           break;
       }
@@ -73,7 +73,7 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
 
  private:
   void HandleStartInstance(const proto::EC2InstanceRequest& req,
-                          proto::EC2InstanceResponse* res) {
+                           proto::EC2InstanceResponse* res) {
     // Set region if specified
     Aws::EC2::EC2ClientConfiguration client_config;
     if (!req.region().empty()) {
@@ -94,14 +94,14 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
     } else {
       res->set_err_code(proto::ErrCode::FAIL);
       res->set_message("Failed to start instance: " +
-                      outcome.GetError().GetMessage());
-      LOG(ERROR) << "Failed to start instance: " << req.instance_id()
-                 << " - " << outcome.GetError().GetMessage();
+                       outcome.GetError().GetMessage());
+      LOG(ERROR) << "Failed to start instance: " << req.instance_id() << " - "
+                 << outcome.GetError().GetMessage();
     }
   }
 
   void HandleStopInstance(const proto::EC2InstanceRequest& req,
-                         proto::EC2InstanceResponse* res) {
+                          proto::EC2InstanceResponse* res) {
     // Set region if specified
     Aws::EC2::EC2ClientConfiguration client_config;
     if (!req.region().empty()) {
@@ -122,17 +122,15 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
     } else {
       res->set_err_code(proto::ErrCode::FAIL);
       res->set_message("Failed to stop instance: " +
-                      outcome.GetError().GetMessage());
-      LOG(ERROR) << "Failed to stop instance: " << req.instance_id()
-                 << " - " << outcome.GetError().GetMessage();
+                       outcome.GetError().GetMessage());
+      LOG(ERROR) << "Failed to stop instance: " << req.instance_id() << " - "
+                 << outcome.GetError().GetMessage();
     }
   }
 
   bool aws_initialized_ = false;
 };
 
-}  // namespace grpc_handler
-}  // namespace server
-}  // namespace bazel_template
+}  // namespace bazel_template::server::grpc_handler
 
 #endif  // BAZEL_TEMPLATE_SERVER_GRPC_HANDLER_EC2_HANDLER_H_

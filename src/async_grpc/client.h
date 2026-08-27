@@ -17,12 +17,13 @@
 #ifndef CPP_GRPC_CLIENT_H
 #define CPP_GRPC_CLIENT_H
 
+#include <optional>
+
 #include "glog/logging.h"
 #include "grpc++/grpc++.h"
 #include "grpc++/impl/codegen/client_unary_call.h"
 #include "grpc++/impl/codegen/proto_utils.h"
 #include "grpc++/impl/codegen/sync_stream.h"
-#include <optional>
 #include "src/async_grpc/retry.h"
 #include "src/async_grpc/rpc_handler_interface.h"
 #include "src/async_grpc/rpc_service_method_traits.h"
@@ -69,7 +70,10 @@ class Client<RpcServiceMethodConcept, ::grpc::internal::RpcMethod::NORMAL_RPC> {
     ::grpc::Status internal_status;
     std::optional<std::chrono::system_clock::time_point> deadline;
     if (timeout_.has_value()) {
-      deadline = std::chrono::system_clock::now() + std::chrono::duration_cast<std::chrono::system_clock::duration>(timeout_.value());
+      deadline =
+          std::chrono::system_clock::now() +
+          std::chrono::duration_cast<std::chrono::system_clock::duration>(
+              timeout_.value());
     }
     client_context_ = ResetContext(deadline);
     bool result = RetryWithStrategy(

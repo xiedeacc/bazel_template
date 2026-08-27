@@ -19,17 +19,16 @@
 #include "src/common/blocking_queue.h"
 #include "src/proto/enums.pb.h"
 
-namespace bazel_template {
-namespace client {
+namespace bazel_template::client {
 
 class WebSocketClient {
  public:
   WebSocketClient(const std::string& host, const std::string& port)
       : host_(host),
         port_(port),
-        ioc_(),
+
         ws_(ioc_),
-        message_queue_(),
+
         running_(false),
         thread_pool_(std::make_shared<folly::CPUThreadPoolExecutor>(2)) {}
 
@@ -105,7 +104,8 @@ class WebSocketClient {
   }
 
   void Stop() {
-    if (!running_) return;
+    if (!running_)
+      return;
 
     LOG(INFO) << "Stopping WebSocket client...";
 
@@ -277,7 +277,6 @@ class WebSocketClient {
   boost::beast::flat_buffer read_buffer_;
 };
 
-}  // namespace client
-}  // namespace bazel_template
+}  // namespace bazel_template::client
 
 #endif  // BAZEL_TEMPLATE_CLIENT_WEBSOCKET_CLIENT_H_

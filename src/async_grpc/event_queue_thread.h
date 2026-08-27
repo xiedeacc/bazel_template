@@ -33,7 +33,7 @@ class EventQueueThread {
 
   EventQueue* event_queue();
 
-  void Start(EventQueueRunner runner);
+  void Start(const EventQueueRunner& runner);
   void Shutdown();
 
  private:

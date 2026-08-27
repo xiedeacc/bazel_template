@@ -20,6 +20,7 @@
 #include <memory>
 #include <queue>
 #include <unordered_set>
+#include <utility>
 
 #include "google/protobuf/message.h"
 #include "grpc++/grpc++.h"
@@ -50,7 +51,7 @@ class Rpc {
 
   struct EventBase {
     explicit EventBase(Event event) : event(event) {}
-    virtual ~EventBase() {};
+    virtual ~EventBase() = default;
     virtual void Handle() = 0;
 
     const Event event;
@@ -81,7 +82,7 @@ class Rpc {
   // Flows through gRPC's CompletionQueue and then our EventQueue.
   struct CompletionQueueRpcEvent : public EventBase {
     CompletionQueueRpcEvent(Event event, Rpc* rpc)
-        : EventBase(event), rpc_ptr(rpc), ok(false), pending(false) {}
+        : EventBase(event), rpc_ptr(rpc) {}
     void PushToEventQueue() {
       rpc_ptr->event_queue()->Push(
           UniqueEventPtr(this, EventDeleter(EventDeleter::DO_NOT_DELETE)));
@@ -89,14 +90,14 @@ class Rpc {
     void Handle() override;
 
     Rpc* rpc_ptr;
-    bool ok;
-    bool pending;
+    bool ok{false};
+    bool pending{false};
   };
 
   // Flows only through our EventQueue.
   struct InternalRpcEvent : public EventBase {
     InternalRpcEvent(Event event, std::weak_ptr<Rpc> rpc)
-        : EventBase(event), rpc(rpc) {}
+        : EventBase(event), rpc(std::move(rpc)) {}
     void Handle() override;
 
     std::weak_ptr<Rpc> rpc;
@@ -139,9 +140,9 @@ class Rpc {
   void SetRpcEventState(Event event, bool pending);
   void EnqueueMessage(SendItem&& send_item);
   void PerformFinish(std::unique_ptr<::google::protobuf::Message> message,
-                     ::grpc::Status status);
+                     const ::grpc::Status& status);
   void PerformWrite(std::unique_ptr<::google::protobuf::Message> message,
-                    ::grpc::Status status);
+                    const ::grpc::Status& status);
 
   ::grpc::internal::AsyncReaderInterface<::google::protobuf::Message>*
   async_reader_interface();

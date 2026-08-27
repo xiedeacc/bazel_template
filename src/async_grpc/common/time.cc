@@ -18,8 +18,7 @@
 
 #include <string>
 
-namespace async_grpc {
-namespace common {
+namespace async_grpc::common {
 
 Duration FromSeconds(const double seconds) {
   return std::chrono::duration_cast<Duration>(
@@ -31,9 +30,13 @@ double ToSeconds(const Duration duration) {
       .count();
 }
 
-Time FromUniversal(const int64_t ticks) { return Time(Duration(ticks)); }
+Time FromUniversal(const int64_t ticks) {
+  return Time(Duration(ticks));
+}
 
-int64_t ToUniversal(const Time time) { return time.time_since_epoch().count(); }
+int64_t ToUniversal(const Time time) {
+  return time.time_since_epoch().count();
+}
 
 std::ostream& operator<<(std::ostream& os, const Time time) {
   os << std::to_string(ToUniversal(time));
@@ -45,5 +48,4 @@ common::Duration FromMilliseconds(const int64_t milliseconds) {
       std::chrono::milliseconds(milliseconds));
 }
 
-}  // namespace common
-}  // namespace async_grpc
+}  // namespace async_grpc::common

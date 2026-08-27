@@ -10,8 +10,7 @@
 #include <mutex>
 #include <queue>
 
-namespace bazel_template {
-namespace common {
+namespace bazel_template::common {
 
 template <typename T>
 class BlockingQueue {
@@ -84,7 +83,6 @@ class BlockingQueue {
   bool closed_ = false;
 };
 
-}  // namespace common
-}  // namespace bazel_template
+}  // namespace bazel_template::common
 
 #endif  // BAZEL_TEMPLATE_COMMON_BLOCKING_QUEUE_H_

@@ -37,7 +37,7 @@ int InitWinsock() {
 }  // namespace
 
 #pragma section(".CRT$XIU", long, read)
-extern "C" __declspec(allocate(".CRT$XIU")) int (*bazel_template_winsock_init_)(
-    void) = InitWinsock;
+extern "C" __declspec(allocate(".CRT$XIU")) int (
+    *bazel_template_winsock_init_)() = InitWinsock;
 
 #endif  // defined(_WIN32)

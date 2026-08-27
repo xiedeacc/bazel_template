@@ -25,8 +25,7 @@
 #include "src/async_grpc/common/mutex.h"
 #include "src/async_grpc/common/time.h"
 
-namespace async_grpc {
-namespace common {
+namespace async_grpc::common {
 
 // A thread-safe blocking queue that is useful for producer/consumer patterns.
 // 'T' must be movable.
@@ -124,7 +123,6 @@ class BlockingQueue {
   std::deque<T> deque_ GUARDED_BY(mutex_);
 };
 
-}  // namespace common
-}  // namespace async_grpc
+}  // namespace async_grpc::common
 
 #endif  // CPP_GRPC_COMMON_BLOCKING_QUEUE_H_

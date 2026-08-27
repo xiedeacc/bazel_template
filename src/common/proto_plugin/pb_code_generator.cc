@@ -23,9 +23,7 @@ using google::protobuf::io::Printer;
 using google::protobuf::io::ZeroCopyOutputStream;
 using std::string;
 
-namespace bazel_template {
-namespace common {
-namespace proto_plugin {
+namespace bazel_template::common::proto_plugin {
 
 bool LoadSmallFile(const string& path, string* content) {
   std::ifstream in(path, std::ios::binary);
@@ -45,8 +43,7 @@ bool LoadSmallFile(const string& path, string* content) {
   return true;
 }
 
-PBCodeGenerator::PBCodeGenerator()
-    : file_(nullptr), generator_context_(nullptr) {}
+PBCodeGenerator::PBCodeGenerator() {}
 
 bool PBCodeGenerator::Generate(const FileDescriptor* file,
                                const string& parameter,
@@ -101,9 +98,7 @@ string PBCodeGenerator::GetFullPath(const string& file_name) const {
   return template_dir_ + "/" + file_name;
 }
 
-}  // namespace proto_plugin
-}  // namespace common
-}  // namespace bazel_template
+}  // namespace bazel_template::common::proto_plugin
 
 int main(int argc, char* argv[]) {
   bazel_template::common::proto_plugin::PBCodeGenerator generator;

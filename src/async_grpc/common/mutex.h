@@ -22,8 +22,7 @@
 
 #include "src/async_grpc/common/time.h"
 
-namespace async_grpc {
-namespace common {
+namespace async_grpc::common {
 
 // Enable thread safety attributes only with clang.
 // The attributes can be safely erased when compiling with other compilers.
@@ -94,7 +93,6 @@ class CAPABILITY("mutex") Mutex {
 
 using MutexLocker = Mutex::Locker;
 
-}  // namespace common
-}  // namespace async_grpc
+}  // namespace async_grpc::common
 
 #endif  // CPP_GRPC_COMMON_MUTEX_H_

@@ -18,18 +18,17 @@
 bool shutdown_required = false;
 std::mutex mutex;
 std::condition_variable cv;
-bazel_template::client::WebSocketClient *websocket_client_ptr = nullptr;
+bazel_template::client::WebSocketClient* websocket_client_ptr = nullptr;
 
-const char *SignalName(int sig);
+const char* SignalName(int sig);
 
 void SignalHandler(int sig) {
-  LOG(INFO) << "Got signal: " << SignalName(sig) << " (" << sig << ")"
-            << std::endl;
+  LOG(INFO) << "Got signal: " << SignalName(sig) << " (" << sig << ")" << '\n';
   shutdown_required = true;
   cv.notify_all();
 }
 
-const char *SignalName(int sig) {
+const char* SignalName(int sig) {
 #if defined(_WIN32)
   (void)sig;
   return "signal";
@@ -42,7 +41,7 @@ const char *SignalName(int sig) {
 // connect targets: Windows rejects them with WSAEADDRNOTAVAIL(10049), while
 // Linux quietly treats them as loopback. Normalize so the client behaves the
 // same everywhere.
-std::string ConnectTargetHost(const std::string &bind_addr) {
+std::string ConnectTargetHost(const std::string& bind_addr) {
   if (bind_addr.empty() || bind_addr == "0.0.0.0") {
     return "127.0.0.1";
   }
@@ -52,7 +51,7 @@ std::string ConnectTargetHost(const std::string &bind_addr) {
   return bind_addr;
 }
 
-void ShutdownCheckingThread(void) {
+void ShutdownCheckingThread() {
   std::unique_lock<std::mutex> lock(mutex);
   cv.wait(lock, []() { return shutdown_required; });
   websocket_client_ptr->Stop();
@@ -68,7 +67,7 @@ void RegisterSignalHandler() {
 #endif
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   // ProfilerStart("bazel_template_profile");
   LOG(INFO) << "Client initializing ...";
 

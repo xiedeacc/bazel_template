@@ -11,19 +11,18 @@
 
 #include "aws/core/Aws.h"
 #include "aws/route53/Route53Client.h"
+#include "aws/route53/model/Change.h"
 #include "aws/route53/model/ChangeBatch.h"
 #include "aws/route53/model/ChangeResourceRecordSetsRequest.h"
 #include "aws/route53/model/ResourceRecordSet.h"
-#include "aws/route53/model/Change.h"
 #include "glog/logging.h"
 #include "src/async_grpc/rpc_handler.h"
 #include "src/server/grpc_handler/meta.h"
 
-namespace bazel_template {
-namespace server {
-namespace grpc_handler {
+namespace bazel_template::server::grpc_handler {
 
-class Route53ManagementHandler : public async_grpc::RpcHandler<Route53ManagementMethod> {
+class Route53ManagementHandler
+    : public async_grpc::RpcHandler<Route53ManagementMethod> {
  public:
   Route53ManagementHandler() {
     // Initialize AWS SDK
@@ -32,7 +31,7 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
     aws_initialized_ = true;
   }
 
-  ~Route53ManagementHandler() {
+  ~Route53ManagementHandler() override {
     // Cleanup AWS SDK if we initialized it
     if (aws_initialized_) {
       Aws::SDKOptions options;
@@ -79,7 +78,7 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
 
  private:
   void HandleUpdateARecord(const proto::Route53Request& req,
-                          proto::Route53Response* res) {
+                           proto::Route53Response* res) {
     // Set region if specified
     Aws::Route53::Route53ClientConfiguration client_config;
     if (!req.region().empty()) {
@@ -116,19 +115,20 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
       res->set_err_code(proto::ErrCode::SUCCESS);
       res->set_change_id(outcome.GetResult().GetChangeInfo().GetId());
       res->set_message("A record updated successfully");
-      LOG(INFO) << "Successfully updated A record for domain: " << req.domain_name()
-                << " to IP: " << req.new_value();
+      LOG(INFO) << "Successfully updated A record for domain: "
+                << req.domain_name() << " to IP: " << req.new_value();
     } else {
       res->set_err_code(proto::ErrCode::FAIL);
       res->set_message("Failed to update A record: " +
-                      outcome.GetError().GetMessage());
-      LOG(ERROR) << "Failed to update A record for domain: " << req.domain_name()
-                 << " - " << outcome.GetError().GetMessage();
+                       outcome.GetError().GetMessage());
+      LOG(ERROR) << "Failed to update A record for domain: "
+                 << req.domain_name() << " - "
+                 << outcome.GetError().GetMessage();
     }
   }
 
   void HandleUpdateCNAMERecord(const proto::Route53Request& req,
-                              proto::Route53Response* res) {
+                               proto::Route53Response* res) {
     // Set region if specified
     Aws::Route53::Route53ClientConfiguration client_config;
     if (!req.region().empty()) {
@@ -165,22 +165,21 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
       res->set_err_code(proto::ErrCode::SUCCESS);
       res->set_change_id(outcome.GetResult().GetChangeInfo().GetId());
       res->set_message("CNAME record updated successfully");
-      LOG(INFO) << "Successfully updated CNAME record for domain: " << req.domain_name()
-                << " to: " << req.new_value();
+      LOG(INFO) << "Successfully updated CNAME record for domain: "
+                << req.domain_name() << " to: " << req.new_value();
     } else {
       res->set_err_code(proto::ErrCode::FAIL);
       res->set_message("Failed to update CNAME record: " +
-                      outcome.GetError().GetMessage());
-      LOG(ERROR) << "Failed to update CNAME record for domain: " << req.domain_name()
-                 << " - " << outcome.GetError().GetMessage();
+                       outcome.GetError().GetMessage());
+      LOG(ERROR) << "Failed to update CNAME record for domain: "
+                 << req.domain_name() << " - "
+                 << outcome.GetError().GetMessage();
     }
   }
 
   bool aws_initialized_ = false;
 };
 
-}  // namespace grpc_handler
-}  // namespace server
-}  // namespace bazel_template
+}  // namespace bazel_template::server::grpc_handler
 
 #endif  // BAZEL_TEMPLATE_SERVER_GRPC_HANDLER_ROUTE53_HANDLER_H_

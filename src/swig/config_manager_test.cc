@@ -11,8 +11,7 @@
 #include "gtest/gtest.h"
 #include "rules_cc/cc/runfiles/runfiles.h"
 
-namespace bazel_template {
-namespace swig {
+namespace bazel_template::swig {
 
 using rules_cc::cc::runfiles::Runfiles;
 
@@ -31,5 +30,4 @@ TEST(ConfigManager, Init) {
   LOG(INFO) << config_manager.ToString();
 }
 
-}  // namespace swig
-}  // namespace bazel_template
+}  // namespace bazel_template::swig

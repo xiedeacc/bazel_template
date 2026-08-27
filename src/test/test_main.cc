@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 // #include "lib/tcmalloc/malloc_extension.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   folly::Init init(&argc, &argv, false);
   // google::InitGoogleLogging(argv[0]);
   google::SetStderrLogging(google::GLOG_INFO);

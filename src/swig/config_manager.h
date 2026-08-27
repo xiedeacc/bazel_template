@@ -11,8 +11,7 @@
 
 #include "src/util/config_manager.h"
 
-namespace bazel_template {
-namespace swig {
+namespace bazel_template::swig {
 
 using std::map;
 using std::string;
@@ -23,7 +22,6 @@ class ConfigManager {
   string ToString() { return util::ConfigManager::Instance()->ToString(); }
 };
 
-}  // namespace swig
-}  // namespace bazel_template
+}  // namespace bazel_template::swig
 
 #endif  // BAZEL_TEMPLATE_SWIG_CONFIG_MANAGER_H_

@@ -12,8 +12,7 @@
 #include "gtest/gtest.h"
 #include "rules_cc/cc/runfiles/runfiles.h"
 
-namespace bazel_template {
-namespace util {
+namespace bazel_template::util {
 
 using rules_cc::cc::runfiles::Runfiles;
 
@@ -31,5 +30,4 @@ TEST(ConfigManager, Init) {
   LOG(INFO) << ConfigManager::Instance()->ToString();
 }
 
-}  // namespace util
-}  // namespace bazel_template
+}  // namespace bazel_template::util

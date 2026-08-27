@@ -17,6 +17,8 @@
 #ifndef CPP_GRPC_RPC_HANDLER_H
 #define CPP_GRPC_RPC_HANDLER_H
 
+#include <utility>
+
 #include "glog/logging.h"
 #include "google/protobuf/message.h"
 #include "src/async_grpc/execution_context.h"
@@ -88,7 +90,7 @@ class RpcHandler : public RpcHandlerInterface {
   }
   virtual void OnRequest(const RequestType& request) = 0;
   void Finish(::grpc::Status status) {
-    rpc_->Finish(status);
+    rpc_->Finish(std::move(status));
 #if BUILD_TRACING
     span_->SetStatus(status);
 #endif

@@ -65,7 +65,9 @@ void Server::Builder::EnableTracing() {
 #endif
 }
 
-void Server::Builder::DisableTracing() { options_.enable_tracing = false; }
+void Server::Builder::DisableTracing() {
+  options_.enable_tracing = false;
+}
 
 void Server::Builder::SetTracingSamplerProbability(
     double tracing_sampler_probability) {
@@ -135,8 +137,8 @@ void Server::AddService(
 
 void Server::RunCompletionQueue(
     ::grpc::ServerCompletionQueue* completion_queue) {
-  bool ok;
-  void* tag;
+  bool ok = false;
+  void* tag = nullptr;
   while (completion_queue->Next(&tag, &ok)) {
     auto* rpc_event = static_cast<Rpc::CompletionQueueRpcEvent*>(tag);
     rpc_event->ok = ok;

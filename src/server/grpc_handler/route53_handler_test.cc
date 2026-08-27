@@ -10,9 +10,7 @@
 #include "gtest/gtest.h"
 #include "src/proto/service.pb.h"
 
-namespace bazel_template {
-namespace server {
-namespace grpc_handler {
+namespace bazel_template::server::grpc_handler {
 
 class Route53ManagementHandlerTest : public ::testing::Test {
  protected:
@@ -20,9 +18,7 @@ class Route53ManagementHandlerTest : public ::testing::Test {
     handler_ = std::make_unique<Route53ManagementHandler>();
   }
 
-  void TearDown() override {
-    handler_.reset();
-  }
+  void TearDown() override { handler_.reset(); }
 
   std::unique_ptr<Route53ManagementHandler> handler_;
 };
@@ -95,6 +91,4 @@ TEST_F(Route53ManagementHandlerTest, InvalidOperationCode) {
   EXPECT_EQ(req.domain_name(), "api.example.com");
 }
 
-}  // namespace grpc_handler
-}  // namespace server
-}  // namespace bazel_template 
+}  // namespace bazel_template::server::grpc_handler

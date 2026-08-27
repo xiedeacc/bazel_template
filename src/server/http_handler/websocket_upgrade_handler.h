@@ -17,9 +17,7 @@
 #include "proxygen/lib/utils/UtilInl.h"
 #include "src/server/http_handler/websocket_handler.h"
 
-namespace bazel_template {
-namespace server {
-namespace http_handler {
+namespace bazel_template::server::http_handler {
 
 // Performs the RFC 6455 upgrade handshake and then feeds raw frames to
 // WebSocketHandler. Sec-WebSocket-Accept is computed by proxygen's HTTP/1.x
@@ -65,9 +63,8 @@ class WebSocketUpgradeHandler : public proxygen::RequestHandler {
     ws_handler_ = std::make_unique<WebSocketHandler>();
     ws_handler_->SetCallback(
         [this](const std::string& message) { HandleMessage(message); });
-    ws_handler_->SetCloseCallback([]() {
-      LOG(INFO) << "WebSocket connection closed by peer";
-    });
+    ws_handler_->SetCloseCallback(
+        []() { LOG(INFO) << "WebSocket connection closed by peer"; });
     ws_handler_->SetSendFrameCallback(
         [this](const std::string& frame) { SendFrame(frame); });
 
@@ -113,8 +110,6 @@ class WebSocketUpgradeHandler : public proxygen::RequestHandler {
   std::unique_ptr<WebSocketHandler> ws_handler_;
 };
 
-}  // namespace http_handler
-}  // namespace server
-}  // namespace bazel_template
+}  // namespace bazel_template::server::http_handler
 
 #endif  // BAZEL_TEMPLATE_SERVER_HTTP_HANDLER_WEBSOCKET_UPGRADE_HANDLER_H_

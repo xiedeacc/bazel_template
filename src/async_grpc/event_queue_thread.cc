@@ -24,9 +24,11 @@ EventQueueThread::EventQueueThread() {
   event_queue_ = std::make_unique<EventQueue>();
 }
 
-EventQueue* EventQueueThread::event_queue() { return event_queue_.get(); }
+EventQueue* EventQueueThread::event_queue() {
+  return event_queue_.get();
+}
 
-void EventQueueThread::Start(EventQueueRunner runner) {
+void EventQueueThread::Start(const EventQueueRunner& runner) {
   CHECK(!thread_);
   EventQueue* event_queue = event_queue_.get();
   thread_ = std::make_unique<std::thread>(

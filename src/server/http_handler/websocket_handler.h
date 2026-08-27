@@ -21,9 +21,7 @@
 #include "folly/lang/Bits.h"
 #include "glog/logging.h"
 
-namespace bazel_template {
-namespace server {
-namespace http_handler {
+namespace bazel_template::server::http_handler {
 
 const std::string kWSKeyHeader = "Sec-WebSocket-Key";
 const std::string kWSProtocolHeader = "Sec-WebSocket-Protocol";
@@ -50,9 +48,7 @@ class WebSocketHandler {
   using SendFrameCallback = std::function<void(const std::string&)>;
 
   WebSocketHandler()
-      : current_message_(std::make_unique<folly::IOBufQueue>()),
-        is_fragmented_(false),
-        current_opcode_(0) {}
+      : current_message_(std::make_unique<folly::IOBufQueue>()) {}
 
   // Add new function to assemble WebSocket frames
   std::string AssembleFrame(const std::string& message, uint8_t opcode = 0x1) {
@@ -156,7 +152,7 @@ class WebSocketHandler {
 
             // Get payload and unmask if needed
             const uint8_t* payload = data + header_size;
-            uint16_t status_code;
+            uint16_t status_code = 0;
             if (mask) {
               // Create a copy of the payload to unmask
               std::vector<uint8_t> unmasked_payload(payload, payload + 2);
@@ -167,19 +163,21 @@ class WebSocketHandler {
               status_code = folly::Endian::big(
                   *reinterpret_cast<const uint16_t*>(unmasked_payload.data()));
             } else {
-              status_code =
-                  folly::Endian::big(*reinterpret_cast<const uint16_t*>(payload));
+              status_code = folly::Endian::big(
+                  *reinterpret_cast<const uint16_t*>(payload));
             }
 
             LOG(INFO) << "Close frame: fin=" << fin
-                      << ", opcode=" << (int)opcode << ", mask=" << mask
-                      << ", length=" << (int)length_field
+                      << ", opcode=" << static_cast<int>(opcode)
+                      << ", mask=" << mask
+                      << ", length=" << static_cast<int>(length_field)
                       << ", header_size=" << header_size << ", masking_key=0x"
                       << std::hex << masking_key << std::dec
                       << ", status_code=" << status_code << " (0x" << std::hex
                       << status_code << std::dec << ")"
-                      << " [raw bytes: 0x" << std::hex << (int)payload[0]
-                      << " 0x" << (int)payload[1] << std::dec << "]";
+                      << " [raw bytes: 0x" << std::hex
+                      << static_cast<int>(payload[0]) << " 0x"
+                      << static_cast<int>(payload[1]) << std::dec << "]";
 
             // Send close frame in response
             if (send_frame_callback_) {
@@ -266,14 +264,16 @@ class WebSocketHandler {
     // Parse payload length
     size_t header_size = 2;
     uint8_t length_field = data[1] & 0x7F;
-    uint64_t payload_length;
+    uint64_t payload_length = 0;
     if (length_field == 126) {
-      if (frame->length() < 4) return false;
+      if (frame->length() < 4)
+        return false;
       payload_length =
           folly::Endian::big(*reinterpret_cast<const uint16_t*>(data + 2));
       header_size = 4;
     } else if (length_field == 127) {
-      if (frame->length() < 10) return false;
+      if (frame->length() < 10)
+        return false;
       payload_length =
           folly::Endian::big(*reinterpret_cast<const uint64_t*>(data + 2));
       header_size = 10;
@@ -289,7 +289,8 @@ class WebSocketHandler {
 
     // Handle masking
     if (header.mask) {
-      if (frame->length() < header_size + 4) return false;
+      if (frame->length() < header_size + 4)
+        return false;
       header.masking_key = folly::Endian::big(
           *reinterpret_cast<const uint32_t*>(data + header_size));
       header_size += 4;
@@ -333,12 +334,10 @@ class WebSocketHandler {
   MessageCallback message_callback_;
   CloseCallback close_callback_;
   SendFrameCallback send_frame_callback_;
-  bool is_fragmented_;
-  uint8_t current_opcode_;
+  bool is_fragmented_{false};
+  uint8_t current_opcode_{0};
 };
 
-}  // namespace http_handler
-}  // namespace server
-}  // namespace bazel_template
+}  // namespace bazel_template::server::http_handler
 
 #endif  // BAZEL_TEMPLATE_SERVER_HTTP_HANDLER_WEBSOCKET_HANDLER_H_

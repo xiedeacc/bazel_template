@@ -12,13 +12,12 @@
 #include <thread>
 #include <vector>
 
-namespace bazel_template {
-namespace common {
+namespace bazel_template::common {
 namespace {
 
 TEST(BlockingQueueTest, BasicOperations) {
   BlockingQueue<int> queue;
-  int value;
+  int value = 0;
 
   // Test empty queue
   EXPECT_TRUE(queue.Empty());
@@ -55,7 +54,7 @@ TEST(BlockingQueueTest, BasicOperations) {
 
 TEST(BlockingQueueTest, CloseBehavior) {
   BlockingQueue<int> queue;
-  int result;
+  int result = 0;
 
   // Test close with empty queue
   queue.Close();
@@ -90,7 +89,7 @@ TEST(BlockingQueueTest, MultipleThreads) {
 
   // Consumer thread
   std::thread consumer([&queue, &results, &results_mutex]() {
-    int value;
+    int value = 0;
     while (queue.Pop(value)) {
       std::lock_guard<std::mutex> lock(results_mutex);
       results.push_back(value);
@@ -123,7 +122,7 @@ TEST(BlockingQueueTest, TryPopWithMultipleThreads) {
 
   // Consumer thread using TryPop
   std::thread consumer([&queue, &results, &results_mutex, &running]() {
-    int value;
+    int value = 0;
     while (running) {
       if (queue.TryPop(value)) {
         std::lock_guard<std::mutex> lock(results_mutex);
@@ -151,5 +150,4 @@ TEST(BlockingQueueTest, TryPopWithMultipleThreads) {
 }
 
 }  // namespace
-}  // namespace common
-}  // namespace bazel_template
+}  // namespace bazel_template::common

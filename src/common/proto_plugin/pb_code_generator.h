@@ -11,9 +11,7 @@
 #include "google/protobuf/compiler/code_generator.h"
 #include "google/protobuf/descriptor.h"
 
-namespace bazel_template {
-namespace common {
-namespace proto_plugin {
+namespace bazel_template::common::proto_plugin {
 
 class PBCodeGenerator : public google::protobuf::compiler::CodeGenerator {
  public:
@@ -33,14 +31,13 @@ class PBCodeGenerator : public google::protobuf::compiler::CodeGenerator {
   std::string GetFullPath(const std::string& file_name) const;
 
  private:
-  const mutable google::protobuf::FileDescriptor* file_;
-  mutable google::protobuf::compiler::GeneratorContext* generator_context_;
+  const mutable google::protobuf::FileDescriptor* file_{nullptr};
+  mutable google::protobuf::compiler::GeneratorContext* generator_context_{
+      nullptr};
   mutable std::string template_dir_;
   mutable std::string out_path_;
 };
 
-}  // namespace proto_plugin
-}  // namespace common
-}  // namespace bazel_template
+}  // namespace bazel_template::common::proto_plugin
 
 #endif  // BAZEL_TEMPLATE_COMMON_PROTO_PLUGIN_PB_CODE_GENERATOR_H_

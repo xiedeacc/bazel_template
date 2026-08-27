@@ -24,10 +24,11 @@
 
 namespace async_grpc {
 
-RetryStrategy CreateRetryStrategy(RetryIndicator retry_indicator,
-                                  RetryDelayCalculator retry_delay_calculator) {
+RetryStrategy CreateRetryStrategy(
+    const RetryIndicator& retry_indicator,
+    const RetryDelayCalculator& retry_delay_calculator) {
   return [retry_indicator, retry_delay_calculator](
-             int failed_attempts, const ::grpc::Status &status) {
+             int failed_attempts, const ::grpc::Status& status) {
     if (!retry_indicator(failed_attempts, status)) {
       return optional<Duration>();
     }
@@ -37,21 +38,21 @@ RetryStrategy CreateRetryStrategy(RetryIndicator retry_indicator,
 
 RetryIndicator CreateLimitedRetryIndicator(int max_attempts) {
   return
-      [max_attempts](int failed_attempts, const ::grpc::Status & /* status */) {
+      [max_attempts](int failed_attempts, const ::grpc::Status& /* status */) {
         return failed_attempts < max_attempts;
       };
 }
 
 RetryIndicator CreateUnlimitedRetryIndicator() {
-  return [](int /* failed_attempts */, const ::grpc::Status & /* status */) {
+  return [](int /* failed_attempts */, const ::grpc::Status& /* status */) {
     return true;
   };
 }
 
 RetryIndicator CreateUnlimitedRetryIndicator(
-    const std::set<::grpc::StatusCode> &unrecoverable_codes) {
+    const std::set<::grpc::StatusCode>& unrecoverable_codes) {
   return [unrecoverable_codes](int /* failed_attempts */,
-                               const ::grpc::Status &status) {
+                               const ::grpc::Status& status) {
     return unrecoverable_codes.count(status.error_code()) <= 0;
   };
 }
@@ -85,14 +86,14 @@ RetryStrategy CreateUnlimitedConstantDelayStrategy(Duration delay) {
 }
 
 RetryStrategy CreateUnlimitedConstantDelayStrategy(
-    Duration delay, const std::set<::grpc::StatusCode> &unrecoverable_codes) {
+    Duration delay, const std::set<::grpc::StatusCode>& unrecoverable_codes) {
   return CreateRetryStrategy(CreateUnlimitedRetryIndicator(unrecoverable_codes),
                              CreateConstantDelayCalculator(delay));
 }
 
-bool RetryWithStrategy(RetryStrategy retry_strategy,
-                       std::function<::grpc::Status()> op,
-                       std::function<void()> reset) {
+bool RetryWithStrategy(const RetryStrategy& retry_strategy,
+                       const std::function<::grpc::Status()>& op,
+                       const std::function<void()>& reset) {
   optional<Duration> delay;
   int failed_attemps = 0;
   for (;;) {

@@ -15,6 +15,7 @@
  */
 
 #include <cstdlib>
+#include <utility>
 
 #include "glog/logging.h"
 #include "grpc++/impl/codegen/proto_utils.h"
@@ -26,7 +27,7 @@ Service::Service(const std::string& /*service_name*/,
                  const std::map<std::string, RpcHandlerInfo>& rpc_handler_infos,
                  EventQueueSelector event_queue_selector)
     : rpc_handler_infos_(rpc_handler_infos),
-      event_queue_selector_(event_queue_selector) {
+      event_queue_selector_(std::move(event_queue_selector)) {
   for (const auto& rpc_handler_info : rpc_handler_infos_) {
     // The 'handler' below is set to 'nullptr' indicating that we want to
     // handle this method asynchronously.
@@ -52,7 +53,9 @@ void Service::StartServing(
   }
 }
 
-void Service::StopServing() { shutting_down_ = true; }
+void Service::StopServing() {
+  shutting_down_ = true;
+}
 
 void Service::HandleEvent(Rpc::Event event, Rpc* rpc, bool ok) {
   switch (event) {
@@ -134,7 +137,9 @@ void Service::HandleFinish(Rpc* rpc, bool ok) {
   RemoveIfNotPending(rpc);
 }
 
-void Service::HandleDone(Rpc* rpc, bool /*ok*/) { RemoveIfNotPending(rpc); }
+void Service::HandleDone(Rpc* rpc, bool /*ok*/) {
+  RemoveIfNotPending(rpc);
+}
 
 void Service::RemoveIfNotPending(Rpc* rpc) {
   if (!rpc->IsAnyEventPending()) {

@@ -28,7 +28,7 @@ CompletionQueueThread::CompletionQueueThread(
   return completion_queue_.get();
 }
 
-void CompletionQueueThread::Start(CompletionQueueRunner runner) {
+void CompletionQueueThread::Start(const CompletionQueueRunner& runner) {
   CHECK(!worker_thread_);
   worker_thread_ = std::make_unique<std::thread>(
       [this, runner]() { runner(this->completion_queue_.get()); });

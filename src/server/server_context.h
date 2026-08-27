@@ -14,8 +14,7 @@
 #include "src/server/version_info.h"
 #include "src/util/config_manager.h"
 
-namespace bazel_template {
-namespace server {
+namespace bazel_template::server {
 
 class ServerContext {
  public:
@@ -41,7 +40,6 @@ class ServerContext {
   std::string git_commit_;
 };
 
-}  // namespace server
-}  // namespace bazel_template
+}  // namespace bazel_template::server
 
 #endif  // BAZEL_TEMPLATE_SERVER_SERVER_CONTEXT_H_

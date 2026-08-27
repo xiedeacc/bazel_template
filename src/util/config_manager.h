@@ -14,8 +14,7 @@
 #include "src/proto/config.pb.h"
 #include "src/util/util.h"
 
-namespace bazel_template {
-namespace util {
+namespace bazel_template::util {
 
 class ConfigManager {
  private:
@@ -53,7 +52,6 @@ class ConfigManager {
   bazel_template::proto::BaseConfig base_config_;
 };
 
-}  // namespace util
-}  // namespace bazel_template
+}  // namespace bazel_template::util
 
 #endif  // BAZEL_TEMPLATE_UTIL_CONFIG_MANAGER_H_

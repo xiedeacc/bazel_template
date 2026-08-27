@@ -21,12 +21,10 @@
 #include <ostream>
 #include <ratio>
 
-
-namespace async_grpc {
-namespace common {
+namespace async_grpc::common {
 
 constexpr int64_t kUtsEpochOffsetFromUnixEpochInSeconds =
-    (719162ll * 24ll * 60ll * 60ll);
+    (719162LL * 24LL * 60LL * 60LL);
 
 struct UniversalTimeScaleClock {
   using rep = int64_t;
@@ -58,7 +56,6 @@ int64_t ToUniversal(Time time);
 // For logging and unit tests, outputs the timestamp integer.
 std::ostream& operator<<(std::ostream& os, Time time);
 
-}  // namespace common
-}  // namespace async_grpc
+}  // namespace async_grpc::common
 
 #endif  // CPP_GRPC_COMMON_TIME_H_
