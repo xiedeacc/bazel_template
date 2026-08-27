@@ -1,12 +1,9 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 load("//bazel:build.bzl", "cc_test")
-load("//bazel:cpplint.bzl", "cpplint")
 load("//bazel:pb_code_gen_plugin.bzl", "cc_proto_plugin")
 
 package(default_visibility = ["//visibility:public"])
-
-cpplint()
 
 COPTS = GLOBAL_COPTS
 

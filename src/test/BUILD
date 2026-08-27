@@ -1,10 +1,7 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//bazel:build.bzl", "cc_test")
-load("//bazel:cpplint.bzl", "cpplint")
 
 package(default_visibility = ["//visibility:public"])
-
-cpplint()
 
 cc_library(
     name = "test_main",

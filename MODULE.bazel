@@ -32,6 +32,7 @@ bazel_dep(name = "googleapis-python", version = "1.0.0")
 bazel_dep(name = "protobuf", version = "35.1", repo_name = "com_google_protobuf")
 bazel_dep(name = "cc_toolchains", version = "0.0.0")
 bazel_dep(name = "bazel_clang_tidy", version = "0.0.0")
+bazel_dep(name = "aspect_rules_lint", version = "2.8.0")
 bazel_dep(name = "rules_apple", version = "4.5.3", repo_name = "build_bazel_rules_apple")
 bazel_dep(name = "apple_support", version = "2.7.0", repo_name = "build_bazel_apple_support")
 
@@ -71,6 +72,11 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 
 local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository")
 
+llvm_tools = use_repo_rule("//bazel:llvm_tools.bzl", "llvm_tools")
+
+# clang-tidy / clang-format for rules_lint, taken from whatever the host has.
+llvm_tools(name = "llvm_tools")
+
 new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
 
 gen_local_config_git = use_repo_rule("//bazel:common.bzl", "gen_local_config_git")
@@ -87,12 +93,6 @@ git_repository(
     tag = "0.4.0",
 )
 
-new_git_repository(
-    name = "cpplint",
-    build_file = "//bazel:cpplint.BUILD",
-    remote = "https://github.com/cpplint/cpplint.git",
-    tag = "2.0.2",
-)
 
 new_git_repository(
     name = "liburing",

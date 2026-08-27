@@ -1,12 +1,9 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
-load("//bazel:cpplint.bzl", "cpplint")
 load("//bazel:swig_java.bzl", "java_wrap_cc")
 
 package(default_visibility = ["//visibility:public"])
-
-cpplint()
 
 COPTS = GLOBAL_COPTS + select({
     "@platforms//os:windows": [
@@ -108,5 +105,3 @@ cc_test(
         "@rules_cc//cc/runfiles",
     ],
 )
-
-#cpplint()

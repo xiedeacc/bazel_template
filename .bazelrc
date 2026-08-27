@@ -9,16 +9,22 @@ startup:windows --output_user_root=D:/bzl
 # 1. pprof.out generated in bazel test sandbox
 # 2. go install github.com/google/pprof@latest
 
-test:cpplint --test_tag_filters='cpplint'
-test:cpplint --build_tests_only
-test:unit_test --test_tag_filters='-cpplint'
+# Lint with clang-tidy through aspect_rules_lint:
+#   bazel build --config=lint //src/...
+build:lint --aspects=//tools/lint:linters.bzl%clang_tidy
+build:lint --output_groups=rules_lint_human
+build:lint --@aspect_rules_lint//lint:fail_on_violation=true
+
+# Kept so "bazel test --config=unit_test //..." still works. There is no
+# longer a cpplint tag to filter out, so it just avoids building non-test
+# targets.
+test:unit_test --build_tests_only
 
 build:clang-tidy --aspects=@bazel_clang_tidy//clang_tidy:clang_tidy.bzl%clang_tidy_aspect
 build:clang-tidy --output_groups=report
 build:clang-tidy --@bazel_clang_tidy//:clang_tidy_config=//:clang_tidy_config
 
 
-coverage --test_tag_filters=-cpplint
 coverage --copt=-fprofile-instr-generate
 coverage --copt=-fprofile-arcs
 coverage --copt=--coverage

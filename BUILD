@@ -2,7 +2,7 @@ load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(["CPPLINT.cfg"])
+exports_files([".clang-tidy"])
 
 refresh_compile_commands(
     name = "refresh_compile_commands",

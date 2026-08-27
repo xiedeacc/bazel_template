@@ -20,6 +20,7 @@ builds and tests on Linux, macOS, and Windows.
 * Builds with gcc, clang, and msvc-cl
 * `compile_commands.json` generation
 * Sanitizers (asan/msan/tsan/ubsan) and coverage
+* clang-tidy linting and clang-format formatting via aspect_rules_lint
 * mimalloc linked into tests by default
 
 ## Requirements
@@ -63,8 +64,8 @@ Platform configs are selected automatically via
 | `--config=msan` | MemorySanitizer |
 | `--config=tsan` / `--config=thready_tsan` | ThreadSanitizer |
 | `--config=ubsan` | UndefinedBehaviorSanitizer |
-| `--config=clang-tidy` | Run clang-tidy as an aspect |
-| `--config=unit_test` | Tests only, excludes cpplint targets |
+| `--config=lint` | Run clang-tidy over the targets, via aspect_rules_lint |
+| `--config=unit_test` | Build test targets only |
 
 ### Cross compilation
 
@@ -93,11 +94,43 @@ decodes subprocess output with the system codepage and dies on MSVC output that
 is not valid GBK. See *Known issues* — this does not run to completion on
 Windows yet.
 
-### clang-tidy
+### Linting
+
+Linting runs clang-tidy through
+[aspect_rules_lint](https://github.com/aspect-build/rules_lint) as an aspect,
+configured in `tools/lint/linters.bzl`:
 
 ```bash
-bazel build --config=clang-tidy //src/...
+bazel build --config=lint //src/...
 ```
+
+Findings are written next to each target, one file per source:
+
+```bash
+cat bazel-bin/src/util/util_rules_lint/src/util/util.cc.AspectRulesLintClangTidy.out
+```
+
+The clang-tidy binary is not downloaded. `bazel/llvm_tools.bzl` locates one on
+the host — the LLVM tools bundled with Visual Studio Build Tools on Windows, or
+`clang-tidy` on `PATH` elsewhere — because toolchains_llvm, which
+rules_lint's own examples use, has no Windows support. A machine without
+clang-tidy still builds and tests normally; only `--config=lint` fails.
+
+**Linting does not currently fail the build.** `.clang-tidy` sets
+`WarningsAsErrors: ''`, so clang-tidy exits 0 on warnings and the
+`fail_on_violation` setting in `.bazelrc` never triggers. There are 134 existing
+findings across 34 files, so enforcing them is a deliberate cleanup, not a flip of
+a switch. To enforce, set `WarningsAsErrors` in `.clang-tidy` — the rest of the
+wiring is already in place.
+
+### Formatting
+
+```bash
+bazel run //tools/format                  # rewrite in place
+bazel run //tools/format -- --mode=check  # report only
+```
+
+Linux and macOS only — see *Known issues*.
 
 ### Coverage
 
@@ -166,11 +199,16 @@ Windows is a supported first-class target, but a few things are specific to it:
 
 ## Known issues
 
-* **cpplint discovers no targets.** `bazel test --config=cpplint //...` reports
-  `Found 0 test targets`. `_extract_labels` in `bazel/cpplint.bzl` only accepts
-  a tuple, but `native.existing_rules()` no longer returns `srcs`/`hdrs` as
-  tuples, so the macro silently generates nothing. The lint gate is currently a
-  no-op.
+* **`//tools/format` does not run on Windows.** `format_multirun` generates a
+  `.bash` script, which Windows cannot execute directly, and invoking it through
+  bash fails inside rules_multirun with "Cannot find .runfiles directory". Use
+  clang-format directly on Windows, or run the target on Linux/macOS.
+* **clang-tidy reports nothing for headers.** `lint_target_headers` and an
+  explicit `header_filter` both route through rules_lint's `_quoted_arg`, whose
+  quotes survive literally on Windows, so clang-tidy reads the pattern as a
+  filename and exits with "no input files". The option is left unset, so
+  diagnostics are reported per linted source rather than for headers pulled in
+  along the way.
 * **`refresh_compile_commands` does not finish on Windows.** The Bazel 9 load
   errors are patched (`bazel/hedron-compile-commands-py-binary.patch`), so the
   target builds and runs, but the refresh itself still fails: it needs
