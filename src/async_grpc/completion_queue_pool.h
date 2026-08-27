@@ -71,6 +71,12 @@ class CompletionQueuePool {
   CompletionQueuePool();
   ~CompletionQueuePool();
 
+  // Owns the completion-queue threads; there is exactly one pool.
+  CompletionQueuePool(const CompletionQueuePool&) = delete;
+  CompletionQueuePool& operator=(const CompletionQueuePool&) = delete;
+  CompletionQueuePool(CompletionQueuePool&&) = delete;
+  CompletionQueuePool& operator=(CompletionQueuePool&&) = delete;
+
   void Initialize();
   static CompletionQueuePool* completion_queue_pool();
 

@@ -11,8 +11,8 @@
 
 #include "folly/init/Init.h"
 #include "gflags/gflags.h"
-#include "glog/logging.h"
 #include "src/client/websocket_client.h"
+#include "src/common/logging.h"
 #include "src/util/config_manager.h"
 
 bool shutdown_required = false;
@@ -68,42 +68,48 @@ void RegisterSignalHandler() {
 }
 
 int main(int argc, char** argv) {
-  // ProfilerStart("bazel_template_profile");
-  LOG(INFO) << "Client initializing ...";
+  // An exception escaping main() calls std::terminate before anything gets
+  // logged, which makes a startup failure look like a silent crash.
+  try {
+    // ProfilerStart("bazel_template_profile");
+    LOG(INFO) << "Client initializing ...";
 
-  gflags::ParseCommandLineFlags(&argc, &argv, false);
-  FLAGS_log_dir = "./log";
-  FLAGS_stop_logging_if_full_disk = true;
-  FLAGS_logbufsecs = 0;
+    gflags::ParseCommandLineFlags(&argc, &argv, false);
 
-  folly::Init init(&argc, &argv, false);
-  google::EnableLogCleaner(7);
-  // google::InitGoogleLogging(argv[0]); // already called in folly::Init
-  google::SetStderrLogging(google::GLOG_INFO);
-  LOG(INFO) << "CommandLine: " << google::GetArgv();
+    folly::Init init(&argc, &argv, false);
+    bazel_template::logging::Initialize(argv[0], "./log");
+    LOG(INFO) << "CommandLine: "
+              << bazel_template::logging::CommandLine(argc, argv);
 
-  bazel_template::util::ConfigManager::Instance()->Init(
-      "./conf/client_config.json");
+    bazel_template::util::ConfigManager::Instance()->Init(
+        "./conf/client_config.json");
 
-  RegisterSignalHandler();
+    RegisterSignalHandler();
 
-  std::thread shutdown_thread(ShutdownCheckingThread);
+    std::thread shutdown_thread(ShutdownCheckingThread);
 
-  auto server_addr =
-      bazel_template::util::ConfigManager::Instance()->ServerAddr();
-  auto http_port =
-      bazel_template::util::ConfigManager::Instance()->HttpServerPort();
-  bazel_template::client::WebSocketClient websocket_client(
-      ConnectTargetHost(server_addr), std::to_string(http_port));
-  websocket_client.Connect();
+    auto server_addr =
+        bazel_template::util::ConfigManager::Instance()->ServerAddr();
+    auto http_port =
+        bazel_template::util::ConfigManager::Instance()->HttpServerPort();
+    bazel_template::client::WebSocketClient websocket_client(
+        ConnectTargetHost(server_addr), std::to_string(http_port));
+    websocket_client.Connect();
 
-  websocket_client_ptr = &websocket_client;
+    websocket_client_ptr = &websocket_client;
 
-  LOG(INFO) << "Now stopped websocket client";
+    LOG(INFO) << "Now stopped websocket client";
 
-  if (shutdown_thread.joinable()) {
-    shutdown_thread.join();
+    if (shutdown_thread.joinable()) {
+      shutdown_thread.join();
+    }
+    // ProfilerStop();
+    return 0;
+  } catch (const std::exception& e) {
+    LOG(ERROR) << "Client failed: " << e.what();
+    return 1;
+  } catch (...) {
+    LOG(ERROR) << "Client failed with an unknown exception";
+    return 1;
   }
-  // ProfilerStop();
-  return 0;
 }

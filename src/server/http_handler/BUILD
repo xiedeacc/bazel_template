@@ -56,7 +56,7 @@ cc_library(
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
-        "@com_github_glog_glog//:glog",
+        "//src/common:logging",
         "//src/common:defs",
         "//src/util:config_manager",
         "@boost//:beast",

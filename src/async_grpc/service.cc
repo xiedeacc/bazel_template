@@ -17,9 +17,9 @@
 #include <cstdlib>
 #include <utility>
 
-#include "glog/logging.h"
 #include "grpc++/impl/codegen/proto_utils.h"
 #include "src/async_grpc/server.h"
+#include "src/common/logging.h"
 
 namespace async_grpc {
 

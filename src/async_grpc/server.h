@@ -182,6 +182,8 @@ class Server {
  private:
   Server(const Server&) = delete;
   Server& operator=(const Server&) = delete;
+  Server(Server&&) = delete;
+  Server& operator=(Server&&) = delete;
   void RunCompletionQueue(::grpc::ServerCompletionQueue* completion_queue);
   void RunEventQueue(Rpc::EventQueue* event_queue);
   Rpc::EventQueue* SelectNextEventQueueRoundRobin();

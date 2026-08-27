@@ -12,6 +12,19 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES
 LINKOPTS = GLOBAL_LINKOPTS
 
 cc_library(
+    name = "logging",
+    srcs = ["logging.cc"],
+    hdrs = ["logging.h"],
+    copts = COPTS,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        "@com_github_glog_glog//:glog",
+        "@spdlog",
+    ],
+)
+
+cc_library(
     name = "winsock_init",
     srcs = ["winsock_init.cc"],
     copts = COPTS,

@@ -21,12 +21,12 @@
 #include <utility>
 
 #include "completion_queue_pool.h"
-#include "glog/logging.h"
 #include "grpc++/grpc++.h"
 #include "grpc++/impl/codegen/async_stream.h"
 #include "grpc++/impl/codegen/async_unary_call.h"
 #include "grpc++/impl/codegen/proto_utils.h"
 #include "src/async_grpc/rpc_service_method_traits.h"
+#include "src/common/logging.h"
 
 namespace async_grpc {
 
@@ -36,7 +36,15 @@ class AsyncClientInterface {
   friend class CompletionQueue;
 
  public:
+  AsyncClientInterface() = default;
   virtual ~AsyncClientInterface() = default;
+
+  // Rule of five: a virtual destructor suppresses the implicit move
+  // operations, and copying through a base reference would slice.
+  AsyncClientInterface(const AsyncClientInterface&) = delete;
+  AsyncClientInterface& operator=(const AsyncClientInterface&) = delete;
+  AsyncClientInterface(AsyncClientInterface&&) = delete;
+  AsyncClientInterface& operator=(AsyncClientInterface&&) = delete;
 
  private:
   virtual void HandleEvent(
@@ -101,8 +109,8 @@ class AsyncClient<RpcServiceMethodConcept,
   std::shared_ptr<::grpc::Channel> channel_;
   CallbackType callback_;
   ::grpc::CompletionQueue* completion_queue_;
-  const std::string rpc_method_name_;
-  const ::grpc::internal::RpcMethod rpc_method_;
+  std::string rpc_method_name_;
+  ::grpc::internal::RpcMethod rpc_method_;
   std::unique_ptr<::grpc::ClientAsyncResponseReader<ResponseType>>
       response_reader_;
   CompletionQueue::ClientEvent finish_event_;
@@ -209,8 +217,8 @@ class AsyncClient<RpcServiceMethodConcept,
   std::shared_ptr<::grpc::Channel> channel_;
   CallbackType callback_;
   ::grpc::CompletionQueue* completion_queue_;
-  const std::string rpc_method_name_;
-  const ::grpc::internal::RpcMethod rpc_method_;
+  std::string rpc_method_name_;
+  ::grpc::internal::RpcMethod rpc_method_;
   std::unique_ptr<::grpc::ClientAsyncReader<ResponseType>> response_reader_;
   CompletionQueue::ClientEvent write_event_;
   CompletionQueue::ClientEvent read_event_;

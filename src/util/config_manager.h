@@ -10,7 +10,7 @@
 #include <string>
 
 #include "folly/Singleton.h"
-#include "glog/logging.h"
+#include "src/common/logging.h"
 #include "src/proto/config.pb.h"
 #include "src/util/util.h"
 

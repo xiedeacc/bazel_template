@@ -18,8 +18,8 @@
 
 #include <utility>
 
-#include "glog/logging.h"
 #include "src/async_grpc/service.h"
+#include "src/common/logging.h"
 
 namespace async_grpc {
 namespace {
@@ -363,9 +363,15 @@ void Rpc::InitializeReadersAndWriters(
 }
 
 ActiveRpcs::~ActiveRpcs() {
-  common::MutexLocker locker(&lock_);
-  if (!rpcs_.empty()) {
-    LOG(FATAL) << "RPCs still in flight!";
+  // Taking the lock and logging can both throw, and a destructor is
+  // implicitly noexcept. LOG(FATAL) aborts on its own, which is the intent
+  // here; what must not happen is an exception unwinding out of this.
+  try {
+    common::MutexLocker locker(&lock_);
+    if (!rpcs_.empty()) {
+      LOG(FATAL) << "RPCs still in flight!";
+    }
+  } catch (...) {  // NOLINT(bugprone-empty-catch)
   }
 }
 

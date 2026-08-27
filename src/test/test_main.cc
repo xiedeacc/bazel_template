@@ -5,16 +5,16 @@
 
 #include "folly/init/Init.h"
 #include "gflags/gflags.h"
-#include "glog/logging.h"
 #include "gtest/gtest.h"
+#include "src/common/logging.h"
 // #include "lib/tcmalloc/malloc_extension.h"
 
 int main(int argc, char** argv) {
   folly::Init init(&argc, &argv, false);
-  // google::InitGoogleLogging(argv[0]);
-  google::SetStderrLogging(google::GLOG_INFO);
+  // Tests log to the console only; no log files to collect afterwards.
+  bazel_template::logging::Initialize(argv[0], "./log", false);
   ::testing::InitGoogleTest(&argc, argv);
-  google::ParseCommandLineFlags(&argc, &argv, false);
+  gflags::ParseCommandLineFlags(&argc, &argv, false);
   // tcmalloc::MallocExtension::ActivateGuardedSampling();
   return RUN_ALL_TESTS();
 }

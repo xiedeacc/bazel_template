@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 
-#include "glog/logging.h"
+#include "src/common/logging.h"
 
 namespace {
 
@@ -65,7 +65,7 @@ void GenerateLargeJsonFile(const std::string& output_path) {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  google::InitGoogleLogging(argv[0]);
+  bazel_template::logging::Initialize(argv[0]);
 
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0] << " <output_file>" << '\n';

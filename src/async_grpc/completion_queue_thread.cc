@@ -16,7 +16,7 @@
 
 #include "src/async_grpc/completion_queue_thread.h"
 
-#include "glog/logging.h"
+#include "src/common/logging.h"
 
 namespace async_grpc {
 

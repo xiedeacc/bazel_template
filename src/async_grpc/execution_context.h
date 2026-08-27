@@ -17,8 +17,8 @@
 #ifndef CPP_GRPC_EXECUTION_CONTEXT_H
 #define CPP_GRPC_EXECUTION_CONTEXT_H
 
-#include "glog/logging.h"
 #include "src/async_grpc/common/mutex.h"
+#include "src/common/logging.h"
 
 namespace async_grpc {
 
@@ -42,6 +42,8 @@ class ExecutionContext {
         : locker_(lock), execution_context_(execution_context) {}
     Synchronized(const Synchronized&) = delete;
     Synchronized(Synchronized&&) = delete;
+    Synchronized& operator=(const Synchronized&) = delete;
+    Synchronized& operator=(Synchronized&&) = delete;
 
    private:
     common::MutexLocker locker_;
@@ -49,8 +51,13 @@ class ExecutionContext {
   };
   ExecutionContext() = default;
   virtual ~ExecutionContext() = default;
+
+  // Rule of five: a virtual destructor suppresses the implicit move
+  // operations, and copying through a base reference would slice.
   ExecutionContext(const ExecutionContext&) = delete;
   ExecutionContext& operator=(const ExecutionContext&) = delete;
+  ExecutionContext(ExecutionContext&&) = delete;
+  ExecutionContext& operator=(ExecutionContext&&) = delete;
   common::Mutex* lock() { return &lock_; }
 
  private:

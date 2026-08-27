@@ -11,10 +11,10 @@
 #include <utility>
 
 #include "folly/io/IOBuf.h"
-#include "glog/logging.h"
 #include "proxygen/httpserver/RequestHandler.h"
 #include "proxygen/httpserver/ResponseBuilder.h"
 #include "proxygen/lib/utils/UtilInl.h"
+#include "src/common/logging.h"
 #include "src/server/http_handler/websocket_handler.h"
 
 namespace bazel_template::server::http_handler {
@@ -30,6 +30,54 @@ class WebSocketUpgradeHandler : public proxygen::RequestHandler {
  public:
   void onRequest(
       std::unique_ptr<proxygen::HTTPMessage> request) noexcept override {
+    // proxygen declares this noexcept, but header lookups, the response
+    // builder and the handler allocation can all throw. Rejecting the
+    // upgrade beats terminating the server.
+    try {
+      HandleUpgradeRequest(std::move(request));
+    } catch (const std::exception& e) {
+      LOG(ERROR) << "WebSocket upgrade failed: " << e.what();
+    } catch (...) {
+      LOG(ERROR) << "WebSocket upgrade failed";
+    }
+  }
+
+  void onBody(std::unique_ptr<folly::IOBuf> body) noexcept override {
+    // proxygen declares this noexcept; frame parsing and logging can throw.
+    try {
+      if (!ws_handler_) {
+        LOG(ERROR) << "WebSocket handler not initialized";
+        return;
+      }
+      if (!ws_handler_->ProcessFrame(std::move(body))) {
+        LOG(ERROR) << "Failed to process WebSocket frame";
+      }
+    } catch (...) {  // NOLINT(bugprone-empty-catch)
+    }
+  }
+
+  void onEOM() noexcept override {}
+
+  void onUpgrade(proxygen::UpgradeProtocol) noexcept override {}
+
+  void requestComplete() noexcept override {
+    ws_handler_.reset();
+    delete this;
+  }
+
+  void onError(proxygen::ProxygenError err) noexcept override {
+    // proxygen declares this noexcept; logging can throw. `delete this` must
+    // still run, or the handler leaks.
+    try {
+      LOG(INFO) << "Request error: " << proxygen::getErrorString(err);
+    } catch (...) {  // NOLINT(bugprone-empty-catch)
+    }
+    ws_handler_.reset();
+    delete this;
+  }
+
+ private:
+  void HandleUpgradeRequest(std::unique_ptr<proxygen::HTTPMessage> request) {
     request_ = std::move(request);
 
     if (!request_->getHeaders().exists(proxygen::HTTP_HEADER_UPGRADE) ||
@@ -71,32 +119,6 @@ class WebSocketUpgradeHandler : public proxygen::RequestHandler {
     LOG(INFO) << "WebSocket connection upgraded";
   }
 
-  void onBody(std::unique_ptr<folly::IOBuf> body) noexcept override {
-    if (!ws_handler_) {
-      LOG(ERROR) << "WebSocket handler not initialized";
-      return;
-    }
-    if (!ws_handler_->ProcessFrame(std::move(body))) {
-      LOG(ERROR) << "Failed to process WebSocket frame";
-    }
-  }
-
-  void onEOM() noexcept override {}
-
-  void onUpgrade(proxygen::UpgradeProtocol) noexcept override {}
-
-  void requestComplete() noexcept override {
-    ws_handler_.reset();
-    delete this;
-  }
-
-  void onError(proxygen::ProxygenError err) noexcept override {
-    LOG(INFO) << "Request error: " << proxygen::getErrorString(err);
-    ws_handler_.reset();
-    delete this;
-  }
-
- private:
   void HandleMessage(const std::string& message) {
     LOG(INFO) << "Echoing WebSocket message of " << message.size() << " bytes";
     SendFrame(ws_handler_->AssembleFrame(message, 0x1));  // 0x1: text frame

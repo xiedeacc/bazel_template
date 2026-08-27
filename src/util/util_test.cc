@@ -3,8 +3,8 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "glog/logging.h"
 #include "gtest/gtest.h"
+#include "src/common/logging.h"
 
 namespace bazel_template::util {
 

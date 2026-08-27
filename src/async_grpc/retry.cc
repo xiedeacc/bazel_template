@@ -20,7 +20,7 @@
 #include <cmath>
 #include <thread>
 
-#include "glog/logging.h"
+#include "src/common/logging.h"
 
 namespace async_grpc {
 

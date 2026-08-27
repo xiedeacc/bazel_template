@@ -18,8 +18,8 @@
 
 #include <cstdlib>
 
-#include "glog/logging.h"
 #include "src/async_grpc/async_client.h"
+#include "src/common/logging.h"
 
 namespace async_grpc {
 namespace {
@@ -91,7 +91,12 @@ CompletionQueuePool::CompletionQueuePool()
     : number_completion_queues_(kDefaultNumberCompletionQueues) {}
 
 CompletionQueuePool::~CompletionQueuePool() {
-  LOG(INFO) << "~CompletionQueuePool";
+  // Logging allocates, so it can throw, and a destructor is implicitly
+  // noexcept -- an escaping exception would terminate the process.
+  try {
+    LOG(INFO) << "~CompletionQueuePool";
+  } catch (...) {  // NOLINT(bugprone-empty-catch)
+  }
 }
 
 void CompletionQueuePool::Initialize() {

@@ -65,9 +65,22 @@ class CAPABILITY("mutex") Mutex {
    public:
     Locker(Mutex* mutex) ACQUIRE(mutex) : mutex_(mutex), lock_(mutex->mutex_) {}
 
+    // A scoped lock owns the mutex for exactly its own lifetime.
+    Locker(const Locker&) = delete;
+    Locker& operator=(const Locker&) = delete;
+    Locker(Locker&&) = delete;
+    Locker& operator=(Locker&&) = delete;
+
     ~Locker() RELEASE() {
-      lock_.unlock();
-      mutex_->condition_.notify_all();
+      // A destructor is implicitly noexcept, so an exception escaping here
+      // terminates the process. unlock() throws only when the lock is not
+      // held, which cannot happen because the constructor acquired it, but
+      // relying on that silently is what makes such bugs hard to find.
+      try {
+        lock_.unlock();
+        mutex_->condition_.notify_all();
+      } catch (...) {  // NOLINT(bugprone-empty-catch)
+      }
     }
 
     template <typename Predicate>

@@ -8,9 +8,9 @@
 #include <memory>
 #include <string>
 
-#include "glog/logging.h"
 #include "gtest/gtest.h"
 #include "rules_cc/cc/runfiles/runfiles.h"
+#include "src/common/logging.h"
 
 namespace bazel_template::util {
 

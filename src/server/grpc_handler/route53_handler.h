@@ -15,8 +15,8 @@
 #include "aws/route53/model/ChangeBatch.h"
 #include "aws/route53/model/ChangeResourceRecordSetsRequest.h"
 #include "aws/route53/model/ResourceRecordSet.h"
-#include "glog/logging.h"
 #include "src/async_grpc/rpc_handler.h"
+#include "src/common/logging.h"
 #include "src/server/grpc_handler/meta.h"
 
 namespace bazel_template::server::grpc_handler {

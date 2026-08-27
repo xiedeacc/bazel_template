@@ -27,7 +27,15 @@ namespace async_grpc {
 class Rpc;
 class RpcHandlerInterface {
  public:
+  RpcHandlerInterface() = default;
   virtual ~RpcHandlerInterface() = default;
+
+  // Rule of five: a virtual destructor suppresses the implicit move
+  // operations, and copying through a base reference would slice.
+  RpcHandlerInterface(const RpcHandlerInterface&) = delete;
+  RpcHandlerInterface& operator=(const RpcHandlerInterface&) = delete;
+  RpcHandlerInterface(RpcHandlerInterface&&) = delete;
+  RpcHandlerInterface& operator=(RpcHandlerInterface&&) = delete;
   virtual void SetExecutionContext(ExecutionContext* execution_context) = 0;
   virtual void SetRpc(Rpc* rpc) = 0;
   virtual void Initialize() {};
@@ -48,9 +56,9 @@ using RpcHandlerFactory = std::function<std::unique_ptr<RpcHandlerInterface>(
 struct RpcHandlerInfo {
   const google::protobuf::Descriptor* request_descriptor;
   const google::protobuf::Descriptor* response_descriptor;
-  const RpcHandlerFactory rpc_handler_factory;
-  const ::grpc::internal::RpcMethod::RpcType rpc_type;
-  const std::string fully_qualified_name;
+  RpcHandlerFactory rpc_handler_factory;
+  ::grpc::internal::RpcMethod::RpcType rpc_type;
+  std::string fully_qualified_name;
 };
 
 }  // namespace async_grpc

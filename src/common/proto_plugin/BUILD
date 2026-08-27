@@ -57,7 +57,7 @@ cc_binary(
     local_defines = LOCAL_DEFINES,
     deps = [
         "@boost//:algorithm",
-        "@com_github_glog_glog//:glog",
+        "//src/common:logging",
         "@com_google_absl//absl/strings",
         "@com_google_protobuf//:protoc_lib",
     ],

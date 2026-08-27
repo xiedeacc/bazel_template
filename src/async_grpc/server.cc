@@ -16,7 +16,7 @@
 
 #include "src/async_grpc/server.h"
 
-#include "glog/logging.h"
+#include "src/common/logging.h"
 #if BUILD_TRACING
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
 #include "opencensus/trace/trace_config.h"

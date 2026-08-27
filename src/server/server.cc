@@ -9,7 +9,7 @@
 
 #include "folly/init/Init.h"
 #include "gflags/gflags.h"
-#include "glog/logging.h"
+#include "src/common/logging.h"
 #include "src/server/http_server_impl.h"
 #include "src/server/server_context.h"
 #include "src/util/config_manager.h"
@@ -58,15 +58,11 @@ int main(int argc, char** argv) {
   LOG(INFO) << "Server initializing ...";
 
   gflags::ParseCommandLineFlags(&argc, &argv, false);
-  FLAGS_log_dir = "./log";
-  FLAGS_stop_logging_if_full_disk = true;
-  FLAGS_logbufsecs = 0;
 
   folly::Init init(&argc, &argv, false);
-  google::EnableLogCleaner(7);
-  // google::InitGoogleLogging(argv[0]); // already called in folly::Init
-  google::SetStderrLogging(google::GLOG_INFO);
-  LOG(INFO) << "CommandLine: " << google::GetArgv();
+  bazel_template::logging::Initialize(argv[0], "./log");
+  LOG(INFO) << "CommandLine: "
+            << bazel_template::logging::CommandLine(argc, argv);
 
   bazel_template::util::ConfigManager::Instance()->Init(
       "./conf/server_config.json");

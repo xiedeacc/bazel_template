@@ -52,9 +52,16 @@ class Rpc {
   struct EventBase {
     explicit EventBase(Event event) : event(event) {}
     virtual ~EventBase() = default;
+
+    // Rule of five: the virtual destructor suppresses the implicit move
+    // operations, and copying through a base reference would slice.
+    EventBase(const EventBase&) = delete;
+    EventBase& operator=(const EventBase&) = delete;
+    EventBase(EventBase&&) = delete;
+    EventBase& operator=(EventBase&&) = delete;
     virtual void Handle() = 0;
 
-    const Event event;
+    Event event;
   };
 
   class EventDeleter {
@@ -133,6 +140,8 @@ class Rpc {
 
   Rpc(const Rpc&) = delete;
   Rpc& operator=(const Rpc&) = delete;
+  Rpc(Rpc&&) = delete;
+  Rpc& operator=(Rpc&&) = delete;
   void InitializeReadersAndWriters(
       ::grpc::internal::RpcMethod::RpcType rpc_type);
   CompletionQueueRpcEvent* GetRpcEvent(Event event);
@@ -195,6 +204,12 @@ class ActiveRpcs {
  public:
   ActiveRpcs();
   ~ActiveRpcs() EXCLUDES(lock_);
+
+  // Holds a mutex and the live RPC set; neither may be duplicated.
+  ActiveRpcs(const ActiveRpcs&) = delete;
+  ActiveRpcs& operator=(const ActiveRpcs&) = delete;
+  ActiveRpcs(ActiveRpcs&&) = delete;
+  ActiveRpcs& operator=(ActiveRpcs&&) = delete;
 
   std::shared_ptr<Rpc> Add(std::unique_ptr<Rpc> rpc) EXCLUDES(lock_);
   bool Remove(Rpc* rpc) EXCLUDES(lock_);

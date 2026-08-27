@@ -19,7 +19,7 @@
 #include "folly/io/IOBuf.h"
 #include "folly/io/IOBufQueue.h"
 #include "folly/lang/Bits.h"
-#include "glog/logging.h"
+#include "src/common/logging.h"
 
 namespace bazel_template::server::http_handler {
 

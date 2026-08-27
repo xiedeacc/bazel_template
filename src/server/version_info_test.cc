@@ -7,8 +7,8 @@
 
 #include <string>
 
-#include "glog/logging.h"
 #include "gtest/gtest.h"
+#include "src/common/logging.h"
 
 TEST(VersionInfo, Info) {
   std::string git_ver = GIT_VERSION;

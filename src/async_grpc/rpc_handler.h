@@ -19,13 +19,13 @@
 
 #include <utility>
 
-#include "glog/logging.h"
 #include "google/protobuf/message.h"
 #include "src/async_grpc/execution_context.h"
 #include "src/async_grpc/rpc.h"
 #include "src/async_grpc/rpc_handler_interface.h"
 #include "src/async_grpc/rpc_service_method_traits.h"
 #include "src/async_grpc/span.h"
+#include "src/common/logging.h"
 #if BUILD_TRACING
 #include "src/async_grpc/opencensus_span.h"
 #endif
@@ -69,7 +69,7 @@ class RpcHandler : public RpcHandlerInterface {
     }
 
    private:
-    const std::weak_ptr<Rpc> rpc_;
+    std::weak_ptr<Rpc> rpc_;
   };
 
 #if BUILD_TRACING

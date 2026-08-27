@@ -19,7 +19,6 @@
 
 #include <optional>
 
-#include "glog/logging.h"
 #include "grpc++/grpc++.h"
 #include "grpc++/impl/codegen/client_unary_call.h"
 #include "grpc++/impl/codegen/proto_utils.h"
@@ -27,6 +26,7 @@
 #include "src/async_grpc/retry.h"
 #include "src/async_grpc/rpc_handler_interface.h"
 #include "src/async_grpc/rpc_service_method_traits.h"
+#include "src/common/logging.h"
 
 namespace async_grpc {
 
@@ -116,8 +116,8 @@ class Client<RpcServiceMethodConcept, ::grpc::internal::RpcMethod::NORMAL_RPC> {
 
   std::shared_ptr<::grpc::Channel> channel_;
   std::unique_ptr<::grpc::ClientContext> client_context_;
-  const std::string rpc_method_name_;
-  const ::grpc::internal::RpcMethod rpc_method_;
+  std::string rpc_method_name_;
+  ::grpc::internal::RpcMethod rpc_method_;
   std::optional<common::Duration> timeout_;
 
   ResponseType response_;
@@ -176,8 +176,8 @@ class Client<RpcServiceMethodConcept,
 
   std::shared_ptr<::grpc::Channel> channel_;
   std::unique_ptr<::grpc::ClientContext> client_context_;
-  const std::string rpc_method_name_;
-  const ::grpc::internal::RpcMethod rpc_method_;
+  std::string rpc_method_name_;
+  ::grpc::internal::RpcMethod rpc_method_;
 
   std::unique_ptr<::grpc::ClientWriter<RequestType>> client_writer_;
   ResponseType response_;
@@ -231,8 +231,8 @@ class Client<RpcServiceMethodConcept,
 
   std::shared_ptr<::grpc::Channel> channel_;
   std::unique_ptr<::grpc::ClientContext> client_context_;
-  const std::string rpc_method_name_;
-  const ::grpc::internal::RpcMethod rpc_method_;
+  std::string rpc_method_name_;
+  ::grpc::internal::RpcMethod rpc_method_;
 
   std::unique_ptr<::grpc::ClientReader<ResponseType>> client_reader_;
 };
@@ -293,8 +293,8 @@ class Client<RpcServiceMethodConcept,
 
   std::shared_ptr<::grpc::Channel> channel_;
   std::unique_ptr<::grpc::ClientContext> client_context_;
-  const std::string rpc_method_name_;
-  const ::grpc::internal::RpcMethod rpc_method_;
+  std::string rpc_method_name_;
+  ::grpc::internal::RpcMethod rpc_method_;
 
   std::unique_ptr<::grpc::ClientReaderWriter<RequestType, ResponseType>>
       client_reader_writer_;

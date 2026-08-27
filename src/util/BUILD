@@ -74,7 +74,7 @@ cc_library(
         "@boost//:algorithm",
         "@boost//:beast",
         "@boost//:iostreams",
-        "@com_github_glog_glog//:glog",
+        "//src/common:logging",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",

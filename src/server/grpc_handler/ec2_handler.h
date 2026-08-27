@@ -13,8 +13,8 @@
 #include "aws/ec2/EC2Client.h"
 #include "aws/ec2/model/StartInstancesRequest.h"
 #include "aws/ec2/model/StopInstancesRequest.h"
-#include "glog/logging.h"
 #include "src/async_grpc/rpc_handler.h"
+#include "src/common/logging.h"
 #include "src/server/grpc_handler/meta.h"
 
 namespace bazel_template::server::grpc_handler {

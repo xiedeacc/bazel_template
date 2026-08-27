@@ -21,9 +21,9 @@
 #include <deque>
 #include <memory>
 
-#include "glog/logging.h"
 #include "src/async_grpc/common/mutex.h"
 #include "src/async_grpc/common/time.h"
+#include "src/common/logging.h"
 
 namespace async_grpc::common {
 
@@ -39,6 +39,8 @@ class BlockingQueue {
 
   BlockingQueue(const BlockingQueue&) = delete;
   BlockingQueue& operator=(const BlockingQueue&) = delete;
+  BlockingQueue(BlockingQueue&&) = delete;
+  BlockingQueue& operator=(BlockingQueue&&) = delete;
 
   // Constructs a blocking queue with a size of 'queue_size'.
   explicit BlockingQueue(const size_t queue_size) : queue_size_(queue_size) {}

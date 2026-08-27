@@ -15,8 +15,8 @@
 #include "boost/beast/core/buffers_to_string.hpp"
 #include "boost/beast/websocket/stream.hpp"
 #include "folly/executors/CPUThreadPoolExecutor.h"
-#include "glog/logging.h"
 #include "src/common/blocking_queue.h"
+#include "src/common/logging.h"
 #include "src/proto/enums.pb.h"
 
 namespace bazel_template::client {
@@ -32,7 +32,20 @@ class WebSocketClient {
         running_(false),
         thread_pool_(std::make_shared<folly::CPUThreadPoolExecutor>(2)) {}
 
-  ~WebSocketClient() { Stop(); }
+  // Owns a socket, an io_context and a thread pool; none may be duplicated.
+  WebSocketClient(const WebSocketClient&) = delete;
+  WebSocketClient& operator=(const WebSocketClient&) = delete;
+  WebSocketClient(WebSocketClient&&) = delete;
+  WebSocketClient& operator=(WebSocketClient&&) = delete;
+
+  ~WebSocketClient() {
+    // Stop() closes a socket and joins the executor, either of which can
+    // throw; a destructor is implicitly noexcept, so let nothing escape.
+    try {
+      Stop();
+    } catch (...) {  // NOLINT(bugprone-empty-catch)
+    }
+  }
 
   void Connect() {
     try {

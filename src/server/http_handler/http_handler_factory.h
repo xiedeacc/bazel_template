@@ -16,15 +16,30 @@ class HTTPHandlerFactory : public proxygen::RequestHandlerFactory {
  public:
   void onServerStart(folly::EventBase*) noexcept override {}
 
-  void onServerStop() noexcept override { LOG(INFO) << "HTTP server stopped"; }
+  void onServerStop() noexcept override {
+    // proxygen declares this noexcept; logging allocates and can throw.
+    try {
+      LOG(INFO) << "HTTP server stopped";
+    } catch (...) {  // NOLINT(bugprone-empty-catch)
+    }
+  }
 
   proxygen::RequestHandler* onRequest(
       proxygen::RequestHandler*, proxygen::HTTPMessage* msg) noexcept override {
-    const std::string& path = msg->getPath();
-    const std::string& method = msg->getMethodString();
+    // proxygen declares this noexcept, but reading the headers and allocating
+    // the handler can both throw. Refusing the request is better than
+    // terminating the server.
+    try {
+      const std::string& path = msg->getPath();
+      const std::string& method = msg->getMethodString();
 
-    if (method == "GET" && path == "/api/v1/folder/load") {
-      return new WebSocketUpgradeHandler();
+      if (method == "GET" && path == "/api/v1/folder/load") {
+        return new WebSocketUpgradeHandler();
+      }
+    } catch (const std::exception& e) {
+      LOG(ERROR) << "Failed to route request: " << e.what();
+    } catch (...) {
+      LOG(ERROR) << "Failed to route request";
     }
 
     return nullptr;

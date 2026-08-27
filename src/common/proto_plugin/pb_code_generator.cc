@@ -12,10 +12,10 @@
 #include <string>
 
 #include "boost/algorithm/string/replace.hpp"
-#include "glog/logging.h"
 #include "google/protobuf/compiler/plugin.h"
 #include "google/protobuf/io/printer.h"
 #include "google/protobuf/io/zero_copy_stream.h"
+#include "src/common/logging.h"
 
 using google::protobuf::FileDescriptor;
 using google::protobuf::compiler::GeneratorContext;

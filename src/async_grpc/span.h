@@ -30,6 +30,13 @@ class Span {
   Span() = default;
   virtual ~Span() = default;
 
+  // Rule of five: a virtual destructor suppresses the implicit move
+  // operations, and copying through a base reference would slice.
+  Span(const Span&) = delete;
+  Span& operator=(const Span&) = delete;
+  Span(Span&&) = delete;
+  Span& operator=(Span&&) = delete;
+
   // Creates a new child span with this span as the parent.
   virtual std::unique_ptr<Span> CreateChildSpan(const std::string& name) = 0;
 

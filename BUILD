@@ -12,7 +12,6 @@ refresh_compile_commands(
     # script then fails parsing that output as makefile deps. Our own sources
     # are what an IDE needs anyway; headers from deps still resolve through the
     # include paths recorded here.
-    exclude_external_sources = True,
     exclude_headers = "external",
     targets = {
         "//src/...": "",
