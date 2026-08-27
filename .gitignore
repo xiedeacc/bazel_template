@@ -9,3 +9,4 @@ external
 #src/proto/*.cc
 /.vscode/
 log/
+compile_commands.json

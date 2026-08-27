@@ -91,8 +91,14 @@ PYTHONUTF8=1 bazel run //:refresh_compile_commands
 
 `PYTHONUTF8=1` is needed on a non-UTF-8 Windows locale: the refresh script
 decodes subprocess output with the system codepage and dies on MSVC output that
-is not valid GBK. See *Known issues* — this does not run to completion on
-Windows yet.
+is not valid GBK.
+
+The target sets `exclude_external_sources` and scopes itself to `//src/...`. To
+emit entries for a dependency the script re-runs the compiler for dependency
+scanning, and boost ships an `.S` assembled by MASM, which neither accepts the
+C++ flags nor writes the object file; the script then fails trying to parse that
+output as makefile deps. Headers from dependencies still resolve through the
+include paths recorded for our own sources.
 
 ### Linting
 
@@ -132,12 +138,14 @@ everything under `external/`, `bazel-out/`, and `_virtual_includes/`.
 ### Formatting
 
 ```bash
-./format.sh          # rewrite in place
-./format.sh check    # report only, non-zero exit on violations
+bazel run //tools/format:fix      # rewrite in place
+bazel run //tools/format:check    # report only, non-zero exit on violations
 ```
 
-`format.sh` works on every platform. `bazel run //tools/format` does the same
-thing on Linux and macOS but not on Windows — see *Known issues*.
+Both cover every `.cc` and `.h` in the repo. They alias the per-language target
+rather than format_multirun's own aggregate, which cannot find its runfiles on
+Windows; `.bazelrc` adds `run:windows --run_under=bash` so `bazel run` can start
+the `.bash` script rules_lint emits.
 
 ### Coverage
 
@@ -206,17 +214,10 @@ Windows is a supported first-class target, but a few things are specific to it:
 
 ## Known issues
 
-* **`bazel run //tools/format` does not work on Windows.** `format_multirun`
-  emits a `.bash` script, which Bazel cannot CreateProcess, and the multirun
-  aggregator locates its runfiles next to `argv[0]`, which fails against
-  Windows' manifest-based layout even when started from bash by hand. `format.sh`
-  sidesteps both by calling the per-language script, which does not use multirun.
-* **`refresh_compile_commands` does not finish on Windows.** The Bazel 9 load
-  errors are patched (`bazel/hedron-compile-commands-py-binary.patch`), so the
-  target builds and runs, but the refresh itself still fails: it needs
-  `PYTHONUTF8=1` on a GBK locale, and then re-runs the build with its own flags,
-  where boost's MASM assembly step fails to write its object file. Untested on
-  Linux and macOS, which likely avoid both problems.
+* **`bazel run //tools/format` (the format_multirun aggregate) does not work on
+  Windows.** It shells out to rules_multirun, which locates its runfiles next to
+  `argv[0]` and so fails against Windows' manifest-based layout. Use
+  `//tools/format:fix` and `//tools/format:check`, which skip the aggregate.
 
 ## Future work
 

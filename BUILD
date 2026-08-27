@@ -6,9 +6,16 @@ exports_files([".clang-tidy"])
 
 refresh_compile_commands(
     name = "refresh_compile_commands",
+    # Skip sources in external repos. To emit their entries the script re-runs
+    # the compiler for dependency scanning, and boost ships an .S assembled by
+    # MASM, which neither understands the C++ flags nor writes the .obj -- the
+    # script then fails parsing that output as makefile deps. Our own sources
+    # are what an IDE needs anyway; headers from deps still resolve through the
+    # include paths recorded here.
+    exclude_external_sources = True,
+    exclude_headers = "external",
     targets = {
-        "//...": "",
-        #"//:my_output_1": "--important_flag1 --important_flag2=true",
+        "//src/...": "",
     },
 )
 

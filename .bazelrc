@@ -119,6 +119,7 @@ build:windows --extra_toolchains='@openssl//:preinstalled_pkgconfig_toolchain'
 build:windows --workspace_status_command=bazel/workspace_status.bat
 build:windows --java_runtime_version="remotejdk_21"
 build:windows --features=-parse_showincludes
+
 # local_config_cc enables default_cpp_std/default_c_std, which prepend
 # /std:c++17 and /std:c17 to every compile. Turn them off so the standard
 # below is the only one on the command line (silences warning D9025).
