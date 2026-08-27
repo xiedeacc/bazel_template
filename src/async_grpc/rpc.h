@@ -132,16 +132,17 @@ class Rpc {
   std::weak_ptr<Rpc> GetWeakPtr();
   RpcHandlerInterface* handler() { return handler_.get(); }
 
+  Rpc(const Rpc&) = delete;
+  Rpc& operator=(const Rpc&) = delete;
+  Rpc(Rpc&&) = delete;
+  Rpc& operator=(Rpc&&) = delete;
+
  private:
   struct SendItem {
     std::unique_ptr<google::protobuf::Message> msg;
     ::grpc::Status status;
   };
 
-  Rpc(const Rpc&) = delete;
-  Rpc& operator=(const Rpc&) = delete;
-  Rpc(Rpc&&) = delete;
-  Rpc& operator=(Rpc&&) = delete;
   void InitializeReadersAndWriters(
       ::grpc::internal::RpcMethod::RpcType rpc_type);
   CompletionQueueRpcEvent* GetRpcEvent(Event event);

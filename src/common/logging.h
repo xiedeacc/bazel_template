@@ -19,8 +19,7 @@
 
 #include "glog/logging.h"
 
-namespace bazel_template {
-namespace logging {
+namespace bazel_template::logging {
 
 enum class Severity {
   kInfo,
@@ -39,6 +38,8 @@ class LogMessage {
   LogMessage(const char* file, int line, Severity severity);
   LogMessage(const LogMessage&) = delete;
   LogMessage& operator=(const LogMessage&) = delete;
+  LogMessage(LogMessage&&) = delete;
+  LogMessage& operator=(LogMessage&&) = delete;
   ~LogMessage();
 
   std::ostream& stream() { return stream_; }
@@ -55,6 +56,8 @@ class FatalLogMessage {
   FatalLogMessage(const char* file, int line);
   FatalLogMessage(const FatalLogMessage&) = delete;
   FatalLogMessage& operator=(const FatalLogMessage&) = delete;
+  FatalLogMessage(FatalLogMessage&&) = delete;
+  FatalLogMessage& operator=(FatalLogMessage&&) = delete;
   [[noreturn]] ~FatalLogMessage();
 
   std::ostream& stream() { return stream_; }
@@ -70,6 +73,8 @@ class CheckMessage {
   CheckMessage(bool condition, const char* file, int line, const char* expr);
   CheckMessage(const CheckMessage&) = delete;
   CheckMessage& operator=(const CheckMessage&) = delete;
+  CheckMessage(CheckMessage&&) = delete;
+  CheckMessage& operator=(CheckMessage&&) = delete;
   ~CheckMessage();
 
   std::ostream& stream() { return stream_; }
@@ -81,9 +86,12 @@ class CheckMessage {
   std::ostringstream stream_;
 };
 
-}  // namespace logging
-}  // namespace bazel_template
+}  // namespace bazel_template::logging
 
+// A logging macro has to be a macro: it captures __FILE__ and __LINE__ at
+// the call site, and CHECK has to leave its message unevaluated when the
+// condition holds. A function can do neither.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #ifdef LOG
 #undef LOG
 #endif
@@ -163,5 +171,6 @@ class CheckMessage {
 #define CHECK_LE(value1, value2) CHECK_OP(<=, <=, value1, value2)
 #define CHECK_GT(value1, value2) CHECK_OP(>, >, value1, value2)
 #define CHECK_GE(value1, value2) CHECK_OP(>=, >=, value1, value2)
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 #endif  // BAZEL_TEMPLATE_COMMON_LOGGING_H_

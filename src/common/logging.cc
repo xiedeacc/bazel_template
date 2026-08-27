@@ -14,8 +14,7 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 
-namespace bazel_template {
-namespace logging {
+namespace bazel_template::logging {
 namespace {
 
 constexpr size_t kMaxLogFileSize = 10 * 1024 * 1024;
@@ -169,5 +168,4 @@ CheckMessage::~CheckMessage() {
   std::abort();
 }
 
-}  // namespace logging
-}  // namespace bazel_template
+}  // namespace bazel_template::logging

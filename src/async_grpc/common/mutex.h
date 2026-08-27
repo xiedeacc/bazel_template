@@ -26,6 +26,9 @@ namespace async_grpc::common {
 
 // Enable thread safety attributes only with clang.
 // The attributes can be safely erased when compiling with other compilers.
+// Clang thread-safety annotations expand to __attribute__((...)), which
+// only a macro can attach to a declaration. There is no function form.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #if defined(__SUPPORT_TS_ANNOTATION__) || defined(__clang__)
 #define THREAD_ANNOTATION_ATTRIBUTE__(x) __attribute__((x))
 #else
@@ -50,6 +53,7 @@ namespace async_grpc::common {
   THREAD_ANNOTATION_ATTRIBUTE__(release_capability(__VA_ARGS__))
 
 #define EXCLUDES(...) THREAD_ANNOTATION_ATTRIBUTE__(locks_excluded(__VA_ARGS__))
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 #define NO_THREAD_SAFETY_ANALYSIS \
   THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)

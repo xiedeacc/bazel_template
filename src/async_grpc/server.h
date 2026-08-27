@@ -179,11 +179,12 @@ class Server {
       const std::string& service_name,
       const std::map<std::string, RpcHandlerInfo>& rpc_handler_infos);
 
- private:
   Server(const Server&) = delete;
   Server& operator=(const Server&) = delete;
   Server(Server&&) = delete;
   Server& operator=(Server&&) = delete;
+
+ private:
   void RunCompletionQueue(::grpc::ServerCompletionQueue* completion_queue);
   void RunEventQueue(Rpc::EventQueue* event_queue);
   Rpc::EventQueue* SelectNextEventQueueRoundRobin();

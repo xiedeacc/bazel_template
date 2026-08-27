@@ -28,6 +28,11 @@
 //   struct Foo { static char* foo() { return nullptr; } };
 //   DEFINE_HAS_SIGNATURE(has_foo, T::foo, char*(*)(void));
 //   static_assert(has_foo_v<Foo>, "foo() is not implemented")
+// These stamp out a type whose name comes from a parameter. A template cannot
+// introduce a new identifier, so a macro is the only way to write them; C++20
+// concepts would replace the detection logic but still could not name the
+// resulting trait.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define DEFINE_HAS_SIGNATURE(traitsName, funcName, signature)                  \
   template <typename U>                                                        \
   class traitsName {                                                           \
@@ -72,6 +77,7 @@
       return methodName;                                                 \
     }                                                                    \
   };
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 namespace async_grpc {
 
