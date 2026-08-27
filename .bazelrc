@@ -92,7 +92,6 @@ build --output_filter="^//"
 build -c opt
 build --define cross_compiling=false
 build --jobs=8
-build --conlyopt='-std=gnu17'
 build --incompatible_disallow_empty_glob=false
 #build --remote_cache=http://192.168.1.101/bazel_cache
 #build --keep_going
@@ -114,6 +113,15 @@ build:windows --extra_toolchains='@openssl//:preinstalled_pkgconfig_toolchain'
 build:windows --workspace_status_command=bazel/workspace_status.bat
 build:windows --java_runtime_version="remotejdk_21"
 build:windows --features=-parse_showincludes
+# local_config_cc enables default_cpp_std/default_c_std, which prepend
+# /std:c++17 and /std:c17 to every compile. Turn them off so the standard
+# below is the only one on the command line (silences warning D9025).
+build:windows --features=-default_cpp_std
+build:windows --features=-default_c_std
+build:windows --host_features=-default_cpp_std
+build:windows --host_features=-default_c_std
+build:windows --conlyopt='/std:c17'
+build:windows --host_conlyopt='/std:c17'
 build:windows --per_file_copt=.*src/proto/.*\\.grpc\\.pb\\.cc@/wd4996
 build:windows --action_env=PATH=D:/software/gperf/bin;C:/Progra~1/Git/usr/bin;C:/Progra~1/Git/bin;C:/Windows;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0
 
@@ -127,6 +135,8 @@ build:macos --host_copt='-g'
 build:macos --host_copt='-O2'
 build:macos --host_copt='-Wall'
 build:macos --host_cxxopt='-std=c++20'
+build:macos --conlyopt='-std=gnu17'
+build:macos --host_conlyopt='-std=gnu17'
 build:macos --dynamic_mode=off
 build:macos --workspace_status_command=bazel/workspace_status.sh
 build:macos --per_file_copt=.*src/proto/.*\\.grpc\\.pb\\.cc@-Wno-deprecated-declarations
@@ -141,6 +151,8 @@ build:linux --host_copt='-g'
 build:linux --host_copt='-O2'
 build:linux --host_copt='-Wall'
 build:linux --host_cxxopt='-std=c++20'
+build:linux --conlyopt='-std=gnu17'
+build:linux --host_conlyopt='-std=gnu17'
 #build:linux --workspace_status_command=bazel/workspace_status.sh
 build:linux --per_file_copt=.*src/proto/.*\\.grpc\\.pb\\.cc@-Wno-deprecated-declarations
 
