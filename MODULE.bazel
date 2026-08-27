@@ -516,6 +516,11 @@ new_git_repository(
 git_repository(
     name = "hedron_compile_commands",
     commit = "abb61a688167623088f8768cc9264798df6a9d10",
+    # Bazel 9 removed the native py_binary rule; upstream is unfixed as of
+    # this commit, which is HEAD. Without the patch the root package fails
+    # to load and "bazel build //..." breaks.
+    patch_args = ["-p1"],
+    patches = ["//bazel:hedron-compile-commands-py-binary.patch"],
     remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
 )
 
