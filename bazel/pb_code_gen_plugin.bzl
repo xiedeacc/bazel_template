@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", _cc_library = "cc_library")
+
 def _get_external_root(ctx):
     gendir = ctx.var["GENDIR"] + "/"
     external_roots = []
@@ -7,7 +9,7 @@ def _get_external_root(ctx):
             path = path[len(gendir):]
         path = path.split("/")
         if path[0] == "external":
-            external_roots += ["/".join(path[0:2])]
+            external_roots.append("/".join(path[0:2]))
     roots = depset(external_roots)
     n = len(external_roots)
     if n > 1:
@@ -66,7 +68,7 @@ def _proto_generate_impl(ctx):
 
     protoc_cmd = [protoc]
     for path in ctx.attr.proto_paths:
-        protoc_cmd += ["--proto_path=" + path]
+        protoc_cmd.append("--proto_path=" + path)
 
     all_inputs = [ctx.file.src]
     for dep in ctx.attr.proto_deps:
@@ -76,28 +78,28 @@ def _proto_generate_impl(ctx):
             rpath = "/".join(ppath.split("/")[4:])
             if rpath == "":
                 continue
-            protoc_cmd += ["--proto_path" + rpath + "=" + ppath]
+            protoc_cmd.append("--proto_path" + rpath + "=" + ppath)
 
     all_inputs += ctx.files.data
 
     out_path = ",".join([f.path for f in out_files])
 
-    protoc_cmd += ["--plugin=protoc-gen-PLUGIN=" + plugin]
-    protoc_cmd += ["--PLUGIN_out=" + execdir]
-    protoc_cmd += ["--PLUGIN_opt=" + ",".join([ctx.attr.template_dir, out_path])]
-    protoc_cmd += [src_proto_path]
+    protoc_cmd.append("--plugin=protoc-gen-PLUGIN=" + plugin)
+    protoc_cmd.append("--PLUGIN_out=" + execdir)
+    protoc_cmd.append("--PLUGIN_opt=" + ",".join([ctx.attr.template_dir, out_path]))
+    protoc_cmd.append(src_proto_path)
 
     cmds = []
     if execdir != ".":
-        cmds += ["cd %s" % execdir]
-    cmds += [" ".join(protoc_cmd)]
+        cmds.append("cd %s" % execdir)
+    cmds.append(" ".join(protoc_cmd))
 
     ctx.actions.run_shell(
         inputs = all_inputs + [ctx.executable.plugin] + [ctx.executable.protoc],
         outputs = out_files,
         command = " && ".join(cmds),
     )
-    return struct(files = depset(out_files))
+    return [DefaultInfo(files = depset(out_files))]
 
 _proto_generate = rule(
     attrs = {
@@ -112,7 +114,7 @@ _proto_generate = rule(
         "plugin": attr.label(
             mandatory = True,
             executable = True,
-            cfg = "host",
+            cfg = "exec",
             allow_files = True,
         ),
         "proto_deps": attr.label_list(
@@ -130,7 +132,7 @@ _proto_generate = rule(
             mandatory = True,
             default = Label("@com_google_protobuf//:protoc"),
             executable = True,
-            cfg = "host",
+            cfg = "exec",
             allow_files = True,
         ),
     },
@@ -167,9 +169,9 @@ def cc_proto_plugin(
         **kwargs):
     proto_name = name + "_proto"
     proto_generate(proto_name, src, outs, data, plugin, proto_deps, proto_paths, template_dir, protoc)
-    native.cc_library(
+    _cc_library(
         name = name,
-        srcs = [proto_name],
+        hdrs = [proto_name],
         deps = depset(deps + ["@com_google_protobuf//:protobuf"]).to_list(),
         visibility = ["//visibility:public"],
         **kwargs

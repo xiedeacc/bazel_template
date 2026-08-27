@@ -1,0 +1,22 @@
+diff --git a/BUILD.bazel b/BUILD.bazel
+index 5c6f307..278156b 100644
+--- a/BUILD.bazel
++++ b/BUILD.bazel
+@@ -31,6 +31,8 @@
+ #
+ #   Bazel Build for Google C++ Testing Framework(Google Test)
+
++load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
++
+ package(default_visibility = ["//visibility:public"])
+
+ licenses(["notice"])
+diff --git a/googletest/src/gtest-filepath.cc b/googletest/src/gtest-filepath.cc
+index f977e4e..f8eb98d 100644
+--- a/googletest/src/gtest-filepath.cc
++++ b/googletest/src/gtest-filepath.cc
+@@ -48,1 +48,4 @@
+ #include <limits.h>
++#ifdef __linux__
++#include <linux/limits.h>
++#endif

@@ -5,6 +5,10 @@
 
 // #include "gperftools/profiler.h"
 
+#include <signal.h>
+
+#include <string>
+
 #include "folly/init/Init.h"
 #include "gflags/gflags.h"
 #include "glog/logging.h"
@@ -16,10 +20,36 @@ std::mutex mutex;
 std::condition_variable cv;
 bazel_template::client::WebSocketClient *websocket_client_ptr = nullptr;
 
+const char *SignalName(int sig);
+
 void SignalHandler(int sig) {
-  LOG(INFO) << "Got signal: " << strsignal(sig) << std::endl;
+  LOG(INFO) << "Got signal: " << SignalName(sig) << " (" << sig << ")"
+            << std::endl;
   shutdown_required = true;
   cv.notify_all();
+}
+
+const char *SignalName(int sig) {
+#if defined(_WIN32)
+  (void)sig;
+  return "signal";
+#else
+  return strsignal(sig);
+#endif
+}
+
+// server_addr in the config is a *bind* address. Wildcards are not valid
+// connect targets: Windows rejects them with WSAEADDRNOTAVAIL(10049), while
+// Linux quietly treats them as loopback. Normalize so the client behaves the
+// same everywhere.
+std::string ConnectTargetHost(const std::string &bind_addr) {
+  if (bind_addr.empty() || bind_addr == "0.0.0.0") {
+    return "127.0.0.1";
+  }
+  if (bind_addr == "::" || bind_addr == "[::]") {
+    return "::1";
+  }
+  return bind_addr;
 }
 
 void ShutdownCheckingThread(void) {
@@ -31,9 +61,11 @@ void ShutdownCheckingThread(void) {
 void RegisterSignalHandler() {
   signal(SIGTERM, &SignalHandler);
   signal(SIGINT, &SignalHandler);
+#if !defined(_WIN32)
   signal(SIGQUIT, &SignalHandler);
   signal(SIGHUP, SIG_IGN);
   signal(SIGPIPE, SIG_IGN);
+#endif
 }
 
 int main(int argc, char **argv) {
@@ -63,7 +95,7 @@ int main(int argc, char **argv) {
   auto http_port =
       bazel_template::util::ConfigManager::Instance()->HttpServerPort();
   bazel_template::client::WebSocketClient websocket_client(
-      server_addr, std::to_string(http_port));
+      ConnectTargetHost(server_addr), std::to_string(http_port));
   websocket_client.Connect();
 
   websocket_client_ptr = &websocket_client;

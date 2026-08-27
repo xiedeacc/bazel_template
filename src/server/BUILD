@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
 load("//bazel:cpplint.bzl", "cpplint")
@@ -114,12 +115,10 @@ cc_binary(
     name = "server",
     srcs = ["server.cc"],
     copts = COPTS,
-    linkopts = LINKOPTS + select({
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [],
-        "//conditions:default": [],
-    }),
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
+        "//src/common:winsock_init",
         ":server_context",
         "//src/proto:cc_grpc_service",
         "//src/server/http_handler",

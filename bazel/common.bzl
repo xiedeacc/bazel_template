@@ -1,4 +1,29 @@
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
+"""Global Bazel C/C++ build options and helpers.
+
+Defines GLOBAL_COPTS, GLOBAL_LINKOPTS, and related selections.
+Wires OS+cpu_model config_settings to per-CPU feature flag lists.
+"""
+
+load(
+    "//bazel/cpu:n105.bzl",
+    "n105_cpu_instruction_features_gcc_clang",
+    "n105_cpu_instruction_features_msvc",
+)
+load(
+    "//bazel/cpu:neoverse-11.bzl",
+    "neoverse11_cpu_instruction_features_gcc_clang",
+    "neoverse11_cpu_instruction_features_msvc",
+)
+load(
+    "//bazel/cpu:ryzen5.bzl",
+    "ryzen5_cpu_instruction_features_gcc_clang",
+    "ryzen5_cpu_instruction_features_msvc",
+)
+load(
+    "//bazel/cpu:ryzen9.bzl",
+    "ryzen9_cpu_instruction_features_gcc_clang",
+    "ryzen9_cpu_instruction_features_msvc",
+)
 
 GLOBAL_COPTS = select({
     "@platforms//os:windows": [
@@ -71,34 +96,56 @@ GLOBAL_COPTS = select({
         #"/errorReport:prompt",  #permission to send error reports to Microsoft
         #"/showIncludes",
     ],
-    "@bazel_template//bazel:linux_x86_64": [
+    "@platforms//os:linux": [
         "-Wall",
         "-Wextra",
         "-O3",
         "-g",
-        "-Wno-sign-compare",
+    ],
+    "@platforms//os:osx": [
+        "-Wall",
+        "-Wextra",
+        "-O3",
+        "-g",
+        "-mmacosx-version-min=10.15",
+    ],
+    "//conditions:default": [],
+}) + select({
+    "@bazel_template//bazel:windows_x86_64": [
+    ],
+    "@bazel_template//bazel:windows_aarch64": [
+    ],
+    "@bazel_template//bazel:linux_x86_64": [
     ],
     "@bazel_template//bazel:linux_aarch64": [
-        "-Wall",
-        "-Wextra",
-        "-O3",
-        "-g",
-        "-Wno-sign-compare",
     ],
     "@bazel_template//bazel:osx_x86_64": [
-        "-Wall",
-        "-Wextra",
-        "-O3",
-        "-g",
-        "-mmacosx-version-min=10.15",
     ],
     "@bazel_template//bazel:osx_aarch64": [
-        "-Wall",
-        "-Wextra",
-        "-O3",
-        "-g",
-        "-mmacosx-version-min=10.15",
     ],
+    "//conditions:default": [],
+}) + select({
+    "@bazel_template//bazel:gcc": [
+        "-D_GLIBCXX_USE_CXX11_ABI=1",
+    ],
+    "@bazel_template//bazel:msvc": [
+    ],
+    "@bazel_template//bazel:clang": [
+    ],
+    "//conditions:default": [],
+}) + select({
+    # x86_64 CPU feature tiers
+    "@bazel_template//bazel:linux_n105": n105_cpu_instruction_features_gcc_clang,
+    "@bazel_template//bazel:linux_ryzen5": ryzen5_cpu_instruction_features_gcc_clang,
+    "@bazel_template//bazel:linux_ryzen9": ryzen9_cpu_instruction_features_gcc_clang,
+    "@bazel_template//bazel:windows_n105": n105_cpu_instruction_features_msvc,
+    "@bazel_template//bazel:windows_ryzen5": ryzen5_cpu_instruction_features_msvc,
+    "@bazel_template//bazel:windows_ryzen9": ryzen9_cpu_instruction_features_msvc,
+    "@bazel_template//bazel:windows_neoverse11": neoverse11_cpu_instruction_features_msvc,
+    "//conditions:default": [],
+}) + select({
+    # aarch64 CPU feature tiers
+    "@bazel_template//bazel:linux_neoverse11": neoverse11_cpu_instruction_features_gcc_clang,
     "//conditions:default": [],
 })
 
@@ -109,7 +156,6 @@ GLOBAL_LOCAL_DEFINES = select({
         "_WIN32",
         "_WINDOWS",
         "NDEBUG",
-        "_MSC_VER=1941",
         "WIN64",
         "_WIN64",
         "WIN32_LEAN_AND_MEAN",
@@ -151,12 +197,6 @@ GLOBAL_LINKOPTS = select({
     "//conditions:default": [],
 })
 
-def dict_union(x, y):
-    z = {}
-    z.update(x)
-    z.update(y)
-    return z
-
 def _template_rule_impl(ctx):
     ctx.actions.expand_template(
         template = ctx.file.src,
@@ -177,45 +217,7 @@ template_rule = rule(
     implementation = _template_rule_impl,
 )
 
-def _extract_symbols_impl(ctx):
-    awk_script = ctx.file.awk_script
-    obj_files = []
-    for lib in ctx.attr.deps:
-        cc_info = lib[CcInfo]
-        for linker_input in cc_info.linking_context.linker_inputs.to_list():
-            for library in linker_input.libraries:
-                for obj_file in library.objects:
-                    if "/external/jemalloc" in obj_file.path:
-                        obj_files.append(obj_file)
-
-    cc_toolchain = find_cpp_toolchain(ctx)
-    output_files = []
-    for obj_file in obj_files:
-        output_file = ctx.actions.declare_file(obj_file.basename + ".sym")
-        output_files.append(output_file)
-
-        ctx.actions.run_shell(
-            inputs = obj_files + [awk_script],
-            outputs = [output_file],
-            command = "{} {} | awk -f {} >> {}".format(cc_toolchain.nm_executable, obj_file.path, awk_script.path, output_file.path),
-        )
-
-    return [DefaultInfo(files = depset(output_files))]
-
-extract_symbols = rule(
-    implementation = _extract_symbols_impl,
-    attrs = {
-        "deps": attr.label_list(
-            allow_files = False,
-            mandatory = True,
-            #providers = ["CcInfo"],
-        ),
-        "awk_script": attr.label(allow_single_file = True),
-        "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
-    },
-    toolchains = use_cpp_toolchain(),
-    fragments = ["cpp"],
-)
+## Removed jemalloc-specific symbol extraction rule
 
 def _local_config_git_genrule_impl(ctx):
     ctx.actions.run_shell(
@@ -252,19 +254,31 @@ def _local_config_git_genrule(**kwargs):
     )
 
 def version_info(name, out, exec_tool):
-    _local_config_git_genrule(
+    native.genrule(
         name = name,
-        out = out,
-        exec_tool = exec_tool,
         srcs = [
             "@local_config_git//:gen/spec.json",
             "@local_config_git//:gen/head",
             "@local_config_git//:gen/branch_ref",
         ],
-        arguments = "--generate \"$@\"",
+        outs = [out],
+        tools = [
+            exec_tool,
+            "//bazel:gen_version_info.ps1",
+        ],
+        cmd = "$(location %s) --generate $(location @local_config_git//:gen/spec.json) $(location @local_config_git//:gen/head) $(location @local_config_git//:gen/branch_ref) \"$@\"" % exec_tool,
+        cmd_bat = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File $(location //bazel:gen_version_info.ps1) \"$@\"",
     )
 
 def os(repository_ctx):
+    """Return normalized OS name for the given repository context.
+
+    Args:
+      repository_ctx: The repository_ctx passed into a repository_rule.
+
+    Returns:
+      One of "linux", "darwin", or "windows".
+    """
     name = repository_ctx.os.name
     if name == "linux":
         return "linux"

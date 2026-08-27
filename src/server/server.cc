@@ -20,10 +20,22 @@ bool shutdown_required = false;
 std::mutex mutex;
 std::condition_variable cv;
 
+const char *SignalName(int sig);
+
 void SignalHandler(int sig) {
-  LOG(INFO) << "Got signal: " << strsignal(sig) << std::endl;
+  LOG(INFO) << "Got signal: " << SignalName(sig) << " (" << sig << ")"
+            << std::endl;
   shutdown_required = true;
   cv.notify_all();
+}
+
+const char *SignalName(int sig) {
+#if defined(_WIN32)
+  (void)sig;
+  return "signal";
+#else
+  return strsignal(sig);
+#endif
 }
 
 void ShutdownCheckingThread(void) {
@@ -35,9 +47,11 @@ void ShutdownCheckingThread(void) {
 void RegisterSignalHandler() {
   signal(SIGTERM, &SignalHandler);
   signal(SIGINT, &SignalHandler);
+#if !defined(_WIN32)
   signal(SIGQUIT, &SignalHandler);
   signal(SIGHUP, SIG_IGN);
   signal(SIGPIPE, SIG_IGN);
+#endif
 }
 
 int main(int argc, char **argv) {

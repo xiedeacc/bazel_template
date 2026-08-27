@@ -11,6 +11,7 @@
 
 #include "aws/core/Aws.h"
 #include "aws/route53/Route53Client.h"
+#include "aws/route53/model/ChangeBatch.h"
 #include "aws/route53/model/ChangeResourceRecordSetsRequest.h"
 #include "aws/route53/model/ResourceRecordSet.h"
 #include "aws/route53/model/Change.h"
@@ -79,12 +80,12 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
  private:
   void HandleUpdateARecord(const proto::Route53Request& req,
                           proto::Route53Response* res) {
-    Aws::Route53::Route53Client route53_client;
-
     // Set region if specified
+    Aws::Route53::Route53ClientConfiguration client_config;
     if (!req.region().empty()) {
-      route53_client = Aws::Route53::Route53Client(req.region());
+      client_config.region = req.region();
     }
+    Aws::Route53::Route53Client route53_client(client_config);
 
     // Create the resource record set
     Aws::Route53::Model::ResourceRecordSet record_set;
@@ -105,7 +106,9 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
     // Create the change request
     Aws::Route53::Model::ChangeResourceRecordSetsRequest change_request;
     change_request.SetHostedZoneId(req.hosted_zone_id());
-    change_request.AddChanges(change);
+    Aws::Route53::Model::ChangeBatch change_batch;
+    change_batch.AddChanges(change);
+    change_request.SetChangeBatch(change_batch);
 
     auto outcome = route53_client.ChangeResourceRecordSets(change_request);
 
@@ -126,12 +129,12 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
 
   void HandleUpdateCNAMERecord(const proto::Route53Request& req,
                               proto::Route53Response* res) {
-    Aws::Route53::Route53Client route53_client;
-
     // Set region if specified
+    Aws::Route53::Route53ClientConfiguration client_config;
     if (!req.region().empty()) {
-      route53_client = Aws::Route53::Route53Client(req.region());
+      client_config.region = req.region();
     }
+    Aws::Route53::Route53Client route53_client(client_config);
 
     // Create the resource record set
     Aws::Route53::Model::ResourceRecordSet record_set;
@@ -152,7 +155,9 @@ class Route53ManagementHandler : public async_grpc::RpcHandler<Route53Management
     // Create the change request
     Aws::Route53::Model::ChangeResourceRecordSetsRequest change_request;
     change_request.SetHostedZoneId(req.hosted_zone_id());
-    change_request.AddChanges(change);
+    Aws::Route53::Model::ChangeBatch change_batch;
+    change_batch.AddChanges(change);
+    change_request.SetChangeBatch(change_batch);
 
     auto outcome = route53_client.ChangeResourceRecordSets(change_request);
 

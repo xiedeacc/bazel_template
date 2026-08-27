@@ -74,12 +74,12 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
  private:
   void HandleStartInstance(const proto::EC2InstanceRequest& req,
                           proto::EC2InstanceResponse* res) {
-    Aws::EC2::EC2Client ec2_client;
-
     // Set region if specified
+    Aws::EC2::EC2ClientConfiguration client_config;
     if (!req.region().empty()) {
-      ec2_client = Aws::EC2::EC2Client(req.region());
+      client_config.region = req.region();
     }
+    Aws::EC2::EC2Client ec2_client(client_config);
 
     Aws::EC2::Model::StartInstancesRequest start_request;
     start_request.AddInstanceIds(req.instance_id());
@@ -102,12 +102,12 @@ class EC2InstanceManagementHandler : public async_grpc::RpcHandler<EC2InstanceMa
 
   void HandleStopInstance(const proto::EC2InstanceRequest& req,
                          proto::EC2InstanceResponse* res) {
-    Aws::EC2::EC2Client ec2_client;
-
     // Set region if specified
+    Aws::EC2::EC2ClientConfiguration client_config;
     if (!req.region().empty()) {
-      ec2_client = Aws::EC2::EC2Client(req.region());
+      client_config.region = req.region();
     }
+    Aws::EC2::EC2Client ec2_client(client_config);
 
     Aws::EC2::Model::StopInstancesRequest stop_request;
     stop_request.AddInstanceIds(req.instance_id());

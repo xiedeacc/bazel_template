@@ -1,17 +1,746 @@
 ###############################################################################
-# Bazel now uses Bzlmod by default to manage external dependencies.
-# Please consider migrating your external dependencies from WORKSPACE to MODULE.bazel.
-#
-# For more details, please check https://github.com/bazelbuild/bazel/issues/18958
+# Bazel 9 / Bzlmod external dependency setup.
 ###############################################################################
 module(
     name = "bazel_template",
     version = "1.0.0",
 )
 
-bazel_dep(
-    name = "protobuf",
-    dev_dependency = True,
-    repo_name = "com_google_protobuf",
-    version = "27.2",
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "abseil-cpp", version = "20260526.0", repo_name = "com_google_absl")
+bazel_dep(name = "re2", version = "2025-11-05.bcr.1", repo_name = "com_googlesource_code_re2")
+bazel_dep(name = "gflags", version = "2.2.2.bcr.1")
+bazel_dep(name = "glog", version = "0.7.1.bcr.1", repo_name = "com_github_glog_glog")
+bazel_dep(name = "snappy", version = "1.2.2.bcr.3", repo_name = "com_github_google_snappy")
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "rules_cc", version = "0.2.22")
+bazel_dep(name = "bazel_features", version = "1.51.0")
+bazel_dep(name = "rules_foreign_cc", version = "0.15.1")
+bazel_dep(name = "rules_python", version = "2.2.0")
+bazel_dep(name = "rules_go", version = "0.61.1", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "rules_java", version = "9.7.0")
+bazel_dep(name = "rules_jvm_external", version = "7.1")
+bazel_dep(name = "rules_proto", version = "7.1.0")
+bazel_dep(name = "rules_shell", version = "0.8.0")
+bazel_dep(name = "envoy_api", version = "0.0.0-20260130-84e8436")
+bazel_dep(name = "protoc-gen-validate", version = "1.3.3", repo_name = "com_envoyproxy_protoc_gen_validate")
+bazel_dep(name = "xds", version = "0.0.0-20251210-ee656c7", repo_name = "com_github_cncf_xds")
+bazel_dep(name = "googleapis", version = "0.0.0-20260716-3e4ab771", repo_name = "com_google_googleapis")
+bazel_dep(name = "googleapis-cc", version = "1.0.0")
+bazel_dep(name = "googleapis-grpc-cc", version = "1.0.0")
+bazel_dep(name = "googleapis-python", version = "1.0.0")
+bazel_dep(name = "protobuf", version = "35.1", repo_name = "com_google_protobuf")
+bazel_dep(name = "cc_toolchains", version = "0.0.0")
+bazel_dep(name = "bazel_clang_tidy", version = "0.0.0")
+bazel_dep(name = "rules_apple", version = "4.5.3", repo_name = "build_bazel_rules_apple")
+bazel_dep(name = "apple_support", version = "2.7.0", repo_name = "build_bazel_apple_support")
+
+single_version_override(
+    module_name = "protobuf",
+    patch_strip = 1,
+    patches = ["//bazel:protobuf-musl-path-max.patch"],
+    version = "35.1",
+)
+
+git_override(
+    commit = "053ccff396d7f2a3be29b8e426d8c6df081d8221",
+    module_name = "cc_toolchains",
+    remote = "https://github.com/xiedeacc/cc_toolchains.git",
+)
+
+git_override(
+    commit = "c4d35e0d0b838309358e57a2efed831780f85cd0",
+    module_name = "bazel_clang_tidy",
+    remote = "https://github.com/erenon/bazel_clang_tidy.git",
+)
+
+single_version_override(
+    module_name = "snappy",
+    patch_strip = 1,
+    patches = ["//bazel:snappy.patch"],
+    version = "1.2.2.bcr.3",
+)
+
+git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+
+shallow_git_repository = use_repo_rule("//bazel:shallow_git_repository.bzl", "shallow_git_repository")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository")
+
+new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
+
+gen_local_config_git = use_repo_rule("//bazel:common.bzl", "gen_local_config_git")
+
+git_repository(
+    name = "io_bazel_rules_docker",
+    remote = "https://github.com/bazelbuild/rules_docker.git",
+    tag = "v0.26.0",
+)
+
+git_repository(
+    name = "apple_rules_lint",
+    remote = "https://github.com/apple/apple_rules_lint.git",
+    tag = "0.4.0",
+)
+
+new_git_repository(
+    name = "cpplint",
+    build_file = "//bazel:cpplint.BUILD",
+    remote = "https://github.com/cpplint/cpplint.git",
+    tag = "2.0.2",
+)
+
+new_git_repository(
+    name = "liburing",
+    build_file = "//bazel:liburing.BUILD",
+    remote = "https://github.com/axboe/liburing.git",
+    tag = "liburing-2.15",
+)
+
+new_git_repository(
+    name = "libaio",
+    build_file = "//bazel:libaio.BUILD",
+    commit = "b8eadc9f89e8f7ab0338eacda9f98a6caea76883",
+    remote = "https://pagure.io/libaio.git",
+)
+
+new_git_repository(
+    name = "xz",
+    build_file = "//bazel:xz.BUILD",
+    remote = "https://github.com/tukaani-project/xz.git",
+    tag = "v5.8.3",
+)
+
+new_git_repository(
+    name = "org_lzma_lzma",
+    build_file = "//bazel:xz.BUILD",
+    remote = "https://github.com/tukaani-project/xz.git",
+    tag = "v5.8.3",
+)
+
+new_git_repository(
+    name = "zlib",
+    build_file = "//bazel:zlib.BUILD",
+    remote = "https://github.com/madler/zlib.git",
+    tag = "v1.3.2",
+)
+
+new_git_repository(
+    name = "bzip2",
+    build_file = "//bazel:bzip2.BUILD",
+    commit = "66c46b8c9436613fd81bc5d03f63a61933a4dcc3",
+    remote = "https://gitlab.com/bzip2/bzip2.git",
+)
+
+new_git_repository(
+    name = "org_bzip_bzip2",
+    build_file = "//bazel:bzip2.BUILD",
+    commit = "66c46b8c9436613fd81bc5d03f63a61933a4dcc3",
+    remote = "https://gitlab.com/bzip2/bzip2.git",
+)
+
+new_git_repository(
+    name = "lz4",
+    build_file = "//bazel:lz4.BUILD",
+    remote = "https://github.com/lz4/lz4.git",
+    tag = "v1.10.0",
+)
+
+new_git_repository(
+    name = "zstd",
+    build_file = "//bazel:zstd.BUILD",
+    remote = "https://github.com/facebook/zstd.git",
+    tag = "v1.5.7",
+)
+
+new_git_repository(
+    name = "com_github_facebook_zstd",
+    build_file = "//bazel:zstd.BUILD",
+    remote = "https://github.com/facebook/zstd.git",
+    tag = "v1.5.7",
+)
+
+git_repository(
+    name = "brotli",
+    build_file = "//bazel:brotli.BUILD",
+    remote = "https://github.com/google/brotli.git",
+    tag = "v1.2.0",
+)
+
+new_git_repository(
+    name = "libsodium",
+    build_file = "//bazel:libsodium.BUILD",
+    remote = "https://github.com/jedisct1/libsodium.git",
+    tag = "1.0.22-RELEASE",
+)
+
+http_archive(
+    name = "nasm",
+    build_file = "//bazel:nasm.BUILD",
+    sha256 = "f5c93c146f52b4f1664fa3ce6579f961a910e869ab0dae431bd871bdd2584ef2",
+    strip_prefix = "nasm-2.15.05",
+    urls = [
+        "https://mirror.bazel.build/www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip",
+        "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip",
+    ],
+)
+
+http_archive(
+    name = "perl",
+    build_file = "//bazel:perl.BUILD",
+    sha256 = "aeb973da474f14210d3e1a1f942dcf779e2ae7e71e4c535e6c53ebabe632cc98",
+    urls = [
+        "https://mirror.bazel.build/strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip",
+        "https://strawberryperl.com/download/5.32.1.1/strawberry-perl-5.32.1.1-64bit.zip",
+    ],
+)
+
+http_archive(
+    name = "openssl",
+    build_file = "//bazel:openssl.make.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:openssl.patch"],
+    sha256 = "2db3f3a0d6ea4b59e1f094ace2c8cd536dffb87cdc39084c5afa1e6f7f37dd09",
+    strip_prefix = "openssl-4.0.1",
+    urls = ["https://github.com/openssl/openssl/releases/download/openssl-4.0.1/openssl-4.0.1.tar.gz"],
+)
+
+http_archive(
+    name = "boringssl",
+    build_file = "//bazel:openssl.make.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:openssl.patch"],
+    sha256 = "2db3f3a0d6ea4b59e1f094ace2c8cd536dffb87cdc39084c5afa1e6f7f37dd09",
+    strip_prefix = "openssl-4.0.1",
+    urls = ["https://github.com/openssl/openssl/releases/download/openssl-4.0.1/openssl-4.0.1.tar.gz"],
+)
+
+new_git_repository(
+    name = "c-ares",
+    build_file = "//bazel:c-ares.BUILD",
+    remote = "https://github.com/c-ares/c-ares.git",
+    tag = "v1.34.8",
+)
+
+new_git_repository(
+    name = "com_github_cares_cares",
+    build_file = "//bazel:c-ares.BUILD",
+    remote = "https://github.com/c-ares/c-ares.git",
+    tag = "v1.34.8",
+)
+
+new_git_repository(
+    name = "curl",
+    build_file = "//bazel:curl.BUILD",
+    remote = "https://github.com/curl/curl.git",
+    tag = "curl-8_21_0",
+)
+
+git_repository(
+    name = "com_github_google_benchmark",
+    remote = "https://github.com/google/benchmark.git",
+    tag = "v1.9.5",
+)
+
+git_repository(
+    name = "com_google_googletest",
+    patch_args = ["-p1"],
+    patches = ["//bazel:googletest.patch"],
+    remote = "https://github.com/google/googletest.git",
+    tag = "v1.17.0",
+)
+
+git_repository(
+    name = "double-conversion",
+    patch_args = ["-p1"],
+    patches = ["//bazel:double-conversion.patch"],
+    remote = "https://github.com/google/double-conversion.git",
+    tag = "v3.4.0",
+)
+
+git_repository(
+    name = "com_github_nelhage_rules_boost",
+    commit = "45ed6bf51f659c7db830fd15ddd4495dadc5afd1",
+    patch_args = ["-p1"],
+    patches = ["//bazel:rules_boost.patch"],
+    remote = "https://github.com/nelhage/rules_boost.git",
+)
+
+http_archive(
+    name = "boost",
+    build_file = "//bazel:boost.BUILD",
+    patch_cmds = [
+        "echo '# bazel_template boost BUILD overlay rev: 20260725-1' >> BUILD.bazel",
+        "rm -f doc/pdf/BUILD",
+    ],
+    patch_cmds_win = [
+        "Add-Content BUILD.bazel '# bazel_template boost BUILD overlay rev: 20260725-1'",
+        "Remove-Item -Force doc/pdf/BUILD -ErrorAction SilentlyContinue",
+    ],
+    sha256 = "8a82bd11a720c70923806c36ee5c26dbd2d630c1eaa1d8fad9a7bd5529908a26",
+    strip_prefix = "boost-1.91.0-1",
+    url = "https://github.com/boostorg/boost/releases/download/boost-1.91.0-1/boost-1.91.0-1-cmake.tar.gz",
+)
+
+new_git_repository(
+    name = "fmt",
+    build_file = "//bazel:fmt.BUILD",
+    remote = "https://github.com/fmtlib/fmt.git",
+    tag = "12.2.0",
+)
+
+new_git_repository(
+    name = "libdwarf",
+    build_file = "//bazel:libdwarf.BUILD",
+    remote = "https://github.com/davea42/libdwarf-code.git",
+    tag = "v2.3.2",
+)
+
+new_git_repository(
+    name = "mbedtls",
+    build_file = "//bazel:mbedtls.BUILD",
+    remote = "https://github.com/Mbed-TLS/mbedtls.git",
+    tag = "v4.2.0",
+)
+
+new_git_repository(
+    name = "libevent",
+    build_file = "//bazel:libevent.BUILD",
+    remote = "https://github.com/libevent/libevent.git",
+    tag = "release-2.1.13-stable",
+)
+
+http_archive(
+    name = "libev",
+    build_file = "//bazel:libev.BUILD",
+    sha256 = "507eb7b8d1015fbec5b935f34ebed15bf346bed04a11ab82b8eee848c4205aea",
+    strip_prefix = "libev-4.33",
+    url = "https://dist.schmorp.de/libev/libev-4.33.tar.gz",
+)
+
+new_git_repository(
+    name = "libuv",
+    build_file = "//bazel:libuv.BUILD",
+    remote = "https://github.com/libuv/libuv.git",
+    tag = "v1.52.1",
+)
+
+http_archive(
+    name = "libiberty",
+    build_file = "//bazel:libiberty.BUILD",
+    sha256 = "f6e4d41fd5fc778b06b7891457b3620da5ecea1006c6a4a41ae998109f85a800",
+    strip_prefix = "binutils-2.42",
+    url = "https://mirrors.aliyun.com/gnu/binutils/binutils-2.42.tar.xz",
+)
+
+new_git_repository(
+    name = "libunwind",
+    build_file = "//bazel:libunwind.BUILD",
+    patches = ["//bazel:libunwind-musl-pthread-dtor.patch"],
+    remote = "https://github.com/libunwind/libunwind.git",
+    tag = "v1.8.3",
+)
+
+new_git_repository(
+    name = "cjson",
+    build_file = "//bazel:cjson.BUILD",
+    remote = "https://github.com/DaveGamble/cJSON.git",
+    tag = "v1.7.19",
+)
+
+new_git_repository(
+    name = "tinyxml2",
+    build_file = "//bazel:tinyxml2.BUILD",
+    remote = "https://github.com/leethomason/tinyxml2.git",
+    tag = "11.0.0",
+)
+
+new_git_repository(
+    name = "libcbor",
+    build_file = "//bazel:libcbor.BUILD",
+    remote = "https://github.com/PJK/libcbor.git",
+    tag = "v0.14.0",
+)
+
+new_git_repository(
+    name = "mimalloc",
+    build_file = "//bazel:mimalloc.BUILD",
+    remote = "https://github.com/microsoft/mimalloc.git",
+    tag = "v3.4.3",
+)
+
+new_git_repository(
+    name = "fast_float",
+    build_file = "//bazel:fast_float.BUILD",
+    remote = "https://github.com/fastfloat/fast_float.git",
+    tag = "v8.2.10",
+)
+
+new_git_repository(
+    name = "folly",
+    build_file = "//bazel:folly.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:folly.patch"],
+    remote = "https://github.com/facebook/folly.git",
+    tag = "v2026.07.20.00",
+)
+
+new_git_repository(
+    name = "fizz",
+    build_file = "//bazel:fizz.BUILD",
+    remote = "https://github.com/facebookincubator/fizz.git",
+    tag = "v2026.07.20.00",
+)
+
+new_git_repository(
+    name = "mvfst",
+    build_file = "//bazel:mvfst.BUILD",
+    remote = "https://github.com/facebook/mvfst.git",
+    tag = "v2026.07.20.00",
+)
+
+new_git_repository(
+    name = "wangle",
+    build_file = "//bazel:wangle.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:wangle-openssl4-const.patch"],
+    remote = "https://github.com/facebook/wangle.git",
+    tag = "v2026.07.20.00",
+)
+
+new_git_repository(
+    name = "fatal",
+    build_file = "//bazel:fatal.BUILD",
+    remote = "https://github.com/facebook/fatal.git",
+    tag = "v2026.07.20.00",
+)
+
+git_repository(
+    name = "yaml-cpp",
+    patch_args = ["-p1"],
+    patches = ["//bazel:yaml-cpp.patch"],
+    remote = "https://github.com/jbeder/yaml-cpp.git",
+    tag = "yaml-cpp-0.9.0",
+)
+
+new_git_repository(
+    name = "xxhash",
+    build_file = "//bazel:xxhash.BUILD",
+    remote = "https://github.com/Cyan4973/xxHash.git",
+    tag = "v0.8.3",
+)
+
+new_git_repository(
+    name = "fbthrift",
+    build_file = "//bazel:fbthrift.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:fbthrift.patch"],
+    remote = "https://github.com/facebook/fbthrift.git",
+    tag = "v2026.07.20.00",
+)
+
+new_git_repository(
+    name = "fb303",
+    build_file = "//bazel:fb303.BUILD",
+    remote = "https://github.com/facebook/fb303.git",
+    tag = "v2026.07.20.00",
+)
+
+new_git_repository(
+    name = "proxygen",
+    build_file = "//bazel:proxygen.BUILD",
+    patch_args = ["-p1"],
+    patches = ["//bazel:proxygen.patch"],
+    remote = "https://github.com/facebook/proxygen.git",
+    tag = "v2026.07.20.00",
+)
+
+new_git_repository(
+    name = "smhasher",
+    build_file = "//bazel:smhasher.BUILD",
+    commit = "07bb4de10a63e8cc2e1724865454eba635742383",
+    remote = "https://github.com/aappleby/smhasher.git",
+)
+
+http_archive(
+    name = "opencensus_proto",
+    sha256 = "e3d89f7f9ed84c9b6eee818c2e9306950519402bf803698b15c310b77ca2f0f3",
+    strip_prefix = "opencensus-proto-0.4.1/src",
+    urls = ["https://github.com/census-instrumentation/opencensus-proto/archive/v0.4.1.tar.gz"],
+)
+
+git_repository(
+    name = "com_github_grpc_grpc",
+    patch_args = ["-p1"],
+    patches = [
+        "//bazel:grpc-foreign-cc-layering.patch",
+        "//bazel:grpc-openssl4-const.patch",
+    ],
+    remote = "https://github.com/grpc/grpc.git",
+    tag = "v1.83.0",
+)
+
+http_archive(
+    name = "swig",
+    build_file = "//bazel:swig.BUILD",
+    sha256 = "40162a706c56f7592d08fd52ef5511cb7ac191f3593cf07306a0a554c6281fcf",
+    strip_prefix = "swig-4.4.1",
+    urls = ["https://downloads.sourceforge.net/project/swig/swig/swig-4.4.1/swig-4.4.1.tar.gz"],
+)
+
+new_git_repository(
+    name = "pcre2",
+    build_file = "//bazel:pcre2.BUILD",
+    remote = "https://github.com/PCRE2Project/pcre2.git",
+    tag = "pcre2-10.47",
+)
+
+new_git_repository(
+    name = "crc32c",
+    build_file = "//bazel:crc32c.BUILD",
+    remote = "https://github.com/google/crc32c.git",
+    tag = "1.1.2",
+)
+
+new_git_repository(
+    name = "rapidjson",
+    build_file = "//bazel:rapidjson.BUILD",
+    commit = "815e6e7e7e14be44a6c15d9aefed232ff064cad0",
+    remote = "https://github.com/Tencent/rapidjson.git",
+)
+
+git_repository(
+    name = "hedron_compile_commands",
+    commit = "abb61a688167623088f8768cc9264798df6a9d10",
+    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
+)
+
+new_git_repository(
+    name = "multipart-parser",
+    build_file = "//bazel:multipart-parser.BUILD",
+    commit = "61e234f2100f39d405b6e9c2689e2482b31f3976",
+    remote = "https://github.com/FooBarWidget/multipart-parser.git",
+)
+
+new_git_repository(
+    name = "simdjson",
+    build_file = "//bazel:simdjson.BUILD",
+    remote = "https://github.com/simdjson/simdjson.git",
+    tag = "v4.6.4",
+)
+
+new_git_repository(
+    name = "spdlog",
+    build_file = "//bazel:spdlog.BUILD",
+    remote = "https://github.com/gabime/spdlog.git",
+    tag = "v1.17.0",
+)
+
+new_git_repository(
+    name = "vlmcsd",
+    build_file = "//bazel:vlmcsd.BUILD",
+    commit = "70e03572b254688b8c3557f898e7ebd765d29ae1",
+    patch_args = ["-p1"],
+    patch_cmds = [
+        "mv src/rpc.h src/vlmcsd_rpc.h",
+        "perl -pi -e 's/\"rpc\\.h\"/\"vlmcsd_rpc.h\"/g' src/*.c src/*.h",
+    ],
+    patch_cmds_win = [
+        "Move-Item -Force src/rpc.h src/vlmcsd_rpc.h",
+        "$files = Get-ChildItem -Path src -Include *.c,*.h -Recurse; foreach ($file in $files) { (Get-Content -Raw $file.FullName) -replace 'rpc\\.h','vlmcsd_rpc.h' | Set-Content -NoNewline -Encoding ascii $file.FullName }",
+    ],
+    patches = [
+        "//bazel:vlmcsd_listen_address.patch",
+        "//bazel:vlmcsd_library_error_output.patch",
+    ],
+    remote = "https://github.com/Wind4/vlmcsd.git",
+)
+
+http_archive(
+    name = "sqlite",
+    build_file = "//bazel:sqlite.BUILD",
+    sha256 = "646421e12aac110282ef8cc68f1a62d4bb15fc7b8f09da0b53e29ee690500431",
+    strip_prefix = "sqlite-amalgamation-3530300",
+    urls = ["https://sqlite.org/2026/sqlite-amalgamation-3530300.zip"],
+)
+
+new_git_repository(
+    name = "blake3",
+    build_file = "//bazel:blake3.BUILD",
+    remote = "https://github.com/BLAKE3-team/BLAKE3.git",
+    tag = "1.8.5",
+)
+
+shallow_git_repository(
+    name = "aws-sdk-cpp",
+    build_file = "//bazel:aws-sdk-cpp.BUILD",
+    patch_strip = 1,
+    patches = [
+        "//bazel:aws-sdk-cpp-darwin-posix.patch",
+        "//bazel:aws-sdk-cpp-openssl4-const.patch",
+        "//bazel:aws-sdk-cpp-remove-version-file.patch",
+    ],
+    recursive_init_submodules = True,
+    remote = "https://github.com/aws/aws-sdk-cpp.git",
+    tag = "1.11.853",
+)
+
+new_git_repository(
+    name = "ankerl_unordered_dense",
+    build_file = "//bazel:unordered_dense.BUILD",
+    remote = "https://github.com/martinus/unordered_dense.git",
+    tag = "v4.8.1",
+)
+
+http_archive(
+    name = "linux-x86_64-gnu_sysroot",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "93b7a2fff9c43d0b04280d8f5a7cb6f4f7ff6df3fce491258f6a8b7e3c5c619b",
+    strip_prefix = "linux-x86_64-gnu_sysroot",
+    urls = ["https://rgit.xiedeacc.com/files/linux-x86_64-gnu_sysroot.tar.gz"],
+)
+
+http_archive(
+    name = "linux-x86_64-musl_sysroot",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "415fa6bf0fbff8955842cb9c09a373f065fa7340fb376b58ba491d9c2f43f494",
+    strip_prefix = "linux-x86_64-musl_sysroot",
+    urls = ["https://rgit.xiedeacc.com/files/linux-x86_64-musl_sysroot.tar.gz"],
+)
+
+http_archive(
+    name = "linux-aarch64-gnu_sysroot",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "4687c3f0e37bba19e0e09a1765bbe3a76d3129e6cc3aba140172a84981c92d3a",
+    strip_prefix = "linux-aarch64-gnu_sysroot",
+    urls = ["https://rgit.xiedeacc.com/files/linux-aarch64-gnu_sysroot.tar.gz"],
+)
+
+http_archive(
+    name = "linux-aarch64-musl_sysroot",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "5e141f8035385e57e92751af241051496bde1b8a84684d1ae6865a6e7980c6d4",
+    strip_prefix = "linux-aarch64-musl_sysroot",
+    urls = ["https://rgit.xiedeacc.com/files/linux-aarch64-musl_sysroot.tar.gz"],
+)
+
+http_archive(
+    name = "gcc16.1.0-linux-x86_64-gnu_runtime",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "55ddf52d9687719d51c2ac72e9b0a8b60670e451fbe448661d8a13805f198b0b",
+    strip_prefix = "gcc16.1.0-linux-x86_64-gnu_runtime",
+    urls = ["https://rgit.xiedeacc.com/files/gcc16.1.0-linux-x86_64-gnu_runtime.tar.gz"],
+)
+
+http_archive(
+    name = "gcc16.1.0-linux-x86_64-musl_runtime",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "481993d5f5ff22af78fd9a6dbc45014e191d94f0cba92c148a0b98409a9a7e81",
+    strip_prefix = "gcc16.1.0-linux-x86_64-musl_runtime",
+    urls = ["https://rgit.xiedeacc.com/files/gcc16.1.0-linux-x86_64-musl_runtime.tar.gz"],
+)
+
+http_archive(
+    name = "gcc16.1.0-linux-aarch64-gnu_runtime",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "dbb5798ef1d221b30edb9db7b8e2dbaac5763cdc9c0fa1c0170b8e9d45ca4ab7",
+    strip_prefix = "gcc16.1.0-linux-aarch64-gnu_runtime",
+    urls = ["https://rgit.xiedeacc.com/files/gcc16.1.0-linux-aarch64-gnu_runtime.tar.gz"],
+)
+
+http_archive(
+    name = "gcc16.1.0-linux-aarch64-musl_runtime",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "3226bbeef9d443afd1b3c8ec13b0b4370207bd48ab7e3d5c30d5d61b565376f1",
+    strip_prefix = "gcc16.1.0-linux-aarch64-musl_runtime",
+    urls = ["https://rgit.xiedeacc.com/files/gcc16.1.0-linux-aarch64-musl_runtime.tar.gz"],
+)
+
+http_archive(
+    name = "clang22.1.2-linux-x86_64-gnu_runtime",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "5f9f8b75ffacb344797aa0525a427723167443fd753ad332325abb87fa1927ac",
+    strip_prefix = "clang22.1.2-linux-x86_64-gnu_runtime",
+    urls = ["https://rgit.xiedeacc.com/files/clang22.1.2-linux-x86_64-gnu_runtime.tar.gz"],
+)
+
+http_archive(
+    name = "clang22.1.2-linux-x86_64-musl_runtime",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "dc807ad3f55eb362862172e6b2ddbf9cb9e514489f11983cf20a46305e6a32cb",
+    strip_prefix = "clang22.1.2-linux-x86_64-musl_runtime",
+    urls = ["https://rgit.xiedeacc.com/files/clang22.1.2-linux-x86_64-musl_runtime.tar.gz"],
+)
+
+http_archive(
+    name = "clang22.1.2-linux-aarch64-gnu_runtime",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "8370f07d5921dc0ac4975da78b52a076328e80c3bb2befd2d181e25569cda860",
+    strip_prefix = "clang22.1.2-linux-aarch64-gnu_runtime",
+    urls = ["https://rgit.xiedeacc.com/files/clang22.1.2-linux-aarch64-gnu_runtime.tar.gz"],
+)
+
+http_archive(
+    name = "clang22.1.2-linux-aarch64-musl_runtime",
+    build_file = "//bazel:toolchains.BUILD",
+    sha256 = "db23c9cccd1d4684d083d5d182fdc904fff4250467d1079d24b8f1e8b5fa881f",
+    strip_prefix = "clang22.1.2-linux-aarch64-musl_runtime",
+    urls = ["https://rgit.xiedeacc.com/files/clang22.1.2-linux-aarch64-musl_runtime.tar.gz"],
+)
+
+http_archive(
+    name = "macosx14.2-x86_64_sysroot",
+    build_file = "//bazel:cc_toolchain.BUILD",
+    sha256 = "d75e540388ade4056c0c91a5623b927f884bfc3f622b96e23ed31aacf226535d",
+    strip_prefix = "macosx14.2-x86_64_sysroot",
+    urls = ["https://rgit.xiedeacc.com/files/macosx14.2-x86_64_sysroot.tar.gz"],
+)
+
+#################### java ####################
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+maven.install(
+    name = "maven",
+    artifacts = [
+        "net.java.dev.jna:jna:5.14.0",
+        "com.google.truth:truth:0.32",
+        "org.junit.platform:junit-platform-launcher:1.9.2",
+        "org.junit.platform:junit-platform-reporting:1.9.2",
+        "org.junit.jupiter:junit-jupiter-api:5.9.2",
+        "org.junit.jupiter:junit-jupiter-params:5.9.2",
+        "org.junit.jupiter:junit-jupiter-engine:5.9.2",
+    ],
+    repositories = [
+        "https://repo1.maven.org/maven2",
+    ],
+)
+use_repo(maven, "maven")
+
+gen_local_config_git(name = "local_config_git")
+
+register_toolchains(
+    "@openssl//:preinstalled_make_toolchain",
+    "@openssl//:preinstalled_pkgconfig_toolchain",
+)
+
+cc_toolchains = use_extension("//bazel:toolchains_extension.bzl", "cc_toolchains_extension")
+use_repo(
+    cc_toolchains,
+    "cc_toolchain_config_clang_aarch64_generic_linux_glibc",
+    "cc_toolchain_config_clang_aarch64_generic_linux_musl",
+    "cc_toolchain_config_clang_x86_64_generic_linux_glibc",
+    "cc_toolchain_config_clang_x86_64_generic_linux_musl",
+    "cc_toolchain_config_clang_x86_64_generic_osx_macosx",
+    "cc_toolchain_config_gcc_aarch64_generic_linux_glibc",
+    "cc_toolchain_config_gcc_aarch64_generic_linux_musl",
+    "cc_toolchain_repo_clang_aarch64_generic_linux_glibc",
+    "cc_toolchain_repo_clang_aarch64_generic_linux_musl",
+    "cc_toolchain_repo_clang_x86_64_generic_linux_glibc",
+    "cc_toolchain_repo_clang_x86_64_generic_linux_musl",
+    "cc_toolchain_repo_clang_x86_64_generic_osx_macosx",
+    "cc_toolchain_repo_gcc_aarch64_generic_linux_glibc",
+    "cc_toolchain_repo_gcc_aarch64_generic_linux_musl",
 )

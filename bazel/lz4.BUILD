@@ -1,4 +1,5 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -48,6 +49,8 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
     "//conditions:default": [],
 })
 
+DEFINES = GLOBAL_DEFINES
+
 cc_library(
     name = "lz4",
     srcs = [
@@ -56,6 +59,7 @@ cc_library(
         "lib/lz4frame.c",
         "lib/lz4hc.c",
         "lib/xxhash.c",
+        "lib/xxhash.h",
     ],
     hdrs = [
         "lib/lz4.h",
@@ -63,14 +67,13 @@ cc_library(
         "lib/lz4frame.h",
         "lib/lz4frame_static.h",
         "lib/lz4hc.h",
-        "lib/xxhash.c",
-        "lib/xxhash.h",
     ],
     copts = COPTS,
+    defines = DEFINES,
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
+    strip_include_prefix = "lib",
     textual_hdrs = [
-        "lib/xxhash.c",
         "lib/lz4.c",
     ],
 )
@@ -96,6 +99,8 @@ cc_library(
         "programs/util.h",
     ],
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["programs"],
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":lz4"],
@@ -105,6 +110,7 @@ cc_binary(
     name = "lz4cli",
     srcs = ["programs/lz4cli.c"],
     copts = COPTS,
+    defines = DEFINES,
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":lz4_util"],

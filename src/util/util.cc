@@ -5,9 +5,10 @@
 
 #include "src/util/util.h"
 
+#include <algorithm>
 #include <fstream>
 
-#include "fmt/core.h"
+#include "fmt/format.h"
 #include "google/protobuf/json/json.h"
 
 using google::protobuf::json::ParseOptions;

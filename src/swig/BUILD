@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
 load("//bazel:cpplint.bzl", "cpplint")
@@ -78,7 +79,10 @@ cc_library(
 java_wrap_cc(
     name = "config_manager_swig_java",
     src = "config_manager.i",
-    copts = COPTS + ["-Wno-strict-aliasing"],
+    copts = COPTS + select({
+        "@platforms//os:windows": [],
+        "//conditions:default": ["-Wno-strict-aliasing"],
+    }),
     package = "com.xiedeacc.example",
     swig_includes = [
         ":config_manager_swig",
@@ -101,6 +105,7 @@ cc_test(
     tags = ["ignore"],
     deps = [
         ":config_manager",
+        "@rules_cc//cc/runfiles",
     ],
 )
 

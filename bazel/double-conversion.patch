@@ -1,0 +1,20 @@
+diff --git a/BUILD b/BUILD
+--- a/BUILD
++++ b/BUILD
+@@ -1,5 +1,7 @@
+ # Bazel(http://bazel.io) BUILD file
+
++load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
++
+ licenses(["notice"])
+
+ exports_files(["LICENSE"])
+@@ -30,6 +32,7 @@ cc_library(
+         "double-conversion/string-to-double.h",
+         "double-conversion/strtod.h",
+         "double-conversion/utils.h",
+     ],
++    includes = ["."],
+     linkopts = [
+         "-lm",
+     ],

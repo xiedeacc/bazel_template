@@ -1,3 +1,6 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS")
+
 package(default_visibility = ["//visibility:public"])
 
 COPTS = [
@@ -36,6 +39,10 @@ LOCAL_DEFINES = [
     "CONFIG_HAVE_FANOTIFY",
 ]
 
+DEFINES = GLOBAL_DEFINES
+
+LINKOPTS = GLOBAL_LINKOPTS
+
 cc_library(
     name = "private_header",
     hdrs = [
@@ -51,7 +58,10 @@ cc_library(
             "src/*.c",
             "src/*.h",
         ],
-        exclude = ["src/ffi.c"],
+        exclude = [
+            "src/ffi.c",
+            "src/sanitize.c",
+        ],
     ) + select({
         "@platforms//cpu:x86_64": [
             "src/arch/x86/lib.h",
@@ -69,6 +79,12 @@ cc_library(
         "src/include/**/*.h",
     ]),
     copts = COPTS,
+    defines = DEFINES,
+    includes = [
+        "src",
+        "src/include",
+    ],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES + select({
         "@platforms//cpu:x86_64": [],
         "@platforms//cpu:aarch64": [],
@@ -80,10 +96,13 @@ cc_library(
 
 cc_library(
     name = "liburing-ffi",
-    srcs = glob([
-        "src/*.c",
-        "src/*.h",
-    ]) + select({
+    srcs = glob(
+        [
+            "src/*.c",
+            "src/*.h",
+        ],
+        exclude = ["src/sanitize.c"],
+    ) + select({
         "@platforms//cpu:x86_64": [
             "src/arch/x86/lib.h",
             "src/arch/x86/syscall.h",
@@ -100,6 +119,12 @@ cc_library(
         "src/include/**/*.h",
     ]),
     copts = COPTS,
+    defines = DEFINES,
+    includes = [
+        "src",
+        "src/include",
+    ],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES + select({
         "@platforms//cpu:x86_64": [],
         "@platforms//cpu:aarch64": [],
@@ -119,7 +144,7 @@ genrule(
         "#define LIBURING_VERSION_H",
         "",
         "#define IO_URING_VERSION_MAJOR 2",
-        "#define IO_URING_VERSION_MINOR 7",
+        "#define IO_URING_VERSION_MINOR 15",
         "",
         "#endif",
         "EOF",
@@ -140,6 +165,7 @@ genrule(
         "#define UAPI_LINUX_IO_URING_H_SKIP_LINUX_TIME_TYPES_H 1",
         "",
         "#include <linux/openat2.h>",
+        "#include <linux/ioctl.h>",
         "",
         "#include <inttypes.h>",
         "",
@@ -152,6 +178,10 @@ genrule(
         "       uint32_t        flags;",
         "       uint32_t        __reserved;",
         "};",
+        "",
+        "#ifndef BLOCK_URING_CMD_DISCARD",
+        "#define BLOCK_URING_CMD_DISCARD _IO(0x12, 0)",
+        "#endif",
         "",
         "#endif",
         "EOF",

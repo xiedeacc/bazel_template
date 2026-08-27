@@ -1,15 +1,6 @@
-# Copyright 2010-2022 Google LLC
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+load("@rules_cc//cc:defs.bzl", _cc_library = "cc_library")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
+load("@rules_java//java:defs.bzl", "java_common", _java_library = "java_library")
 
 """Build definitions for SWIG Java."""
 
@@ -90,17 +81,18 @@ def _java_wrap_cc_impl(ctx):
         generated_c_files.append(outhdr)
 
     # Add swig LIB files.
-    swig_lib = {"SWIG_LIB": "external/swig/Lib"}
+    swig_workspace_root = ctx.attr._swig.label.workspace_root
+    swig_lib = {"SWIG_LIB": swig_workspace_root + "/Lib"}
     ctx.actions.run(
         outputs = generated_c_files + [java_files_dir],
-        inputs = depset([src] + ctx.files.swig_includes, transitive = header_sets),
+        inputs = depset([src] + ctx.files.swig_includes + ctx.files._swig_lib, transitive = header_sets),
         env = swig_lib,
         executable = ctx.executable._swig,
         arguments = [swig_args],
         mnemonic = "SwigCompile",
     )
 
-    java_runtime = ctx.attr._jdk[java_common.JavaRuntimeInfo]
+    java_runtime = ctx.attr._host_jdk[java_common.JavaRuntimeInfo]
     _create_src_jar(ctx, java_runtime, java_files_dir, ctx.outputs.srcjar)
 
 _java_wrap_cc = rule(
@@ -139,13 +131,19 @@ It's expected that the `swig` binary exists in the host's path.
             doc = "Generated Java source jar.",
             mandatory = True,
         ),
-        "_jdk": attr.label(
-            default = Label("@bazel_tools//tools/jdk:current_java_runtime"),
+        "_host_jdk": attr.label(
+            cfg = "exec",
+            default = Label("@bazel_tools//tools/jdk:current_host_java_runtime"),
             providers = [java_common.JavaRuntimeInfo],
         ),
         "_swig": attr.label(
             default = Label("@swig//:swig"),
             executable = True,
+            cfg = "exec",
+        ),
+        "_swig_lib": attr.label(
+            default = Label("@swig//:lib_java"),
+            allow_files = True,
             cfg = "exec",
         ),
         "swig_includes": attr.label_list(
@@ -216,7 +214,7 @@ def java_wrap_cc(
         **kwargs
     )
 
-    native.cc_library(
+    _cc_library(
         name = cc_name,
         srcs = [outfile],
         hdrs = [outhdr] if use_directors else [],
@@ -227,7 +225,7 @@ def java_wrap_cc(
         **kwargs
     )
 
-    native.java_library(
+    _java_library(
         name = name,
         srcs = [srcjar],
         deps = java_deps,

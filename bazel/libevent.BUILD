@@ -1,4 +1,4 @@
-load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
@@ -73,11 +73,8 @@ cc_library(
         "http.c",
         "listener.c",
         "log.c",
-        "sha1.c",
         "signal.c",
         "strlcpy.c",
-        "watch.c",
-        "ws.c",
     ] + select({
         "@platforms//os:windows": [
             "buffer_iocp.c",
@@ -85,7 +82,6 @@ cc_library(
             "epoll.c",
             "event_iocp.c",
             "evthread_win32.c",
-            "wepoll.c",
             "win32select.c",
         ],
         "@platforms//os:osx": [
@@ -100,12 +96,10 @@ cc_library(
             "evthread_pthread.c",
             "poll.c",
             "select.c",
-            "signalfd.c",
         ],
         "//conditions:default": [],
         #}) + select({
-        #"@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [],
-        #"@bazel_template//bazel:linux_gnu": [
+        #"//conditions:default": [],
         #"epoll_sub.c",
         #],
         #"//conditions:default": [],
@@ -116,6 +110,7 @@ cc_library(
         ":event-config_h",
     ] + glob(
         [
+            "compat/**/*.h",
             "include/**/*.h",
             "*.h",
         ],
@@ -123,10 +118,6 @@ cc_library(
         "@platforms//os:windows": [
             "WIN32-Code/getopt.h",
             "WIN32-Code/tree.h",
-            "compat/sys/queue.h",
-        ],
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
-            "compat/sys/queue.h",
         ],
         "//conditions:default": [],
     }),
@@ -135,13 +126,13 @@ cc_library(
             "-Iexternal/libevent/compat",
             "-Iexternal/libevent/WIN32-Code",
         ],
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
-            "-Iexternal/libevent/compat",
-        ],
         "//conditions:default": [],
     }),
     defines = DEFINES,
-    includes = ["include"],
+    includes = [
+        "compat",
+        "include",
+    ],
     linkopts = LINKOPTS + [
     ],
     local_defines = LOCAL_DEFINES,
@@ -151,7 +142,6 @@ cc_library(
     name = "event_openssl",
     srcs = [
         "bufferevent_openssl.c",
-        "bufferevent_ssl.c",
     ],
     hdrs = [
         "arc4random.c",
@@ -159,6 +149,7 @@ cc_library(
         ":event-config_h",
     ] + glob(
         [
+            "compat/**/*.h",
             "include/**/*.h",
             "*.h",
         ],
@@ -166,10 +157,6 @@ cc_library(
         "@platforms//os:windows": [
             "WIN32-Code/getopt.h",
             "WIN32-Code/tree.h",
-            "compat/sys/queue.h",
-        ],
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
-            "compat/sys/queue.h",
         ],
         "//conditions:default": [],
     }),
@@ -178,13 +165,15 @@ cc_library(
             "-Iexternal/libevent/compat",
             "-Iexternal/libevent/WIN32-Code",
         ],
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
-            "-Iexternal/libevent/compat",
-        ],
         "//conditions:default": [],
     }),
-    includes = ["include"],
-    local_defines = [
+    defines = DEFINES,
+    includes = [
+        "compat",
+        "include",
+    ],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES + [
         "HAVE_CONFIG_H",
         "LITTLE_ENDIAN",
         "NDEBUG",
@@ -207,6 +196,7 @@ cc_library(
         ":event-config_h",
     ] + glob(
         [
+            "compat/**/*.h",
             "include/**/*.h",
             "*.h",
         ],
@@ -214,10 +204,6 @@ cc_library(
         "@platforms//os:windows": [
             "WIN32-Code/getopt.h",
             "WIN32-Code/tree.h",
-            "compat/sys/queue.h",
-        ],
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
-            "compat/sys/queue.h",
         ],
         "//conditions:default": [],
     }),
@@ -226,13 +212,15 @@ cc_library(
             "-Iexternal/libevent/compat",
             "-Iexternal/libevent/WIN32-Code",
         ],
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
-            "-Iexternal/libevent/compat",
-        ],
         "//conditions:default": [],
     }),
-    includes = ["include"],
-    local_defines = [
+    defines = DEFINES,
+    includes = [
+        "compat",
+        "include",
+    ],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES + [
         "HAVE_CONFIG_H",
         "NDEBUG",
         "LITTLE_ENDIAN",
@@ -263,7 +251,7 @@ genrule(
         "/* config.h.  Generated from config.h.in by configure.  */",
         "/* config.h.in.  Generated from configure.ac by autoheader.  */",
         "",
-        "#if defined(__linux__) || defined(__APPLE__)",
+        "#if defined(__linux__)",
         "#include <features.h>",
         "#endif",
         "/* Define if building universal (internal helper macro) */",
@@ -289,13 +277,13 @@ genrule(
         "#if __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 36)",
         "#define EVENT__HAVE_ARC4RANDOM 1",
         "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
-        "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
+        "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
         "#else",
         "/* #undef EVENT__HAVE_ARC4RANDOM */",
         "/* #undef EVENT__HAVE_ARC4RANDOM_BUF */",
         "/* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */",
         "#endif",
-        "#elif defined(__APPLE__)",
+        "#elif defined(__APPLE__) || defined(__OpenBSD__)",
         "#define EVENT__HAVE_ARC4RANDOM 1",
         "#define EVENT__HAVE_ARC4RANDOM_BUF 1",
         "#define EVENT__HAVE_ARC4RANDOM_ADDRANDOM 1",
@@ -1070,11 +1058,11 @@ template_rule(
         "//conditions:default": {
         },
     }) | select({
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": {
-            "#define EVENT__HAVE_SYS_QUEUE_H 1": "/* #undef EVENT__HAVE_SYS_QUEUE_H */",
+        "@bazel_template//bazel:libc_musl": {
             "#define EVENT__HAVE_MMAP64 1": "/* #undef EVENT__HAVE_MMAP64 */",
         },
-        "//conditions:default": {},
+        "//conditions:default": {
+        },
     }),
 )
 

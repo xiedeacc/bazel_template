@@ -9,7 +9,7 @@
 #include <atomic>
 #include <future>
 
-#include "fmt/core.h"
+#include "fmt/format.h"
 #include "glog/logging.h"
 #include "src/server/version_info.h"
 #include "src/util/config_manager.h"

@@ -1,0 +1,57 @@
+diff --git a/BUILD b/BUILD
+--- a/BUILD
++++ b/BUILD
+@@ -5165,5 +5165,6 @@ grpc_cc_library(
+         "@com_google_protobuf//upb/mem",
+     ],
++    features = ["-layering_check"],
+     visibility = ["//bazel:grpclb"],
+     deps = [
+         "call_tracer",
+diff --git a/bazel/grpc_build_system.bzl b/bazel/grpc_build_system.bzl
+--- a/bazel/grpc_build_system.bzl
++++ b/bazel/grpc_build_system.bzl
+@@ -124,6 +124,7 @@ def grpc_cc_library(
+         hdrs = [],
+         external_deps = [],
+         defines = [],
++        features = [],
+         deps = [],
+         select_deps = None,
+         standalone = False,  # @unused
+@@ -143,6 +144,7 @@ def grpc_cc_library(
+       hdrs: The headers.
+       external_deps: External dependencies to be resolved.
+       defines: Build defines to use.
++      features: Features to enable or disable on the cc_library.
+       deps: cc_library deps.
+       select_deps: deps included conditionally.
+       standalone: Unused.
+@@ -167,6 +169,8 @@ def grpc_cc_library(
+     # See b/391433873.
+     if "fuzztest" in external_deps and "grpc-fuzztest" not in tags:
+         tags = tags + ["grpc-fuzztest"]
++    if "libssl" in external_deps or "libcrypto" in external_deps:
++        features = features + ["-layering_check"]
+     cc_library(
+         name = name,
+         srcs = srcs,
+@@ -184,6 +188,7 @@ def grpc_cc_library(
+                       "//:grpc_disallow_exceptions": ["GRPC_ALLOW_EXCEPTIONS=0"],
+                       "//conditions:default": [],
+                   }),
++        features = features,
+         hdrs = hdrs + public_hdrs,
+         deps = deps + _get_external_deps(external_deps),
+         copts = GRPC_DEFAULT_COPTS + copts,
+diff --git a/src/core/BUILD b/src/core/BUILD
+--- a/src/core/BUILD
++++ b/src/core/BUILD
+@@ -6570,6 +6570,7 @@ grpc_cc_library(
+         "@com_google_protobuf//upb/reflection",
+         "@com_google_protobuf//upb/message",
+     ],
++    features = ["-layering_check"],
+     tags = ["nofixdeps"],
+     visibility = ["//bazel:xds_client_grpc"],
+     deps = [

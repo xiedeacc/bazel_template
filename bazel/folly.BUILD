@@ -1,7 +1,16 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
+
+selects.config_setting_group(
+    name = "linux_aarch64_glibc",
+    match_all = [
+        "@bazel_template//bazel:libc_glibc",
+        "@bazel_template//bazel:linux_aarch64",
+    ],
+)
 
 COPTS = GLOBAL_COPTS + select({
     "@platforms//os:windows": [
@@ -19,7 +28,7 @@ COPTS = GLOBAL_COPTS + select({
         "/I$(GENDIR)/external/libsodium/src/libsodium/include",
     ],
     "//conditions:default": [
-        "-std=c++17",
+        "-std=c++20",
         "-Iexternal/libdwarf/src/lib/libdwarf",
         "-isystem external/libiberty/include",
         "-isystem external/folly",
@@ -80,6 +89,10 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
     ],
 })
 
+DEFINES = GLOBAL_DEFINES
+
+LINKOPTS = GLOBAL_LINKOPTS
+
 cc_library(
     name = "MathOperation_AVX2",
     srcs = [
@@ -89,6 +102,8 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mavx"],
         "@platforms//cpu:aarch64": [],
     }),
+    defines = DEFINES,
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -103,6 +118,8 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mno-avx"],
         "@platforms//cpu:aarch64": [],
     }),
+    defines = DEFINES,
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -119,6 +136,8 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mpclmul"],
         "@platforms//cpu:aarch64": [],
     }),
+    defines = DEFINES,
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -132,6 +151,8 @@ cc_library(
         "@platforms//cpu:x86_64": ["-mpclmul"],
         "@platforms//cpu:aarch64": [],
     }),
+    defines = DEFINES,
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -145,6 +166,8 @@ cc_library(
         "@platforms//cpu:x86_64": ["-msse4.2"],
         "@platforms//cpu:aarch64": [],
     }),
+    defines = DEFINES,
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":common"],
 )
@@ -165,6 +188,8 @@ cc_library(
         "//conditions:default": [],
     }),
     copts = COPTS + ["-x assembler-with-cpp"],
+    defines = DEFINES,
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES + select({
         "@platforms//cpu:x86_64": [],
         "@platforms//cpu:aarch64": [
@@ -190,8 +215,11 @@ cc_library(
             "folly/hash/detail/ChecksumDetail.cpp",
             "folly/hash/detail/Crc32CombineDetail.cpp",
             "folly/hash/detail/Crc32cDetail.cpp",
+            "folly/io/async/IoUringZeroCopyBufferPool.cpp",
             "folly/io/tool/HugePageUtil.cpp",
             "folly/json/tool/JSONSchemaTester.cpp",
+            "folly/memset_select_aarch64.cpp",
+            "folly/rust/**",
             "folly/tool/BenchmarkCompare.cpp",
             "folly/build/**",
             "folly/docs/**",
@@ -207,18 +235,18 @@ cc_library(
         ],
     ) + select({
         "@platforms//os:windows": [],
+        "@platforms//os:linux": [
+            "folly/io/async/IoUringZeroCopyBufferPool.cpp",
+        ],
         "//conditions:default": [
             "folly/Subprocess.cpp",
-            "folly/debugging/exception_tracer/ExceptionCounterLib.cpp",
-            "folly/debugging/exception_tracer/ExceptionStackTraceLib.cpp",
-            "folly/debugging/exception_tracer/ExceptionTracer.cpp",
-            "folly/debugging/exception_tracer/ExceptionTracerLib.cpp",
-            "folly/debugging/exception_tracer/SmartExceptionStackTraceHooks.cpp",
-            "folly/debugging/exception_tracer/SmartExceptionTracer.cpp",
-            "folly/debugging/exception_tracer/SmartExceptionTracerSingleton.cpp",
-            "folly/debugging/exception_tracer/StackTrace.cpp",
             "folly/executors/ManualExecutor.cpp",
         ],
+    }) + select({
+        ":linux_aarch64_glibc": [
+            "folly/memset_select_aarch64.cpp",
+        ],
+        "//conditions:default": [],
     }),
     hdrs = [
         "folly/io/async/test/ScopedBoundPort.h",
@@ -236,19 +264,16 @@ cc_library(
             "folly/test/**/*.h",
             "folly/**/test/**/*.h",
             "folly/python/**/*.h",
+            "folly/rust/**",
         ],
     ) + select({
         "@platforms//cpu:x86_64": [],
         "@platforms//cpu:aarch64": ["folly/external/aor/asmdefs.h"],
     }),
     copts = COPTS,
-    defines = select({
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [
-            "FOLLY_STATIC_LIBSTDCXX=1",
-        ],
-        "//conditions:default": [],
-    }),
-    linkopts = GLOBAL_LINKOPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
         "@boost//:algorithm",
@@ -264,23 +289,24 @@ cc_library(
         "@boost//:program_options",
         "@boost//:thread",
         "@boost//:utility",
-        "@com_github_gflags_gflags//:gflags",
         "@com_github_glog_glog//:glog",
         "@com_github_google_snappy//:snappy",
         "@com_google_googletest//:gtest",
         "@double-conversion//:double-conversion",
+        "@fast_float",
         "@fmt",
+        "@gflags",
         "@libdwarf//:dwarf",
         "@libevent//:event",
         "@libevent//:event_openssl",
         "@libsodium//:sodium",
+        "@lz4",
         "@openssl",
+        "@org_bzip_bzip2//:bz2lib",
+        "@org_lzma_lzma//:lzma",
+        "@zlib",
         "@zstd",
     ] + select({
-        "@bazel_template//bazel:jemalloc": ["@jemalloc"],
-        "@bazel_template//bazel:tcmalloc": ["@tcmalloc//tcmalloc"],
-        "//conditions:default": [],
-    }) + select({
         "@platforms//os:windows": [],
         "@platforms//os:osx": [
             "@libiberty//:iberty",
@@ -334,7 +360,7 @@ genrule(
         "#define FOLLY_HAVE_LIBGFLAGS 1",
         "#define FOLLY_GFLAGS_NAMESPACE gflags",
         "#define FOLLY_HAVE_LIBGLOG 1",
-        "#define FOLLY_USE_JEMALLOC 0",
+        "/* #undef FOLLY_USE_JEMALLOC */",
         "#if __has_include(<features.h>)",
         "#include <features.h>",
         "#endif",
@@ -382,14 +408,17 @@ template_rule(
     name = "folly-config_h",
     src = ":folly-config_h_in",
     out = "folly/folly-config.h",
-    substitutions = select({
-        "@bazel_template//bazel:jemalloc": {"#define FOLLY_USE_JEMALLOC 0": "#define FOLLY_USE_JEMALLOC 1"},
-        "@bazel_template//bazel:tcmalloc": {"#define FOLLY_USE_JEMALLOC 0": ""},
-        "//conditions:default": {"#define FOLLY_USE_JEMALLOC 0": ""},
-    }) | select({
+    substitutions = {} | select({
         "@bazel_template//bazel:linux_aarch64": {
             "#define FOLLY_HAVE_SWAPCONTEXT 1": "",
             "#define FOLLY_HAVE_BACKTRACE 1": "",
+        },
+        "//conditions:default": {},
+    }) | select({
+        "@bazel_template//bazel:libc_musl": {
+            "#define FOLLY_HAVE_BACKTRACE 1": "/* #undef FOLLY_HAVE_BACKTRACE */",
+            "#define FOLLY_HAVE_IFUNC 1": "/* #undef FOLLY_HAVE_IFUNC */",
+            "#define FOLLY_HAVE_SWAPCONTEXT 1": "/* #undef FOLLY_HAVE_SWAPCONTEXT */",
         },
         "//conditions:default": {},
     }) | select({
@@ -434,9 +463,5 @@ template_rule(
             "#define FOLLY_HAVE_VLA 1": "/* #undef FOLLY_HAVE_VLA */",
             "#define FOLLY_HAVE_EXTRANDOM_SFMT19937 1": "/* #undef FOLLY_HAVE_EXTRANDOM_SFMT19937 */",
         },
-    }) | select({
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": {
-        },
-        "//conditions:default": {},
     }),
 )

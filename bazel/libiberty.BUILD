@@ -1,6 +1,39 @@
-load("@bazel_template//bazel:common.bzl", "template_rule")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
+
+COPTS = GLOBAL_COPTS + select({
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+DEFINES = GLOBAL_DEFINES
+
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LINKOPTS = GLOBAL_LINKOPTS + select({
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
 
 cc_library(
     name = "iberty",
@@ -80,9 +113,10 @@ cc_library(
     ] + glob([
         "libiberty/*.h",
         "include/*.h",
+    ]) + [
         "include/dwarf2.def",
-    ]),
-    copts = select({
+    ],
+    copts = COPTS + select({
         "@platforms//os:windows": [
             "/I$(GENDIR)/external/libiberty/libiberty",
             "/Iexternal/libiberty/include",
@@ -93,7 +127,14 @@ cc_library(
             "-Iexternal/libiberty/include",
         ],
     }),
-    local_defines = [
+    defines = DEFINES,
+    features = ["-layering_check"],
+    includes = [
+        "include",
+        "libiberty",
+    ],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES + [
         "HAVE_CONFIG_H",
         "_GNU_SOURCE",
     ],
@@ -777,6 +818,11 @@ template_rule(
         },
         "//conditions:default": {},
     }) | select({
+        "@bazel_template//bazel:libc_musl": {
+            "#define HAVE_CANONICALIZE_FILE_NAME 1": "/* #undef HAVE_CANONICALIZE_FILE_NAME */",
+        },
+        "//conditions:default": {},
+    }) | select({
         "@platforms//os:osx": {
             "#define HAVE_CANONICALIZE_FILE_NAME 1": "/* #undef HAVE_CANONICALIZE_FILE_NAME */",
             "#define HAVE_DECL_BASENAME 1": "#define HAVE_DECL_BASENAME 0",
@@ -799,11 +845,6 @@ template_rule(
             "#define HAVE___FSETLOCKING 1": "/* #undef HAVE___FSETLOCKING */",
             "/* #undef NEED_DECLARATION_CANONICALIZE_FILE_NAME */": "#define NEED_DECLARATION_CANONICALIZE_FILE_NAME 1",
             "#define STACK_DIRECTION 1": "#define STACK_DIRECTION -1",
-        },
-        "//conditions:default": {},
-    }) | select({
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": {
-            "#define HAVE_CANONICALIZE_FILE_NAME 1": "/* #undef HAVE_CANONICALIZE_FILE_NAME */",
         },
         "//conditions:default": {},
     }),

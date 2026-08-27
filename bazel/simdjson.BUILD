@@ -1,11 +1,9 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
 COPTS = GLOBAL_COPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
-    "//conditions:default": [],
-}) + select({
     "@platforms//os:linux": [],
     "@platforms//os:osx": [],
     "@platforms//os:windows": [],
@@ -13,9 +11,6 @@ COPTS = GLOBAL_COPTS + select({
 })
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
-    "//conditions:default": [],
-}) + select({
     "@platforms//os:linux": [],
     "@platforms//os:osx": [],
     "@platforms//os:windows": [],
@@ -23,23 +18,25 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
 })
 
 LINKOPTS = GLOBAL_LINKOPTS + select({
-    "@bazel_template//bazel:not_cross_compiling_on_windows": [],
-    "//conditions:default": [],
-}) + select({
     "@platforms//os:linux": [],
     "@platforms//os:osx": [],
     "@platforms//os:windows": [],
     "//conditions:default": [],
 })
 
+DEFINES = GLOBAL_DEFINES
+
 cc_library(
     name = "simdjson",
     srcs = ["singleheader/simdjson.cpp"],
     hdrs = ["singleheader/simdjson.h"],
-    copts = [
+    copts = COPTS + [
         "-O3",
         "-DNDEBUG",
         "-DSIMDJSON_AVX512_ALLOWED=0",
     ],
+    defines = DEFINES,
     includes = ["singleheader"],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
 )

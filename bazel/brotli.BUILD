@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 STRICT_C_OPTIONS = select({
@@ -64,8 +66,8 @@ cc_library(
     srcs = [":common_sources"],
     hdrs = [":common_headers"],
     copts = STRICT_C_OPTIONS,
-    deps = [":brotli_inc"],
     linkstatic = True,
+    deps = [":brotli_inc"],
 )
 
 cc_library(
@@ -73,8 +75,11 @@ cc_library(
     srcs = [":dec_sources"],
     hdrs = [":dec_headers"],
     copts = STRICT_C_OPTIONS,
-    deps = [":brotlicommon"],
     linkstatic = True,
+    deps = [
+        ":brotli_inc",
+        ":brotlicommon",
+    ],
 )
 
 cc_library(
@@ -86,8 +91,11 @@ cc_library(
         "@platforms//os:windows": [],
         "//conditions:default": ["-lm"],
     }),
-    deps = [":brotlicommon"],
     linkstatic = True,
+    deps = [
+        ":brotli_inc",
+        ":brotlicommon",
+    ],
 )
 
 cc_binary(
@@ -95,6 +103,7 @@ cc_binary(
     srcs = ["c/tools/brotli.c"],
     copts = STRICT_C_OPTIONS,
     deps = [
+        ":brotli_inc",
         ":brotlidec",
         ":brotlienc",
     ],

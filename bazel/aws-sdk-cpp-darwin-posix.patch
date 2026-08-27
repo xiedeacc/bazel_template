@@ -1,0 +1,12 @@
+diff --git a/crt/aws-crt-cpp/crt/s2n/utils/s2n_prelude.h b/crt/aws-crt-cpp/crt/s2n/utils/s2n_prelude.h
+--- a/crt/aws-crt-cpp/crt/s2n/utils/s2n_prelude.h
++++ b/crt/aws-crt-cpp/crt/s2n/utils/s2n_prelude.h
+@@ -22,7 +22,7 @@
+ #define _S2N_PRELUDE_INCLUDED
+ 
+ /* Define the POSIX API we are targeting */
+-#ifndef _POSIX_C_SOURCE
++#if !defined(_POSIX_C_SOURCE) && !defined(__APPLE__)
+     #define _POSIX_C_SOURCE 200809L
+ #endif
+ 

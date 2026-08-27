@@ -1,6 +1,53 @@
+---
+# Google C++ Style Guide Configuration
 BasedOnStyle: Google
 Language: Cpp
-Standard: Cpp11
+Standard: c++17
+
+# Indentation
+IndentWidth: 2
+ContinuationIndentWidth: 4
+AccessModifierOffset: -1
+
+# Line Length
+ColumnLimit: 80
+
+# Braces
+BreakBeforeBraces: Attach
+
+# Spaces
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+
+# Pointer and Reference Alignment
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Comments
+ReflowComments: true
+
+# Includes
+SortIncludes: true
+IncludeBlocks: Regroup
+
+# Other
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
+ConstructorInitializerIndentWidth: 4
+Cpp11BracedListStyle: true
+DerivePointerAlignment: false
+FixNamespaceComments: true
+NamespaceIndentation: None
 ---
 Language: Proto
 BasedOnStyle: Google

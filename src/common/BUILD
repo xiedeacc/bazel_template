@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 load("//bazel:build.bzl", "cc_test")
 load("//bazel:cpplint.bzl", "cpplint")
@@ -12,6 +13,14 @@ COPTS = GLOBAL_COPTS
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES
 
 LINKOPTS = GLOBAL_LINKOPTS
+
+cc_library(
+    name = "winsock_init",
+    srcs = ["winsock_init.cc"],
+    copts = COPTS,
+    local_defines = LOCAL_DEFINES,
+    alwayslink = True,
+)
 
 cc_library(
     name = "defs",

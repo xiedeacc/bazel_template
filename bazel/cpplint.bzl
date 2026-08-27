@@ -1,5 +1,11 @@
 # -*- python -*-
 
+"""cpplint rule helpers.
+
+Discovers C/C++ sources in the current BUILD file and generates py_test
+targets that run cpplint with the project's CPPLINT.cfg.
+"""
+
 # From https://bazel.build/versions/master/docs/be/c-cpp.html#cc_library.srcs
 _SOURCE_EXTENSIONS = [source_ext for source_ext in """
 .c
@@ -51,14 +57,17 @@ def _add_linter_rules(source_labels, source_filenames, name, data = None):
         tags = tags,
     )
 
-def cpplint(data = None, extra_srcs = None):
-    """For every rule in the BUILD file so far, adds a test rule that runs
-    cpplint over the C++ sources listed in that rule.    Thus, BUILD file authors
-    should call this function at the *end* of every C++-related BUILD file.
-    By default, only the CPPLINT.cfg from the project root and the current
-    directory are used.    Additional configs can be passed in as data labels.
-    Sources that are not discoverable through the "sources so far" heuristic can
-    be passed in as extra_srcs=[].
+def cpplint(name = None, data = None, extra_srcs = None):
+    """Emit py_test rules that run cpplint on discovered C/C++ sources.
+
+    For every rule in the BUILD file so far, adds a test rule that runs
+    cpplint over the C++ sources listed in that rule. Thus, BUILD file authors
+    should call this function at the end of every C++-related BUILD file.
+
+    Args:
+      name: Optional name prefix for the extra_srcs cpplint rule.
+      data: Additional data labels (e.g., extra CPPLINT.cfg files) to include.
+      extra_srcs: Optional list of source labels to lint in a single rule.
     """
 
     # Iterate over all rules.
@@ -86,6 +95,6 @@ def cpplint(data = None, extra_srcs = None):
         _add_linter_rules(
             source_labels,
             source_filenames,
-            "extra_srcs_cpplint",
+            (name + "_extra_srcs_cpplint") if name else "extra_srcs_cpplint",
             data,
         )

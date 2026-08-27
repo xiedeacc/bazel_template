@@ -6,15 +6,20 @@
 #ifndef BAZEL_TEMPLATE_SERVER_HTTP_HANDLER_WEBSOCKET_HANDLER_H_
 #define BAZEL_TEMPLATE_SERVER_HTTP_HANDLER_WEBSOCKET_HANDLER_H_
 
-#include <arpa/inet.h>  // for htonl
-
+#include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
 
+// folly::Endian::big() replaces htonl()/ntohl() here: <arpa/inet.h> does not
+// exist on Windows, and the conversion is a plain byte swap in both
+// directions, so one helper covers host->network and network->host.
 #include "folly/io/IOBuf.h"
 #include "folly/io/IOBufQueue.h"
+#include "folly/lang/Bits.h"
+#include "glog/logging.h"
 
 namespace bazel_template {
 namespace server {
@@ -61,11 +66,11 @@ class WebSocketHandler {
       frame.push_back(message.size());
     } else if (message.size() <= 65535) {
       frame.push_back(126);
-      uint16_t len = htons(message.size());
+      uint16_t len = folly::Endian::big(static_cast<uint16_t>(message.size()));
       frame.append(reinterpret_cast<char*>(&len), sizeof(len));
     } else {
       frame.push_back(127);
-      uint64_t len = folly::Endian::big(message.size());
+      uint64_t len = folly::Endian::big(static_cast<uint64_t>(message.size()));
       frame.append(reinterpret_cast<char*>(&len), sizeof(len));
     }
 
@@ -144,8 +149,8 @@ class WebSocketHandler {
                 LOG(ERROR) << "Frame too short for masking key";
                 return false;
               }
-              masking_key =
-                  ntohl(*reinterpret_cast<const uint32_t*>(data + header_size));
+              masking_key = folly::Endian::big(
+                  *reinterpret_cast<const uint32_t*>(data + header_size));
               header_size += 4;
             }
 
@@ -159,10 +164,11 @@ class WebSocketHandler {
                 unmasked_payload[i] ^=
                     (masking_key >> ((3 - (i % 4)) * 8)) & 0xFF;
               }
-              status_code = ntohs(
+              status_code = folly::Endian::big(
                   *reinterpret_cast<const uint16_t*>(unmasked_payload.data()));
             } else {
-              status_code = ntohs(*reinterpret_cast<const uint16_t*>(payload));
+              status_code =
+                  folly::Endian::big(*reinterpret_cast<const uint16_t*>(payload));
             }
 
             LOG(INFO) << "Close frame: fin=" << fin
@@ -187,7 +193,8 @@ class WebSocketHandler {
                                  sizeof(response_masking_key));
 
               // Add status code in network byte order
-              uint16_t response_code = htons(1000);  // Normal Closure
+              uint16_t response_code =
+                  folly::Endian::big<uint16_t>(1000);  // Normal Closure
               std::string response_payload;
               response_payload.append(reinterpret_cast<char*>(&response_code),
                                       sizeof(response_code));
@@ -262,7 +269,8 @@ class WebSocketHandler {
     uint64_t payload_length;
     if (length_field == 126) {
       if (frame->length() < 4) return false;
-      payload_length = ntohs(*reinterpret_cast<const uint16_t*>(data + 2));
+      payload_length =
+          folly::Endian::big(*reinterpret_cast<const uint16_t*>(data + 2));
       header_size = 4;
     } else if (length_field == 127) {
       if (frame->length() < 10) return false;
@@ -282,8 +290,8 @@ class WebSocketHandler {
     // Handle masking
     if (header.mask) {
       if (frame->length() < header_size + 4) return false;
-      header.masking_key =
-          ntohl(*reinterpret_cast<const uint32_t*>(data + header_size));
+      header.masking_key = folly::Endian::big(
+          *reinterpret_cast<const uint32_t*>(data + header_size));
       header_size += 4;
     }
 

@@ -1,6 +1,39 @@
-load("@bazel_template//bazel:common.bzl", "template_rule")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
+
+COPTS = GLOBAL_COPTS + select({
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+DEFINES = GLOBAL_DEFINES
+
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+LINKOPTS = GLOBAL_LINKOPTS + select({
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
 
 cc_library(
     name = "ev",
@@ -26,7 +59,10 @@ cc_library(
         ],
         "@platforms//os:windows": ["ev_win32.c"],
     }),
-    local_defines = ["HAVE_CONFIG_H"] + select({
+    copts = COPTS,
+    defines = DEFINES,
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES + ["HAVE_CONFIG_H"] + select({
         "@platforms//os:windows": [
             "WIN32",
             "_WIN32",

@@ -9,6 +9,25 @@ def remove_prefix(s, prefix):
         return s[len(prefix):]
     return s
 
+def external_repo_root(path):
+    if path.startswith("external/"):
+        parts = path.split("/")
+        if len(parts) >= 2:
+            return "/".join(parts[:2])
+    return ""
+
+def add_include_arg(args, include_root):
+    if include_root:
+        args.extend(["-I", include_root])
+
+def normalize_include_path(path, current_workspace_root):
+    if not path.startswith("external/"):
+        return path
+    apparent_repo = path.split("/")[1]
+    if current_workspace_root.endswith(apparent_repo) or current_workspace_root.endswith("+" + apparent_repo):
+        return current_workspace_root
+    return path
+
 def _fbthrift_cpp_gen_impl(ctx):
     service_suffixs = [
         ".h",
@@ -49,7 +68,8 @@ def _fbthrift_cpp_gen_impl(ctx):
         fail("output_files size not equal to srcs")
     for thrift_file in ctx.files.srcs:
         outputs = []
-        file_name = remove_prefix(thrift_file.path, "external/{}/".format(ctx.label.workspace_name))
+        workspace_root = ctx.label.workspace_root
+        file_name = remove_prefix(thrift_file.path, workspace_root + "/")
         if file_name in ctx.attr.service_out_file_name:
             service_out_file_name = ctx.attr.service_out_file_name[file_name]
             for suffix in service_suffixs:
@@ -62,6 +82,23 @@ def _fbthrift_cpp_gen_impl(ctx):
             output_file = ctx.actions.declare_file("{}/gen-cpp2/{}{}".format(ctx.attr.out_dir, out_file_name, suffix))
             outputs.append(output_file)
             output_files.append(output_file)
+        include_args = []
+        add_include_arg(include_args, workspace_root)
+        for data_file in ctx.files.data:
+            add_include_arg(include_args, external_repo_root(data_file.path))
+
+        raw_includes = ctx.attr.includes
+        skip_next = False
+        for i in range(len(raw_includes)):
+            if skip_next:
+                skip_next = False
+                continue
+            if raw_includes[i] == "-I" and i + 1 < len(raw_includes):
+                add_include_arg(include_args, normalize_include_path(raw_includes[i + 1], workspace_root))
+                skip_next = True
+            else:
+                include_args.append(raw_includes[i])
+
         ctx.actions.run(
             inputs = [thrift_file] + ctx.files.data,
             outputs = outputs,
@@ -70,7 +107,7 @@ def _fbthrift_cpp_gen_impl(ctx):
                 gen_para,
                 "-o",
                 "{}/external/{}/{}".format(outputs[0].root.path, ctx.label.workspace_name, ctx.attr.out_dir),
-            ] + ctx.attr.includes + [
+            ] + include_args + [
                 thrift_file.path,
             ],
             executable = ctx.executable.thrift,
@@ -83,7 +120,7 @@ fbthrift_cpp_gen = rule(
     attrs = {
         "srcs": attr.label_list(allow_files = [".thrift"], mandatory = True),
         "data": attr.label_list(mandatory = True, allow_files = [".thrift", ".h"]),
-        "thrift": attr.label(executable = True, cfg = "host", default = "@fbthrift//:thrift1"),
+        "thrift": attr.label(executable = True, cfg = "exec", default = "@fbthrift//:thrift1"),
         "gen_para": attr.string_list(mandatory = True),
         "includes": attr.string_list(mandatory = True),
         "plugin": attr.string(mandatory = False, default = "mstch_cpp2"),

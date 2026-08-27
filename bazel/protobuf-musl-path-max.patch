@@ -1,0 +1,15 @@
+diff --git a/src/google/protobuf/compiler/command_line_interface.cc b/src/google/protobuf/compiler/command_line_interface.cc
+index d26696535..3ec173de1 100644
+--- a/src/google/protobuf/compiler/command_line_interface.cc
++++ b/src/google/protobuf/compiler/command_line_interface.cc
+@@ -35,6 +35,10 @@
+ #include <unistd.h>
+ #endif
+ 
++#if defined(__linux__)
++#include <linux/limits.h>
++#endif
++
+ #if defined(__APPLE__)
+ #include <mach-o/dyld.h>
+ #elif defined(__FreeBSD__)

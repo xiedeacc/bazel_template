@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//bazel:build.bzl", "cc_test")
 load("//bazel:cpplint.bzl", "cpplint")
 
@@ -14,7 +15,7 @@ cc_library(
         "-isystem $(GENDIR)/external/folly",
     ],
     deps = [
-        "@com_github_gflags_gflags//:gflags",
+        "@gflags",
         "@com_github_glog_glog//:glog",
         "@com_google_googletest//:gtest",
         "@folly",

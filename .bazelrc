@@ -1,27 +1,22 @@
-#startup --output_base=D:/x --windows_enable_symlinks
-common --noenable_bzlmod
-common --experimental_downloader_config=.bazel_downloader.cfg
+common --downloader_config=.bazel_downloader.cfg
 common --enable_platform_specific_config
+common --incompatible_default_to_explicit_init_py
+
+# Keep Windows Bazel action paths short to avoid the Win32 MAX_PATH limit.
+startup:windows --output_user_root=D:/bzl
 
 ######################### attention #########################
 # 1. pprof.out generated in bazel test sandbox
 # 2. go install github.com/google/pprof@latest
-# 3. tcmalloc not support windows
 
 test:cpplint --test_tag_filters='cpplint'
 test:cpplint --build_tests_only
 test:unit_test --test_tag_filters='-cpplint'
 
-test:unit_test_tcmalloc --define='profiling_type=tcmalloc'
-test:unit_test_tcmalloc --test_env='CPUPROFILE=pprof.out'
-test:unit_test_tcmalloc --test_env='PPROF_PATH=/root/src/go/bin/pprof'
-test:unit_test_tcmalloc --copt='-g'
+build:clang-tidy --aspects=@bazel_clang_tidy//clang_tidy:clang_tidy.bzl%clang_tidy_aspect
+build:clang-tidy --output_groups=report
+build:clang-tidy --@bazel_clang_tidy//:clang_tidy_config=//:clang_tidy_config
 
-test:unit_test_jemalloc --define='profiling_type=jemalloc'
-test:unit_test_jemalloc --test_env='CPUPROFILE=pprof.out'
-test:unit_test_jemalloc --test_env='PPROF_PATH=/usr/local/bin/pprof'
-test:unit_test_jemalloc --test_env='MALLOC_CONF=prof_leak:true,prof:true,prof_active:true,lg_prof_interval:20,lg_prof_sample:17,prof_prefix:jeprof.out,prof_final:true'
-test:unit_test_jemalloc --copt='-g'
 
 coverage --test_tag_filters=-cpplint
 coverage --copt=-fprofile-instr-generate
@@ -96,55 +91,156 @@ build --strip='never'
 build --output_filter="^//"
 build -c opt
 build --define cross_compiling=false
-build --features=-module_maps
-build --host_features=-module_maps
-#build --features=-layering_check
-#build --host_features=-layering_check
+build --jobs=8
+build --conlyopt='-std=gnu17'
+build --incompatible_disallow_empty_glob=false
 #build --remote_cache=http://192.168.1.101/bazel_cache
-build --keep_going
+#build --keep_going
 
 build:opt --compilation_mode=opt
 build:opt --copt=-Wframe-larger-than=16384
 build:dbg --compilation_mode=dbg
 
-build:windows --cxxopt='/std:c++17'
-build:windows --host_cxxopt='/std:c++17'
+build:windows --cxxopt='/std:c++20'
+build:windows --host_cxxopt='/std:c++20'
+build:windows --copt='/utf-8'
+build:windows --host_copt='/utf-8'
+build:windows --cxxopt='/utf-8'
+build:windows --host_cxxopt='/utf-8'
 build:windows --compiler='msvc-cl'
 build:windows --cpu='x64_windows'
 build:windows --extra_toolchains='@openssl//:preinstalled_nmake_toolchain'
 build:windows --extra_toolchains='@openssl//:preinstalled_pkgconfig_toolchain'
 build:windows --workspace_status_command=bazel/workspace_status.bat
+build:windows --java_runtime_version="remotejdk_21"
+build:windows --features=-parse_showincludes
+build:windows --per_file_copt=.*src/proto/.*\\.grpc\\.pb\\.cc@/wd4996
+build:windows --action_env=PATH=D:/software/gperf/bin;C:/Progra~1/Git/usr/bin;C:/Progra~1/Git/bin;C:/Windows;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0
 
 build:macos --copt='-mmacosx-version-min=10.15'
 build:macos --copt='-g'
 build:macos --copt='-O2'
 build:macos --copt='-Wall'
-build:macos --cxxopt='-std=c++17'
-build:macos --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+build:macos --cxxopt='-std=c++20'
 build:macos --host_copt='-mmacosx-version-min=10.15'
 build:macos --host_copt='-g'
 build:macos --host_copt='-O2'
 build:macos --host_copt='-Wall'
-build:macos --host_cxxopt='-std=c++17'
+build:macos --host_cxxopt='-std=c++20'
 build:macos --dynamic_mode=off
 build:macos --workspace_status_command=bazel/workspace_status.sh
+build:macos --per_file_copt=.*src/proto/.*\\.grpc\\.pb\\.cc@-Wno-deprecated-declarations
 
 build:linux --copt='-g'
 build:linux --copt='-O2'
 build:linux --copt='-Wall'
-build:linux --cxxopt='-std=c++17'
-build:linux --cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
+build:linux --cxxopt='-std=c++20'
+build:linux --repo_env=CC=/usr/bin/gcc-16
+build:linux --repo_env=CXX=/usr/bin/g++-16
 build:linux --host_copt='-g'
 build:linux --host_copt='-O2'
 build:linux --host_copt='-Wall'
-build:linux --host_cxxopt='-std=c++17'
-build:linux --host_cxxopt=-D_GLIBCXX_USE_CXX11_ABI=1
-build:linux --workspace_status_command=bazel/workspace_status.sh
+build:linux --host_cxxopt='-std=c++20'
+#build:linux --workspace_status_command=bazel/workspace_status.sh
+build:linux --per_file_copt=.*src/proto/.*\\.grpc\\.pb\\.cc@-Wno-deprecated-declarations
 
 build:android --noenable_platform_specific_config
 build:ios --noenable_platform_specific_config
 
-build:tcmalloc --define='profiling_type=tcmalloc'
-build:jemalloc --define='profiling_type=jemalloc'
-
 ################# cross compiling ###############
+
+build:gcc_aarch64_linux_musl --platforms='//bazel:linux_aarch64_musl_platform'
+build:gcc_aarch64_linux_musl --toolchain_resolution_debug='@bazel_tools//tools/jdk:runtime_toolchain_type'
+build:gcc_aarch64_linux_musl --extra_toolchains='@cc_toolchain_config_gcc_aarch64_generic_linux_musl//:toolchain-gcc_aarch64_generic_linux_musl'
+build:gcc_aarch64_linux_musl --cpu='aarch64'
+build:gcc_aarch64_linux_musl --compiler='gcc'
+build:gcc_aarch64_linux_musl --define libc=musl
+build:gcc_aarch64_linux_musl --java_runtime_version="remotejdk_21"
+build:gcc_aarch64_linux_musl --jobs=6
+build:gcc_aarch64_linux_musl --action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs
+build:gcc_aarch64_linux_musl --action_env=STAGING_DIR=/root/src/software/toolchains
+build:gcc_aarch64_linux_musl --copt='-g'
+build:gcc_aarch64_linux_musl --host_copt='-g'
+
+build:gcc_aarch64_linux_gnu --platforms='//bazel:linux_aarch64_glibc_platform'
+build:gcc_aarch64_linux_gnu --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+build:gcc_aarch64_linux_gnu --extra_toolchains='@cc_toolchain_config_gcc_aarch64_generic_linux_glibc//:toolchain-gcc_aarch64_generic_linux_glibc'
+build:gcc_aarch64_linux_gnu --cpu='aarch64'
+build:gcc_aarch64_linux_gnu --compiler='gcc'
+build:gcc_aarch64_linux_gnu --define libc=glibc
+build:gcc_aarch64_linux_gnu --java_runtime_version="remotejdk_21"
+build:gcc_aarch64_linux_gnu --jobs=6
+build:gcc_aarch64_linux_gnu --action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs
+build:gcc_aarch64_linux_gnu --copt='-g'
+build:gcc_aarch64_linux_gnu --host_copt='-g'
+
+build:clang_aarch64_linux_gnu --platforms='//bazel:linux_aarch64_glibc_platform'
+build:clang_aarch64_linux_gnu --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+build:clang_aarch64_linux_gnu --extra_toolchains='@cc_toolchain_config_clang_aarch64_generic_linux_glibc//:toolchain-clang_aarch64_generic_linux_glibc'
+build:clang_aarch64_linux_gnu --cpu='aarch64'
+build:clang_aarch64_linux_gnu --compiler='clang'
+build:clang_aarch64_linux_gnu --define libc=glibc
+build:clang_aarch64_linux_gnu --java_runtime_version="remotejdk_21"
+build:clang_aarch64_linux_gnu --jobs=6
+build:clang_aarch64_linux_gnu --action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs
+build:clang_aarch64_linux_gnu --copt='-g'
+build:clang_aarch64_linux_gnu --host_copt='-g'
+
+build:clang_aarch64_linux_musl --platforms='//bazel:linux_aarch64_musl_platform'
+build:clang_aarch64_linux_musl --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+build:clang_aarch64_linux_musl --extra_toolchains='@cc_toolchain_config_clang_aarch64_generic_linux_musl//:toolchain-clang_aarch64_generic_linux_musl'
+build:clang_aarch64_linux_musl --cpu='aarch64'
+build:clang_aarch64_linux_musl --compiler='clang'
+build:clang_aarch64_linux_musl --define libc=musl
+build:clang_aarch64_linux_musl --java_runtime_version="remotejdk_21"
+build:clang_aarch64_linux_musl --jobs=6
+build:clang_aarch64_linux_musl --action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs
+build:clang_aarch64_linux_musl --action_env=STAGING_DIR=/root/src/software/toolchains
+build:clang_aarch64_linux_musl --copt='-g'
+build:clang_aarch64_linux_musl --host_copt='-g'
+
+build:clang_x86_64_linux_gnu --platforms='//bazel:linux_x86_64_glibc_platform'
+build:clang_x86_64_linux_gnu --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+build:clang_x86_64_linux_gnu --extra_toolchains='@cc_toolchain_config_clang_x86_64_generic_linux_glibc//:toolchain-clang_x86_64_generic_linux_glibc'
+build:clang_x86_64_linux_gnu --cpu='x86_64'
+build:clang_x86_64_linux_gnu --compiler='clang'
+build:clang_x86_64_linux_gnu --define libc=glibc
+build:clang_x86_64_linux_gnu --java_runtime_version="remotejdk_21"
+build:clang_x86_64_linux_gnu --jobs=6
+build:clang_x86_64_linux_gnu --action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs
+build:clang_x86_64_linux_gnu --host_action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs
+build:clang_x86_64_linux_gnu --copt='-g'
+build:clang_x86_64_linux_gnu --host_copt='-g'
+
+build:clang_gnu --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+build:clang_gnu --platforms='//bazel:linux_x86_64_glibc_platform'
+build:clang_gnu --host_platform='//bazel:linux_x86_64_glibc_platform'
+build:clang_gnu --extra_execution_platforms='//bazel:linux_x86_64_glibc_platform'
+build:clang_gnu --extra_toolchains='@cc_toolchain_config_clang_x86_64_generic_linux_glibc//:toolchain-clang_x86_64_generic_linux_glibc'
+build:clang_gnu --extra_toolchains='@cc_toolchain_config_clang_aarch64_generic_linux_glibc//:toolchain-clang_aarch64_generic_linux_glibc'
+build:clang_gnu --compiler='clang'
+build:clang_gnu --define libc=glibc
+build:clang_gnu --java_runtime_version="remotejdk_21"
+build:clang_gnu --jobs=6
+build:clang_gnu --action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs
+build:clang_gnu --host_action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs
+build:clang_gnu --copt='-g'
+build:clang_gnu --host_copt='-g'
+
+build:clang_musl --toolchain_resolution_debug='@bazel_tools//tools/cpp:toolchain_type'
+build:clang_musl --platforms='//bazel:linux_x86_64_musl_platform'
+build:clang_musl --host_platform='//bazel:linux_x86_64_glibc_platform'
+build:clang_musl --extra_execution_platforms='//bazel:linux_x86_64_glibc_platform'
+build:clang_musl --extra_toolchains='@cc_toolchain_config_clang_x86_64_generic_linux_glibc//:toolchain-clang_x86_64_generic_linux_glibc'
+build:clang_musl --extra_toolchains='@cc_toolchain_config_clang_aarch64_generic_linux_glibc//:toolchain-clang_aarch64_generic_linux_glibc'
+build:clang_musl --extra_toolchains='@cc_toolchain_config_clang_x86_64_generic_linux_musl//:toolchain-clang_x86_64_generic_linux_musl'
+build:clang_musl --extra_toolchains='@cc_toolchain_config_clang_aarch64_generic_linux_musl//:toolchain-clang_aarch64_generic_linux_musl'
+build:clang_musl --compiler='clang'
+build:clang_musl --define libc=musl
+build:clang_musl --java_runtime_version="remotejdk_21"
+build:clang_musl --jobs=6
+build:clang_musl --action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs
+build:clang_musl --host_action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs
+build:clang_musl --action_env=STAGING_DIR=/root/src/software/toolchains
+build:clang_musl --copt='-g'
+build:clang_musl --host_copt='-g'

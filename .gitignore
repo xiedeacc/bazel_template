@@ -8,3 +8,4 @@ external
 #src/proto/*.h
 #src/proto/*.cc
 /.vscode/
+log/

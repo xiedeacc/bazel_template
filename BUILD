@@ -11,3 +11,8 @@ refresh_compile_commands(
         #"//:my_output_1": "--important_flag1 --important_flag2=true",
     },
 )
+
+filegroup(
+    name = "clang_tidy_config",
+    srcs = [".clang-tidy"],
+)

@@ -1,25 +1,55 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "template_rule")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
-crc32c_arm64_HDRS = [
-    "src/crc32c_arm64.h",
-]
+COPTS = GLOBAL_COPTS + select({
+    "@platforms//os:windows": [
+        "/std:c++20",
+    ],
+    "//conditions:default": [
+        "-std=c++20",
+    ],
+}) + select({
+    "@platforms//os:linux": [
+        "-fPIC",
+    ],
+    "@platforms//os:osx": [
+        "-fPIC",
+    ],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
 
-crc32c_arm64_SRCS = [
+LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + [
+    "CJSON_EXPORT_SYMBOLS",
+    "CJSON_IMPORT_SYMBOLS",
+] + select({
+    "@platforms//os:windows": [
+        "_CRT_SECURE_NO_WARNINGS",
+    ],
+    "//conditions:default": [],
+})
+
+LINKOPTS = GLOBAL_LINKOPTS + select({
+    "@platforms//os:windows": [],
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "//conditions:default": [],
+})
+
+DEFINES = GLOBAL_DEFINES
+
+crc32c_arm64_srcs = [
     "src/crc32c_arm64.cc",
 ]
 
-crc32c_sse42_HDRS = [
-    "src/crc32c_sse42.h",
-]
-
-crc32c_sse42_SRCS = [
+crc32c_sse42_srcs = [
     "src/crc32c_sse42.cc",
 ]
 
-crc32c_HDRS = [
+crc32c_hdrs = [
     "src/crc32c_arm64.h",
     "src/crc32c_arm64_check.h",
     "src/crc32c_internal.h",
@@ -31,7 +61,7 @@ crc32c_HDRS = [
     "include/crc32c/crc32c.h",
 ]
 
-crc32c_SRCS = [
+crc32c_srcs = [
     "src/crc32c_portable.cc",
     "src/crc32c.cc",
 ]
@@ -106,9 +136,12 @@ template_rule(
 
 cc_library(
     name = "crc32c",
-    srcs = crc32c_SRCS + crc32c_sse42_SRCS + crc32c_arm64_SRCS,
-    hdrs = crc32c_HDRS + ["crc32c/crc32c_config.h"],
-    copts = crc32c_copts,
+    srcs = crc32c_srcs + crc32c_sse42_srcs + crc32c_arm64_srcs,
+    hdrs = crc32c_hdrs + ["crc32c/crc32c_config.h"],
+    copts = COPTS + crc32c_copts,
+    defines = DEFINES,
     includes = ["include"],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [],
 )

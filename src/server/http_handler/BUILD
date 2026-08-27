@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
 load("//bazel:cpplint.bzl", "cpplint")
@@ -52,11 +53,13 @@ cc_library(
     hdrs = [
         "http_handler_factory.h",
         "websocket_handler.h",
+        "websocket_upgrade_handler.h",
     ],
     copts = COPTS,
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
+        "@com_github_glog_glog//:glog",
         "//src/common:defs",
         "//src/util:config_manager",
         "@boost//:beast",

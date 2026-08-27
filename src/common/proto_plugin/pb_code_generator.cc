@@ -5,6 +5,7 @@
 
 #include "src/common/proto_plugin/pb_code_generator.h"
 
+#include <algorithm>
 #include <fstream>
 #include <memory>
 #include <ostream>

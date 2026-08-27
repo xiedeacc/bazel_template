@@ -1,0 +1,91 @@
+diff --git a/src/libkms.c b/src/libkms.c
+index 89bcd9e..bc7ff44 100644
+--- a/src/libkms.c
++++ b/src/libkms.c
+@@ -102,6 +102,68 @@ EXTERNC __declspec(EXTERNAL)int_fast8_t __cdecl IsDisconnected(const SOCKET sock
+ }
+ 
+ 
++EXTERNC __declspec(EXTERNAL)DWORD __cdecl StartKmsServerWithAddress(const char* listenAddress, const int port, RequestCallback_t requestCallback)
++{
++#ifndef SIMPLE_SOCKETS
++	char formattedAddress[128];
++	char* addressList;
++	char* address;
++	BOOL hasSocket = FALSE;
++
++	if (IsServerStarted) return SOCKET_EALREADY;
++	if (!listenAddress || !*listenAddress) return SOCKET_EADDRNOTAVAIL;
++
++#	ifdef _WIN32
++	int error = initializeWinSockets();
++	if (error) return error;
++#	endif // _WIN32
++
++	CreateResponseBase = requestCallback;
++
++	SocketList = (SOCKET*)vlmcsd_malloc(sizeof(SOCKET) * FD_SETSIZE);
++	numsockets = 0;
++	addressList = (char*)vlmcsd_malloc(strlen(listenAddress) + 1);
++	strcpy(addressList, listenAddress);
++
++	for (address = strtok(addressList, ","); address; address = strtok(NULL, ","))
++	{
++		const size_t addressLength = strlen(address);
++		const BOOL isBracketedIPv6 = address[0] == '[';
++		const BOOL isIPv6 = strchr(address, ':') != NULL;
++		if (addressLength + 16 >= sizeof(formattedAddress)) continue;
++		if (isIPv6 && !isBracketedIPv6)
++		{
++			snprintf(formattedAddress, sizeof(formattedAddress), "[%s]:%u", address, (unsigned int)port);
++		}
++		else
++		{
++			snprintf(formattedAddress, sizeof(formattedAddress), "%s:%u", address, (unsigned int)port);
++		}
++		if (addListeningSocket(formattedAddress)) hasSocket = TRUE;
++	}
++	free(addressList);
++
++	if (!hasSocket)
++	{
++		if (SocketList) free(SocketList);
++		SocketList = NULL;
++		numsockets = 0;
++		return SOCKET_EADDRNOTAVAIL;
++	}
++
++	IsServerStarted = TRUE;
++
++	runServer();
++
++	IsServerStarted = FALSE;
++	return 0;
++#else // SIMPLE_SOCKETS
++	(void)listenAddress;
++	return StartKmsServer(port, requestCallback);
++#endif // SIMPLE_SOCKETS
++}
++
++
+ EXTERNC __declspec(EXTERNAL)DWORD __cdecl StartKmsServer(const int port, RequestCallback_t requestCallback)
+ {
+ #ifndef SIMPLE_SOCKETS
+@@ -120,6 +177,6 @@ EXTERNC __declspec(EXTERNAL)DWORD __cdecl StartKmsServer(const int port, Request
+ 	if (checkProtocolStack(AF_INET6)) { haveIPv6 = TRUE; maxsockets++; }
+ 
+-	if (!maxsockets) return SOCKET_EAFNOSUPPORT;
++	if (!maxsockets) return SOCKET_EADDRNOTAVAIL;
+ 
+ 	SocketList = (SOCKET*)vlmcsd_malloc(sizeof(SOCKET) * (size_t)maxsockets);
+ 	numsockets = 0;
+diff --git a/src/libkms.h b/src/libkms.h
+index 2c9065f..cc7a208 100644
+--- a/src/libkms.h
++++ b/src/libkms.h
+@@ -19,4 +19,5 @@ EXTERNC __declspec(EXTERNAL) DWORD __cdecl SendKMSRequest(const SOCKET sock, RES
+ EXTERNC __declspec(EXTERNAL) DWORD __cdecl StartKmsServer(const int port, RequestCallback_t requestCallback);
++EXTERNC __declspec(EXTERNAL) DWORD __cdecl StartKmsServerWithAddress(const char* listenAddress, const int port, RequestCallback_t requestCallback);
+ EXTERNC __declspec(EXTERNAL) DWORD __cdecl StopKmsServer();
+ EXTERNC __declspec(EXTERNAL) int __cdecl GetLibKmsVersion();
+ EXTERNC __declspec(EXTERNAL) const char* const __cdecl GetEmulatorVersion();
