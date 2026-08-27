@@ -60,6 +60,7 @@ cc_library(
         "//src/common:defs",
         "//src/util:config_manager",
         "@boost//:beast",
+        "@openssl//:crypto",
         "@boost//:system",
         "@boost//:url",
         "@proxygen",

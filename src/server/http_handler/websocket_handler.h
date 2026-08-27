@@ -10,7 +10,6 @@
 #include <cstdlib>
 #include <functional>
 #include <memory>
-#include <random>
 #include <string>
 #include <vector>
 
@@ -20,6 +19,7 @@
 #include "folly/io/IOBuf.h"
 #include "folly/io/IOBufQueue.h"
 #include "folly/lang/Bits.h"
+#include "openssl/rand.h"
 #include "src/common/logging.h"
 
 namespace bazel_template::server::http_handler {
@@ -37,11 +37,14 @@ constexpr const char* kWSVersionHeader = "Sec-WebSocket-Version";
 constexpr const char* kWSVersion = "13";
 constexpr const char* kUpgradeTo = "websocket";
 
-// RFC 6455 requires the masking key to be unpredictable. rand() is neither
-// well-distributed nor thread-safe; this is seeded once per thread.
-inline uint32_t RandomMaskingKey() {
-  static thread_local std::mt19937 engine{std::random_device{}()};
-  return std::uniform_int_distribution<uint32_t>{}(engine);
+// RFC 6455 section 5.3 requires the masking key to come from a strong source
+// of entropy: the mask is what stops a proxy from being fooled into reading
+// frame data as a request, so a predictable key defeats its purpose. A plain
+// PRNG is not enough -- mt19937's state is recoverable from 624 outputs, and
+// a frame consumes exactly one. Returns false rather than falling back to a
+// weak key, since masking with a guessable one is worse than not sending.
+inline bool RandomMaskingKey(uint32_t* key) {
+  return RAND_bytes(reinterpret_cast<unsigned char*>(key), sizeof(*key)) == 1;
 }
 
 // WebSocket frame header structure
@@ -201,7 +204,11 @@ class WebSocketHandler {
               close_frame.push_back(static_cast<char>(0x82));  // MASK + len 2
 
               // Generate random masking key
-              uint32_t response_masking_key = RandomMaskingKey();
+              uint32_t response_masking_key = 0;
+              if (!RandomMaskingKey(&response_masking_key)) {
+                LOG(ERROR) << "No entropy for close-frame masking key";
+                return false;
+              }
               close_frame.append(reinterpret_cast<char*>(&response_masking_key),
                                  sizeof(response_masking_key));
 
@@ -241,7 +248,11 @@ class WebSocketHandler {
             pong_frame.push_back(static_cast<char>(0x80));  // MASK + len 0
 
             // Generate random masking key
-            uint32_t masking_key = RandomMaskingKey();
+            uint32_t masking_key = 0;
+            if (!RandomMaskingKey(&masking_key)) {
+              LOG(ERROR) << "No entropy for pong-frame masking key";
+              return false;
+            }
             pong_frame.append(reinterpret_cast<char*>(&masking_key),
                               sizeof(masking_key));
 
