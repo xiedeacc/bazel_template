@@ -84,7 +84,8 @@ class AsyncClient<RpcServiceMethodConcept,
                                       rpc_method_, &client_context_, request,
                                       /*start=*/false));
     response_reader_->StartCall();
-    response_reader_->Finish(&response_, &status_, (void*)&finish_event_);
+    response_reader_->Finish(&response_, &status_,
+                             reinterpret_cast<void*>(&finish_event_));
   }
 
   void HandleEvent(const CompletionQueue::ClientEvent& client_event) override {
@@ -146,7 +147,7 @@ class AsyncClient<RpcServiceMethodConcept,
         ::grpc::internal::ClientAsyncReaderFactory<ResponseType>::Create(
             channel_.get(), completion_queue_, rpc_method_, &client_context_,
             request,
-            /*start=*/true, (void*)&write_event_));
+            /*start=*/true, reinterpret_cast<void*>(&write_event_)));
   }
 
   void HandleEvent(const CompletionQueue::ClientEvent& client_event) override {
@@ -176,11 +177,12 @@ class AsyncClient<RpcServiceMethodConcept,
         callback_ = nullptr;
       }
       finish_status_ = status;
-      response_reader_->Finish(&finish_status_, (void*)&finish_event_);
+      response_reader_->Finish(&finish_status_,
+                               reinterpret_cast<void*>(&finish_event_));
       return;
     }
 
-    response_reader_->Read(&response_, (void*)&read_event_);
+    response_reader_->Read(&response_, reinterpret_cast<void*>(&read_event_));
   }
 
   void HandleReadEvent(const CompletionQueue::ClientEvent& client_event) {
@@ -191,10 +193,11 @@ class AsyncClient<RpcServiceMethodConcept,
           callback_ = nullptr;
         }
       }
-      response_reader_->Read(&response_, (void*)&read_event_);
+      response_reader_->Read(&response_, reinterpret_cast<void*>(&read_event_));
     } else {
       finish_status_ = ::grpc::Status();
-      response_reader_->Finish(&finish_status_, (void*)&finish_event_);
+      response_reader_->Finish(&finish_status_,
+                               reinterpret_cast<void*>(&finish_event_));
     }
   }
 

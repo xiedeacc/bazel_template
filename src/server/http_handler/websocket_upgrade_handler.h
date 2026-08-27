@@ -123,7 +123,7 @@ class WebSocketUpgradeHandler : public proxygen::RequestHandler {
 
   void HandleMessage(const std::string& message) {
     LOG(INFO) << "Echoing WebSocket message of " << message.size() << " bytes";
-    SendFrame(ws_handler_->AssembleFrame(message, 0x1));  // 0x1: text frame
+    SendFrame(WebSocketHandler::AssembleFrame(message, 0x1));  // 0x1: text
   }
 
   void SendFrame(const std::string& frame) {

@@ -49,8 +49,10 @@ void ShutdownCheckingThread() {
 }
 
 void RegisterSignalHandler() {
-  signal(SIGTERM, &SignalHandler);
-  signal(SIGINT, &SignalHandler);
+  // The previous handler is deliberately discarded: nothing installs one
+  // before this, and there is nothing to restore it to.
+  (void)signal(SIGTERM, &SignalHandler);
+  (void)signal(SIGINT, &SignalHandler);
 #if !defined(_WIN32)
   signal(SIGQUIT, &SignalHandler);
   signal(SIGHUP, SIG_IGN);

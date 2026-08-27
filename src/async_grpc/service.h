@@ -36,10 +36,11 @@ class Service : public ::grpc::Service {
   friend class Rpc;
 
   Service(const std::string& service_name,
-          const std::map<std::string, RpcHandlerInfo>& rpc_handlers,
+          const std::map<std::string, RpcHandlerInfo>& rpc_handler_infos,
           EventQueueSelector event_queue_selector);
-  void StartServing(std::vector<CompletionQueueThread>& completion_queues,
-                    ExecutionContext* execution_context);
+  void StartServing(
+      std::vector<CompletionQueueThread>& completion_queue_threads,
+      ExecutionContext* execution_context);
   void HandleEvent(Rpc::Event event, Rpc* rpc, bool ok);
   void StopServing();
 

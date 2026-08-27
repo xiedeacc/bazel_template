@@ -108,10 +108,8 @@ class RpcHandler : public RpcHandlerInterface {
   }
   Writer GetWriter() { return Writer(rpc_->GetWeakPtr()); }
 
- protected:
-  ExecutionContext* execution_context_{};
-
  private:
+  ExecutionContext* execution_context_{};
   Rpc* rpc_{};
   std::unique_ptr<Span> span_;
 };

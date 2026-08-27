@@ -8,10 +8,12 @@
 namespace bazel_template::util {
 
 // folly::Singleton registers itself at static-init time; that registration is
-// the whole point of the object, and it has no const form.
-// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
+// the whole point of the object, and it has no const form. That registration
+// is also the throwing static initialisation cert-err58-cpp warns about;
+// folly offers no way to defer it.
+// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables,cert-err58-cpp)
 static folly::Singleton<ConfigManager> config_manager;
-// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
+// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables,cert-err58-cpp)
 
 std::shared_ptr<ConfigManager> ConfigManager::Instance() {
   return folly::Singleton<bazel_template::util::ConfigManager,

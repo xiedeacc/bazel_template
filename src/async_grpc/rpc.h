@@ -137,6 +137,7 @@ class Rpc {
   Rpc& operator=(const Rpc&) = delete;
   Rpc(Rpc&&) = delete;
   Rpc& operator=(Rpc&&) = delete;
+  ~Rpc() = default;
 
  private:
   struct SendItem {

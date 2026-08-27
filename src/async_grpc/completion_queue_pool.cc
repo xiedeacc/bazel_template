@@ -17,6 +17,7 @@
 #include "src/async_grpc/completion_queue_pool.h"
 
 #include <cstdlib>
+#include <random>
 
 #include "src/async_grpc/async_client.h"
 #include "src/common/logging.h"
@@ -24,7 +25,7 @@
 namespace async_grpc {
 namespace {
 
-size_t kDefaultNumberCompletionQueues = 2;
+constexpr size_t kDefaultNumberCompletionQueues = 2;
 
 }  // namespace
 
@@ -67,7 +68,11 @@ void CompletionQueuePool::SetNumberCompletionQueues(
 ::grpc::CompletionQueue* CompletionQueuePool::GetCompletionQueue() {
   CompletionQueuePool* pool = completion_queue_pool();
   pool->Initialize();
-  const unsigned int qid = rand() % pool->completion_queues_.size();
+  // rand() is neither well distributed nor thread-safe; this picks a queue
+  // per thread from a properly seeded engine.
+  static thread_local std::mt19937 engine{std::random_device{}()};
+  const size_t qid = std::uniform_int_distribution<size_t>{
+      0, pool->completion_queues_.size() - 1}(engine);
   return pool->completion_queues_.at(qid).completion_queue();
 }
 

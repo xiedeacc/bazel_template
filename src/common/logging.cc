@@ -5,6 +5,7 @@
 
 #include "src/common/logging.h"
 
+#include <array>
 #include <filesystem>
 #include <mutex>
 #include <vector>
@@ -89,15 +90,16 @@ void Initialize(const std::string& program_name, const std::string& log_dir,
     console_sink->set_level(spdlog::level::info);
     sinks.push_back(console_sink);
     std::filesystem::create_directories(log_dir);
-    const struct {
+    struct FileSink {
       const char* suffix;
       spdlog::level::level_enum level;
-    } file_sinks[] = {
+    };
+    const std::array<FileSink, 4> file_sinks = {{
         {.suffix = "INFO", .level = spdlog::level::info},
         {.suffix = "WARNING", .level = spdlog::level::warn},
         {.suffix = "ERROR", .level = spdlog::level::err},
         {.suffix = "FATAL", .level = spdlog::level::critical},
-    };
+    }};
 
     for (const auto& sink_config : file_sinks) {
       const auto path = std::filesystem::path(log_dir) /

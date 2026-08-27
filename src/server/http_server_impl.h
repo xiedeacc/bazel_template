@@ -46,7 +46,7 @@ class HttpServer final {
 
   void Start() {
     server_->start();
-    server_context_->MarkedHttpServerInitedDone();
+    ServerContext::MarkedHttpServerInitedDone();
   }
   void Shutdown() { server_->stop(); }
 

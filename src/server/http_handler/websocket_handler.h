@@ -214,8 +214,9 @@ class WebSocketHandler {
 
               // Apply masking
               for (size_t i = 0; i < response_payload.size(); i++) {
-                response_payload[i] ^=
-                    (response_masking_key >> ((3 - (i % 4)) * 8)) & 0xFF;
+                response_payload[i] = static_cast<char>(
+                    response_payload[i] ^
+                    ((response_masking_key >> ((3 - (i % 4)) * 8)) & 0xFF));
               }
               close_frame.append(response_payload);
 
@@ -237,7 +238,7 @@ class WebSocketHandler {
             // Create pong frame
             std::string pong_frame;
             pong_frame.push_back(static_cast<char>(0x8A));  // FIN + PONG
-            pong_frame.push_back(0x80);  // MASK + 0 bytes payload length
+            pong_frame.push_back(static_cast<char>(0x80));  // MASK + len 0
 
             // Generate random masking key
             uint32_t masking_key = RandomMaskingKey();
@@ -299,7 +300,7 @@ class WebSocketHandler {
     }
 
     // Validate payload length
-    if (payload_length > 100 * 1024 * 1024) {  // 100MB limit
+    if (payload_length > uint64_t{100} * 1024 * 1024) {  // 100MB limit
       LOG(ERROR) << "Payload too large: " << payload_length;
       return false;
     }

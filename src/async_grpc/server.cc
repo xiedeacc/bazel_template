@@ -16,6 +16,8 @@
 
 #include "src/async_grpc/server.h"
 
+#include <chrono>
+
 #include "src/common/logging.h"
 #if BUILD_TRACING
 #include "opencensus/exporters/trace/stackdriver/stackdriver_exporter.h"
@@ -25,7 +27,9 @@
 namespace async_grpc {
 namespace {
 
-const common::Duration kPopEventTimeout = common::FromMilliseconds(100);
+constexpr common::Duration kPopEventTimeout =
+    std::chrono::duration_cast<common::Duration>(
+        std::chrono::milliseconds(100));
 constexpr unsigned int kDefaultTracingMaxAttributes = 128;
 constexpr unsigned int kDefaultTracingMaxAnnotations = 128;
 constexpr unsigned int kDefaultTracingMaxMessageEvents = 128;

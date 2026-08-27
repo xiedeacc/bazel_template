@@ -6,6 +6,7 @@
 #include "src/util/util.h"
 
 #include <algorithm>
+#include <array>
 #include <fstream>
 
 #include "fmt/format.h"
@@ -64,16 +65,16 @@ bool Util::HashUpdate(EVP_MD_CTX* context, const string& str) {
 
 bool Util::HashFinal(EVP_MD_CTX* context, string* out,
                      const bool use_upper_case) {
-  unsigned char hash[EVP_MAX_MD_SIZE];
+  std::array<unsigned char, EVP_MAX_MD_SIZE> hash{};
   unsigned int length = 0;
-  if (EVP_DigestFinal_ex(context, hash, &length) != 1) {
+  if (EVP_DigestFinal_ex(context, hash.data(), &length) != 1) {
     EVP_MD_CTX_free(context);
     return false;
   }
 
   EVP_MD_CTX_free(context);
 
-  string s(reinterpret_cast<const char*>(hash), length);
+  string s(reinterpret_cast<const char*>(hash.data()), length);
   Util::ToHexStr(s, out, use_upper_case);
   return true;
 }

@@ -20,6 +20,8 @@ class BlockingQueue {
 
   // Destructor
   ~BlockingQueue() = default;
+  BlockingQueue(BlockingQueue&&) = delete;
+  BlockingQueue& operator=(BlockingQueue&&) = delete;
 
   // Prevent copying
   BlockingQueue(const BlockingQueue&) = delete;

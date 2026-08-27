@@ -23,11 +23,12 @@
 
 namespace async_grpc {
 
-Service::Service(const std::string& /*service_name*/,
+Service::Service(const std::string& service_name,
                  const std::map<std::string, RpcHandlerInfo>& rpc_handler_infos,
                  EventQueueSelector event_queue_selector)
     : rpc_handler_infos_(rpc_handler_infos),
       event_queue_selector_(std::move(event_queue_selector)) {
+  (void)service_name;
   for (const auto& rpc_handler_info : rpc_handler_infos_) {
     // The 'handler' below is set to 'nullptr' indicating that we want to
     // handle this method asynchronously.
