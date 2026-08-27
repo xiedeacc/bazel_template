@@ -51,7 +51,7 @@ void CompletionQueue::RunCompletionQueue() {
 }
 
 CompletionQueuePool* CompletionQueuePool::completion_queue_pool() {
-  static CompletionQueuePool* const kInstance = new CompletionQueuePool();
+  static auto* const kInstance = new CompletionQueuePool();
   return kInstance;
 }
 
@@ -80,8 +80,8 @@ void CompletionQueuePool::Shutdown() {
   LOG(INFO) << "Shutting down CompletionQueuePool";
   CompletionQueuePool* pool = completion_queue_pool();
   common::MutexLocker locker(&pool->mutex_);
-  for (size_t i = 0; i < pool->completion_queues_.size(); ++i) {
-    pool->completion_queues_.at(i).Shutdown();
+  for (auto& completion_queue : pool->completion_queues_) {
+    completion_queue.Shutdown();
   }
   pool->completion_queues_.clear();
   pool->initialized_ = false;

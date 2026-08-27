@@ -7,7 +7,11 @@
 
 namespace bazel_template::util {
 
+// folly::Singleton registers itself at static-init time; that registration is
+// the whole point of the object, and it has no const form.
+// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 static folly::Singleton<ConfigManager> config_manager;
+// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 std::shared_ptr<ConfigManager> ConfigManager::Instance() {
   return folly::Singleton<bazel_template::util::ConfigManager,

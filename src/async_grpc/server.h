@@ -28,8 +28,8 @@
 
 namespace async_grpc {
 
-constexpr int64_t MAX_GRPC_MSG_SIZE = 2 * 64 * 1024 * 1024 * 8;  // 128MB
-constexpr double TRACING_SAMPLER_PROBALITITY = 0.01;             // 1 Percent
+constexpr int64_t MAX_GRPC_MSG_SIZE = int64_t{2} * 64 * 1024 * 1024 * 8;
+constexpr double TRACING_SAMPLER_PROBALITITY = 0.01;  // 1 Percent
 
 class Server {
  protected:
@@ -42,8 +42,8 @@ class Server {
         : num_grpc_threads(num_grpc_threads),
           num_event_threads(num_event_threads),
           server_address(server_address) {}
-    size_t num_grpc_threads;
-    size_t num_event_threads;
+    size_t num_grpc_threads{};
+    size_t num_event_threads{};
     std::string server_address;
     int max_receive_message_size = MAX_GRPC_MSG_SIZE;
     int max_send_message_size = MAX_GRPC_MSG_SIZE;
@@ -65,7 +65,7 @@ class Server {
     void SetServerAddress(const std::string& server_address);
     void SetMaxReceiveMessageSize(int max_receive_message_size);
     void SetMaxSendMessageSize(int max_send_message_size);
-    void EnableTracing();
+    static void EnableTracing();
     void DisableTracing();
     void SetTracingSamplerProbability(double tracing_sampler_probability);
     void SetTracingTaskName(const std::string& tracing_task_name);
@@ -149,6 +149,11 @@ class Server {
   friend class Builder;
   virtual ~Server() = default;
 
+  Server(const Server&) = delete;
+  Server& operator=(const Server&) = delete;
+  Server(Server&&) = delete;
+  Server& operator=(Server&&) = delete;
+
   // Starts a server starts serving the registered services.
   void Start();
 
@@ -174,19 +179,15 @@ class Server {
   }
 
  protected:
-  Server(const Options& options);
+  explicit Server(const Options& options);
   void AddService(
       const std::string& service_name,
       const std::map<std::string, RpcHandlerInfo>& rpc_handler_infos);
 
-  Server(const Server&) = delete;
-  Server& operator=(const Server&) = delete;
-  Server(Server&&) = delete;
-  Server& operator=(Server&&) = delete;
-
  private:
-  void RunCompletionQueue(::grpc::ServerCompletionQueue* completion_queue);
-  void RunEventQueue(Rpc::EventQueue* event_queue);
+  static void RunCompletionQueue(
+      ::grpc::ServerCompletionQueue* completion_queue);
+  void RunEventQueue(Rpc::EventQueue* event_queue) const;
   Rpc::EventQueue* SelectNextEventQueueRoundRobin();
 
   Options options_;

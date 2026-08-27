@@ -15,10 +15,15 @@
 #include "src/util/config_manager.h"
 
 // https://github.com/grpc/grpc/issues/24884
+// A signal handler may only touch objects with static storage duration, so
+// the shutdown state has to live here. It is guarded by the mutex below and
+// read by the shutdown thread, not by the handler itself.
+// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 bazel_template::server::HttpServer* http_server_ptr = nullptr;
 bool shutdown_required = false;
 std::mutex mutex;
 std::condition_variable cv;
+// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 const char* SignalName(int sig);
 

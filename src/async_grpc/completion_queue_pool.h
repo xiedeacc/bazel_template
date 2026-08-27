@@ -40,7 +40,6 @@ class CompletionQueue {
     bool ok = false;
   };
 
- public:
   CompletionQueue()
       : completion_queue_(std::make_shared<grpc::CompletionQueue>()) {}
 

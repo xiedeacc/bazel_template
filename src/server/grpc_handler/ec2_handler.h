@@ -72,8 +72,8 @@ class EC2InstanceManagementHandler
   void OnReadsDone() override { Finish(grpc::Status::OK); }
 
  private:
-  void HandleStartInstance(const proto::EC2InstanceRequest& req,
-                           proto::EC2InstanceResponse* res) {
+  static void HandleStartInstance(const proto::EC2InstanceRequest& req,
+                                  proto::EC2InstanceResponse* res) {
     // Set region if specified
     Aws::EC2::EC2ClientConfiguration client_config;
     if (!req.region().empty()) {
@@ -100,8 +100,8 @@ class EC2InstanceManagementHandler
     }
   }
 
-  void HandleStopInstance(const proto::EC2InstanceRequest& req,
-                          proto::EC2InstanceResponse* res) {
+  static void HandleStopInstance(const proto::EC2InstanceRequest& req,
+                                 proto::EC2InstanceResponse* res) {
     // Set region if specified
     Aws::EC2::EC2ClientConfiguration client_config;
     if (!req.region().empty()) {

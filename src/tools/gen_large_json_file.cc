@@ -12,8 +12,9 @@
 
 namespace {
 
-constexpr size_t TARGET_SIZE = 5 * 1024 * 1024;  // 200MB
-constexpr size_t CHUNK_SIZE = 1024 * 1024;  // 1MB chunks for progress reporting
+constexpr size_t TARGET_SIZE = size_t{5} * 1024 * 1024;  // 200MB
+constexpr size_t CHUNK_SIZE =
+    size_t{1024} * 1024;  // 1MB chunks for progress reporting
 
 void GenerateLargeJsonFile(const std::string& output_path) {
   std::ofstream out(output_path, std::ios::binary);
@@ -48,7 +49,7 @@ void GenerateLargeJsonFile(const std::string& output_path) {
     // Report progress
     if (total_written % CHUNK_SIZE < 1000) {  // Report roughly every MB
       std::cout << "\rProgress: " << (total_written * 100 / TARGET_SIZE)
-                << "% (" << (total_written / (1024 * 1024)) << "MB)"
+                << "% (" << (total_written / (size_t{1024} * 1024)) << "MB)"
                 << std::flush;
     }
   }
@@ -58,7 +59,7 @@ void GenerateLargeJsonFile(const std::string& output_path) {
   out.close();
 
   std::cout << "\nGenerated " << count << " nodes in " << output_path << '\n';
-  std::cout << "Total size: " << (total_written / (1024 * 1024)) << "MB"
+  std::cout << "Total size: " << (total_written / (size_t{1024} * 1024)) << "MB"
             << '\n';
 }
 

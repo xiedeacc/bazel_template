@@ -63,7 +63,7 @@ class WebSocketClient {
           }));
 
       // Set message size limit (100MB)
-      ws_.read_message_max(100 * 1024 * 1024);
+      ws_.read_message_max(std::size_t{100} * 1024 * 1024);
 
       // Perform the WebSocket handshake with the correct API path
       ws_.handshake(host_, "/api/v1/folder/load");

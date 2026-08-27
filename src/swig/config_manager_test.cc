@@ -27,7 +27,7 @@ TEST(ConfigManager, Init) {
 
   ConfigManager config_manager;
   EXPECT_TRUE(config_manager.Init(path));
-  LOG(INFO) << config_manager.ToString();
+  LOG(INFO) << bazel_template::swig::ConfigManager::ToString();
 }
 
 }  // namespace bazel_template::swig

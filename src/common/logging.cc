@@ -17,11 +17,15 @@
 namespace bazel_template::logging {
 namespace {
 
-constexpr size_t kMaxLogFileSize = 10 * 1024 * 1024;
+constexpr size_t kMaxLogFileSize = size_t{10} * 1024 * 1024;
 constexpr size_t kMaxRotatedFiles = 10;
 
+// The logger is process-wide by nature: Initialize() installs it and every
+// LOG() reads it. g_logging_mutex serialises both.
+// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 std::mutex g_logging_mutex;
 std::shared_ptr<spdlog::logger> g_logger;
+// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 spdlog::level::level_enum ToSpdlogLevel(Severity severity) {
   switch (severity) {

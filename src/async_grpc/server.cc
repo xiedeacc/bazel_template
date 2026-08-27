@@ -148,12 +148,12 @@ void Server::RunCompletionQueue(
 
 EventQueue* Server::SelectNextEventQueueRoundRobin() {
   common::MutexLocker locker(&current_event_queue_id_lock_);
-  current_event_queue_id_ =
-      (current_event_queue_id_ + 1) % options_.num_event_threads;
+  current_event_queue_id_ = static_cast<int>((current_event_queue_id_ + 1) %
+                                             options_.num_event_threads);
   return event_queue_threads_.at(current_event_queue_id_).event_queue();
 }
 
-void Server::RunEventQueue(EventQueue* event_queue) {
+void Server::RunEventQueue(EventQueue* event_queue) const {
   while (!shutting_down_) {
     Rpc::UniqueEventPtr rpc_event =
         event_queue->PopWithTimeout(kPopEventTimeout);

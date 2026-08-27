@@ -187,8 +187,9 @@ class AsyncClient<RpcServiceMethodConcept,
     if (client_event.ok) {
       if (callback_) {
         callback_(::grpc::Status(), &response_);
-        if (!client_event.ok)
+        if (!client_event.ok) {
           callback_ = nullptr;
+        }
       }
       response_reader_->Read(&response_, (void*)&read_event_);
     } else {

@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <functional>
 #include <memory>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -23,14 +24,25 @@
 
 namespace bazel_template::server::http_handler {
 
-const std::string kWSKeyHeader = "Sec-WebSocket-Key";
-const std::string kWSProtocolHeader = "Sec-WebSocket-Protocol";
-const std::string kWSExtensionsHeader = "Sec-WebSocket-Extensions";
-const std::string kWSAcceptHeader = "Sec-WebSocket-Accept";
-const std::string kWSVersionHeader = "Sec-WebSocket-Version";
+// A namespace-scope const std::string needs dynamic initialisation, which
+// can throw before main where nothing can catch it (cert-err58-cpp). A
+// pointer to a string literal needs none and still converts where a
+// std::string is wanted.
+constexpr const char* kWSKeyHeader = "Sec-WebSocket-Key";
+constexpr const char* kWSProtocolHeader = "Sec-WebSocket-Protocol";
+constexpr const char* kWSExtensionsHeader = "Sec-WebSocket-Extensions";
+constexpr const char* kWSAcceptHeader = "Sec-WebSocket-Accept";
+constexpr const char* kWSVersionHeader = "Sec-WebSocket-Version";
 
-const std::string kWSVersion = "13";
-const std::string kUpgradeTo = "websocket";
+constexpr const char* kWSVersion = "13";
+constexpr const char* kUpgradeTo = "websocket";
+
+// RFC 6455 requires the masking key to be unpredictable. rand() is neither
+// well-distributed nor thread-safe; this is seeded once per thread.
+inline uint32_t RandomMaskingKey() {
+  static thread_local std::mt19937 engine{std::random_device{}()};
+  return std::uniform_int_distribution<uint32_t>{}(engine);
+}
 
 // WebSocket frame header structure
 struct WebSocketFrameHeader {
@@ -56,17 +68,19 @@ class WebSocketHandler {
     std::string frame;
 
     // First byte: FIN (1) + opcode
-    frame.push_back(0x80 | (opcode & 0x0F));
+    // WebSocket frame bytes are unsigned; std::string holds signed char, so
+    // the cast is explicit rather than implementation-defined.
+    frame.push_back(static_cast<char>(0x80 | (opcode & 0x0F)));
 
     // Second byte: MASK (0) + payload length
     if (message.size() <= 125) {
-      frame.push_back(message.size());
+      frame.push_back(static_cast<char>(message.size()));
     } else if (message.size() <= 65535) {
-      frame.push_back(126);
+      frame.push_back(static_cast<char>(126));
       uint16_t len = folly::Endian::big(static_cast<uint16_t>(message.size()));
       frame.append(reinterpret_cast<char*>(&len), sizeof(len));
     } else {
-      frame.push_back(127);
+      frame.push_back(static_cast<char>(127));
       uint64_t len = folly::Endian::big(static_cast<uint64_t>(message.size()));
       frame.append(reinterpret_cast<char*>(&len), sizeof(len));
     }
@@ -183,11 +197,11 @@ class WebSocketHandler {
             // Send close frame in response
             if (send_frame_callback_) {
               std::string close_frame;
-              close_frame.push_back(0x88);  // FIN + CLOSE opcode
-              close_frame.push_back(0x82);  // MASK + 2 bytes payload length
+              close_frame.push_back(static_cast<char>(0x88));  // FIN + CLOSE
+              close_frame.push_back(static_cast<char>(0x82));  // MASK + len 2
 
               // Generate random masking key
-              uint32_t response_masking_key = rand();
+              uint32_t response_masking_key = RandomMaskingKey();
               close_frame.append(reinterpret_cast<char*>(&response_masking_key),
                                  sizeof(response_masking_key));
 
@@ -222,11 +236,11 @@ class WebSocketHandler {
           if (send_frame_callback_) {
             // Create pong frame
             std::string pong_frame;
-            pong_frame.push_back(0x8A);  // FIN + PONG opcode
+            pong_frame.push_back(static_cast<char>(0x8A));  // FIN + PONG
             pong_frame.push_back(0x80);  // MASK + 0 bytes payload length
 
             // Generate random masking key
-            uint32_t masking_key = rand();
+            uint32_t masking_key = RandomMaskingKey();
             pong_frame.append(reinterpret_cast<char*>(&masking_key),
                               sizeof(masking_key));
 

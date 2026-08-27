@@ -31,7 +31,8 @@ class HttpServer final {
             .build();
 
     std::string addr = util::ConfigManager::Instance()->ServerAddr();
-    int32_t port = util::ConfigManager::Instance()->HttpServerPort();
+    auto port =
+        static_cast<int32_t>(util::ConfigManager::Instance()->HttpServerPort());
 
     proxygen::HTTPServer::IPConfig ip_config{
         folly::SocketAddress(addr, port, true),
