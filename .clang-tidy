@@ -27,7 +27,14 @@ Checks: >
   -readability-identifier-length,
   -readability-magic-numbers,
   -modernize-pass-by-value
-WarningsAsErrors: ''
+# Lint is a gate: any finding in our own code fails the build. The two
+# exceptions are path-sensitive analyzer diagnostics that originate inside
+# protobuf and grpc headers -- the header filter does not apply to those, and
+# they are not ours to fix, so they stay warnings.
+WarningsAsErrors: >
+  *,
+  -clang-analyzer-optin.cplusplus.VirtualCall,
+  -clang-analyzer-optin.cplusplus.UninitializedObject
 HeaderFilterRegex: '(src|test_data).'
 ExcludeHeaderFilterRegex: '(external|bazel-out|_virtual_includes).'
 FormatStyle: file

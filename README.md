@@ -122,12 +122,12 @@ the host — the LLVM tools bundled with Visual Studio Build Tools on Windows, o
 rules_lint's own examples use, has no Windows support. A machine without
 clang-tidy still builds and tests normally; only `--config=lint` fails.
 
-**Linting does not currently fail the build.** `.clang-tidy` sets
-`WarningsAsErrors: ''`, so clang-tidy exits 0 on warnings and the
-`fail_on_violation` setting in `.bazelrc` never triggers. There are 516 existing
-findings across 34 targets, so enforcing them is a deliberate cleanup, not a flip
-of a switch. To enforce, set `WarningsAsErrors` in `.clang-tidy` — the rest of the
-wiring is already in place.
+**Linting is a gate.** `.clang-tidy` sets `WarningsAsErrors`, so any finding in
+first-party code fails `--config=lint`. Two path-sensitive analyzer checks are
+excluded from that: they fire inside protobuf and grpc headers, where the header
+filter does not reach and the code is not ours to change, so they stay warnings.
+
+First-party code is currently clean.
 
 Which headers are reported is controlled by `HeaderFilterRegex` and
 `ExcludeHeaderFilterRegex` in `.clang-tidy`, not by the aspect. Headers reach
