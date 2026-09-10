@@ -3,32 +3,24 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/server/grpc_handler/route53_handler.h"
-
 #include <memory>
 
+#include "grpc++/grpc++.h"
 #include "gtest/gtest.h"
 #include "src/proto/service.pb.h"
+
+import bazel_template.async_grpc;
+import bazel_template.server.grpc_handler;
 
 namespace bazel_template {
 namespace server {
 namespace grpc_handler {
 
-class Route53ManagementHandlerTest : public ::testing::Test {
- protected:
-  void SetUp() override {
-    handler_ = std::make_unique<Route53ManagementHandler>();
-  }
+class Route53ManagementHandlerTest : public ::testing::Test {};
 
-  void TearDown() override {
-    handler_.reset();
-  }
-
-  std::unique_ptr<Route53ManagementHandler> handler_;
-};
-
-TEST_F(Route53ManagementHandlerTest, HandlerCreation) {
-  EXPECT_NE(handler_, nullptr);
+TEST_F(Route53ManagementHandlerTest, HandlersRegister) {
+  async_grpc::Server::Builder builder;
+  RegisterHandlers(builder);
 }
 
 TEST_F(Route53ManagementHandlerTest, CreateUpdateARecordRequest) {
@@ -97,4 +89,4 @@ TEST_F(Route53ManagementHandlerTest, InvalidOperationCode) {
 
 }  // namespace grpc_handler
 }  // namespace server
-}  // namespace bazel_template 
+}  // namespace bazel_template

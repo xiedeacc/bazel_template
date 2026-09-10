@@ -1,4 +1,5 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 load("@bazel_template//bazel:rules_fbthrift.bzl", "fbthrift_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
@@ -20,7 +21,7 @@ COPTS = GLOBAL_COPTS + select({
         "/Iexternal/mvfst",
     ],
     "//conditions:default": [
-        "-std=c++17",
+        "-std=c++20",
         "-isystem external/libsodium/src/libsodium/include",
         "-isystem external/fbthrift",
         "-isystem $(GENDIR)/external/fbthrift",
@@ -65,10 +66,16 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
     "//conditions:default": [],
 })
 
+DEFINES = GLOBAL_DEFINES
+
 cc_binary(
     name = "compiler_generate_build_templates",
     srcs = ["thrift/compiler/generate/build_templates.cc"],
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
 )
 
 genrule(
@@ -80,51 +87,94 @@ genrule(
 )
 
 cc_library(
+    name = "common",
+    srcs = glob([
+        "thrift/common/*.cc",
+        "thrift/common/detail/*.cc",
+    ]),
+    hdrs = glob([
+        "thrift/common/*.h",
+        "thrift/common/detail/*.h",
+    ]),
+    copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        "@fmt",
+        "@folly",
+    ],
+)
+
+cc_library(
+    name = "whisker",
+    srcs = glob(
+        [
+            "thrift/compiler/whisker/**/*.cc",
+        ],
+        exclude = [
+            "thrift/compiler/whisker/test/**",
+            "thrift/compiler/whisker/tools/**",
+        ],
+    ),
+    hdrs = glob(
+        [
+            "thrift/compiler/whisker/**/*.h",
+        ],
+        exclude = [
+            "thrift/compiler/whisker/test/**",
+            "thrift/compiler/whisker/tools/**",
+        ],
+    ),
+    copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
+    local_defines = LOCAL_DEFINES,
+    deps = [
+        ":common",
+        ":compiler_base",
+        "@fmt",
+        "@folly",
+    ],
+)
+
+cc_library(
     name = "compiler_generators",
-    srcs = [
-        "thrift/compiler/generate/common.cc",
-        "thrift/compiler/generate/json.cc",
-        "thrift/compiler/generate/mstch_objects.cc",
-        "thrift/compiler/generate/t_android_generator.cc",
-        "thrift/compiler/generate/t_cocoa_generator.cc",
-        "thrift/compiler/generate/t_concat_generator.cc",
-        "thrift/compiler/generate/t_generator.cc",
-        "thrift/compiler/generate/t_hack_generator.cc",
-        "thrift/compiler/generate/t_java_deprecated_generator.cc",
-        "thrift/compiler/generate/t_js_generator.cc",
-        "thrift/compiler/generate/t_json_experimental_generator.cc",
-        "thrift/compiler/generate/t_json_generator.cc",
-        "thrift/compiler/generate/t_mstch_cpp2_generator.cc",
-        "thrift/compiler/generate/t_mstch_generator.cc",
-        "thrift/compiler/generate/t_mstch_go_generator.cc",
-        "thrift/compiler/generate/t_mstch_html_generator.cc",
-        "thrift/compiler/generate/t_mstch_java_generator.cc",
-        "thrift/compiler/generate/t_mstch_py3_generator.cc",
-        "thrift/compiler/generate/t_mstch_pyi_generator.cc",
-        "thrift/compiler/generate/t_mstch_python_capi_generator.cc",
-        "thrift/compiler/generate/t_mstch_python_generator.cc",
-        "thrift/compiler/generate/t_mstch_rust_generator.cc",
-        "thrift/compiler/generate/t_py_generator.cc",
-        "thrift/compiler/generate/t_starlark_generator.cc",
+    srcs = glob(
+        [
+            "thrift/compiler/generate/*.cc",
+        ],
+        exclude = [
+            "thrift/compiler/generate/build_templates.cc",
+            "thrift/compiler/generate/schema_populator.cc",
+            "thrift/compiler/generate/t_ast_generator.cc",
+        ],
+    ) + [
         "thrift/compiler/generate/templates.cc",
     ],
-    hdrs = [
-        "thrift/compiler/generate/common.h",
-        "thrift/compiler/generate/json.h",
-        "thrift/compiler/generate/mstch_objects.h",
-        "thrift/compiler/generate/t_concat_generator.h",
-        "thrift/compiler/generate/t_generator.h",
-        "thrift/compiler/generate/t_java_deprecated_generator.h",
-        "thrift/compiler/generate/t_mstch_generator.h",
-        "thrift/compiler/generate/templates.h",
-        "thrift/compiler/sema/ast_validator.h",
-    ],
+    hdrs = glob(
+        [
+            "thrift/compiler/generate/**/*.h",
+            "thrift/compiler/sema/**/*.h",
+        ],
+        exclude = [
+            "thrift/compiler/generate/const_util.h",
+            "thrift/compiler/generate/schema_populator.h",
+            "thrift/compiler/generate/t_ast_generator.h",
+        ],
+    ),
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
         ":compiler_ast",
         ":compiler_base",
         ":mustache",
+        ":whisker",
         "@com_googlesource_code_re2//:re2",
         "@fmt",
         "@folly",
@@ -136,39 +186,41 @@ cc_library(
 
 cc_library(
     name = "compiler_base",
-    srcs = [
+    srcs = glob(
+        [
+            "thrift/compiler/detail/*.cc",
+            "thrift/compiler/parse/*.cc",
+            "thrift/compiler/sema/*.cc",
+        ],
+        exclude = [
+            "thrift/compiler/sema/test/**",
+        ],
+    ) + [
         "thrift/compiler/compiler.cc",
-        "thrift/compiler/detail/pluggable_functions.cc",
-        "thrift/compiler/detail/system.cc",
         "thrift/compiler/diagnostic.cc",
-        "thrift/compiler/lib/schematizer.cc",
-        "thrift/compiler/parse/lexer.cc",
-        "thrift/compiler/parse/parse_ast.cc",
-        "thrift/compiler/parse/parser.cc",
-        "thrift/compiler/parse/token.cc",
-        "thrift/compiler/sema/const_checker.cc",
-        "thrift/compiler/sema/explicit_include_validator.cc",
-        "thrift/compiler/sema/patch_mutator.cc",
-        "thrift/compiler/sema/scope_validator.cc",
-        "thrift/compiler/sema/standard_mutator.cc",
-        "thrift/compiler/sema/standard_validator.cc",
         "thrift/compiler/source_location.cc",
     ],
-    hdrs = [
-        "thrift/compiler/compiler.h",
-        "thrift/compiler/detail/pluggable_functions.h",
-        "thrift/compiler/detail/system.h",
-        "thrift/compiler/diagnostic.h",
-        "thrift/compiler/generate/t_generator.h",
-        "thrift/compiler/lib/cpp2/util.h",
-        "thrift/compiler/source_location.h",
-    ] + glob([
-        "thrift/compiler/sema/**/*.h",
+    hdrs = glob([
+        "thrift/annotation/bundled_annotations.h",
+        "thrift/conformance/if/bundled_conformance_if.h",
+        "thrift/compiler/detail/**/*.h",
+        "thrift/compiler/generate/**/*.h",
+        "thrift/compiler/metrics/**/*.h",
         "thrift/compiler/parse/**/*.h",
-    ]),
+        "thrift/compiler/sema/**/*.h",
+        "thrift/lib/thrift/bundled_lib_thrift.h",
+    ]) + [
+        "thrift/compiler/compiler.h",
+        "thrift/compiler/diagnostic.h",
+        "thrift/compiler/source_location.h",
+    ],
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
+        ":common",
         ":compiler",
         ":compiler_ast",
         ":mustache",
@@ -182,28 +234,34 @@ cc_library(
 
 cc_library(
     name = "compiler",
-    srcs = [
-        "thrift/compiler/gen/cpp/gen.cc",
-        "thrift/compiler/gen/cpp/namespace_resolver.cc",
-        "thrift/compiler/gen/cpp/reference_type.cc",
-        "thrift/compiler/gen/cpp/type_resolver.cc",
-        "thrift/compiler/lib/cpp2/util.cc",
-        "thrift/compiler/lib/go/util.cc",
-        "thrift/compiler/lib/java/util.cc",
-        "thrift/compiler/lib/py3/util.cpp",
-        "thrift/compiler/lib/python/util.cc",
-        "thrift/compiler/lib/rust/util.cc",
-    ],
-    hdrs = [
-        "thrift/compiler/gen/cpp/gen.h",
-        "thrift/compiler/gen/cpp/namespace_resolver.h",
-        "thrift/compiler/gen/cpp/reference_type.h",
-        "thrift/compiler/gen/cpp/type_resolver.h",
-        "thrift/compiler/source_location.h",
-    ] + glob([
-        "thrift/compiler/lib/**/*.h",
+    srcs = glob([
+        "thrift/compiler/generate/cpp/*.cc",
+        "thrift/compiler/generate/csharp/*.cc",
+        "thrift/compiler/generate/go/*.cc",
+        "thrift/compiler/generate/java/*.cc",
+        "thrift/compiler/generate/python/*.cc",
+        "thrift/compiler/generate/rust/*.cc",
+        "thrift/compiler/generate/swift/*.cc",
     ]),
+    hdrs = glob([
+        "thrift/compiler/generate/cpp/*.h",
+        "thrift/compiler/generate/csharp/*.h",
+        "thrift/compiler/generate/go/*.h",
+        "thrift/compiler/generate/java/*.h",
+        "thrift/compiler/generate/python/*.h",
+        "thrift/compiler/generate/rust/*.h",
+        "thrift/compiler/generate/swift/*.h",
+    ]) + [
+        "thrift/compiler/detail/pluggable_functions.h",
+        "thrift/compiler/diagnostic.h",
+        "thrift/compiler/metrics/metric.h",
+        "thrift/compiler/metrics/metrics.h",
+        "thrift/compiler/source_location.h",
+    ],
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
         ":compiler_ast",
@@ -217,30 +275,28 @@ cc_library(
 
 cc_library(
     name = "compiler_ast",
-    srcs = [
-        "thrift/compiler/ast/t_const.cc",
-        "thrift/compiler/ast/t_const_value.cc",
-        "thrift/compiler/ast/t_enum.cc",
-        "thrift/compiler/ast/t_function.cc",
-        "thrift/compiler/ast/t_interface.cc",
-        "thrift/compiler/ast/t_named.cc",
-        "thrift/compiler/ast/t_node.cc",
-        "thrift/compiler/ast/t_package.cc",
-        "thrift/compiler/ast/t_paramlist.cc",
-        "thrift/compiler/ast/t_primitive_type.cc",
-        "thrift/compiler/ast/t_program.cc",
-        "thrift/compiler/ast/t_scope.cc",
-        "thrift/compiler/ast/t_structured.cc",
-        "thrift/compiler/ast/t_type.cc",
-        "thrift/compiler/ast/t_typedef.cc",
-    ],
+    srcs = glob(
+        ["thrift/compiler/ast/*.cc"],
+        exclude = [
+            "thrift/compiler/ast/test/**",
+            "thrift/compiler/ast/thrift_ast_debug_tree_utils.cc",
+        ],
+    ),
     hdrs = [
-        "thrift/compiler/lib/uri.h",
+        "thrift/compiler/detail/overload.h",
         "thrift/compiler/source_location.h",
-    ] + glob([
-        "thrift/compiler/ast/*.h",
-    ]),
+    ] + glob(
+        [
+            "thrift/compiler/ast/*.h",
+        ],
+        exclude = [
+            "thrift/compiler/ast/thrift_ast_debug_tree_utils.h",
+        ],
+    ),
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
         "@com_googlesource_code_re2//:re2",
@@ -253,22 +309,17 @@ cc_library(
 
 cc_library(
     name = "mustache",
-    srcs = [
-        "thrift/compiler/detail/mustache/mstch.cpp",
-        "thrift/compiler/detail/mustache/render_context.cpp",
-        "thrift/compiler/detail/mustache/state/in_section.cpp",
-        "thrift/compiler/detail/mustache/state/outside_section.cpp",
-        "thrift/compiler/detail/mustache/template_type.cpp",
-        "thrift/compiler/detail/mustache/token.cpp",
-        "thrift/compiler/detail/mustache/utils.cpp",
-    ],
+    srcs = glob(["thrift/compiler/detail/mustache/**/*.cpp"]),
     hdrs = [
-        "thrift/compiler/lib/uri.h",
+        "thrift/compiler/ast/uri.h",
         "thrift/compiler/source_location.h",
     ] + glob([
         "thrift/compiler/detail/mustache/**/*.h",
     ]),
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
         "@com_googlesource_code_re2//:re2",
@@ -283,6 +334,7 @@ cc_binary(
     name = "thrift1",
     srcs = ["thrift/compiler/main.cc"],
     copts = COPTS,
+    defines = DEFINES,
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
@@ -338,30 +390,6 @@ fbthrift_cpp_gen(
 )
 
 fbthrift_cpp_gen(
-    name = "lib_reflection_thrift_cpp",
-    srcs = [
-        "thrift/lib/thrift/reflection.thrift",
-    ],
-    data = [":fbthrift_libraries"],
-    gen_para = [
-        "templates",
-        "no_metadata",
-        "include_prefix=thrift/lib/thrift",
-    ],
-    includes = [
-        ## buildifier: leave-alone
-        "-I",
-        "external/fbthrift",
-        ## buildifier: leave-alone
-    ],
-    out_dir = "thrift/lib/thrift",
-    out_file_name = {
-        "thrift/lib/thrift/reflection.thrift": "reflection",
-    },
-    plugin = "mstch_cpp2",
-)
-
-fbthrift_cpp_gen(
     name = "lib_json_thrift_cpp",
     srcs = [
         "thrift/lib/thrift/RpcMetadata.thrift",
@@ -390,16 +418,27 @@ fbthrift_cpp_gen(
     name = "lib_rocket_thrift_cpp",
     srcs = [
         "thrift/lib/thrift/RocketUpgrade.thrift",
+        "thrift/lib/thrift/any.thrift",
+        "thrift/lib/thrift/any_patch.thrift",
+        "thrift/lib/thrift/any_patch_detail.thrift",
         "thrift/lib/thrift/any_rep.thrift",
+        "thrift/lib/thrift/ast.thrift",
+        "thrift/lib/thrift/dynamic.thrift",
         "thrift/lib/thrift/field_mask.thrift",
         "thrift/lib/thrift/id.thrift",
         "thrift/lib/thrift/patch.thrift",
         "thrift/lib/thrift/patch_op.thrift",
         "thrift/lib/thrift/protocol.thrift",
         "thrift/lib/thrift/protocol_detail.thrift",
+        "thrift/lib/thrift/record.thrift",
+        "thrift/lib/thrift/schema.thrift",
+        "thrift/lib/thrift/service_catalog.thrift",
         "thrift/lib/thrift/standard.thrift",
+        "thrift/lib/thrift/thrift_catalog_service.thrift",
         "thrift/lib/thrift/type.thrift",
+        "thrift/lib/thrift/type_id.thrift",
         "thrift/lib/thrift/type_rep.thrift",
+        "thrift/lib/thrift/type_system.thrift",
     ],
     data = [":fbthrift_libraries"],
     gen_para = [
@@ -415,16 +454,27 @@ fbthrift_cpp_gen(
     out_dir = "thrift/lib/thrift",
     out_file_name = {
         "thrift/lib/thrift/RocketUpgrade.thrift": "RocketUpgrade",
+        "thrift/lib/thrift/any.thrift": "any",
+        "thrift/lib/thrift/any_patch.thrift": "any_patch",
+        "thrift/lib/thrift/any_patch_detail.thrift": "any_patch_detail",
         "thrift/lib/thrift/any_rep.thrift": "any_rep",
+        "thrift/lib/thrift/ast.thrift": "ast",
+        "thrift/lib/thrift/dynamic.thrift": "dynamic",
         "thrift/lib/thrift/field_mask.thrift": "field_mask",
         "thrift/lib/thrift/id.thrift": "id",
         "thrift/lib/thrift/patch.thrift": "patch",
         "thrift/lib/thrift/patch_op.thrift": "patch_op",
         "thrift/lib/thrift/protocol.thrift": "protocol",
         "thrift/lib/thrift/protocol_detail.thrift": "protocol_detail",
+        "thrift/lib/thrift/record.thrift": "record",
+        "thrift/lib/thrift/schema.thrift": "schema",
+        "thrift/lib/thrift/service_catalog.thrift": "service_catalog",
         "thrift/lib/thrift/standard.thrift": "standard",
+        "thrift/lib/thrift/thrift_catalog_service.thrift": "thrift_catalog_service",
         "thrift/lib/thrift/type.thrift": "type",
+        "thrift/lib/thrift/type_id.thrift": "type_id",
         "thrift/lib/thrift/type_rep.thrift": "type_rep",
+        "thrift/lib/thrift/type_system.thrift": "type_system",
     },
     service_out_file_name = {
         "thrift/lib/thrift/RocketUpgrade.thrift": "RocketUpgrade",
@@ -498,6 +548,28 @@ fbthrift_cpp_gen(
     },
 )
 
+fbthrift_cpp_gen(
+    name = "schema_thrift_cpp",
+    srcs = [
+        "thrift/lib/cpp2/schema/syntax_graph.thrift",
+    ],
+    data = [":fbthrift_libraries"],
+    gen_para = [
+        "no_metadata",
+        "include_prefix=thrift/lib/cpp2/schema",
+    ],
+    includes = [
+        ## buildifier: leave-alone
+        "-I",
+        "external/fbthrift",
+        ## buildifier: leave-alone
+    ],
+    out_dir = "thrift/lib/cpp2/schema",
+    out_file_name = {
+        "thrift/lib/cpp2/schema/syntax_graph.thrift": "syntax_graph",
+    },
+)
+
 cc_library(
     name = "fbthrift",
     srcs = [
@@ -505,53 +577,19 @@ cc_library(
         ":conformance_thrift_cpp",
         ":lib_json_thrift_cpp",
         ":lib_meta_thrift_cpp",
-        ":lib_reflection_thrift_cpp",
         ":lib_rocket_thrift_cpp",
+        ":schema_thrift_cpp",
     ] + glob(
         [
             "thrift/annotation/**/*.cpp",
             "thrift/lib/cpp/**/*.cpp",
             "thrift/lib/cpp2/**/*.cpp",
             "thrift/lib/thrift/**/*.cpp",
-            "thrift/lib/cpp2/async/AsyncClient.cpp",
-            "thrift/lib/cpp2/async/AsyncProcessor.cpp",
-            "thrift/lib/cpp2/async/AsyncProcessorHelper.cpp",
-            "thrift/lib/cpp2/async/ClientChannel.cpp",
-            "thrift/lib/cpp2/async/ClientSinkBridge.cpp",
-            "thrift/lib/cpp2/async/ClientStreamBridge.cpp",
-            "thrift/lib/cpp2/async/Cpp2Channel.cpp",
-            "thrift/lib/cpp2/async/DuplexChannel.cpp",
-            "thrift/lib/cpp2/async/FramingHandler.cpp",
-            "thrift/lib/cpp2/async/HeaderChannel.cpp",
-            "thrift/lib/cpp2/async/HeaderChannelTrait.cpp",
-            "thrift/lib/cpp2/async/HeaderClientChannel.cpp",
-            "thrift/lib/cpp2/async/HeaderServerChannel.cpp",
-            "thrift/lib/cpp2/async/HibernatingRequestChannel.cpp",
-            "thrift/lib/cpp2/async/Interaction.cpp",
-            "thrift/lib/cpp2/async/MultiplexAsyncProcessor.cpp",
-            "thrift/lib/cpp2/async/PooledRequestChannel.cpp",
-            "thrift/lib/cpp2/async/ReconnectingRequestChannel.cpp",
-            "thrift/lib/cpp2/async/RequestCallback.cpp",
-            "thrift/lib/cpp2/async/RequestChannel.cpp",
-            "thrift/lib/cpp2/async/ResponseChannel.cpp",
-            "thrift/lib/cpp2/async/RetryingRequestChannel.cpp",
-            "thrift/lib/cpp2/async/RocketClientChannel.cpp",
-            "thrift/lib/cpp2/async/RpcOptions.cpp",
-            "thrift/lib/cpp2/async/RpcTypes.cpp",
-            "thrift/lib/cpp2/async/ServerGeneratorStream.cpp",
-            "thrift/lib/cpp2/async/ServerRequestData.cpp",
-            "thrift/lib/cpp2/async/ServerSinkBridge.cpp",
-            "thrift/lib/cpp2/async/ThreadBoundAdaptorChannel.cpp",
-            "thrift/conformance/cpp2/Any.cpp",
-            "thrift/conformance/cpp2/AnyRef.cpp",
-            "thrift/conformance/cpp2/AnyRegistry.cpp",
-            "thrift/conformance/cpp2/AnySerializer.cpp",
-            "thrift/conformance/cpp2/Protocol.cpp",
-            "thrift/conformance/cpp2/ThriftTypeInfo.cpp",
         ],
         exclude = [
             "thrift/lib/cpp2/protocol/Patch.cpp",  # conflict with fmt
             "thrift/lib/cpp2/async/*.cpp",  # depend proxygen
+            "thrift/lib/cpp2/fast_thrift/**/*.cpp",  # experimental subsystem
             "thrift/lib/cpp2/transport/http2/client/H2ClientConnection.cpp",  # depend proxygen
             "thrift/lib/cpp2/transport/http2/client/ThriftTransactionHandler.cpp",  # depend proxygen
             "thrift/lib/cpp2/transport/http2/common/H2Channel.cpp",  # depend proxygen
@@ -565,10 +603,47 @@ cc_library(
             "thrift/**/tests/**",
             "thrift/**/testutil/**",
             "thrift/**/example/**",
+            "thrift/**/bench/**",
+            "thrift/**/benchmark/**",
+            "thrift/**/benchmarks/**",
             "thrift/lib/cpp2/util/gtest/**",
             "thrift/**/*Test.cpp",
         ],
-    ),
+    ) + [
+        "thrift/conformance/cpp2/Any.cpp",
+        "thrift/conformance/cpp2/AnyRef.cpp",
+        "thrift/conformance/cpp2/AnyRegistry.cpp",
+        "thrift/conformance/cpp2/AnySerializer.cpp",
+        "thrift/conformance/cpp2/Protocol.cpp",
+        "thrift/conformance/cpp2/ThriftTypeInfo.cpp",
+        "thrift/lib/cpp2/async/AsyncClient.cpp",
+        "thrift/lib/cpp2/async/AsyncProcessor.cpp",
+        "thrift/lib/cpp2/async/AsyncProcessorHelper.cpp",
+        "thrift/lib/cpp2/async/ClientChannel.cpp",
+        "thrift/lib/cpp2/async/ClientSinkBridge.cpp",
+        "thrift/lib/cpp2/async/ClientStreamBridge.cpp",
+        "thrift/lib/cpp2/async/Cpp2Channel.cpp",
+        "thrift/lib/cpp2/async/DuplexChannel.cpp",
+        "thrift/lib/cpp2/async/FramingHandler.cpp",
+        "thrift/lib/cpp2/async/HeaderChannel.cpp",
+        "thrift/lib/cpp2/async/HeaderChannelTrait.cpp",
+        "thrift/lib/cpp2/async/HeaderClientChannel.cpp",
+        "thrift/lib/cpp2/async/HeaderServerChannel.cpp",
+        "thrift/lib/cpp2/async/HibernatingRequestChannel.cpp",
+        "thrift/lib/cpp2/async/Interaction.cpp",
+        "thrift/lib/cpp2/async/MultiplexAsyncProcessor.cpp",
+        "thrift/lib/cpp2/async/PooledRequestChannel.cpp",
+        "thrift/lib/cpp2/async/ReconnectingRequestChannel.cpp",
+        "thrift/lib/cpp2/async/RequestCallback.cpp",
+        "thrift/lib/cpp2/async/RequestChannel.cpp",
+        "thrift/lib/cpp2/async/ResponseChannel.cpp",
+        "thrift/lib/cpp2/async/RetryingRequestChannel.cpp",
+        "thrift/lib/cpp2/async/RocketClientChannel.cpp",
+        "thrift/lib/cpp2/async/RpcOptions.cpp",
+        "thrift/lib/cpp2/async/RpcTypes.cpp",
+        "thrift/lib/cpp2/async/ServerRequestData.cpp",
+        "thrift/lib/cpp2/async/ServerSinkBridge.cpp",
+    ],
     hdrs = [
         "thrift/conformance/cpp2/Any.h",
         "thrift/conformance/cpp2/AnyRef.h",
@@ -591,11 +666,18 @@ cc_library(
         exclude = [
             "thrift/**/test/**",
             "thrift/**/example/**",
+            "thrift/**/bench/**",
+            "thrift/**/benchmark/**",
+            "thrift/**/benchmarks/**",
         ],
     ),
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
+        ":common",
         "@fatal",
         "@folly",
         "@mvfst",

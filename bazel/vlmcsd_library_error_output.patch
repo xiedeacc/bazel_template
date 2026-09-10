@@ -1,0 +1,12 @@
+--- a/src/output.c	2026-08-26 16:46:03.093137500 +0800
++++ b/src/output.c	2026-08-26 16:46:03.152215300 +0800
+@@ -116,6 +116,9 @@
+ 
+ 	size_t len = strlen(ErrorMessage);
+ 	vlmcsd_vsnprintf(ErrorMessage + len, MESSAGE_BUFFER_SIZE - len - 1, fmt, arglist);
++	va_end(arglist);
++	errno = error;
++	return 0;
+ 
+ #	else // !IS_LIBRARY
+ 

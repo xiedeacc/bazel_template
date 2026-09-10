@@ -1,5 +1,4 @@
 diff --git a/thrift/compiler/detail/system.cc b/thrift/compiler/detail/system.cc
-index a8dccc3ee4..368c2b3e35 100644
 --- a/thrift/compiler/detail/system.cc
 +++ b/thrift/compiler/detail/system.cc
 @@ -40,7 +40,7 @@ std::filesystem::path make_abs_path(
@@ -11,16 +10,149 @@ index a8dccc3ee4..368c2b3e35 100644
      return format_abs_path(abs_path.lexically_normal().string());
    }
    return abs_path;
-diff --git a/thrift/compiler/generate/t_mstch_generator.cc b/thrift/compiler/generate/t_mstch_generator.cc
-index f98181e8ff..b89d4c1717 100644
---- a/thrift/compiler/generate/t_mstch_generator.cc
-+++ b/thrift/compiler/generate/t_mstch_generator.cc
-@@ -445,7 +445,7 @@ void t_mstch_generator::write_output(
-   if (!ofs) {
-     std::ostringstream err;
-     err << "Couldn't open \"" << abs_path.string() << "\" for writing.";
--    throw std::runtime_error{err.str()};
-+    // throw std::runtime_error{err.str()};
-   }
-   ofs << data;
-   if (!is_last_char(data, '\n')) {
+diff --git a/thrift/annotation/bundled_annotations.h b/thrift/annotation/bundled_annotations.h
+--- a/thrift/annotation/bundled_annotations.h
++++ b/thrift/annotation/bundled_annotations.h
+@@ -19,6 +19,9 @@
+
+ namespace apache::thrift::detail {
+
+-const std::map<std::string, std::string>& bundled_annotation_files();
++inline const std::map<std::string, std::string>& bundled_annotation_files() {
++  static const std::map<std::string, std::string> files;
++  return files;
++}
+
+ } // namespace apache::thrift::detail
+diff --git a/thrift/lib/thrift/detail/DynamicPatch.cpp b/thrift/lib/thrift/detail/DynamicPatch.cpp
+--- a/thrift/lib/thrift/detail/DynamicPatch.cpp
++++ b/thrift/lib/thrift/detail/DynamicPatch.cpp
+@@ -731,16 +731,16 @@ std::uint32_t DynamicStructurePatch<IsUnion>::encode(Protocol& prot) const {
+   return ret;
+ }
+
+-template std::uint32_t DynamicStructPatch::encode(
++template std::uint32_t DynamicStructurePatch<false>::encode(
+     apache::thrift::BinaryProtocolWriter&) const;
+-template std::uint32_t DynamicStructPatch::encode(
++template std::uint32_t DynamicStructurePatch<false>::encode(
+     apache::thrift::CompactProtocolWriter&) const;
+-template std::uint32_t DynamicStructPatch::encode(
++template std::uint32_t DynamicStructurePatch<false>::encode(
+     apache::thrift::protocol::detail::ObjectWriter&) const;
+-template std::uint32_t DynamicUnionPatch::encode(
++template std::uint32_t DynamicStructurePatch<true>::encode(
+     apache::thrift::BinaryProtocolWriter&) const;
+-template std::uint32_t DynamicUnionPatch::encode(
++template std::uint32_t DynamicStructurePatch<true>::encode(
+     apache::thrift::CompactProtocolWriter&) const;
+-template std::uint32_t DynamicUnionPatch::encode(
++template std::uint32_t DynamicStructurePatch<true>::encode(
+     apache::thrift::protocol::detail::ObjectWriter&) const;
+
+ void DynamicMapPatch::put(Value k, Value v) {
+diff --git a/thrift/lib/cpp2/protocol/NativeObject.h b/thrift/lib/cpp2/protocol/NativeObject.h
+--- a/thrift/lib/cpp2/protocol/NativeObject.h
++++ b/thrift/lib/cpp2/protocol/NativeObject.h
+@@ -91,7 +91,7 @@ namespace apache::thrift::protocol::experimental {
+ // ---- std::hash specialization for container types ---- //
+
+ template <>
+-struct ::std::hash<apache::thrift::protocol::experimental::NativeValue> {
++struct std::hash<apache::thrift::protocol::experimental::NativeValue> {
+   std::size_t operator()(
+       const apache::thrift::protocol::experimental::NativeValue& s)
+       const noexcept {
+@@ -100,7 +100,7 @@ struct ::std::hash<apache::thrift::protocol::experimental::NativeValue> {
+ };
+
+ template <>
+-struct ::std::hash<
++struct std::hash<
+     std::unique_ptr<apache::thrift::protocol::experimental::NativeValue>> {
+   std::size_t operator()(const std::unique_ptr<
+                          apache::thrift::protocol::experimental::NativeValue>&
+diff --git a/thrift/conformance/if/bundled_conformance_if.h b/thrift/conformance/if/bundled_conformance_if.h
+--- a/thrift/conformance/if/bundled_conformance_if.h
++++ b/thrift/conformance/if/bundled_conformance_if.h
+@@ -19,6 +19,9 @@
+
+ namespace apache::thrift::detail {
+
+-const std::map<std::string, std::string>& bundled_conformance_if_files();
++inline const std::map<std::string, std::string>& bundled_conformance_if_files() {
++  static const std::map<std::string, std::string> files;
++  return files;
++}
+
+ } // namespace apache::thrift::detail
+diff --git a/thrift/lib/thrift/bundled_lib_thrift.h b/thrift/lib/thrift/bundled_lib_thrift.h
+--- a/thrift/lib/thrift/bundled_lib_thrift.h
++++ b/thrift/lib/thrift/bundled_lib_thrift.h
+@@ -19,6 +19,9 @@
+
+ namespace apache::thrift::detail {
+
+-const std::map<std::string, std::string>& bundled_lib_thrift_files();
++inline const std::map<std::string, std::string>& bundled_lib_thrift_files() {
++  static const std::map<std::string, std::string> files;
++  return files;
++}
+
+ } // namespace apache::thrift::detail
+diff --git a/thrift/lib/cpp2/protocol/detail/CursorBasedSerialization.h b/thrift/lib/cpp2/protocol/detail/CursorBasedSerialization.h
+--- a/thrift/lib/cpp2/protocol/detail/CursorBasedSerialization.h
++++ b/thrift/lib/cpp2/protocol/detail/CursorBasedSerialization.h
+@@ -245,6 +245,6 @@ class BaseCursorWriter {
+   BaseCursorWriter(const BaseCursorWriter&) = delete;
+   BaseCursorWriter& operator=(const BaseCursorWriter&) = delete;
+ 
+-  template <typename T>
++  template <typename Tag, typename Writer>
+   friend class StructuredCursorWriter;
+ };
+diff --git a/thrift/lib/thrift/TypeToMaskAdapter.h b/thrift/lib/thrift/TypeToMaskAdapter.h
+--- a/thrift/lib/thrift/TypeToMaskAdapter.h
++++ b/thrift/lib/thrift/TypeToMaskAdapter.h
+@@ -16,7 +16,8 @@
+ #pragma once
+ 
+ #include <folly/Exception.h>
+ #include <folly/container/F14Map.h>
++#include <map>
+ #include <thrift/lib/thrift/gen-cpp2/type_types.h>
+ 
+ namespace apache::thrift::protocol::detail {
+@@ -26,7 +27,7 @@ std::string debugFormatType(const type::Type& type);
+ template <typename Mask>
+ class ValidatingTypeMap {
+  public:
+-#if FOLLY_F14_VECTOR_INTRINSICS_AVAILABLE
++#if FOLLY_F14_VECTOR_INTRINSICS_AVAILABLE && !defined(_MSC_VER)
+   using map_type = folly::F14VectorMap<type::Type, Mask>;
+   void reserve(std::size_t n) { map_.reserve(n); }
+   template <typename V>
+diff --git a/thrift/lib/cpp2/util/DebugTree.cpp b/thrift/lib/cpp2/util/DebugTree.cpp
+--- a/thrift/lib/cpp2/util/DebugTree.cpp
++++ b/thrift/lib/cpp2/util/DebugTree.cpp
+@@ -398,5 +398,11 @@ struct BasePatchVisitor {
+   // the field id so that the result is always sorted by field id.
+   struct PatchOperation {
++    PatchOperation() = default;
++    PatchOperation(std::string name_in) : name(std::move(name_in)) {}
++    PatchOperation(PatchOperation&&) = default;
++    PatchOperation& operator=(PatchOperation&&) = default;
++    PatchOperation(const PatchOperation&) = delete;
++    PatchOperation& operator=(const PatchOperation&) = delete;
+     std::string name;
+     std::multimap<protocol::Value, scope> data = {};
+   };
+@@ -408,7 +414,7 @@ struct BasePatchVisitor {
+ 
+   void clear() { addOp("clear"); }
+ 
+-  void addOp(std::string name) { ops.push_back({std::move(name)}); }
++  void addOp(std::string name) { ops.emplace_back(std::move(name)); }
+ 
+   void addOp(std::string name, scope data) {
+     addOp(std::move(name));

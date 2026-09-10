@@ -19,60 +19,18 @@
 
 #include <grpc++/grpc++.h>
 
-#include <cstdint>
+#include <concepts>
 #include <type_traits>
 
-// This helper allows us to stamp out traits structs which allow to check for
-// the existence of member functions.
-// Example:
-//   struct Foo { static char* foo() { return nullptr; } };
-//   DEFINE_HAS_SIGNATURE(has_foo, T::foo, char*(*)(void));
-//   static_assert(has_foo_v<Foo>, "foo() is not implemented")
-#define DEFINE_HAS_SIGNATURE(traitsName, funcName, signature)                  \
-  template <typename U>                                                        \
-  class traitsName {                                                           \
-   private:                                                                    \
-    template <typename T, T>                                                   \
-    struct helper;                                                             \
-                                                                               \
-    template <typename T>                                                      \
-    static std::uint8_t check(helper<signature, &funcName>*);                  \
-    template <typename T>                                                      \
-    static std::uint16_t check(...);                                           \
-                                                                               \
-   public:                                                                     \
-    static constexpr bool value = sizeof(check<U>(0)) == sizeof(std::uint8_t); \
-  }
-
-#define DEFINE_HAS_MEMBER_TYPE(traitsName, Type)           \
-  template <class T>                                       \
-  class traitsName {                                       \
-   private:                                                \
-    struct Fallback {                                      \
-      struct Type {};                                      \
-    };                                                     \
-    struct Derived : T, Fallback {};                       \
-                                                           \
-    template <class U>                                     \
-    static std::uint16_t& check(typename U::Type*);        \
-    template <typename U>                                  \
-    static std::uint8_t& check(U*);                        \
-                                                           \
-   public:                                                 \
-    static constexpr bool value =                          \
-        sizeof(check<Derived>(0)) == sizeof(std::uint8_t); \
-  }
-
-#define DEFINE_HANDLER_SIGNATURE(traitsName, incomingType, outgoingType, \
-                                 methodName)                             \
-  struct traitsName {                                                    \
-    using IncomingType = incomingType;                                   \
-    using OutgoingType = outgoingType;                                   \
-    static const char* MethodName() { return methodName; }               \
-  };
+// Only forward-declared: this header ends up in the global module fragment of
+// bazel_template.async_grpc.client, and MSVC dies writing a BMI that reaches
+// protobuf's full Message. The concepts below only need it complete where they
+// are instantiated, which is the importing translation unit.
+#include "src/util/util_fwd.h"
 
 namespace async_grpc {
 
+// Tags an incoming or outgoing message type as streaming.
 template <typename Request>
 class Stream {
   using type = Request;
@@ -89,7 +47,37 @@ struct Strip<T, T<Param>> {
 };
 
 template <typename T>
-using StripStream = typename Strip<Stream, T>::type;
+using StripStream = Strip<Stream, T>::type;
+
+// Concepts describing the RPC service method definitions that this library is
+// parameterized on. These replace the DEFINE_HAS_SIGNATURE /
+// DEFINE_HAS_MEMBER_TYPE detection macros that used to live here.
+
+// Provides 'static const char* MethodName()'.
+template <typename T>
+concept HasRpcMethodName = requires {
+  { T::MethodName() } -> std::convertible_to<const char*>;
+};
+
+// Provides an 'IncomingType' typedef; i.e. the proto message passed to the
+// service method. It may be wrapped (tagged) by async_grpc::Stream.
+template <typename T>
+concept HasIncomingType = requires { typename T::IncomingType; };
+
+// Provides an 'OutgoingType' typedef; i.e. the proto message returned from the
+// service method. It may be wrapped (tagged) by async_grpc::Stream.
+template <typename T>
+concept HasOutgoingType = requires { typename T::OutgoingType; };
+
+// A type from which the properties of an RPC service method can be inferred.
+// See RpcServiceMethodTraits.
+template <typename T>
+concept RpcServiceMethodSpec =
+    HasRpcMethodName<T> && HasIncomingType<T> && HasOutgoingType<T>;
+
+// A generated protocol buffer message type.
+template <typename T>
+concept ProtoMessage = std::derived_from<T, ::google::protobuf::Message>;
 
 template <typename Incoming, typename Outgoing>
 struct RpcType

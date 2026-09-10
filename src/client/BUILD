@@ -1,10 +1,14 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_binary")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
-load("//bazel:cpplint.bzl", "cpplint")
 
-package(default_visibility = ["//visibility:public"])
-
-cpplint()
+package(
+    default_visibility = ["//visibility:public"],
+    features = [
+        "cpp_modules",
+        "layering_check",
+    ],
+)
 
 COPTS = GLOBAL_COPTS + select({
     "@platforms//os:windows": [
@@ -55,21 +59,23 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
     "//conditions:default": [],
 })
 
+# bazel_template.client.websocket_client; websocket_client.cc holds boost/folly.
 cc_library(
     name = "websocket_client",
-    hdrs = ["websocket_client.h"],
+    srcs = ["websocket_client.cc"],
     copts = COPTS,
+    features = ["-layering_check"],
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
+    module_interfaces = ["websocket_client.cppm"],
     deps = [
-        "//src/client/handler:handlers",
         "//src/common:blocking_queue",
+        "//src/common:socket_compat",
         "//src/proto:cc_enums",
         "@boost//:asio",
         "@boost//:beast",
-        "@boost//:json",
+        "@com_github_glog_glog//:glog",
         "@folly",
-        "@simdjson",
     ],
 )
 
@@ -82,9 +88,6 @@ cc_test(
     deps = [
         ":websocket_client",
         "//src/proto:cc_service",
-        "//src/util",
-        "@boost//:asio",
-        "@boost//:beast",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -93,19 +96,19 @@ cc_binary(
     name = "client",
     srcs = ["client.cc"],
     copts = COPTS,
-    linkopts = LINKOPTS + select({
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64_musl": [],
-        "//conditions:default": [],
-    }),
+    linkopts = LINKOPTS,
+    linkstatic = True,
     local_defines = LOCAL_DEFINES,
     deps = [
+        ":websocket_client",
         "//src/proto:cc_grpc_service",
         "//src/util:config_manager",
+        "@boost//:url",
+        "@com_github_glog_glog//:glog",
         "@folly",
+        "@gflags",
         "@libsodium//:sodium",
         "@openssl//:crypto",
-        ":websocket_client",
-        "@boost//:url",
         "@openssl//:ssl",
         "@xz//:lzma",
     ],
@@ -119,6 +122,7 @@ cc_binary(
     local_defines = LOCAL_DEFINES,
     deps = [
         "//src/proto:cc_grpc_service",
+        "//src/proto:cc_service",
         "@com_github_grpc_grpc//:grpc++",
     ],
 )
@@ -131,6 +135,7 @@ cc_binary(
     local_defines = LOCAL_DEFINES,
     deps = [
         "//src/proto:cc_grpc_service",
+        "//src/proto:cc_service",
         "@com_github_grpc_grpc//:grpc++",
     ],
 )

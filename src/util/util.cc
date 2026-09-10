@@ -3,48 +3,53 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/util/util.h"
+module;
 
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <format>
 #include <fstream>
+#include <iterator>
+#include <string>
 
-#include "fmt/core.h"
 #include "google/protobuf/json/json.h"
+#include "google/protobuf/message.h"
+#include "openssl/evp.h"
+
+module bazel_template.util;
 
 using google::protobuf::json::ParseOptions;
 using google::protobuf::json::PrintOptions;
 using std::string;
 
-namespace bazel_template {
-namespace util {
+namespace bazel_template::util {
 
-void Util::ToHexStr(const string &in, string *out, const bool use_upper_case) {
+void Util::ToHexStr(const string& in, string* out, const bool use_upper_case) {
   out->clear();
   out->reserve(in.size() * 2);
-  for (std::size_t i = 0; i < in.size(); ++i) {
-    if (use_upper_case) {
-      out->append(fmt::format("{:02X}", (unsigned char)in[i]));
-    } else {
-      out->append(fmt::format("{:02x}", (unsigned char)in[i]));
-    }
+  for (const char c : in) {
+    const auto byte = static_cast<unsigned char>(c);
+    out->append(use_upper_case ? std::format("{:02X}", byte)
+                               : std::format("{:02x}", byte));
   }
 }
 
-string Util::ToHexStr(const string &in, const bool use_upper_case) {
+string Util::ToHexStr(const string& in, const bool use_upper_case) {
   string out;
   out.reserve(in.size() * 2);
-  for (std::size_t i = 0; i < in.size(); ++i) {
-    if (use_upper_case) {
-      out.append(fmt::format("{:02X}", (unsigned char)in[i]));
-    } else {
-      out.append(fmt::format("{:02x}", (unsigned char)in[i]));
-    }
+  for (const char c : in) {
+    const auto byte = static_cast<unsigned char>(c);
+    out.append(use_upper_case ? std::format("{:02X}", byte)
+                              : std::format("{:02x}", byte));
   }
   return out;
 }
 
-EVP_MD_CTX *Util::HashInit(const EVP_MD *type) {
-  EVP_MD_CTX *context = EVP_MD_CTX_new();
-  if (!context) {
+EVP_MD_CTX* Util::HashInit(const EVP_MD* type) {
+  EVP_MD_CTX* context = EVP_MD_CTX_new();
+  if (context == nullptr) {
     return nullptr;
   }
   if (EVP_DigestInit_ex(context, type, nullptr) != 1) {
@@ -54,7 +59,7 @@ EVP_MD_CTX *Util::HashInit(const EVP_MD *type) {
   return context;
 }
 
-bool Util::HashUpdate(EVP_MD_CTX *context, const string &str) {
+bool Util::HashUpdate(EVP_MD_CTX* context, const string& str) {
   if (EVP_DigestUpdate(context, str.data(), str.size()) != 1) {
     EVP_MD_CTX_free(context);
     return false;
@@ -62,50 +67,52 @@ bool Util::HashUpdate(EVP_MD_CTX *context, const string &str) {
   return true;
 }
 
-bool Util::HashFinal(EVP_MD_CTX *context, string *out,
+bool Util::HashFinal(EVP_MD_CTX* context, string* out,
                      const bool use_upper_case) {
-  unsigned char hash[EVP_MAX_MD_SIZE];
-  unsigned int length;
-  if (EVP_DigestFinal_ex(context, hash, &length) != 1) {
+  std::array<unsigned char, EVP_MAX_MD_SIZE> hash{};
+  unsigned int length = 0;
+  if (EVP_DigestFinal_ex(context, hash.data(), &length) != 1) {
     EVP_MD_CTX_free(context);
     return false;
   }
 
   EVP_MD_CTX_free(context);
 
-  string s(reinterpret_cast<const char *>(hash), length);
+  const string s(reinterpret_cast<const char*>(hash.data()), length);
   Util::ToHexStr(s, out, use_upper_case);
   return true;
 }
 
-EVP_MD_CTX *Util::SHA256Init() { return HashInit(EVP_sha256()); }
+EVP_MD_CTX* Util::SHA256Init() {
+  return HashInit(EVP_sha256());
+}
 
-bool Util::SHA256Update(EVP_MD_CTX *context, const string &str) {
+bool Util::SHA256Update(EVP_MD_CTX* context, const string& str) {
   return HashUpdate(context, str);
 }
 
-bool Util::SHA256Final(EVP_MD_CTX *context, string *out,
+bool Util::SHA256Final(EVP_MD_CTX* context, string* out,
                        const bool use_upper_case) {
   return HashFinal(context, out, use_upper_case);
 }
 
-bool Util::JsonToMessage(const string &json, google::protobuf::Message *msg) {
-  static ParseOptions option = {true, false};
-  if (!JsonStringToMessage(json, msg, option).ok()) {
-    return false;
-  }
-  return true;
+bool Util::JsonToMessage(const string& json, google::protobuf::Message* msg) {
+  static const ParseOptions option = {.ignore_unknown_fields = true,
+                                      .case_insensitive_enum_parsing = false};
+  return JsonStringToMessage(json, msg, option).ok();
 }
 
-bool Util::MessageToJson(const google::protobuf::Message &msg, string *json) {
-  static PrintOptions option = {false, true, true, true, true};
-  if (!MessageToJsonString(msg, json, option).ok()) {
-    return false;
-  }
-  return true;
+bool Util::MessageToJson(const google::protobuf::Message& msg, string* json) {
+  static const PrintOptions option = {
+      .add_whitespace = true,
+      .always_print_fields_with_no_presence = true,
+      .always_print_enums_as_ints = true,
+      .preserve_proto_field_names = true,
+      .unquote_int64_if_possible = false};
+  return MessageToJsonString(msg, json, option).ok();
 }
 
-bool Util::LoadSmallFile(const string &path, string *content) {
+bool Util::LoadSmallFile(const string& path, string* content) {
   std::ifstream in(path, std::ios::binary);
   if (!in || !in.is_open()) {
     return false;
@@ -121,5 +128,4 @@ bool Util::LoadSmallFile(const string &path, string *content) {
   return true;
 }
 
-}  // namespace util
-}  // namespace bazel_template
+}  // namespace bazel_template::util

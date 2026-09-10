@@ -1,10 +1,14 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
-load("//bazel:cpplint.bzl", "cpplint")
 
-package(default_visibility = ["//visibility:public"])
-
-cpplint()
+package(
+    default_visibility = ["//visibility:public"],
+    features = [
+        "cpp_modules",
+        "layering_check",
+    ],
+)
 
 COPTS = GLOBAL_COPTS + select({
     "@platforms//os:windows": [
@@ -55,36 +59,42 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
     "//conditions:default": [],
 })
 
+# Forward declarations of the third-party types module interfaces may name
+# but must not define in their global module fragment (see util_fwd.h).
 cc_library(
-    name = "config_manager",
-    srcs = ["config_manager.cc"],
-    hdrs = ["config_manager.h"],
-    copts = COPTS,
-    local_defines = LOCAL_DEFINES,
-    deps = [
-        ":util",
-        "//src/proto:cc_config",
-        "@folly",
-    ],
+    name = "util_fwd",
+    hdrs = ["util_fwd.h"],
 )
 
+# bazel_template.util; util.cc is an implementation unit.
 cc_library(
     name = "util",
     srcs = ["util.cc"],
-    hdrs = ["util.h"],
+    copts = COPTS,
+    features = ["-layering_check"],
+    local_defines = LOCAL_DEFINES,
+    module_interfaces = ["util.cppm"],
     deps = [
-        "@boost//:algorithm",
-        "@boost//:beast",
-        "@boost//:iostreams",
-        "@com_github_glog_glog//:glog",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/synchronization",
-        "@com_google_absl//absl/time",
+        ":util_fwd",
         "@com_google_protobuf//:protobuf",
-        "@fmt",
-        "@folly",
+        "@com_google_protobuf//src/google/protobuf/json",
         "@openssl",
-        "@smhasher",
+    ],
+)
+
+# bazel_template.util.config_manager
+cc_library(
+    name = "config_manager",
+    srcs = ["config_manager.cc"],
+    copts = COPTS,
+    features = ["-layering_check"],
+    local_defines = LOCAL_DEFINES,
+    module_interfaces = ["config_manager.cppm"],
+    deps = [
+        ":util",
+        "//src/proto:cc_config",
+        "//src/proto:cc_config_fwd",
+        "@com_github_glog_glog//:glog",
     ],
 )
 
@@ -92,19 +102,23 @@ cc_test(
     name = "util_test",
     timeout = "short",
     srcs = ["util_test.cc"],
+    copts = COPTS,
+    local_defines = LOCAL_DEFINES,
     deps = [
         ":util",
+        "@com_github_glog_glog//:glog",
         "@com_google_googletest//:gtest_main",
     ],
 )
 
 cc_test(
     name = "config_manager_test",
-    srcs = [
-        "config_manager_test.cc",
-    ],
+    srcs = ["config_manager_test.cc"],
     copts = COPTS,
-    data = ["//conf:server_config.json"],
     local_defines = LOCAL_DEFINES,
-    deps = [":config_manager"],
+    deps = [
+        ":config_manager",
+        "@com_github_glog_glog//:glog",
+        "@com_google_googletest//:gtest_main",
+    ],
 )

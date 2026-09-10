@@ -17,6 +17,8 @@
 #ifndef CPP_GRPC_RETRY_H
 #define CPP_GRPC_RETRY_H
 
+#include <functional>
+#include <optional>
 #include <set>
 
 #include "grpc++/grpc++.h"
@@ -25,34 +27,37 @@
 namespace async_grpc {
 
 using common::Duration;
-using std::optional;
 
-using RetryStrategy = std::function<optional<Duration>(
-    int /* failed_attempts */, const ::grpc::Status &)>;
+using RetryStrategy = std::function<std::optional<Duration>(
+    int /* failed_attempts */, const ::grpc::Status&)>;
 using RetryIndicator =
-    std::function<bool(int /* failed_attempts */, const ::grpc::Status &)>;
+    std::function<bool(int /* failed_attempts */, const ::grpc::Status&)>;
 using RetryDelayCalculator = std::function<Duration(int /* failed_attempts */)>;
 
-RetryStrategy CreateRetryStrategy(RetryIndicator retry_indicator,
-                                  RetryDelayCalculator retry_delay_calculator);
+[[nodiscard]] RetryStrategy CreateRetryStrategy(
+    RetryIndicator retry_indicator,
+    RetryDelayCalculator retry_delay_calculator);
 
-RetryIndicator CreateLimitedRetryIndicator(int max_attempts);
-RetryIndicator CreateUnlimitedRetryIndicator();
-RetryIndicator CreateUnlimitedRetryIndicator(
-    const std::set<::grpc::StatusCode> &unrecoverable_codes);
-RetryDelayCalculator CreateBackoffDelayCalculator(Duration min_delay,
-                                                  float backoff_factor);
-RetryDelayCalculator CreateConstantDelayCalculator(Duration delay);
-RetryStrategy CreateLimitedBackoffStrategy(Duration min_delay,
-                                           float backoff_factor,
-                                           int max_attempts);
-RetryStrategy CreateUnlimitedConstantDelayStrategy(Duration delay);
-RetryStrategy CreateUnlimitedConstantDelayStrategy(
-    Duration delay, const std::set<::grpc::StatusCode> &unrecoverable_codes);
+[[nodiscard]] RetryIndicator CreateLimitedRetryIndicator(int max_attempts);
+[[nodiscard]] RetryIndicator CreateUnlimitedRetryIndicator();
+[[nodiscard]] RetryIndicator CreateUnlimitedRetryIndicator(
+    const std::set<::grpc::StatusCode>& unrecoverable_codes);
+[[nodiscard]] RetryDelayCalculator CreateBackoffDelayCalculator(
+    Duration min_delay, float backoff_factor);
+[[nodiscard]] RetryDelayCalculator CreateConstantDelayCalculator(
+    Duration delay);
+[[nodiscard]] RetryStrategy CreateLimitedBackoffStrategy(Duration min_delay,
+                                                         float backoff_factor,
+                                                         int max_attempts);
+[[nodiscard]] RetryStrategy CreateUnlimitedConstantDelayStrategy(
+    Duration delay);
+[[nodiscard]] RetryStrategy CreateUnlimitedConstantDelayStrategy(
+    Duration delay, const std::set<::grpc::StatusCode>& unrecoverable_codes);
 
-bool RetryWithStrategy(RetryStrategy retry_strategy,
-                       std::function<::grpc::Status()> op,
-                       std::function<void()> reset = nullptr);
+[[nodiscard]] bool RetryWithStrategy(
+    const RetryStrategy& retry_strategy,
+    const std::function<::grpc::Status()>& op,
+    const std::function<void()>& reset = nullptr);
 
 }  // namespace async_grpc
 

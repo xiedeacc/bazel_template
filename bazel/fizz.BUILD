@@ -1,4 +1,5 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -50,6 +51,10 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
     "//conditions:default": [],
 })
 
+DEFINES = GLOBAL_DEFINES
+
+LINKOPTS = GLOBAL_LINKOPTS
+
 cc_library(
     name = "fizz",
     srcs = glob(
@@ -60,6 +65,7 @@ cc_library(
         exclude = [
             "fizz/experimental/crypto/exchange/OQSKeyExchange.cpp",
             "fizz/extensions/javacrypto/**",
+            "fizz/tool/**",
             "fizz/cmake",
             "fizz/**/test/**",
         ],
@@ -68,6 +74,9 @@ cc_library(
         ["fizz/**/*.h"],
     ),
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
         "@double-conversion//:double-conversion",
@@ -93,9 +102,25 @@ genrule(
         " */",
         "#pragma once",
         "",
+        "#define FIZZ_HAVE_LIBAEGIS 0",
+        "#define FIZZ_HAVE_SODIUM 1",
         "#define FIZZ_BUILD_AEGIS 0",
         "#define FIZZ_CERTIFICATE_USE_OPENSSL_CERT 1",
         "#define FIZZ_HAVE_OQS 0",
+        "#define FIZZ_LOGGING_XLOG 1",
+        "",
+        "#if !defined(FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS)",
+        "#if defined(NDEBUG)",
+        "#define FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS 0",
+        "#else",
+        "#define FIZZ_ENABLE_CONTEXT_COMPATIBILITY_CHECKS 1",
+        "#endif",
+        "#endif",
+        "",
+        "#define FIZZ_CONTEXT_VALIDATION_SHOULD_CHECK_CIPHER(x) (true)",
+        "",
+        "#define FIZZ_DEFAULT_FACTORY_HEADER <fizz/protocol/MultiBackendFactory.h>",
+        "#define FIZZ_DEFAULT_FACTORY ::fizz::MultiBackendFactory",
         "EOF",
     ]),
 )

@@ -17,16 +17,20 @@
 #ifndef CPP_GRPC_COMMON_MUTEX_H_
 #define CPP_GRPC_COMMON_MUTEX_H_
 
+#include <chrono>
+#include <concepts>
 #include <condition_variable>
 #include <mutex>
 
 #include "src/async_grpc/common/time.h"
 
-namespace async_grpc {
-namespace common {
+namespace async_grpc::common {
 
 // Enable thread safety attributes only with clang.
 // The attributes can be safely erased when compiling with other compilers.
+// Clang thread-safety annotations expand to __attribute__((...)), which
+// only a macro can attach to a declaration. There is no function form.
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #if defined(__SUPPORT_TS_ANNOTATION__) || defined(__clang__)
 #define THREAD_ANNOTATION_ATTRIBUTE__(x) __attribute__((x))
 #else
@@ -51,6 +55,7 @@ namespace common {
   THREAD_ANNOTATION_ATTRIBUTE__(release_capability(__VA_ARGS__))
 
 #define EXCLUDES(...) THREAD_ANNOTATION_ATTRIBUTE__(locks_excluded(__VA_ARGS__))
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 #define NO_THREAD_SAFETY_ANALYSIS \
   THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
@@ -64,20 +69,36 @@ class CAPABILITY("mutex") Mutex {
   // conditions that get checked whenever the mutex is released.
   class SCOPED_CAPABILITY Locker {
    public:
-    Locker(Mutex* mutex) ACQUIRE(mutex) : mutex_(mutex), lock_(mutex->mutex_) {}
+    explicit Locker(Mutex* mutex) ACQUIRE(mutex)
+        : mutex_(mutex), lock_(mutex->mutex_) {}
+
+    // A scoped lock owns the mutex for exactly its own lifetime.
+    Locker(const Locker&) = delete;
+    Locker& operator=(const Locker&) = delete;
+    Locker(Locker&&) = delete;
+    Locker& operator=(Locker&&) = delete;
 
     ~Locker() RELEASE() {
-      lock_.unlock();
-      mutex_->condition_.notify_all();
+      // A destructor is implicitly noexcept, so an exception escaping here
+      // terminates the process. unlock() throws only when the lock is not
+      // held, which cannot happen because the constructor acquired it, but
+      // relying on that silently is what makes such bugs hard to find.
+      try {
+        lock_.unlock();
+        mutex_->condition_.notify_all();
+      } catch (...) {  // NOLINT(bugprone-empty-catch)
+      }
     }
 
-    template <typename Predicate>
+    template <std::predicate Predicate>
     void Await(Predicate predicate) REQUIRES(this) {
       mutex_->condition_.wait(lock_, predicate);
     }
 
-    template <typename Predicate>
-    bool AwaitWithTimeout(Predicate predicate, common::Duration timeout)
+    // Accepts any std::chrono duration, not just common::Duration.
+    template <std::predicate Predicate, typename Rep, typename Period>
+    [[nodiscard]] bool AwaitWithTimeout(
+        Predicate predicate, const std::chrono::duration<Rep, Period> timeout)
         REQUIRES(this) {
       return mutex_->condition_.wait_for(lock_, timeout, predicate);
     }
@@ -94,7 +115,6 @@ class CAPABILITY("mutex") Mutex {
 
 using MutexLocker = Mutex::Locker;
 
-}  // namespace common
-}  // namespace async_grpc
+}  // namespace async_grpc::common
 
 #endif  // CPP_GRPC_COMMON_MUTEX_H_

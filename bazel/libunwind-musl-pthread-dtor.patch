@@ -1,0 +1,15 @@
+diff --git src/aarch64/Gtrace.c src/aarch64/Gtrace.c
+index fa856af..20ab5ff 100644
+--- src/aarch64/Gtrace.c
++++ src/aarch64/Gtrace.c
+@@ -29,6 +29,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
+ #include <signal.h>
+ #include <limits.h>
+ 
++#ifndef PTHREAD_DESTRUCTOR_ITERATIONS
++#define PTHREAD_DESTRUCTOR_ITERATIONS 4
++#endif
++
+ #pragma weak pthread_once
+ #pragma weak pthread_key_create
+ #pragma weak pthread_getspecific

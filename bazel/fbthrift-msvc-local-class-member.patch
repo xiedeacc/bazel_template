@@ -1,0 +1,57 @@
+# MSVC 14.52 rejects an unqualified use of a base-class member inside a local
+# class defined in a function template (C2597, illegal reference to non-static
+# member 'BasePatchVisitor::typeRef'). Qualifying it with this-> is what the
+# standard wants anyway. Applies on top of fbthrift.patch.
+--- a/thrift/lib/cpp2/util/DebugTree.cpp
++++ b/thrift/lib/cpp2/util/DebugTree.cpp
+@@ -551,7 +551,7 @@
+     const protocol::DynamicListPatch& patch, const OptionalTypeRef& listType) {
+   struct Visitor : BasePatchVisitor {
+     void push_back(const protocol::Value& v) {
+-      addOp("push_back", debugTree(v, getListElem(typeRef)));
++      addOp("push_back", debugTree(v, getListElem(this->typeRef)));
+     }
+   };
+ 
+@@ -586,7 +586,7 @@
+       if (set.empty()) {
+         return;
+       }
+-      if (auto mapKey = getMapKey(typeRef)) {
++      if (auto mapKey = getMapKey(this->typeRef)) {
+         auto type = TypeRef::of(syntax_graph::Set::of(*mapKey));
+         addOp(__func__, debugTree(set, type));
+         return;
+@@ -599,8 +599,8 @@
+     void patchByKey(
+         const protocol::Value& k, const protocol::DynamicPatch& patch) {
+       auto root = scope::make_root("KeyAndSubPatch");
+-      root.make_child() = debugTree(k, getMapKey(typeRef));
+-      root.make_child() = debugTree(patch, getMapValue(typeRef));
++      root.make_child() = debugTree(k, getMapKey(this->typeRef));
++      root.make_child() = debugTree(patch, getMapValue(this->typeRef));
+       addCombinableOp("patch", k, std::move(root));
+     }
+   };
+@@ -621,7 +621,7 @@
+     void ensure(FieldId id, const protocol::Value& v) {
+       std::string op = IsUnion ? "ensureUnion" : "ensure";
+       auto node = toNode(id);
+-      node.make_child() = debugTree(v, getFieldType(typeRef, id));
++      node.make_child() = debugTree(v, getFieldType(this->typeRef, id));
+       addCombinableOp(op, toValue(id), std::move(node));
+     }
+   };
+@@ -654,9 +654,9 @@
+       if (set.empty()) {
+         return;
+       }
+-      OptionalTypeRef elem = typeRef;
+-      if (typeRef && typeRef->isMap()) {
+-        elem = TypeRef::of(syntax_graph::Set::of(*getMapKey(typeRef)));
++      OptionalTypeRef elem = this->typeRef;
++      if (this->typeRef && this->typeRef->isMap()) {
++        elem = TypeRef::of(syntax_graph::Set::of(*getMapKey(this->typeRef)));
+       }
+       protocol::Value v;
+       v.emplace_set(set);

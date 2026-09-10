@@ -101,21 +101,24 @@ toolchain(
 configure_make(
     name = "openssl_static",
     args = select({
-        "@bazel_template//bazel:not_cross_compiling_on_osx": ["-j4"],
+        "@platforms//os:osx": ["-j4"],
         "//conditions:default": ["-j"],
     }),
     configure_command = "Configure",
     configure_in_place = True,
     configure_options = CONFIGURE_OPTIONS + select({
-        "@bazel_template//bazel:cross_compiling_for_linux_aarch64": [
+        "@bazel_template//bazel:linux_aarch64": [
             "linux-aarch64",
         ],
-        "@bazel_template//bazel:cross_compiling_for_osx_x86_64": [
+        "@bazel_template//bazel:osx_x86_64": [
             "darwin64-x86_64-cc",
         ],
-        "@bazel_template//bazel:cross_compiling_for_osx_aarch64": [
+        "@bazel_template//bazel:osx_aarch64": [
             "darwin64-arm64-cc",
         ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:linux": ["-fPIC"],
         "//conditions:default": [],
     }) + ["no-shared"],
     env = select({
@@ -155,6 +158,7 @@ configure_make(
     configure_options = CONFIGURE_OPTIONS + [
         "VC-WIN64A",
         "no-shared",
+        "no-makedepend",
         "ASFLAGS=\" \"",
         "CC=cl.exe",
         "LD=link.exe",

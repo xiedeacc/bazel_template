@@ -18,41 +18,53 @@
 
 #include <chrono>
 #include <cmath>
+#include <format>
+#include <memory>
+#include <optional>
 #include <thread>
+#include <utility>
 
-#include "glog/logging.h"
+#include "src/common/logging.h"
 
 namespace async_grpc {
 
 RetryStrategy CreateRetryStrategy(RetryIndicator retry_indicator,
                                   RetryDelayCalculator retry_delay_calculator) {
-  return [retry_indicator, retry_delay_calculator](
-             int failed_attempts, const ::grpc::Status &status) {
+  // The analyzer sees the moved-from parameters as stack memory escaping
+  // through the returned std::function; they are captured by value.
+  // NOLINTNEXTLINE(clang-analyzer-core.StackAddressEscape)
+  return [retry_indicator = std::move(retry_indicator),
+          retry_delay_calculator = std::move(retry_delay_calculator)](
+             int failed_attempts,
+             const ::grpc::Status& status) -> std::optional<Duration> {
     if (!retry_indicator(failed_attempts, status)) {
-      return optional<Duration>();
+      return std::nullopt;
     }
-    return optional<Duration>(retry_delay_calculator(failed_attempts));
+    return retry_delay_calculator(failed_attempts);
   };
 }
 
 RetryIndicator CreateLimitedRetryIndicator(int max_attempts) {
   return
-      [max_attempts](int failed_attempts, const ::grpc::Status & /* status */) {
+      [max_attempts](int failed_attempts, const ::grpc::Status& /* status */) {
         return failed_attempts < max_attempts;
       };
 }
 
 RetryIndicator CreateUnlimitedRetryIndicator() {
-  return [](int /* failed_attempts */, const ::grpc::Status & /* status */) {
+  return [](int /* failed_attempts */, const ::grpc::Status& /* status */) {
     return true;
   };
 }
 
 RetryIndicator CreateUnlimitedRetryIndicator(
-    const std::set<::grpc::StatusCode> &unrecoverable_codes) {
-  return [unrecoverable_codes](int /* failed_attempts */,
-                               const ::grpc::Status &status) {
-    return unrecoverable_codes.count(status.error_code()) <= 0;
+    const std::set<::grpc::StatusCode>& unrecoverable_codes) {
+  // Shared rather than captured by value: copying the returned std::function
+  // then neither allocates nor throws.
+  auto codes =
+      std::make_shared<const std::set<::grpc::StatusCode>>(unrecoverable_codes);
+  return [codes](int /* failed_attempts */, const ::grpc::Status& status) {
+    return !codes->contains(status.error_code());
   };
 }
 
@@ -85,34 +97,32 @@ RetryStrategy CreateUnlimitedConstantDelayStrategy(Duration delay) {
 }
 
 RetryStrategy CreateUnlimitedConstantDelayStrategy(
-    Duration delay, const std::set<::grpc::StatusCode> &unrecoverable_codes) {
+    Duration delay, const std::set<::grpc::StatusCode>& unrecoverable_codes) {
   return CreateRetryStrategy(CreateUnlimitedRetryIndicator(unrecoverable_codes),
                              CreateConstantDelayCalculator(delay));
 }
 
-bool RetryWithStrategy(RetryStrategy retry_strategy,
-                       std::function<::grpc::Status()> op,
-                       std::function<void()> reset) {
-  optional<Duration> delay;
+bool RetryWithStrategy(const RetryStrategy& retry_strategy,
+                       const std::function<::grpc::Status()>& op,
+                       const std::function<void()>& reset) {
   int failed_attemps = 0;
   for (;;) {
-    ::grpc::Status status = op();
+    const ::grpc::Status status = op();
     if (status.ok()) {
       return true;
     }
     if (!retry_strategy) {
       return false;
     }
-    delay = retry_strategy(++failed_attemps, status);
+    const std::optional<Duration> delay =
+        retry_strategy(++failed_attemps, status);
     if (!delay.has_value()) {
       break;
     }
-    LOG(INFO) << "Retrying after "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(
-                     delay.value())
-                     .count()
-              << " milliseconds.";
-    std::this_thread::sleep_for(delay.value());
+    LOG(INFO) << std::format(
+        "Retrying after {} milliseconds.",
+        std::chrono::duration_cast<std::chrono::milliseconds>(*delay).count());
+    std::this_thread::sleep_for(*delay);
     if (reset) {
       reset();
     }

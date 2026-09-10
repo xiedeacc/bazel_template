@@ -3,32 +3,24 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/server/grpc_handler/ec2_handler.h"
-
 #include <memory>
 
+#include "grpc++/grpc++.h"
 #include "gtest/gtest.h"
 #include "src/proto/service.pb.h"
+
+import bazel_template.async_grpc;
+import bazel_template.server.grpc_handler;
 
 namespace bazel_template {
 namespace server {
 namespace grpc_handler {
 
-class EC2InstanceManagementHandlerTest : public ::testing::Test {
- protected:
-  void SetUp() override {
-    handler_ = std::make_unique<EC2InstanceManagementHandler>();
-  }
+class EC2InstanceManagementHandlerTest : public ::testing::Test {};
 
-  void TearDown() override {
-    handler_.reset();
-  }
-
-  std::unique_ptr<EC2InstanceManagementHandler> handler_;
-};
-
-TEST_F(EC2InstanceManagementHandlerTest, HandlerCreation) {
-  EXPECT_NE(handler_, nullptr);
+TEST_F(EC2InstanceManagementHandlerTest, HandlersRegister) {
+  async_grpc::Server::Builder builder;
+  RegisterHandlers(builder);
 }
 
 TEST_F(EC2InstanceManagementHandlerTest, CreateStartRequest) {
@@ -77,4 +69,4 @@ TEST_F(EC2InstanceManagementHandlerTest, InvalidOperationCode) {
 
 }  // namespace grpc_handler
 }  // namespace server
-}  // namespace bazel_template 
+}  // namespace bazel_template

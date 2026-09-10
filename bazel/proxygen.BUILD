@@ -1,4 +1,6 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 load("@bazel_template//bazel:proxygen.bzl", "is_external", "proxygen_cpp_gen")
 
 package(default_visibility = ["//visibility:public"])
@@ -23,7 +25,7 @@ COPTS = GLOBAL_COPTS + select({
         "/Iexternal/fizz",
         "/Iexternal/wangle",
         "/Iexternal/mvfst",
-        "/std:c++17",
+        "/std:c++20",
     ],
     "//conditions:default": [
         "-Iexternal/libdwarf/src/lib/libdwarf",
@@ -44,7 +46,7 @@ COPTS = GLOBAL_COPTS + select({
         "-isystem external/fizz",
         "-isystem external/wangle",
         "-isystem external/mvfst",
-        "-std=c++17",
+        "-std=c++20",
         "-Wno-register",
         "-fsized-deallocation",
     ],
@@ -64,6 +66,18 @@ LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
     "@platforms//os:windows": [],
     "//conditions:default": [],
 })
+
+LINKOPTS = GLOBAL_LINKOPTS + select({
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+}) + select({
+    "@platforms//os:linux": [],
+    "@platforms//os:osx": [],
+    "@platforms//os:windows": [],
+    "//conditions:default": [],
+})
+
+DEFINES = GLOBAL_DEFINES
 
 sh_binary(
     name = "gen_HTTPCommonHeaders_sh",
@@ -85,6 +99,13 @@ proxygen_cpp_gen(
     ],
     tool = ":gen_HTTPCommonHeaders_sh",
     txt_file = "proxygen/lib/http/HTTPCommonHeaders.txt",
+    gperf_path = select({
+        # Absolute path on purpose: the action runs under Git bash, which cannot
+        # split the semicolon-separated Windows PATH from --action_env, so a bare
+        # "gperf" is not found.
+        "@platforms//os:windows": "D:/software/gperf/bin/gperf.exe",
+        "//conditions:default": "",
+    }),
 )
 
 sh_binary(
@@ -104,6 +125,11 @@ proxygen_cpp_gen(
     tool = ":gen_StatsWrapper_sh",
 )
 
+TRACE_PYTHON = select({
+    "@platforms//os:windows": "py -3",
+    "//conditions:default": "python3",
+})
+
 genrule(
     name = "trace",
     srcs = [
@@ -117,13 +143,12 @@ genrule(
         "proxygen/lib/utils/TraceFieldType.cpp",
         "proxygen/lib/utils/TraceEventType.cpp",
     ],
-    cmd = """
-python3 $(location :proxygen/lib/utils/gen_trace_event_constants.py) \
+    cmd = TRACE_PYTHON + """ $(location :proxygen/lib/utils/gen_trace_event_constants.py) \
 --output_type=cpp \
 --input_files=$(location :proxygen/lib/utils/samples/TraceEventType.txt),$(location :proxygen/lib/utils/samples/TraceFieldType.txt) \
 --output_scope=proxygen \
 --header_path=proxygen/lib/utils \
---install_dir=$(GENDIR)/external/proxygen/proxygen/lib/utils \
+--install_dir=$(RULEDIR)/proxygen/lib/utils \
 --fbcode_dir=external/proxygen
 """,
 )
@@ -142,6 +167,8 @@ cc_library(
             "proxygen/lib/dns/*.cpp",  # c-ares version mismatch and some enum missed
             #"proxygen/lib/http/codec/compress/experimental/interop/QPACKInterop.cpp",
             "proxygen/lib/http/codec/compress/experimental/simulator/**/*.cpp",
+            "proxygen/**/benchmark/**/*.cpp",
+            "proxygen/**/benchmarks/**/*.cpp",
             "proxygen/**/fuzzers/**/*.cpp",
             "proxygen/**/test/**/*.cpp",
             "proxygen/**/tests/**/*.cpp",
@@ -154,6 +181,9 @@ cc_library(
     }),
     hdrs = glob(["proxygen/**/*.h"]),
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
+    linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
         "@c-ares",

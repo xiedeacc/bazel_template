@@ -1,0 +1,13 @@
+diff --git a/BUILD.bazel b/BUILD.bazel
+index 6f82d49..c6f0138 100644
+--- a/BUILD.bazel
++++ b/BUILD.bazel
+@@ -84,6 +84,7 @@ cc_library(
+     hdrs = [
+         "snappy.h",
+         "snappy-sinksource.h",
+     ],
++    includes = ["."],
+     copts = select({
+         ":windows": [],
+         "//conditions:default": [

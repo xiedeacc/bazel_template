@@ -14,31 +14,55 @@
  * limitations under the License.
  */
 
-#include "src/async_grpc/opencensus_span.h"
+module;
+
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/message.h"
+#include "grpc++/grpc++.h"
+#include "grpc++/impl/codegen/async_stream.h"
+#include "grpc++/impl/codegen/async_unary_call.h"
+#include "grpc++/impl/codegen/proto_utils.h"
+#include "grpc++/impl/codegen/service_type.h"
+#include "src/async_grpc/common/blocking_queue.h"
+#include "src/async_grpc/common/mutex.h"
+#include "src/async_grpc/common/time.h"
+#include "src/async_grpc/rpc_service_method_traits.h"
+#include "src/async_grpc/type_traits.h"
+#include "src/common/logging.h"
+#include "src/util/util_fwd.h"
+
+module bazel_template.async_grpc;
 
 #if BUILD_TRACING
 
+#include <memory>
+#include <string_view>
+#include <utility>
+
 namespace async_grpc {
 
-std::unique_ptr<Span> OpencensusSpan::StartSpan(const std::string& name,
+std::unique_ptr<Span> OpencensusSpan::StartSpan(std::string_view name,
                                                 const OpencensusSpan* parent) {
   return std::unique_ptr<OpencensusSpan>(new OpencensusSpan(name, parent));
 }
 
-std::unique_ptr<Span> OpencensusSpan::CreateChildSpan(const std::string& name) {
+std::unique_ptr<Span> OpencensusSpan::CreateChildSpan(std::string_view name) {
   return std::unique_ptr<OpencensusSpan>(new OpencensusSpan(name, this));
 }
 
 void OpencensusSpan::SetStatus(const ::grpc::Status& status) {
-  span_.SetStatus((opencensus::trace::StatusCode)status.error_code());
+  span_.SetStatus(
+      static_cast<opencensus::trace::StatusCode>(status.error_code()));
 }
 
-void OpencensusSpan::End() { span_.End(); }
+void OpencensusSpan::End() {
+  span_.End();
+}
 
-OpencensusSpan::OpencensusSpan(const std::string& name,
+OpencensusSpan::OpencensusSpan(std::string_view name,
                                const OpencensusSpan* parent)
     : span_(opencensus::trace::Span::StartSpan(
-          name, parent ? &parent->span_ : nullptr)) {}
+          name, parent != nullptr ? &parent->span_ : nullptr)) {}
 
 }  // namespace async_grpc
 

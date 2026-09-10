@@ -1,6 +1,16 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
+
+selects.config_setting_group(
+    name = "gcc_musl",
+    match_all = [
+        "@bazel_template//bazel:gcc",
+        "@bazel_template//bazel:libc_musl",
+    ],
+)
 
 COPTS = [
     "-g",
@@ -9,22 +19,11 @@ COPTS = [
     "-Wall",
     "-Wsign-compare",
     "-isystem external/xz/src/liblzma/lzma",
-    "-I$(GENDIR)/external/libunwind/include",
-    "-Iexternal/libunwind/include",
-    "-I$(GENDIR)/external/libunwind/include/tdep",
-    "-Iexternal/libunwind/src",
-    "-Iexternal/libunwind/include/tdep",
-    "-Iexternal/libunwind/src/mi",
-    "-Iexternal/libunwind/src/dwarf",
 ]
 
-X86_64_COPTS = [
-    "-Iexternal/libunwind/src/x86_64",
-]
+X86_64_COPTS = []
 
-AARCH64_COPTS = [
-    "-Iexternal/libunwind/src/aarch64",
-]
+AARCH64_COPTS = []
 
 LOCAL_DEFINES = [
     "HAVE_CONFIG_H",
@@ -85,7 +84,6 @@ cc_library(
             "src/dwarf/L*.c",
             "src/mi/L*.c",
             "src/ptrace/*.c",
-            "src/unwind/*.c",
         ],
         exclude = [
             "src/mi/G*.c",
@@ -99,11 +97,13 @@ cc_library(
             "src/mi/Ldyn-remote.c",
         ],
     ) + select({
+        ":gcc_musl": [],
+        "//conditions:default": glob(["src/unwind/*.c"]),
+    }) + select({
         "@platforms//cpu:x86_64": glob(
             [
                 "src/x86_64/L*.c",
                 "src/x86_64/G*.c",
-                "src/x86_64/is_fpreg.c",
                 "src/x86_64/regname.c",
                 "src/x86_64/getcontext.S",
                 "src/x86_64/longjmp.S",
@@ -118,12 +118,13 @@ cc_library(
                 "src/x86_64/Gos-qnx.c",
                 "src/x86_64/Los-qnx.c",
             ],
-        ),
+        ) + [
+            "src/x86_64/is_fpreg.c",
+        ],
         "@platforms//cpu:aarch64": glob(
             [
                 "src/aarch64/L*.c",
                 "src/aarch64/G*.c",
-                "src/aarch64/is_fpreg.c",
                 "src/aarch64/regname.c",
                 "src/aarch64/getcontext.S",
                 "src/aarch64/longjmp.S",
@@ -138,7 +139,9 @@ cc_library(
                 "src/aarch64/Gos-qnx.c",
                 "src/aarch64/Los-qnx.c",
             ],
-        ),
+        ) + [
+            "src/aarch64/is_fpreg.c",
+        ],
     }),
     hdrs = [
         "include/compiler.h",
@@ -155,6 +158,7 @@ cc_library(
         "include/tdep/jmpbuf.h",
         "include/unwind.h",
         "src/coredump/_UCD_internal.h",
+        "src/coredump/_UCD_lib.h",
         "src/coredump/ucd_file_table.h",
         "src/elf64.h",
         "src/elfxx.h",
@@ -193,6 +197,17 @@ cc_library(
         "@platforms//cpu:x86_64": X86_64_COPTS,
         "@platforms//cpu:aarch64": AARCH64_COPTS,
     }),
+    includes = [
+        "include",
+        "include/tdep",
+        "src",
+        "src/coredump",
+        "src/dwarf",
+        "src/mi",
+    ] + select({
+        "@platforms//cpu:x86_64": ["src/x86_64"],
+        "@platforms//cpu:aarch64": ["src/aarch64"],
+    }),
     linkstatic = True,
     local_defines = LOCAL_DEFINES,
     textual_hdrs = [
@@ -211,6 +226,10 @@ genrule(
         "cat <<'EOF' >$@",
         "/* include/config.h.  Generated from config.h.in by configure.  */",
         "/* include/config.h.in.  Generated from configure.ac by autoheader.  */",
+        "",
+        "#ifdef __linux__",
+        "#include <linux/limits.h>",
+        "#endif",
         "",
         "/* Block signals before mutex operations */",
         "#define CONFIG_BLOCK_SIGNALS /**/",

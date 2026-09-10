@@ -17,20 +17,21 @@
 #ifndef CPP_GRPC_COMMON_BLOCKING_QUEUE_H_
 #define CPP_GRPC_COMMON_BLOCKING_QUEUE_H_
 
+#include <chrono>
+#include <concepts>
 #include <cstddef>
 #include <deque>
 #include <memory>
 
-#include "glog/logging.h"
 #include "src/async_grpc/common/mutex.h"
 #include "src/async_grpc/common/time.h"
+#include "src/common/logging.h"
 
-namespace async_grpc {
-namespace common {
+namespace async_grpc::common {
 
 // A thread-safe blocking queue that is useful for producer/consumer patterns.
 // 'T' must be movable.
-template <typename T>
+template <std::movable T>
 class BlockingQueue {
  public:
   static constexpr size_t kInfiniteQueueSize = 0;
@@ -40,6 +41,9 @@ class BlockingQueue {
 
   BlockingQueue(const BlockingQueue&) = delete;
   BlockingQueue& operator=(const BlockingQueue&) = delete;
+  BlockingQueue(BlockingQueue&&) = delete;
+  BlockingQueue& operator=(BlockingQueue&&) = delete;
+  ~BlockingQueue() = default;
 
   // Constructs a blocking queue with a size of 'queue_size'.
   explicit BlockingQueue(const size_t queue_size) : queue_size_(queue_size) {}
@@ -52,7 +56,9 @@ class BlockingQueue {
   }
 
   // Like push, but returns false if 'timeout' is reached.
-  bool PushWithTimeout(T t, const common::Duration timeout) {
+  template <typename Rep, typename Period>
+  [[nodiscard]] bool PushWithTimeout(
+      T t, const std::chrono::duration<Rep, Period> timeout) {
     MutexLocker lock(&mutex_);
     if (!lock.AwaitWithTimeout(
             [this]() REQUIRES(mutex_) { return QueueNotFullCondition(); },
@@ -64,7 +70,7 @@ class BlockingQueue {
   }
 
   // Pops the next value from the queue. Blocks until a value is available.
-  T Pop() {
+  [[nodiscard]] T Pop() {
     MutexLocker lock(&mutex_);
     lock.Await([this]() REQUIRES(mutex_) { return !QueueEmptyCondition(); });
 
@@ -73,13 +79,17 @@ class BlockingQueue {
     return t;
   }
 
-  // Like Pop, but can timeout. Returns nullptr in this case.
-  T PopWithTimeout(const common::Duration timeout) {
+  // Like Pop, but can timeout. Returns a default-constructed 'T' in this case,
+  // which is the null pointer for the smart pointer instantiations.
+  template <typename Rep, typename Period>
+    requires std::default_initializable<T>
+  [[nodiscard]] T PopWithTimeout(
+      const std::chrono::duration<Rep, Period> timeout) {
     MutexLocker lock(&mutex_);
     if (!lock.AwaitWithTimeout(
             [this]() REQUIRES(mutex_) { return !QueueEmptyCondition(); },
             timeout)) {
-      return nullptr;
+      return T{};
     }
     T t = std::move(deque_.front());
     deque_.pop_front();
@@ -90,7 +100,7 @@ class BlockingQueue {
   // Maintains ownership. This assumes a member function get() that returns
   // a pointer to the given type R.
   template <typename R>
-  const R* Peek() {
+  [[nodiscard]] const R* Peek() {
     MutexLocker lock(&mutex_);
     if (deque_.empty()) {
       return nullptr;
@@ -99,7 +109,7 @@ class BlockingQueue {
   }
 
   // Returns the number of items currently in the queue.
-  size_t Size() {
+  [[nodiscard]] size_t Size() {
     MutexLocker lock(&mutex_);
     return deque_.size();
   }
@@ -112,10 +122,12 @@ class BlockingQueue {
 
  private:
   // Returns true iff the queue is empty.
-  bool QueueEmptyCondition() REQUIRES(mutex_) { return deque_.empty(); }
+  [[nodiscard]] bool QueueEmptyCondition() REQUIRES(mutex_) {
+    return deque_.empty();
+  }
 
   // Returns true iff the queue is not full.
-  bool QueueNotFullCondition() REQUIRES(mutex_) {
+  [[nodiscard]] bool QueueNotFullCondition() REQUIRES(mutex_) {
     return queue_size_ == kInfiniteQueueSize || deque_.size() < queue_size_;
   }
 
@@ -124,7 +136,6 @@ class BlockingQueue {
   std::deque<T> deque_ GUARDED_BY(mutex_);
 };
 
-}  // namespace common
-}  // namespace async_grpc
+}  // namespace async_grpc::common
 
 #endif  // CPP_GRPC_COMMON_BLOCKING_QUEUE_H_

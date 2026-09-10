@@ -1,6 +1,6 @@
-load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -38,6 +38,8 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
     "@platforms//os:osx": [],
     "//conditions:default": [],
 })
+
+DEFINES = GLOBAL_DEFINES
 
 write_file(
     name = "configuration_h",
@@ -123,6 +125,8 @@ cc_library(
         ":configuration_h",
     ],
     copts = COPTS + ["-Iexternal/libcbor/src"],
+    defines = DEFINES,
+    includes = ["src"],
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
 )

@@ -8,9 +8,7 @@
 
 #include "src/proto/service.pb.h"
 
-namespace bazel_template {
-namespace server {
-namespace grpc_handler {
+namespace bazel_template::server::grpc_handler {
 
 struct EC2InstanceManagementMethod {
   static constexpr const char* MethodName() {
@@ -28,8 +26,6 @@ struct Route53ManagementMethod {
   using OutgoingType = bazel_template::proto::Route53Response;
 };
 
-}  // namespace grpc_handler
-}  // namespace server
-}  // namespace bazel_template
+}  // namespace bazel_template::server::grpc_handler
 
 #endif  // bazel_template_SERVER_GRPC_HANDLER_META_H_

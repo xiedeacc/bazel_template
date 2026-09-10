@@ -1,3 +1,42 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+genrule(
+    name = "swigconfig_h",
+    srcs = ["Source/Include/swigconfig.h.in"],
+    outs = ["Source/Include/swigconfig.h"],
+    cmd = "\n".join([
+        "sed \\",
+        "  -e 's|#undef HAVE_CXX11|#define HAVE_CXX11 1|' \\",
+        "  -e 's|#undef HAVE_CXX14|#define HAVE_CXX14 1|' \\",
+        "  -e 's|#undef HAVE_CXX17|#define HAVE_CXX17 1|' \\",
+        "  -e 's|#undef HAVE_CXX20|#define HAVE_CXX20 1|' \\",
+        "  -e 's|#undef HAVE_INTTYPES_H|#define HAVE_INTTYPES_H 1|' \\",
+        "  -e 's|#undef HAVE_PCRE|#define HAVE_PCRE 1|' \\",
+        "  -e 's|#undef HAVE_STDINT_H|#define HAVE_STDINT_H 1|' \\",
+        "  -e 's|#undef HAVE_STDIO_H|#define HAVE_STDIO_H 1|' \\",
+        "  -e 's|#undef HAVE_STDLIB_H|#define HAVE_STDLIB_H 1|' \\",
+        "  -e 's|#undef HAVE_STRINGS_H|#define HAVE_STRINGS_H 1|' \\",
+        "  -e 's|#undef HAVE_STRING_H|#define HAVE_STRING_H 1|' \\",
+        "  -e 's|#undef HAVE_SYS_STAT_H|#define HAVE_SYS_STAT_H 1|' \\",
+        "  -e 's|#undef HAVE_SYS_TYPES_H|#define HAVE_SYS_TYPES_H 1|' \\",
+        "  -e 's|#undef HAVE_UNISTD_H|#define HAVE_UNISTD_H 1|' \\",
+        "  -e 's|^#undef PACKAGE$$|#define PACKAGE \"swig\"|' \\",
+        "  -e 's|^#undef PACKAGE_BUGREPORT$$|#define PACKAGE_BUGREPORT \"https://github.com/swig/swig/issues\"|' \\",
+        "  -e 's|^#undef PACKAGE_NAME$$|#define PACKAGE_NAME \"swig\"|' \\",
+        "  -e 's|^#undef PACKAGE_STRING$$|#define PACKAGE_STRING \"swig 4.4.1\"|' \\",
+        "  -e 's|^#undef PACKAGE_TARNAME$$|#define PACKAGE_TARNAME \"swig\"|' \\",
+        "  -e 's|^#undef PACKAGE_URL$$|#define PACKAGE_URL \"https://www.swig.org\"|' \\",
+        "  -e 's|^#undef PACKAGE_VERSION$$|#define PACKAGE_VERSION \"4.4.1\"|' \\",
+        "  -e 's|#undef STDC_HEADERS|#define STDC_HEADERS 1|' \\",
+        "  -e 's|^#undef SWIG_CXX$$|#define SWIG_CXX \"bazel\"|' \\",
+        "  -e 's|^#undef SWIG_LIB$$|#define SWIG_LIB \"Lib\"|' \\",
+        "  -e 's|^#undef SWIG_LIB_WIN_UNIX$$|#define SWIG_LIB_WIN_UNIX \"Lib\"|' \\",
+        "  -e 's|^#undef SWIG_PLATFORM$$|#define SWIG_PLATFORM \"x86_64-pc-linux-gnu\"|' \\",
+        "  -e 's|^#undef VERSION$$|#define VERSION \"4.4.1\"|' \\",
+        "  $< >$@",
+    ]),
+)
+
 cc_binary(
     name = "swig",
     srcs = [
@@ -17,6 +56,8 @@ cc_binary(
         "Source/DOH/memory.c",
         "Source/DOH/string.c",
         "Source/DOH/void.c",
+        "Source/Doxygen/csharpdoc.cxx",
+        "Source/Doxygen/csharpdoc.h",
         "Source/Doxygen/doxycommands.h",
         "Source/Doxygen/doxyentity.cxx",
         "Source/Doxygen/doxyentity.h",
@@ -28,9 +69,9 @@ cc_binary(
         "Source/Doxygen/javadoc.h",
         "Source/Doxygen/pydoc.cxx",
         "Source/Doxygen/pydoc.h",
-        "Source/Include/swigconfig.h",
         "Source/Include/swigwarn.h",
         "Source/Modules/allocate.cxx",
+        "Source/Modules/c.cxx",
         "Source/Modules/contract.cxx",
         "Source/Modules/csharp.cxx",
         "Source/Modules/d.cxx",
@@ -44,7 +85,6 @@ cc_binary(
         "Source/Modules/lang.cxx",
         "Source/Modules/lua.cxx",
         "Source/Modules/main.cxx",
-        "Source/Modules/mzscheme.cxx",
         "Source/Modules/nested.cxx",
         "Source/Modules/ocaml.cxx",
         "Source/Modules/octave.cxx",
@@ -89,6 +129,7 @@ cc_binary(
         "Source/Swig/typeobj.c",
         "Source/Swig/typesys.c",
         "Source/Swig/wrapfunc.c",
+        ":swigconfig_h",
     ],
     copts = ["$(STACK_FRAME_UNLIMITED)"] + select({
         "@platforms//os:windows": [],
@@ -121,7 +162,6 @@ filegroup(
         "Lib/typemaps/*",
     ]),
     licenses = ["notice"],  # simple notice license for Lib/
-    path = "Lib",
     visibility = ["//visibility:public"],
 )
 
@@ -134,6 +174,5 @@ filegroup(
         "Lib/typemaps/*",
     ]),
     licenses = ["notice"],  # simple notice license for Lib/
-    path = "Lib",
     visibility = ["//visibility:public"],
 )

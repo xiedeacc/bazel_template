@@ -1,5 +1,6 @@
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -12,6 +13,8 @@ COPTS = GLOBAL_COPTS + select({
     "@platforms//os:windows": [],
     "//conditions:default": [],
 })
+
+DEFINES = GLOBAL_DEFINES
 
 LOCAL_DEFINES = GLOBAL_LOCAL_DEFINES + select({
     "@platforms//os:windows": [
@@ -79,6 +82,8 @@ cc_library(
     ],
     hdrs = ["bzlib.h"],
     copts = COPTS,
+    defines = DEFINES,
+    includes = ["."],
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
 )
@@ -87,6 +92,7 @@ cc_binary(
     name = "bzip2",
     srcs = ["bzip2.c"],
     copts = COPTS,
+    defines = DEFINES,
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":libbzip2"],
@@ -96,6 +102,7 @@ cc_binary(
     name = "bzip2recover",
     srcs = ["bzip2recover.c"],
     copts = COPTS,
+    defines = DEFINES,
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [":libbzip2"],

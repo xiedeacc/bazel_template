@@ -2,6 +2,7 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_library", "boost_so_library", "default_copts", "default_defines", "hdr_list")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 _repo_dir = repository_name().removeprefix("@")
 
@@ -338,11 +339,15 @@ cc_library(
 boost_library(
     name = "atomic",
     srcs = select({
-        ":windows_x86_64": ["libs/atomic/src/wait_on_address.cpp"],
+        ":windows_x86_64": [],
         "//conditions:default": [],
     }),
     copts = ["-Iexternal/%s/libs/atomic/src" % _repo_dir],
-    exclude_src = ["libs/atomic/src/wait_on_address.cpp"] + BOOST_ATOMIC_SSE_SRCS,
+    defines = select({
+        ":windows_x86_64": ["_WIN32_WINNT=0x0A00"],
+        "//conditions:default": [],
+    }),
+    exclude_src = BOOST_ATOMIC_SSE_SRCS,
     deps = BOOST_ATOMIC_DEPS + select({
         "@platforms//cpu:x86_64": [":atomic_sse"],
         "//conditions:default": [],
@@ -653,7 +658,6 @@ boost_library(
 
 boost_library(
     name = "container_hash",
-    defines = ["BOOST_NO_CXX98_FUNCTION_BASE"],
     deps = [
         ":assert",
         ":config",
@@ -856,6 +860,7 @@ boost_library(
         ":iterator",
         ":predef",
         ":range",
+        ":scope",
         ":scoped_array",
         ":smart_ptr",
         ":static_assert",
@@ -863,6 +868,10 @@ boost_library(
         ":throw_exception",
         ":type_traits",
     ],
+)
+
+boost_library(
+    name = "scope",
 )
 
 boost_library(
@@ -1927,9 +1936,6 @@ boost_library(
 
 boost_library(
     name = "static_assert",
-    hdrs = [
-        "libs/config/include/boost/config/workaround.hpp",
-    ],
 )
 
 boost_library(
@@ -1951,10 +1957,19 @@ boost_library(
 )
 
 boost_library(
+    name = "compat",
+)
+
+boost_library(
     name = "system",
+    includes = [
+        "libs/compat/include",
+        "libs/url/src/detail",
+    ],
     deps = [
         ":assert",
         ":cerrno",
+        ":compat",
         ":config",
         ":core",
         ":cstdint",
@@ -2552,13 +2567,17 @@ boost_library(
 
 boost_library(
     name = "json",
+    exclude_src = ["libs/json/src/boost_json_gdb_printers.py"],
+    includes = ["libs/compat/include"],
     deps = [
         ":align",
         ":assert",
+        ":compat",
         ":config",
         ":container",
         ":core",
         ":describe",
+        ":endian",
         ":exception",
         ":mp11",
         ":shared_ptr",
@@ -2626,13 +2645,18 @@ boost_library(
 boost_library(
     name = "url",
     srcs = glob([
+        "libs/url/src/detail/**/*.hpp",
         "libs/url/src/detail/**/*.cpp",
+        "libs/url/src/grammar/**/*.hpp",
         "libs/url/src/grammar/**/*.cpp",
+        "libs/url/src/rfc/**/*.hpp",
         "libs/url/src/rfc/**/*.cpp",
     ]),
+    includes = ["libs/compat/include"],
     deps = [
         ":align",
         ":assert",
+        ":compat",
         ":config",
         ":core",
         ":mp11",

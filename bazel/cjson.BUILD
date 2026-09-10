@@ -1,3 +1,4 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_DEFINES", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
@@ -37,16 +38,19 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
     "//conditions:default": [],
 })
 
+DEFINES = GLOBAL_DEFINES
+
 cc_library(
     name = "cjson",
-    srcs = glob([
+    srcs = [
         "cJSON.c",
-    ]),
-    hdrs = glob([
+    ],
+    hdrs = [
         "cJSON.h",
         "cJSON_Utils.h",
-    ]),
+    ],
     copts = COPTS,
+    defines = DEFINES,
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
 )
@@ -56,4 +60,4 @@ alias(
     name = "cjson_lib",
     actual = ":cjson",
     visibility = ["//visibility:public"],
-) 
+)

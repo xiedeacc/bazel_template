@@ -1,11 +1,13 @@
-load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
-load("//bazel:build.bzl", "cc_test")
-load("//bazel:cpplint.bzl", "cpplint")
-load("//bazel:pb_code_gen_plugin.bzl", "cc_proto_plugin")
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 
-package(default_visibility = ["//visibility:public"])
-
-cpplint()
+package(
+    default_visibility = ["//visibility:public"],
+    features = [
+        "cpp_modules",
+        "layering_check",
+    ],
+)
 
 COPTS = GLOBAL_COPTS + select({
     "@platforms//os:windows": [
@@ -50,17 +52,19 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
 
 cc_binary(
     name = "pb_code_generator",
-    srcs = [
-        "pb_code_generator.cc",
-        "pb_code_generator.h",
-    ],
+    srcs = ["pb_code_generator.cc"],
     copts = COPTS,
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
     deps = [
+        "//src/common:logging",
         "@boost//:algorithm",
-        "@com_github_glog_glog//:glog",
         "@com_google_absl//absl/strings",
+        "@com_google_protobuf//:protobuf",
         "@com_google_protobuf//:protoc_lib",
+        "@com_google_protobuf//src/google/protobuf/compiler:code_generator",
+        "@com_google_protobuf//src/google/protobuf/compiler:plugin",
+        "@com_google_protobuf//src/google/protobuf/io:io",
+        "@com_google_protobuf//src/google/protobuf/io:printer",
     ],
 )

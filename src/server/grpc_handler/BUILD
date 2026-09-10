@@ -1,10 +1,14 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
-load("//bazel:cpplint.bzl", "cpplint")
 
-package(default_visibility = ["//visibility:public"])
-
-cpplint()
+package(
+    default_visibility = ["//visibility:public"],
+    features = [
+        "cpp_modules",
+        "layering_check",
+    ],
+)
 
 COPTS = GLOBAL_COPTS + select({
     "@platforms//os:windows": [
@@ -74,21 +78,36 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
 })
 
 cc_library(
-    name = "grpc_handler",
-    hdrs = [
-        "ec2_handler.h",
-        "meta.h",
-        "route53_handler.h",
-    ],
+    name = "meta",
+    hdrs = ["meta.h"],
     copts = COPTS,
     local_defines = LOCAL_DEFINES,
+    deps = ["//src/proto:cc_service"],
+)
+
+# bazel_template.server.grpc_handler; every handler is an implementation unit.
+cc_library(
+    name = "grpc_handler",
+    srcs = [
+        "ec2_handler.cc",
+        "registry.cc",
+        "route53_handler.cc",
+    ],
+    copts = COPTS,
+    features = ["-layering_check"],
+    local_defines = LOCAL_DEFINES,
+    module_interfaces = ["grpc_handler.cppm"],
     deps = [
+        ":meta",
         "//src/async_grpc",
         "//src/proto:cc_grpc_service",
-        "//src/util",
+        "//src/proto:cc_service",
         "@aws-sdk-cpp//:aws-cpp-sdk-core",
         "@aws-sdk-cpp//:aws-cpp-sdk-ec2",
         "@aws-sdk-cpp//:aws-cpp-sdk-route53",
+        "@com_github_glog_glog//:glog",
+        "@com_github_grpc_grpc//:grpc++",
+        "@com_google_protobuf//:protobuf",
     ],
 )
 
@@ -100,7 +119,9 @@ cc_test(
     local_defines = LOCAL_DEFINES,
     deps = [
         ":grpc_handler",
+        "//src/async_grpc",
         "//src/proto:cc_service",
+        "@com_github_grpc_grpc//:grpc++",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -113,7 +134,9 @@ cc_test(
     local_defines = LOCAL_DEFINES,
     deps = [
         ":grpc_handler",
+        "//src/async_grpc",
         "//src/proto:cc_service",
+        "@com_github_grpc_grpc//:grpc++",
         "@com_google_googletest//:gtest_main",
     ],
 )

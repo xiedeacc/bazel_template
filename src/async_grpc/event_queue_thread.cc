@@ -14,9 +14,27 @@
  * limitations under the License.
  */
 
-#include "src/async_grpc/event_queue_thread.h"
+module;
 
-#include "glog/logging.h"
+#include <stop_token>
+#include <utility>
+
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/message.h"
+#include "grpc++/grpc++.h"
+#include "grpc++/impl/codegen/async_stream.h"
+#include "grpc++/impl/codegen/async_unary_call.h"
+#include "grpc++/impl/codegen/proto_utils.h"
+#include "grpc++/impl/codegen/service_type.h"
+#include "src/async_grpc/common/blocking_queue.h"
+#include "src/async_grpc/common/mutex.h"
+#include "src/async_grpc/common/time.h"
+#include "src/async_grpc/rpc_service_method_traits.h"
+#include "src/async_grpc/type_traits.h"
+#include "src/common/logging.h"
+#include "src/util/util_fwd.h"
+
+module bazel_template.async_grpc;
 
 namespace async_grpc {
 
@@ -24,18 +42,28 @@ EventQueueThread::EventQueueThread() {
   event_queue_ = std::make_unique<EventQueue>();
 }
 
-EventQueue* EventQueueThread::event_queue() { return event_queue_.get(); }
+EventQueue* EventQueueThread::event_queue() {
+  return event_queue_.get();
+}
 
-void EventQueueThread::Start(EventQueueRunner runner) {
-  CHECK(!thread_);
+void EventQueueThread::Start(const EventQueueRunner& runner) {
+  CHECK(!thread_.joinable());
   EventQueue* event_queue = event_queue_.get();
-  thread_ = std::make_unique<std::thread>(
-      [event_queue, runner]() { runner(event_queue); });
+  thread_ = std::jthread([event_queue, runner](std::stop_token stop_token) {
+    runner(event_queue, std::move(stop_token));
+  });
+}
+
+void EventQueueThread::RequestStop() {
+  thread_.request_stop();
 }
 
 void EventQueueThread::Shutdown() {
   LOG(INFO) << "Shutting down event queue " << event_queue_.get();
-  thread_->join();
+  thread_.request_stop();
+  if (thread_.joinable()) {
+    thread_.join();
+  }
 }
 
 }  // namespace async_grpc

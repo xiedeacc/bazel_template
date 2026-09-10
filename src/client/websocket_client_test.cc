@@ -3,14 +3,14 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/client/websocket_client.h"
-
 #include <chrono>
+#include <exception>
 #include <thread>
 
 #include "gtest/gtest.h"
 #include "src/proto/service.pb.h"
-#include "src/util/util.h"
+
+import bazel_template.client.websocket_client;
 
 namespace bazel_template {
 namespace client {
@@ -31,9 +31,12 @@ class WebSocketClientTest : public ::testing::Test {
   std::unique_ptr<WebSocketClient> client_;
 };
 
-TEST_F(WebSocketClientTest, ConnectAndDisconnect) {
-  EXPECT_NO_THROW(client_->Connect());
-  std::this_thread::sleep_for(std::chrono::seconds(1));
+// Nothing listens on the test port: Connect() must report that as an
+// exception rather than hang or crash, and Stop() must then be safe to call.
+// Pointing host/port at a running server turns this into a live smoke test.
+TEST_F(WebSocketClientTest, ConnectFailureIsReported) {
+  EXPECT_THROW(client_->Connect(), std::exception);
+  EXPECT_NO_THROW(client_->Stop());
 }
 
 }  // namespace

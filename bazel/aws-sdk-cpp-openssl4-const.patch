@@ -1,0 +1,161 @@
+diff -ruN a/crt/aws-crt-cpp/crt/s2n/crypto/s2n_certificate.c b/crt/aws-crt-cpp/crt/s2n/crypto/s2n_certificate.c
+--- a/crt/aws-crt-cpp/crt/s2n/crypto/s2n_certificate.c	2026-07-22 22:42:58.278806361 +0000
++++ b/crt/aws-crt-cpp/crt/s2n/crypto/s2n_certificate.c	2026-07-22 22:42:59.669092528 +0000
+@@ -232,8 +232,8 @@
+ 
+         if (san_name->type == GEN_DNS) {
+             /* Decoding isn't necessary here since a DNS SAN name is ASCII(type V_ASN1_IA5STRING) */
+-            unsigned char *san_str = san_name->d.dNSName->data;
+-            const size_t san_str_len = san_name->d.dNSName->length;
++            const unsigned char *san_str = ASN1_STRING_get0_data(san_name->d.dNSName);
++            const size_t san_str_len = ASN1_STRING_length(san_name->d.dNSName);
+             struct s2n_blob *san_blob = NULL;
+             POSIX_GUARD_RESULT(s2n_array_pushback(chain_and_key->san_names, (void **) &san_blob));
+             if (!san_blob) {
+@@ -270,19 +270,19 @@
+     POSIX_ENSURE_REF(chain_and_key->cn_names);
+     POSIX_ENSURE_REF(x509_cert);
+ 
+-    X509_NAME *subject = X509_get_subject_name(x509_cert);
++    const X509_NAME *subject = X509_get_subject_name(x509_cert);
+     if (!subject) {
+         return 0;
+     }
+ 
+     int lastpos = -1;
+     while ((lastpos = X509_NAME_get_index_by_NID(subject, NID_commonName, lastpos)) >= 0) {
+-        X509_NAME_ENTRY *name_entry = X509_NAME_get_entry(subject, lastpos);
++        const X509_NAME_ENTRY *name_entry = X509_NAME_get_entry(subject, lastpos);
+         if (!name_entry) {
+             continue;
+         }
+ 
+-        ASN1_STRING *asn1_str = X509_NAME_ENTRY_get_data(name_entry);
++        const ASN1_STRING *asn1_str = X509_NAME_ENTRY_get_data(name_entry);
+         if (!asn1_str) {
+             continue;
+         }
+@@ -730,7 +730,7 @@
+         * Since this is an internal pointer it should not be freed or modified in any way.
+         * Ref: https://www.openssl.org/docs/man1.0.2/man3/ASN1_STRING_data.html.
+         */
+-        unsigned char *internal_data = ASN1_STRING_data(asn1_str);
++        const unsigned char *internal_data = ASN1_STRING_get0_data(asn1_str);
+         POSIX_ENSURE_REF(internal_data);
+         POSIX_CHECKED_MEMCPY(out_data, internal_data, len);
+     }
+@@ -793,7 +793,7 @@
+     POSIX_ENSURE_REF(asn1_obj_in);
+ 
+     for (size_t loc = 0; loc < ext_count; loc++) {
+-        ASN1_OCTET_STRING *asn1_str = NULL;
++        const ASN1_OCTET_STRING *asn1_str = NULL;
+         bool match_found = false;
+ 
+         /* Retrieve the x509 extension at location loc.
+@@ -802,7 +802,7 @@
+          * The returned extension is an internal pointer which must not be freed up by the application.
+          * Ref: https://www.openssl.org/docs/man1.1.0/man3/X509_get_ext.html.
+          */
+-        X509_EXTENSION *x509_ext = X509_get_ext(x509_cert, loc);
++        const X509_EXTENSION *x509_ext = X509_get_ext(x509_cert, loc);
+         POSIX_ENSURE_REF(x509_ext);
+ 
+         /* Retrieve the extension object/OID/extnId.
+@@ -810,7 +810,7 @@
+          * The returned pointer is an internal value which must not be freed up.
+          * Ref: https://www.openssl.org/docs/man1.1.0/man3/X509_EXTENSION_get_object.html.
+          */
+-        ASN1_OBJECT *asn1_obj = X509_EXTENSION_get_object(x509_ext);
++        const ASN1_OBJECT *asn1_obj = X509_EXTENSION_get_object(x509_ext);
+         POSIX_ENSURE_REF(asn1_obj);
+ 
+         /* OBJ_cmp() compares two ASN1_OBJECT objects. If the two are identical 0 is returned.
+@@ -837,7 +837,7 @@
+                  * Since this is an internal pointer it should not be freed or modified in any way.
+                  * Ref: https://www.openssl.org/docs/man1.0.2/man3/ASN1_STRING_data.html.
+                  */
+-                unsigned char *internal_data = ASN1_STRING_data(asn1_str);
++                const unsigned char *internal_data = ASN1_STRING_get0_data(asn1_str);
+                 POSIX_ENSURE_REF(internal_data);
+                 POSIX_CHECKED_MEMCPY(ext_value, internal_data, len);
+             }
+diff -ruN a/crt/aws-crt-cpp/crt/s2n/crypto/s2n_openssl_x509.c b/crt/aws-crt-cpp/crt/s2n/crypto/s2n_openssl_x509.c
+--- a/crt/aws-crt-cpp/crt/s2n/crypto/s2n_openssl_x509.c	2026-07-22 22:42:58.725021751 +0000
++++ b/crt/aws-crt-cpp/crt/s2n/crypto/s2n_openssl_x509.c	2026-07-22 22:42:59.671204488 +0000
+@@ -92,10 +92,10 @@
+     RESULT_ENSURE_REF(cert);
+     RESULT_ENSURE_REF(info);
+ 
+-    X509_NAME *issuer_name = X509_get_issuer_name(cert);
++    const X509_NAME *issuer_name = X509_get_issuer_name(cert);
+     RESULT_ENSURE_REF(issuer_name);
+ 
+-    X509_NAME *subject_name = X509_get_subject_name(cert);
++    const X509_NAME *subject_name = X509_get_subject_name(cert);
+     RESULT_ENSURE_REF(subject_name);
+ 
+     if (X509_NAME_cmp(issuer_name, subject_name) == 0) {
+diff -ruN a/crt/aws-crt-cpp/crt/s2n/tls/extensions/s2n_cert_authorities.c b/crt/aws-crt-cpp/crt/s2n/tls/extensions/s2n_cert_authorities.c
+--- a/crt/aws-crt-cpp/crt/s2n/tls/extensions/s2n_cert_authorities.c	2026-07-22 22:42:59.185034544 +0000
++++ b/crt/aws-crt-cpp/crt/s2n/tls/extensions/s2n_cert_authorities.c	2026-07-22 22:42:59.673077137 +0000
+@@ -55,7 +55,7 @@
+             continue;
+         }
+ 
+-        X509_NAME *name = X509_get_subject_name(cert);
++        const X509_NAME *name = X509_get_subject_name(cert);
+         RESULT_ENSURE(name, S2N_ERR_INTERNAL_LIBCRYPTO_ERROR);
+ 
+         const uint8_t *name_bytes = NULL;
+diff -ruN a/crt/aws-crt-cpp/crt/s2n/tls/s2n_x509_validator.c b/crt/aws-crt-cpp/crt/s2n/tls/s2n_x509_validator.c
+--- a/crt/aws-crt-cpp/crt/s2n/tls/s2n_x509_validator.c	2026-07-22 22:42:59.662516292 +0000
++++ b/crt/aws-crt-cpp/crt/s2n/tls/s2n_x509_validator.c	2026-07-22 22:42:59.675001473 +0000
+@@ -235,7 +235,7 @@
+     if (current_name->type == GEN_DNS || current_name->type == GEN_URI) {
+         *san_found = true;
+ 
+-        const char *name = (const char *) ASN1_STRING_data(current_name->d.ia5);
++        const char *name = (const char *) ASN1_STRING_get0_data(current_name->d.ia5);
+         RESULT_ENSURE_REF(name);
+         int name_len = ASN1_STRING_length(current_name->d.ia5);
+         RESULT_ENSURE_GT(name_len, 0);
+@@ -249,9 +249,9 @@
+         *san_found = true;
+ 
+         /* try to validate an IP address if it's in the subject alt name. */
+-        const unsigned char *ip_addr = current_name->d.iPAddress->data;
++        const unsigned char *ip_addr = ASN1_STRING_get0_data(current_name->d.iPAddress);
+         RESULT_ENSURE_REF(ip_addr);
+-        int ip_addr_len = current_name->d.iPAddress->length;
++        int ip_addr_len = ASN1_STRING_length(current_name->d.iPAddress);
+         RESULT_ENSURE_GT(ip_addr_len, 0);
+ 
+         RESULT_STACK_BLOB(address, INET6_ADDRSTRLEN + 1, INET6_ADDRSTRLEN + 1);
+@@ -317,7 +317,7 @@
+     RESULT_ENSURE_REF(public_cert);
+     RESULT_ENSURE_REF(cn_found);
+ 
+-    X509_NAME *subject_name = X509_get_subject_name(public_cert);
++    const X509_NAME *subject_name = X509_get_subject_name(public_cert);
+     RESULT_ENSURE(subject_name, S2N_ERR_CERT_UNTRUSTED);
+ 
+     int curr_idx = -1;
+@@ -332,7 +332,7 @@
+ 
+     RESULT_ENSURE(curr_idx >= 0, S2N_ERR_CERT_UNTRUSTED);
+ 
+-    ASN1_STRING *common_name = X509_NAME_ENTRY_get_data(X509_NAME_get_entry(subject_name, curr_idx));
++    const ASN1_STRING *common_name = X509_NAME_ENTRY_get_data(X509_NAME_get_entry(subject_name, curr_idx));
+     RESULT_ENSURE(common_name, S2N_ERR_CERT_UNTRUSTED);
+ 
+     /* X520CommonName allows the following ANSI string types per RFC 5280 Appendix A.1 */
+@@ -351,7 +351,7 @@
+     RESULT_ENSURE_GT(cn_len, 0);
+     uint32_t len = (uint32_t) cn_len;
+     RESULT_ENSURE_LTE(len, s2n_array_len(peer_cn) - 1);
+-    RESULT_CHECKED_MEMCPY(peer_cn, ASN1_STRING_data(common_name), len);
++    RESULT_CHECKED_MEMCPY(peer_cn, ASN1_STRING_get0_data(common_name), len);
+ 
+     /* According to https://www.rfc-editor.org/rfc/rfc6125#section-6.4.4,
+      * the CN fallback only applies to fully qualified DNS domain names.

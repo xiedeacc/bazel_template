@@ -16,11 +16,12 @@ def _proxygen_cpp_gen_impl(ctx):
 
     # print("{}/{}".format(ctx.bin_dir.path, repo_dir))
     if ctx.attr.txt_file:
+        gperf_arg = " {}".format(ctx.attr.gperf_path) if ctx.attr.gperf_path else ""
         ctx.actions.run_shell(
             inputs = ctx.files.data,
             outputs = output_files,
             tools = [ctx.executable.tool],
-            command = "{} {} {} {}".format(ctx.executable.tool.path, ctx.file.txt_file.path, repo_dir, output_files[0].dirname),
+            command = "{} {} {} {}{}".format(ctx.executable.tool.path, ctx.file.txt_file.path, repo_dir, output_files[0].dirname, gperf_arg),
         )
     else:
         ctx.actions.run_shell(
@@ -45,5 +46,6 @@ proxygen_cpp_gen = rule(
             mandatory = True,
         ),
         "txt_file": attr.label(allow_single_file = True, mandatory = False),
+        "gperf_path": attr.string(mandatory = False),
     },
 )

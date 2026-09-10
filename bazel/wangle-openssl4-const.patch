@@ -1,0 +1,13 @@
+diff --git a/wangle/ssl/SSLUtil.cpp b/wangle/ssl/SSLUtil.cpp
+index 1715ba7..1295885 100644
+--- a/wangle/ssl/SSLUtil.cpp
++++ b/wangle/ssl/SSLUtil.cpp
+@@ -54,7 +54,7 @@ SSLResumeEnum SSLUtil::getResumeState(folly::AsyncSSLSocket* sslSocket) {
+ }
+ 
+ std::unique_ptr<std::string> SSLUtil::getCommonName(const X509* cert) {
+-  X509_NAME* subject = X509_get_subject_name((X509*)cert);
++  const X509_NAME* subject = X509_get_subject_name(cert);
+   if (!subject) {
+     return nullptr;
+   }

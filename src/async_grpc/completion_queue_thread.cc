@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
-#include "src/async_grpc/completion_queue_thread.h"
+module;
 
-#include "glog/logging.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/message.h"
+#include "grpc++/grpc++.h"
+#include "grpc++/impl/codegen/async_stream.h"
+#include "grpc++/impl/codegen/async_unary_call.h"
+#include "grpc++/impl/codegen/proto_utils.h"
+#include "grpc++/impl/codegen/service_type.h"
+#include "src/async_grpc/common/blocking_queue.h"
+#include "src/async_grpc/common/mutex.h"
+#include "src/async_grpc/common/time.h"
+#include "src/async_grpc/rpc_service_method_traits.h"
+#include "src/async_grpc/type_traits.h"
+#include "src/common/logging.h"
+#include "src/util/util_fwd.h"
+
+module bazel_template.async_grpc;
 
 namespace async_grpc {
 
@@ -28,16 +43,20 @@ CompletionQueueThread::CompletionQueueThread(
   return completion_queue_.get();
 }
 
-void CompletionQueueThread::Start(CompletionQueueRunner runner) {
-  CHECK(!worker_thread_);
-  worker_thread_ = std::make_unique<std::thread>(
-      [this, runner]() { runner(this->completion_queue_.get()); });
+void CompletionQueueThread::Start(const CompletionQueueRunner& runner) {
+  CHECK(!worker_thread_.joinable());
+  worker_thread_ =
+      std::jthread([this, runner]() { runner(completion_queue_.get()); });
 }
 
 void CompletionQueueThread::Shutdown() {
   LOG(INFO) << "Shutting down completion queue " << completion_queue_.get();
+  // The queue's own Shutdown() is what makes Next() return false and ends the
+  // thread; a stop token would not be observed inside Next().
   completion_queue_->Shutdown();
-  worker_thread_->join();
+  if (worker_thread_.joinable()) {
+    worker_thread_.join();
+  }
 }
 
 }  // namespace async_grpc

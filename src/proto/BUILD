@@ -1,8 +1,13 @@
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES")
 load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
+load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
-package(default_visibility = ["//visibility:public"])
+package(
+    default_visibility = ["//visibility:public"],
+    features = ["layering_check"],
+)
 
 cc_grpc_library(
     name = "cc_grpc_service",
@@ -14,7 +19,19 @@ cc_grpc_library(
         ":cc_enums",
         ":cc_error",
         ":cc_service",
+        "@com_github_grpc_grpc//:grpc++",
     ],
+)
+
+# Forward declarations only; see config_fwd.h and service_fwd.h.
+cc_library(
+    name = "cc_config_fwd",
+    hdrs = ["config_fwd.h"],
+)
+
+cc_library(
+    name = "cc_service_fwd",
+    hdrs = ["service_fwd.h"],
 )
 
 cc_proto_library(
