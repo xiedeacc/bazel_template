@@ -1,6 +1,5 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary")
 load("@rules_java//java:defs.bzl", "java_library")
-
+load("@rules_cc//cc:defs.bzl", "cc_binary")
 cc_binary(
     name = "libjni_config_manger.so",
     linkshared = True,

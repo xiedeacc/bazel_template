@@ -27,16 +27,19 @@ diff --git a/bazel/grpc_build_system.bzl b/bazel/grpc_build_system.bzl
        deps: cc_library deps.
        select_deps: deps included conditionally.
        standalone: Unused.
-@@ -167,6 +169,8 @@ def grpc_cc_library(
+@@ -167,6 +169,11 @@ def grpc_cc_library(
      # See b/391433873.
      if "fuzztest" in external_deps and "grpc-fuzztest" not in tags:
          tags = tags + ["grpc-fuzztest"]
-+    if "libssl" in external_deps or "libcrypto" in external_deps:
-+        features = features + ["-layering_check"]
++    # gRPC's own layering is not clean against Apple's SDK module maps and
++    # the foreign-cc openssl headers, and channelz includes upb-gen headers
++    # it never declares (which MSVC's /showIncludes parsing rejects); leave
++    # both checks to consumers.
++    features = features + ["-layering_check", "-parse_showincludes"]
      cc_library(
          name = name,
          srcs = srcs,
-@@ -184,6 +188,7 @@ def grpc_cc_library(
+@@ -184,6 +191,7 @@ def grpc_cc_library(
                        "//:grpc_disallow_exceptions": ["GRPC_ALLOW_EXCEPTIONS=0"],
                        "//conditions:default": [],
                    }),

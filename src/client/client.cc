@@ -5,40 +5,38 @@
 
 // #include "gperftools/profiler.h"
 
+#include <atomic>
+#include <condition_variable>
 #include <csignal>
+#include <cstring>
+#include <exception>
+#include <mutex>
 #include <string>
+#include <thread>
 
 #include "folly/init/Init.h"
 #include "gflags/gflags.h"
-#include "src/client/websocket_client.h"
 #include "src/common/logging.h"
-#include "src/util/config_manager.h"
 
-// A signal handler may only touch objects with static storage duration, so
-// the shutdown state has to live here. It is guarded by the mutex below and
-// read by the shutdown thread, not by the handler itself.
+import bazel_template.client.websocket_client;
+import bazel_template.util.config_manager;
+
+// A signal handler may only touch objects with static storage duration.
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
-bool shutdown_required = false;
+std::atomic_bool shutdown_required{false};
 std::mutex mutex;
 std::condition_variable cv;
 bazel_template::client::WebSocketClient* websocket_client_ptr = nullptr;
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
-const char* SignalName(int sig);
-
 void SignalHandler(int sig) {
-  LOG(INFO) << "Got signal: " << SignalName(sig) << " (" << sig << ")" << '\n';
-  shutdown_required = true;
-  cv.notify_all();
-}
-
-const char* SignalName(int sig) {
-#if defined(_WIN32)
-  (void)sig;
-  return "signal";
+#ifdef _WIN32
+  LOG(INFO) << "Got signal: " << sig;
 #else
-  return strsignal(sig);
+  LOG(INFO) << "Got signal: " << strsignal(sig);
 #endif
+  shutdown_required.store(true);
+  cv.notify_all();
 }
 
 // server_addr in the config is a *bind* address. Wildcards are not valid
@@ -57,25 +55,35 @@ std::string ConnectTargetHost(const std::string& bind_addr) {
 
 void ShutdownCheckingThread() {
   std::unique_lock<std::mutex> lock(mutex);
-  cv.wait(lock, []() { return shutdown_required; });
+  cv.wait(lock, []() { return shutdown_required.load(); });
   websocket_client_ptr->Stop();
 }
 
 void RegisterSignalHandler() {
-  // The previous handler is deliberately discarded: nothing installs one
-  // before this, and there is nothing to restore it to.
   (void)signal(SIGTERM, &SignalHandler);
   (void)signal(SIGINT, &SignalHandler);
-#if !defined(_WIN32)
-  signal(SIGQUIT, &SignalHandler);
-  signal(SIGHUP, SIG_IGN);
-  signal(SIGPIPE, SIG_IGN);
+#ifndef _WIN32
+  (void)signal(SIGQUIT, &SignalHandler);
+  (void)signal(SIGHUP, SIG_IGN);
+  (void)signal(SIGPIPE, SIG_IGN);
 #endif
 }
 
+namespace {
+
+// noexcept: reporting from a catch handler must not throw again, which is
+// what keeps main() exception-safe.
+void ReportFailure(const char* what) noexcept {
+  try {
+    LOG(ERROR) << "Client failed" << (what == nullptr ? "" : ": ")
+               << (what == nullptr ? "" : what);
+  } catch (...) {  // NOLINT(bugprone-empty-catch)
+  }
+}
+
+}  // namespace
+
 int main(int argc, char** argv) {
-  // An exception escaping main() calls std::terminate before anything gets
-  // logged, which makes a startup failure look like a silent crash.
   try {
     // ProfilerStart("bazel_template_profile");
     LOG(INFO) << "Client initializing ...";
@@ -112,10 +120,10 @@ int main(int argc, char** argv) {
     // ProfilerStop();
     return 0;
   } catch (const std::exception& e) {
-    ::bazel_template::logging::ReportException("Client failed", e.what());
+    ReportFailure(e.what());
     return 1;
   } catch (...) {
-    ::bazel_template::logging::ReportException("Client failed", nullptr);
+    ReportFailure(nullptr);
     return 1;
   }
 }

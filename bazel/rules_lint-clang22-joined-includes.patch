@@ -1,0 +1,26 @@
+--- a/lint/clang_tidy.bzl
++++ b/lint/clang_tidy.bzl
+@@ -132,7 +132,9 @@
+     elif (flag.startswith("/FI")):
+         flags = ["-include", flag.removeprefix("/FI")]
+     elif (flag.startswith("/I")):
+-        flags = ["-iquote", flag.removeprefix("/I")]
++        # Joined form: clang 22 no longer pairs a bare "-iquote" line in the
++        # --config file with the line after it.
++        flags = ["-iquote" + flag.removeprefix("/I")]
+     elif (flag in ["/MD", "/MDd", "/MT", "/MTd"]):
+         # mimic microsoft's behaviour and add a define
+         flags = ["-D_MT"]
+@@ -159,11 +161,7 @@
+     return safe_flags
+ 
+ def _prefixed(list, prefix):
+-    array = []
+-    for arg in list:
+-        array.append(prefix)
+-        array.append(arg)
+-    return array
++    return [prefix + arg for arg in list]
+ 
+ def _angle_includes_option(ctx):
+     if (ctx.attr._angle_includes_are_system):

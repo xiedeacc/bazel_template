@@ -33,19 +33,58 @@ bazel_dep(name = "protobuf", version = "35.1", repo_name = "com_google_protobuf"
 bazel_dep(name = "cc_toolchains", version = "0.0.0")
 bazel_dep(name = "bazel_clang_tidy", version = "0.0.0")
 bazel_dep(name = "aspect_rules_lint", version = "2.8.0")
+
+# clang-tidy 22 (VS 2026) treats a two-line "-iquote" + "<dir>" pair in the
+# --config param file as an input file; emit the joined form instead.
+single_version_override(
+    module_name = "aspect_rules_lint",
+    patch_strip = 1,
+    patches = ["//bazel:rules_lint-clang22-joined-includes.patch"],
+    version = "2.8.0",
+)
 bazel_dep(name = "rules_apple", version = "4.5.3", repo_name = "build_bazel_rules_apple")
 bazel_dep(name = "apple_support", version = "2.7.0", repo_name = "build_bazel_apple_support")
 
 single_version_override(
     module_name = "protobuf",
     patch_strip = 1,
-    patches = ["//bazel:protobuf-musl-path-max.patch"],
+    patches = [
+        "//bazel:protobuf-musl-path-max.patch",
+        "//bazel:protobuf-cxx-modules-arm-varint.patch",
+    ],
     version = "35.1",
+)
+
+# rules_cc 0.2.22 C++20 module fixes: the MSVC toolchain never exports DEPS_SCANNER_OUTPUT_FILE
+# to the C++20 module deps-scanning action, so its wrapper cannot redirect
+# cl.exe's output and every scan fails.
+single_version_override(
+    module_name = "rules_cc",
+    patch_strip = 1,
+    patches = ["//bazel:rules_cc-cpp20-modules.patch"],
+    version = "0.2.22",
+)
+
+# The cc_toolchains fork of unix_cc_toolchain_config.bzl predates C++20 named
+# module support, so the cross toolchains have no deps-scanning, module compile
+# or modmap actions. The patch ports them from rules_cc 0.2.22 and adds the
+# per-toolchain p1689 deps scanner wrapper they need.
+# apple_support 2.7.0 has no C++20 named module support at all: its crosstool
+# knows nothing about the deps-scanning, module-compile and module-codegen
+# actions, so --experimental_cpp_modules cannot work on macOS. The patch adds
+# them, plus a generated clang-scan-deps wrapper.
+single_version_override(
+    module_name = "apple_support",
+    patch_strip = 1,
+    patches = ["//bazel:apple_support-cpp20-modules.patch"],
+    version = "2.7.0",
 )
 
 git_override(
     commit = "053ccff396d7f2a3be29b8e426d8c6df081d8221",
     module_name = "cc_toolchains",
+    patch_strip = 1,
+    patches = ["//bazel:cc_toolchains-cpp20-modules.patch"],
     remote = "https://github.com/xiedeacc/cc_toolchains.git",
 )
 
@@ -93,7 +132,6 @@ git_repository(
     tag = "0.4.0",
 )
 
-
 new_git_repository(
     name = "liburing",
     build_file = "//bazel:liburing.BUILD",
@@ -127,13 +165,6 @@ new_git_repository(
     build_file = "//bazel:zlib.BUILD",
     remote = "https://github.com/madler/zlib.git",
     tag = "v1.3.2",
-)
-
-new_git_repository(
-    name = "bzip2",
-    build_file = "//bazel:bzip2.BUILD",
-    commit = "66c46b8c9436613fd81bc5d03f63a61933a4dcc3",
-    remote = "https://gitlab.com/bzip2/bzip2.git",
 )
 
 new_git_repository(
@@ -314,14 +345,6 @@ new_git_repository(
     tag = "release-2.1.13-stable",
 )
 
-http_archive(
-    name = "libev",
-    build_file = "//bazel:libev.BUILD",
-    sha256 = "507eb7b8d1015fbec5b935f34ebed15bf346bed04a11ab82b8eee848c4205aea",
-    strip_prefix = "libev-4.33",
-    url = "https://dist.schmorp.de/libev/libev-4.33.tar.gz",
-)
-
 new_git_repository(
     name = "libuv",
     build_file = "//bazel:libuv.BUILD",
@@ -438,7 +461,10 @@ new_git_repository(
     name = "fbthrift",
     build_file = "//bazel:fbthrift.BUILD",
     patch_args = ["-p1"],
-    patches = ["//bazel:fbthrift.patch"],
+    patches = [
+        "//bazel:fbthrift.patch",
+        "//bazel:fbthrift-msvc-local-class-member.patch",
+    ],
     remote = "https://github.com/facebook/fbthrift.git",
     tag = "v2026.07.20.00",
 )
@@ -457,13 +483,6 @@ new_git_repository(
     patches = ["//bazel:proxygen.patch"],
     remote = "https://github.com/facebook/proxygen.git",
     tag = "v2026.07.20.00",
-)
-
-new_git_repository(
-    name = "smhasher",
-    build_file = "//bazel:smhasher.BUILD",
-    commit = "07bb4de10a63e8cc2e1724865454eba635742383",
-    remote = "https://github.com/aappleby/smhasher.git",
 )
 
 http_archive(
@@ -499,20 +518,6 @@ new_git_repository(
     tag = "pcre2-10.47",
 )
 
-new_git_repository(
-    name = "crc32c",
-    build_file = "//bazel:crc32c.BUILD",
-    remote = "https://github.com/google/crc32c.git",
-    tag = "1.1.2",
-)
-
-new_git_repository(
-    name = "rapidjson",
-    build_file = "//bazel:rapidjson.BUILD",
-    commit = "815e6e7e7e14be44a6c15d9aefed232ff064cad0",
-    remote = "https://github.com/Tencent/rapidjson.git",
-)
-
 git_repository(
     name = "hedron_compile_commands",
     commit = "abb61a688167623088f8768cc9264798df6a9d10",
@@ -525,59 +530,10 @@ git_repository(
 )
 
 new_git_repository(
-    name = "multipart-parser",
-    build_file = "//bazel:multipart-parser.BUILD",
-    commit = "61e234f2100f39d405b6e9c2689e2482b31f3976",
-    remote = "https://github.com/FooBarWidget/multipart-parser.git",
-)
-
-new_git_repository(
-    name = "simdjson",
-    build_file = "//bazel:simdjson.BUILD",
-    remote = "https://github.com/simdjson/simdjson.git",
-    tag = "v4.6.4",
-)
-
-new_git_repository(
     name = "spdlog",
     build_file = "//bazel:spdlog.BUILD",
     remote = "https://github.com/gabime/spdlog.git",
     tag = "v1.17.0",
-)
-
-new_git_repository(
-    name = "vlmcsd",
-    build_file = "//bazel:vlmcsd.BUILD",
-    commit = "70e03572b254688b8c3557f898e7ebd765d29ae1",
-    patch_args = ["-p1"],
-    patch_cmds = [
-        "mv src/rpc.h src/vlmcsd_rpc.h",
-        "perl -pi -e 's/\"rpc\\.h\"/\"vlmcsd_rpc.h\"/g' src/*.c src/*.h",
-    ],
-    patch_cmds_win = [
-        "Move-Item -Force src/rpc.h src/vlmcsd_rpc.h",
-        "$files = Get-ChildItem -Path src -Include *.c,*.h -Recurse; foreach ($file in $files) { (Get-Content -Raw $file.FullName) -replace 'rpc\\.h','vlmcsd_rpc.h' | Set-Content -NoNewline -Encoding ascii $file.FullName }",
-    ],
-    patches = [
-        "//bazel:vlmcsd_listen_address.patch",
-        "//bazel:vlmcsd_library_error_output.patch",
-    ],
-    remote = "https://github.com/Wind4/vlmcsd.git",
-)
-
-http_archive(
-    name = "sqlite",
-    build_file = "//bazel:sqlite.BUILD",
-    sha256 = "646421e12aac110282ef8cc68f1a62d4bb15fc7b8f09da0b53e29ee690500431",
-    strip_prefix = "sqlite-amalgamation-3530300",
-    urls = ["https://sqlite.org/2026/sqlite-amalgamation-3530300.zip"],
-)
-
-new_git_repository(
-    name = "blake3",
-    build_file = "//bazel:blake3.BUILD",
-    remote = "https://github.com/BLAKE3-team/BLAKE3.git",
-    tag = "1.8.5",
 )
 
 shallow_git_repository(
@@ -592,13 +548,6 @@ shallow_git_repository(
     recursive_init_submodules = True,
     remote = "https://github.com/aws/aws-sdk-cpp.git",
     tag = "1.11.853",
-)
-
-new_git_repository(
-    name = "ankerl_unordered_dense",
-    build_file = "//bazel:unordered_dense.BUILD",
-    remote = "https://github.com/martinus/unordered_dense.git",
-    tag = "v4.8.1",
 )
 
 http_archive(
@@ -733,6 +682,14 @@ register_toolchains(
     "@openssl//:preinstalled_make_toolchain",
     "@openssl//:preinstalled_pkgconfig_toolchain",
 )
+
+# rules_cc's autoconfigured toolchain wins toolchain resolution on macOS unless
+# the root module registers apple_support's, and that one has no C++20 named
+# module support (and points at a clang-scan-deps Xcode does not ship).
+apple_cc_configure = use_extension("@build_bazel_apple_support//crosstool:setup.bzl", "apple_cc_configure_extension")
+use_repo(apple_cc_configure, "local_config_apple_cc_toolchains")
+
+register_toolchains("@local_config_apple_cc_toolchains//:all")
 
 cc_toolchains = use_extension("//bazel:toolchains_extension.bzl", "cc_toolchains_extension")
 use_repo(

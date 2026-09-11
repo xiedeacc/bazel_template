@@ -17,6 +17,8 @@
 #ifndef CPP_GRPC_COMMON_MUTEX_H_
 #define CPP_GRPC_COMMON_MUTEX_H_
 
+#include <chrono>
+#include <concepts>
 #include <condition_variable>
 #include <mutex>
 
@@ -88,13 +90,15 @@ class CAPABILITY("mutex") Mutex {
       }
     }
 
-    template <typename Predicate>
+    template <std::predicate Predicate>
     void Await(Predicate predicate) REQUIRES(this) {
       mutex_->condition_.wait(lock_, predicate);
     }
 
-    template <typename Predicate>
-    bool AwaitWithTimeout(Predicate predicate, common::Duration timeout)
+    // Accepts any std::chrono duration, not just common::Duration.
+    template <std::predicate Predicate, typename Rep, typename Period>
+    [[nodiscard]] bool AwaitWithTimeout(
+        Predicate predicate, const std::chrono::duration<Rep, Period> timeout)
         REQUIRES(this) {
       return mutex_->condition_.wait_for(lock_, timeout, predicate);
     }

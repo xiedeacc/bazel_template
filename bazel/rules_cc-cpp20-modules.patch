@@ -1,0 +1,340 @@
+diff -ruN a/cc/private/compile/compile.bzl b/cc/private/compile/compile.bzl
+--- a/cc/private/compile/compile.bzl	2026-09-05 00:47:04.141050000 +0800
++++ b/cc/private/compile/compile.bzl	2026-09-05 00:47:04.174555600 +0800
+@@ -672,6 +672,15 @@
+     direct_module_files = []
+     source_to_module_file_map = {}
+     source_to_ddi_file_map = {}
++    # The pic and non-pic compilations of one library each produce a modules
++    # info file; without the pic prefix they collide on the same path.
++    modules_info_base_name = label.name
++    if use_pic:
++        modules_info_base_name = _cc_internal.get_artifact_name_for_category(
++            cc_toolchain = cc_toolchain,
++            category = artifact_category.PIC_FILE,
++            output_name = label.name,
++        )
+     modules_info_file = _get_compile_output_file(
+         action_construction_context,
+         label,
+@@ -679,7 +688,7 @@
+         output_name = _cc_internal.get_artifact_name_for_category(
+             cc_toolchain = cc_toolchain,
+             category = artifact_category.CPP_MODULES_INFO,
+-            output_name = label.name,
++            output_name = modules_info_base_name,
+         ),
+     )
+     if use_pic:
+diff -ruN a/cc/private/toolchain/gcc_deps_scanner_wrapper.sh.tpl b/cc/private/toolchain/gcc_deps_scanner_wrapper.sh.tpl
+--- a/cc/private/toolchain/gcc_deps_scanner_wrapper.sh.tpl	2026-09-05 00:46:30.252229300 +0800
++++ b/cc/private/toolchain/gcc_deps_scanner_wrapper.sh.tpl	2026-09-05 00:48:14.206583200 +0800
+@@ -9,4 +9,23 @@
+ 
+ # Call the C++ compiler
+ 
+-%{cc} -E -x c++ -fmodules-ts -fdeps-file=out.tmp -fdeps-format=p1689r5 "$@" >"$DEPS_SCANNER_OUTPUT_FILE"
++# GCC writes the p1689 dependency JSON to -fdeps-file, not to stdout, and
++# Bazel passes "-o <ddi>" (plus -MD) expecting the JSON there; hand that
++# path to -fdeps-file instead and send the preprocessed text to /dev/null.
++out=""
++args=()
++wants_dotd=0
++while [ $# -gt 0 ]; do
++  case "$1" in
++    -o) out="$2"; shift 2 ;;
++    -MD|-MMD) wants_dotd=1; args+=("$1"); shift ;;
++    *) args+=("$1"); shift ;;
++  esac
++done
++if [ -z "$out" ]; then
++  out="$DEPS_SCANNER_OUTPUT_FILE"
++fi
++if [ "$wants_dotd" = 1 ]; then
++  args+=(-MF "$out.d")
++fi
++%{cc} -E -x c++ -fmodules-ts -fdeps-format=p1689r5   -fdeps-file="$out" -fdeps-target="$out" "${args[@]}" -o /dev/null
+diff -ruN a/cc/private/toolchain/linux_cc_wrapper.sh.tpl b/cc/private/toolchain/linux_cc_wrapper.sh.tpl
+--- a/cc/private/toolchain/linux_cc_wrapper.sh.tpl	2026-09-05 00:53:28.390206000 +0800
++++ b/cc/private/toolchain/linux_cc_wrapper.sh.tpl	2026-09-05 00:56:45.410671900 +0800
+@@ -19,18 +19,25 @@
+ set -eu
+ 
+ OUTPUT=
++DEPFILE=
++MODULES=
+ 
+ parse_option() {
+     opt=$1
+     if [ "$OUTPUT" = "1" ]; then
+         OUTPUT=$opt
++    elif [ "$DEPFILE" = "1" ]; then
++        DEPFILE=$opt
+     elif [ "$opt" = "-o" ]; then
+         # output is coming
+         OUTPUT=1
++    elif [ "$opt" = "-MF" ]; then
++        DEPFILE=1
++    elif [ "$opt" = "-fmodules-ts" ] || [ "$opt" = "-fmodules" ]; then
++        MODULES=1
+     fi
+ }
+ 
+-# parse the option list
+ for i in "$@"; do
+     case $i in
+         @*)
+@@ -47,13 +54,29 @@
+     esac
+ done
+ 
+-# Set-up the environment
+ %{env}
+ 
+-# Call the C++ compiler
+ %{cc} "$@"
+ 
+-# Generate an empty file if header processing succeeded.
++# With modules enabled GCC names the CMI as a second target of the object's
++# rule ("x.o x.pcm: deps", the target list may wrap) and appends rules for it
++# ("x.pcm:| x.o", "name.c++-module: x.pcm", ".PHONY: ..."). Bazel treats every
++# token in the .d as an inclusion and rejects the CMI as undeclared, so keep
++# only the first rule and rewrite its target list to the object file.
++if [ "$MODULES" = "1" ] && [ -n "$DEPFILE" ] && [ "$DEPFILE" != "1" ] && [ -f "$DEPFILE" ]; then
++    awk -v obj="$OUTPUT" '
++        !done {
++            rule = rule $0 "\n"
++            if ($0 !~ /\\$/) {
++                done = 1
++                sub(/^[^:]*:/, obj ":", rule)
++                printf "%s", rule
++            }
++            next
++        }
++        { exit }' "$DEPFILE" > "$DEPFILE.tmp" && mv -f "$DEPFILE.tmp" "$DEPFILE"
++fi
++
+ case $OUTPUT in
+     *.h.processed)
+         : > "$OUTPUT"
+diff -ruN a/cc/private/toolchain/unix_cc_configure.bzl b/cc/private/toolchain/unix_cc_configure.bzl
+--- a/cc/private/toolchain/unix_cc_configure.bzl	2026-09-05 00:53:28.378703400 +0800
++++ b/cc/private/toolchain/unix_cc_configure.bzl	2026-09-05 00:55:01.750037900 +0800
+@@ -400,8 +400,11 @@
+         warn = not darwin,
+         silent = True,
+     )
+-    if darwin:
++    if darwin or not is_clang:
++        # On Linux the wrapper only exists to scrub the extra make rules GCC
++        # appends to a C++20 module interface unit's .d file.
+         overridden_tools["gcc"] = "cc_wrapper.sh"
++    if darwin:
+         xcrun = repository_ctx.which("xcrun")
+         if xcrun:
+             for tool_name in ["llvm-cov", "llvm-profdata"]:
+diff -ruN a/cc/private/toolchain/unix_cc_toolchain_config.bzl b/cc/private/toolchain/unix_cc_toolchain_config.bzl
+--- a/cc/private/toolchain/unix_cc_toolchain_config.bzl	2026-09-05 00:49:19.948745300 +0800
++++ b/cc/private/toolchain/unix_cc_toolchain_config.bzl	2026-09-05 00:53:28.435213900 +0800
+@@ -1850,7 +1850,9 @@
+                 ],
+                 flag_groups = [
+                     flag_group(
+-                        flags = ["@%{cpp_module_modmap_file}" if ctx.attr.compiler == "clang" else "-fmodule-mapper=%{cpp_module_modmap_file}"],
++                        # GCC only honours module imports, module units and
++                        # the mapper once modules are switched on.
++                        flags = ["@%{cpp_module_modmap_file}"] if ctx.attr.compiler == "clang" else ["-fmodules-ts", "-fmodule-mapper=%{cpp_module_modmap_file}"],
+                         expand_if_available = "cpp_module_modmap_file",
+                     ),
+                 ],
+diff -ruN a/cc/private/toolchain/windows_cc_toolchain_config.bzl b/cc/private/toolchain/windows_cc_toolchain_config.bzl
+--- a/cc/private/toolchain/windows_cc_toolchain_config.bzl	2026-09-05 00:41:27.886967300 +0800
++++ b/cc/private/toolchain/windows_cc_toolchain_config.bzl	2026-09-05 01:36:02.311889700 +0800
+@@ -551,7 +551,7 @@
+             name = "fastbuild",
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/Od"])],
+                 ),
+                 flag_set(
+@@ -583,6 +583,8 @@
+                         ACTION_NAMES.cpp_compile,
+                         ACTION_NAMES.cpp_header_parsing,
+                         ACTION_NAMES.cpp_module_compile,
++                        ACTION_NAMES.cpp20_module_compile,
++                        ACTION_NAMES.cpp20_module_codegen,
+                         ACTION_NAMES.cpp_module_codegen,
+                         ACTION_NAMES.lto_backend,
+                         ACTION_NAMES.clif_match,
+@@ -662,12 +664,12 @@
+             name = "static_link_msvcrt",
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/MT"])],
+                     with_features = [with_feature_set(not_features = ["dbg"])],
+                 ),
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/MTd"])],
+                     with_features = [with_feature_set(features = ["dbg"])],
+                 ),
+@@ -689,12 +691,12 @@
+             enabled = True,
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/MD"])],
+                     with_features = [with_feature_set(not_features = ["dbg", "static_link_msvcrt"])],
+                 ),
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/MDd"])],
+                     with_features = [with_feature_set(features = ["dbg"], not_features = ["static_link_msvcrt"])],
+                 ),
+@@ -715,7 +717,7 @@
+             name = "dbg",
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/Od", "/Z7"])],
+                 ),
+                 flag_set(
+@@ -734,7 +736,7 @@
+             name = "opt",
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/O2"])],
+                 ),
+             ],
+@@ -931,7 +933,7 @@
+             enabled = True,
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/DNDEBUG"])],
+                     with_features = [with_feature_set(features = ["opt"])],
+                 ),
+@@ -999,6 +1001,8 @@
+                         ACTION_NAMES.linkstamp_compile,
+                         ACTION_NAMES.cpp_compile,
+                         ACTION_NAMES.cpp_module_compile,
++                        ACTION_NAMES.cpp20_module_compile,
++                        ACTION_NAMES.cpp20_module_codegen,
+                         ACTION_NAMES.cpp_header_parsing,
+                     ],
+                     # Force English (and thus a consistent locale) output so that Bazel can parse
+@@ -1048,6 +1052,11 @@
+                         ACTION_NAMES.cpp_compile,
+                         ACTION_NAMES.cpp_header_parsing,
+                         ACTION_NAMES.cpp_module_compile,
++                        # C++20 module scanning and interface compiles see
++                        # the same headers as an ordinary compile.
++                        ACTION_NAMES.cpp_module_deps_scanning,
++                        ACTION_NAMES.cpp20_module_compile,
++                        ACTION_NAMES.cpp20_module_codegen,
+                     ],
+                     flag_groups = [
+                         flag_group(
+@@ -1134,7 +1143,7 @@
+             name = "frame_pointer",
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/Oy-"])],
+                 ),
+             ],
+@@ -1236,7 +1245,7 @@
+             enabled = True,
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/Gy", "/Gw"])],
+                     with_features = [with_feature_set(features = ["opt"])],
+                 ),
+@@ -1253,7 +1262,7 @@
+             enabled = True,
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["/Zc:inline"])],
+                 ),
+             ],
+@@ -1328,6 +1337,19 @@
+                         env_entry(key = "TEMP", value = ctx.attr.msvc_env_tmp),
+                     ],
+                 ),
++                # The MSVC deps scanner wrapper redirects cl.exe output to
++                # this file; the unix config exports it, the Windows one
++                # forgot to, so every C++20 module deps scan failed.
++                env_set(
++                    actions = [ACTION_NAMES.cpp_module_deps_scanning],
++                    env_entries = [
++                        env_entry(
++                            key = "DEPS_SCANNER_OUTPUT_FILE",
++                            value = "%{output_file}",
++                            expand_if_available = "output_file",
++                        ),
++                    ],
++                ),
+             ],
+             implies = ["msvc_compile_env", "msvc_link_env"],
+         )
+@@ -1479,7 +1501,7 @@
+             name = "dbg",
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = ["-g", "-Og"])],
+                 ),
+             ],
+@@ -1489,7 +1511,7 @@
+             name = "opt",
+             flag_sets = [
+                 flag_set(
+-                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                    actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                     flag_groups = [flag_group(flags = [
+                         "-g0",
+                         "-O3",
+@@ -1569,7 +1591,7 @@
+                 name = "fdo_optimize",
+                 flag_sets = [
+                     flag_set(
+-                        actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                        actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                         flag_groups = [
+                             flag_group(
+                                 flags = [
+@@ -1587,7 +1609,7 @@
+                 name = "treat_warnings_as_errors",
+                 flag_sets = [
+                     flag_set(
+-                        actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
++                        actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile, ACTION_NAMES.cpp20_module_compile, ACTION_NAMES.cpp20_module_codegen],
+                         flag_groups = [flag_group(flags = ["-Werror"])],
+                     ),
+                     flag_set(
+@@ -1615,6 +1637,8 @@
+                             ACTION_NAMES.cpp_compile,
+                             ACTION_NAMES.cpp_header_parsing,
+                             ACTION_NAMES.cpp_module_compile,
++                            ACTION_NAMES.cpp20_module_compile,
++                            ACTION_NAMES.cpp20_module_codegen,
+                             ACTION_NAMES.cpp_module_codegen,
+                             ACTION_NAMES.lto_backend,
+                             ACTION_NAMES.clif_match,

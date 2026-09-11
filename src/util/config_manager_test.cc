@@ -3,31 +3,58 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/util/config_manager.h"
-
-#include <memory>
+#include <chrono>
+#include <filesystem>
+#include <fstream>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "rules_cc/cc/runfiles/runfiles.h"
 #include "src/common/logging.h"
+#include "gtest/gtest.h"
+
+import bazel_template.util.config_manager;
 
 namespace bazel_template::util {
+namespace {
 
-using rules_cc::cc::runfiles::Runfiles;
-
-TEST(ConfigManager, Init) {
-  std::string error;
-  std::unique_ptr<Runfiles> runfiles(
-      Runfiles::CreateForTest(BAZEL_CURRENT_REPOSITORY, &error));
-  ASSERT_NE(runfiles, nullptr) << error;
-
-  const std::string path =
-      runfiles->Rlocation("bazel_template/conf/server_config.json");
-  ASSERT_FALSE(path.empty());
-
-  EXPECT_TRUE(ConfigManager::Instance()->Init(path));
-  LOG(INFO) << ConfigManager::Instance()->ToString();
+// Written by the test itself: on Windows there is no runfiles tree to read
+// conf/server_config.json from.
+std::filesystem::path WriteTempConfig() {
+  const auto stamp =
+      std::chrono::steady_clock::now().time_since_epoch().count();
+  const auto path =
+      std::filesystem::temp_directory_path() /
+      ("bazel_template_config_" + std::to_string(stamp) + ".json");
+  std::ofstream config(path, std::ios::binary);
+  config << R"({
+  "server_addr": "127.0.0.1",
+  "grpc_server_port": 10001,
+  "http_server_port": 10003,
+  "grpc_threads": 3,
+  "event_threads": 5,
+  "client_worker_thread_pool_size": 2
+})";
+  return path;
 }
 
+TEST(ConfigManager, Init) {
+  const auto config_path = WriteTempConfig();
+  auto config_manager = ConfigManager::Instance();
+  ASSERT_TRUE(config_manager->Init(config_path.string()));
+  std::error_code error;
+  std::filesystem::remove(config_path, error);
+
+  EXPECT_EQ(config_manager->ServerAddr(), "127.0.0.1");
+  EXPECT_EQ(config_manager->GrpcServerPort(), 10001U);
+  EXPECT_EQ(config_manager->HttpServerPort(), 10003U);
+  EXPECT_EQ(config_manager->GrpcThreads(), 3U);
+  EXPECT_EQ(config_manager->EventThreads(), 5U);
+  EXPECT_EQ(config_manager->ClientWorkerThreadPoolSize(), 2U);
+  LOG(INFO) << config_manager->ToString();
+}
+
+TEST(ConfigManager, InitRejectsMissingFile) {
+  EXPECT_FALSE(ConfigManager::Instance()->Init("./does-not-exist.json"));
+}
+
+}  // namespace
 }  // namespace bazel_template::util

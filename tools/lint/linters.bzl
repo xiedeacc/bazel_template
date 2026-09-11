@@ -4,9 +4,14 @@ Replaces the old //bazel:cpplint.bzl macro, which discovered targets by
 reflecting over native.existing_rules() and silently stopped generating
 anything when that API's return type changed. An aspect reads the real rule
 attributes instead, so it cannot go quietly out of date.
+
+The aspect comes from //tools/lint:cpp_modules.bzl rather than from rules_lint
+directly: it is rules_lint's clang-tidy aspect for everything that does not use
+C++20 named modules, plus a source-level path for everything that does, since
+clang-tidy cannot read the module interfaces Bazel builds. See that file.
 """
 
-load("@aspect_rules_lint//lint:clang_tidy.bzl", "lint_clang_tidy_aspect")
+load(":cpp_modules.bzl", "lint_clang_tidy_aspect")
 
 clang_tidy = lint_clang_tidy_aspect(
     binary = Label("//tools/lint:clang_tidy"),

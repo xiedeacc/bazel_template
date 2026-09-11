@@ -3,30 +3,32 @@
  * All rights reserved.
  *******************************************************************************/
 
+// Example gRPC client for the EC2 instance management RPC.
+
+#include <exception>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include "grpc++/grpc++.h"
-#include "src/common/logging.h"
 #include "src/proto/service.grpc.pb.h"
+
+namespace {
 
 using bazel_template::proto::EC2InstanceRequest;
 using bazel_template::proto::EC2InstanceResponse;
 using bazel_template::proto::MEGAService;
 using bazel_template::proto::OpCode;
-using grpc::Channel;
-using grpc::ClientContext;
-using grpc::Status;
 
 class EC2Client {
  public:
-  explicit EC2Client(const std::shared_ptr<Channel>& channel)
+  explicit EC2Client(const std::shared_ptr<grpc::Channel>& channel)
       : stub_(MEGAService::NewStub(channel)) {}
 
-  // Manage EC2 instance (start or stop based on op code)
+  // Manage an EC2 instance (start or stop based on the op code).
   bool ManageInstance(const std::string& instance_id, OpCode operation,
-                      const std::string& region = "") {
+                      const std::string& region) {
     EC2InstanceRequest request;
     request.set_op(operation);
     request.set_instance_id(instance_id);
@@ -35,34 +37,30 @@ class EC2Client {
     }
 
     EC2InstanceResponse response;
-    ClientContext context;
-
-    Status status = stub_->EC2InstanceManagement(&context, request, &response);
-
-    if (status.ok()) {
-      std::string operation_name =
-          (operation == OpCode::OP_EC2_START) ? "Start" : "Stop";
-      std::cout << operation_name << " request successful for instance: "
-                << response.instance_id() << '\n';
-      std::cout << "Status: " << response.status() << '\n';
-      std::cout << "Message: " << response.message() << '\n';
-      return response.err_code() == bazel_template::proto::ErrCode::SUCCESS;
+    grpc::ClientContext context;
+    const grpc::Status status =
+        stub_->EC2InstanceManagement(&context, request, &response);
+    const std::string_view operation_name =
+        operation == OpCode::OP_EC2_START ? "Start" : "Stop";
+    if (!status.ok()) {
+      std::cout << operation_name
+                << " request failed: " << status.error_message() << '\n';
+      return false;
     }
-    std::string operation_name =
-        (operation == OpCode::OP_EC2_START) ? "Start" : "Stop";
-    std::cout << operation_name << " request failed: " << status.error_message()
-              << '\n';
-    return false;
+    std::cout << operation_name
+              << " request successful for instance: " << response.instance_id()
+              << '\n'
+              << "Status: " << response.status() << '\n'
+              << "Message: " << response.message() << '\n';
+    return response.err_code() == bazel_template::proto::ErrCode::SUCCESS;
   }
 
-  // Convenience methods for start and stop operations
   bool StartInstance(const std::string& instance_id,
-                     const std::string& region = "") {
+                     const std::string& region) {
     return ManageInstance(instance_id, OpCode::OP_EC2_START, region);
   }
 
-  bool StopInstance(const std::string& instance_id,
-                    const std::string& region = "") {
+  bool StopInstance(const std::string& instance_id, const std::string& region) {
     return ManageInstance(instance_id, OpCode::OP_EC2_STOP, region);
   }
 
@@ -70,55 +68,61 @@ class EC2Client {
   std::unique_ptr<MEGAService::Stub> stub_;
 };
 
-int main(int argc, char** argv) {
-  // An exception escaping main() calls std::terminate before anything is
-  // logged, which makes a failure look like a silent crash.
-  try {
-    if (argc < 3) {
-      std::cout << "Usage: " << argv[0]
-                << " <server_address:port> <instance_id> [region] [start|stop]"
-                << '\n';
-      std::cout << "Example: " << argv[0]
-                << " localhost:50051 i-1234567890abcdef0 us-west-2 start"
-                << '\n';
-      return 1;
-    }
-
-    std::string server_address = argv[1];
-    std::string instance_id = argv[2];
-    std::string region = (argc > 3) ? argv[3] : "";
-    std::string operation = (argc > 4) ? argv[4] : "start";
-
-    // Create a gRPC channel
-    auto channel =
-        grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
-    EC2Client client(channel);
-
-    bool success = false;
-    if (operation == "start") {
-      std::cout << "Starting EC2 instance: " << instance_id << '\n';
-      success = client.StartInstance(instance_id, region);
-    } else if (operation == "stop") {
-      std::cout << "Stopping EC2 instance: " << instance_id << '\n';
-      success = client.StopInstance(instance_id, region);
-    } else {
-      std::cout << "Invalid operation. Use 'start' or 'stop'." << '\n';
-      return 1;
-    }
-
-    if (success) {
-      std::cout << "Operation completed successfully." << '\n';
-      return 0;
-    }
-    std::cout << "Operation failed." << '\n';
+int Run(int argc, char** argv) {
+  if (argc < 3) {
+    std::cout << "Usage: " << argv[0]
+              << " <server_address:port> <instance_id> [region] [start|stop]\n"
+              << "Example: " << argv[0]
+              << " localhost:50051 i-1234567890abcdef0 us-west-2 start\n";
     return 1;
+  }
+
+  const std::string server_address = argv[1];
+  const std::string instance_id = argv[2];
+  const std::string region = argc > 3 ? argv[3] : "";
+  const std::string operation = argc > 4 ? argv[4] : "start";
+
+  auto channel =
+      grpc::CreateChannel(server_address, grpc::InsecureChannelCredentials());
+  EC2Client client(channel);
+
+  bool success = false;
+  if (operation == "start") {
+    std::cout << "Starting EC2 instance: " << instance_id << '\n';
+    success = client.StartInstance(instance_id, region);
+  } else if (operation == "stop") {
+    std::cout << "Stopping EC2 instance: " << instance_id << '\n';
+    success = client.StopInstance(instance_id, region);
+  } else {
+    std::cout << "Invalid operation. Use 'start' or 'stop'.\n";
+    return 1;
+  }
+
+  std::cout << (success ? "Operation completed successfully.\n"
+                        : "Operation failed.\n");
+  return success ? 0 : 1;
+}
+
+// noexcept: reporting from a catch handler must not throw again, which is
+// what keeps main() exception-safe.
+void ReportFailure(const char* what) noexcept {
+  try {
+    std::cerr << "Failed" << (what == nullptr ? "" : ": ")
+              << (what == nullptr ? "" : what) << '\n';
+  } catch (...) {  // NOLINT(bugprone-empty-catch)
+  }
+}
+
+}  // namespace
+
+int main(int argc, char** argv) {
+  try {
+    return Run(argc, argv);
   } catch (const std::exception& e) {
-    ::bazel_template::logging::ReportException("ec2_client_example failed",
-                                               e.what());
+    ReportFailure(e.what());
     return 1;
   } catch (...) {
-    ::bazel_template::logging::ReportException("ec2_client_example failed",
-                                               nullptr);
+    ReportFailure(nullptr);
     return 1;
   }
 }

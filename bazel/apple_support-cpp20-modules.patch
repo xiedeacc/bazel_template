@@ -1,0 +1,675 @@
+diff -ruN a/crosstool/BUILD.tpl b/crosstool/BUILD.tpl
+--- a/crosstool/BUILD.tpl	2026-09-05 01:02:34.724277900 +0800
++++ b/crosstool/BUILD.tpl	2026-09-05 01:05:17.370232800 +0800
+@@ -50,6 +50,7 @@
+         "@apple_support//crosstool:exec_libtool",
+         "@apple_support//crosstool:exec_wrapped_clang",
+         "@apple_support//crosstool:exec_wrapped_clang_pp",
++        ":cc_module_deps_scanner.sh",
+         ":modulemap",
+     ],
+ )
+@@ -89,6 +90,7 @@
+         c_flags = [%{c_flags}],
+         conly_flags = [%{conly_flags}],
+         cxx_flags = [%{cxx_flags}],
++        deps_scanner = ":cc_module_deps_scanner.sh",
+         link_flags = [%{link_flags}],
+         module_map = ":modulemap",
+         wrapped_clang = "@apple_support//crosstool:exec_wrapped_clang",
+diff -ruN a/crosstool/cc_module_deps_scanner.sh.tpl b/crosstool/cc_module_deps_scanner.sh.tpl
+--- a/crosstool/cc_module_deps_scanner.sh.tpl	1970-01-01 08:00:00.000000000 +0800
++++ b/crosstool/cc_module_deps_scanner.sh.tpl	2026-09-05 01:05:30.083956200 +0800
+@@ -0,0 +1,59 @@
++#!/bin/bash
++#
++# C++20 named module dependency scanner for the Apple CC toolchain.
++#
++# Bazel drives this action with the same command line it would hand to a C++
++# compile, so the arguments still contain the placeholders that wrapped_clang
++# normally expands and may be wrapped in a params file. Expand both here, then
++# let clang-scan-deps emit the P1689 dependency JSON on stdout and redirect it
++# to the file Bazel expects.
++
++set -eu
++
++developer_dir="${DEVELOPER_DIR:-}"
++if [[ -z "${developer_dir}" ]]; then
++  developer_dir="$(/usr/bin/xcode-select -p)"
++fi
++
++sdkroot="${SDKROOT:-}"
++if [[ -z "${sdkroot}" ]]; then
++  sdkroot="$(/usr/bin/xcrun --show-sdk-path)"
++fi
++
++execution_root="${PWD}"
++
++_expand() {
++  local arg="$1"
++  arg="${arg//__BAZEL_EXECUTION_ROOT_CANONICAL__/${execution_root}}"
++  arg="${arg//__BAZEL_EXECUTION_ROOT__/${execution_root}}"
++  arg="${arg//__BAZEL_XCODE_DEVELOPER_DIR__/${developer_dir}}"
++  arg="${arg//__BAZEL_XCODE_SDKROOT__/${sdkroot}}"
++  printf '%s' "${arg}"
++}
++
++_tmp_files=()
++_cleanup() {
++  if [[ ${#_tmp_files[@]} -gt 0 ]]; then
++    rm -f "${_tmp_files[@]}"
++  fi
++}
++trap _cleanup EXIT
++
++args=()
++for arg in "$@"; do
++  if [[ "${arg}" == @* && -f "${arg:1}" ]]; then
++    params="$(mktemp "${TMPDIR:-/tmp}/apple_cc_scan_deps_params.XXXXXX")"
++    _tmp_files+=("${params}")
++    while IFS= read -r line; do
++      _expand "${line}" >>"${params}"
++      printf '\n' >>"${params}"
++    done <"${arg:1}"
++    args+=("@${params}")
++  else
++    args+=("$(_expand "${arg}")")
++  fi
++done
++
++compiler="$(/usr/bin/xcrun --find clang++)"
++
++"%{deps_scanner}" -format=p1689 -- "${compiler}" "${args[@]}" >"${DEPS_SCANNER_OUTPUT_FILE}"
+diff -ruN a/crosstool/cc_toolchain_config.bzl b/crosstool/cc_toolchain_config.bzl
+--- a/crosstool/cc_toolchain_config.bzl	2026-09-05 01:02:34.395220800 +0800
++++ b/crosstool/cc_toolchain_config.bzl	2026-09-05 01:09:47.145929600 +0800
+@@ -45,7 +45,19 @@
+     ACTION_NAMES.cpp_link_dynamic_library,
+ ]
+ 
+-_COMPILE_ACTIONS_WITHOUT_HEADER_PARSING = list(ACTION_NAME_GROUPS.all_cc_compile_actions)
++# Bazel's experimental C++20 named module support (--experimental_cpp_modules)
++# drives three actions that predate this toolchain: a clang-scan-deps pass that
++# reports the module graph of a source file, and separate compile/codegen
++# actions for module interface units.
++_CPP20_MODULE_ACTIONS = [
++    ACTION_NAMES.cpp_module_deps_scanning,
++    ACTION_NAMES.cpp20_module_compile,
++    ACTION_NAMES.cpp20_module_codegen,
++]
++
++_ALL_CC_COMPILE_ACTIONS = list(ACTION_NAME_GROUPS.all_cc_compile_actions) + _CPP20_MODULE_ACTIONS
++
++_COMPILE_ACTIONS_WITHOUT_HEADER_PARSING = list(_ALL_CC_COMPILE_ACTIONS)
+ _COMPILE_ACTIONS_WITHOUT_HEADER_PARSING.remove(ACTION_NAMES.cpp_header_parsing)
+ 
+ def _sdk_version_for_platform(xcode_config, platform_type):
+@@ -446,6 +458,81 @@
+         ],
+     )
+ 
++    if ctx.file.deps_scanner:
++        deps_scanner_tool = tool(
++            tool = ctx.file.deps_scanner,
++            execution_requirements = xcode_execution_requirements,
++        )
++    else:
++        deps_scanner_tool = tool(path = "cpp-module-deps-scanner_not_found")
++
++    cpp_module_deps_scanning_action = action_config(
++        action_name = ACTION_NAMES.cpp_module_deps_scanning,
++        tools = [deps_scanner_tool],
++    )
++
++    # Module interface units have to be handed to clang as C++ modules; the
++    # generated script otherwise runs through the same wrapper as any other
++    # C++ compile so the Xcode placeholders keep being expanded.
++    cpp20_module_compile_action = action_config(
++        action_name = ACTION_NAMES.cpp20_module_compile,
++        tools = [
++            tool(
++                tool = ctx.file.wrapped_clang_pp,
++                execution_requirements = xcode_execution_requirements,
++            ),
++        ],
++        flag_sets = [
++            flag_set(
++                flag_groups = [
++                    # -fmodules-embed-all-files keeps the BMI self-contained;
++                    # without it clang reopens the interface unit's sources
++                    # from a sandbox that no longer has them.
++                    flag_group(flags = [
++                        "-x",
++                        "c++-module",
++                        "-fcxx-modules",
++                        "-fno-implicit-module-maps",
++                        "-fno-implicit-modules",
++                        "-Xclang",
++                        "-fmodules-embed-all-files",
++                        "-Xclang",
++                        "-fmodules-codegen",
++                    ]),
++                ],
++            ),
++        ],
++    )
++
++    cpp20_module_codegen_action = action_config(
++        action_name = ACTION_NAMES.cpp20_module_codegen,
++        tools = [
++            tool(
++                tool = ctx.file.wrapped_clang_pp,
++                execution_requirements = xcode_execution_requirements,
++            ),
++        ],
++        flag_sets = [
++            flag_set(
++                flag_groups = [
++                    # -fmodules-codegen: the interface unit's object emits the
++                    # inline functions its BMI carries. Without it clang 21
++                    # (Apple and upstream) drops libc++'s hidden inline
++                    # helpers, e.g. __atomic_unique_lock::__set_locked_bit
++                    # behind condition_variable_any::wait(stop_token), in every
++                    # importer and the link fails.
++                    flag_group(flags = [
++                        "-fcxx-modules",
++                        "-fno-implicit-module-maps",
++                        "-fno-implicit-modules",
++                        "-Xclang",
++                        "-fmodules-codegen",
++                    ]),
++                ],
++            ),
++        ],
++    )
++
+     objc_fully_link_action = action_config(
+         action_name = ACTION_NAMES.objc_fully_link,
+         tools = [
+@@ -497,6 +568,9 @@
+         cpp_compile_action,
+         linkstamp_compile_action,
+         cpp_module_compile_action,
++        cpp_module_deps_scanning_action,
++        cpp20_module_compile_action,
++        cpp20_module_codegen_action,
+         cpp_header_parsing_action,
+         objc_compile_action,
+         objcpp_compile_action,
+@@ -610,6 +684,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.assemble,
+                     ACTION_NAMES.preprocess_assemble,
+@@ -662,6 +739,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -769,6 +849,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -792,6 +875,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -837,7 +923,7 @@
+         enabled = True,
+         flag_sets = [
+             flag_set(
+-                actions = ACTION_NAME_GROUPS.all_cc_compile_actions + _DYNAMIC_LINK_ACTIONS,
++                actions = _ALL_CC_COMPILE_ACTIONS + _DYNAMIC_LINK_ACTIONS,
+                 flag_groups = [
+                     flag_group(
+                         flags = [
+@@ -851,7 +937,7 @@
+         ],
+         env_sets = [
+             env_set(
+-                actions = ACTION_NAME_GROUPS.all_cc_compile_actions + _DYNAMIC_LINK_ACTIONS + _STATIC_LINK_ACTIONS + [
++                actions = _ALL_CC_COMPILE_ACTIONS + _DYNAMIC_LINK_ACTIONS + _STATIC_LINK_ACTIONS + [
+                     ACTION_NAMES.strip,
+                 ],
+                 env_entries = [
+@@ -957,6 +1043,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.linkstamp_compile,
+                     ACTION_NAMES.preprocess_assemble,
+                 ],
+@@ -978,6 +1067,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1004,6 +1096,9 @@
+                     ACTION_NAMES.linkstamp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1023,6 +1118,18 @@
+                 ],
+             ),
+         ],
++        env_sets = [
++            env_set(
++                actions = [ACTION_NAMES.cpp_module_deps_scanning],
++                env_entries = [
++                    env_entry(
++                        key = "DEPS_SCANNER_OUTPUT_FILE",
++                        value = "%{output_file}",
++                        expand_if_available = "output_file",
++                    ),
++                ],
++            ),
++        ],
+     )
+ 
+     pch_feature = feature(
+@@ -1058,6 +1165,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+@@ -1255,6 +1365,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1282,6 +1395,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1314,6 +1430,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1331,6 +1450,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1397,7 +1519,7 @@
+         enabled = True,
+         flag_sets = [
+             flag_set(
+-                actions = ACTION_NAME_GROUPS.all_cc_compile_actions,
++                actions = _ALL_CC_COMPILE_ACTIONS,
+                 flag_groups = [
+                     flag_group(
+                         flags = [
+@@ -1458,6 +1580,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.assemble,
+                     ACTION_NAMES.preprocess_assemble,
+@@ -1486,6 +1611,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.linkstamp_compile,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+@@ -1507,6 +1635,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.linkstamp_compile,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+@@ -1529,6 +1660,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.linkstamp_compile,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+@@ -1577,6 +1711,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1598,6 +1735,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1623,6 +1763,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1638,6 +1781,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1661,6 +1807,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1683,6 +1832,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                 ],
+@@ -1806,6 +1958,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+@@ -1830,6 +1985,9 @@
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+@@ -1855,6 +2013,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.linkstamp_compile,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+@@ -1920,6 +2081,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.linkstamp_compile,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+@@ -1952,6 +2116,9 @@
+                     ACTION_NAMES.linkstamp_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                 ],
+                 flag_groups = ([
+                     flag_group(
+@@ -1976,6 +2143,9 @@
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.linkstamp_compile,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+@@ -2305,6 +2475,63 @@
+     else:
+         layering_check_feature = feature(name = "layering_check")
+ 
++    # Tell Bazel this toolchain can build C++20 named modules. Disabled by
++    # default; turn it on with --features=cpp_modules or a features attr.
++    cpp_modules_feature = feature(
++        name = "cpp_modules",
++        enabled = False,
++    )
++
++    cpp_module_modmap_file_feature = feature(
++        name = "cpp_module_modmap_file",
++        enabled = True,
++        flag_sets = [
++            flag_set(
++                actions = [
++                    ACTION_NAMES.cpp_compile,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
++                ],
++                flag_groups = [
++                    # Apple's clang turns standard C++ modules off by default,
++                    # so -std=c++20 alone is not enough to parse a module unit
++                    # or an import declaration. -fcxx-modules also switches on
++                    # Clang's implicit header modules, under which system
++                    # headers become module imports and protobuf's
++                    # parse_context.h stops compiling; the two -fno-implicit
++                    # flags keep only the C++20 named-module support.
++                    flag_group(
++                        flags = [
++                            "-fcxx-modules",
++                            "-fno-implicit-module-maps",
++                            "-fno-implicit-modules",
++                            "-Xclang",
++                            "-fmodules-codegen",
++                            "@%{cpp_module_modmap_file}",
++                        ],
++                        expand_if_available = "cpp_module_modmap_file",
++                    ),
++                ],
++            ),
++        ],
++    )
++
++    cpp20_module_compile_flags_feature = feature(
++        name = "cpp20_module_compile_flags",
++        enabled = True,
++        flag_sets = [
++            flag_set(
++                actions = [ACTION_NAMES.cpp20_module_compile],
++                flag_groups = [
++                    flag_group(
++                        flags = ["-fmodule-output=%{cpp_module_output_file}"],
++                        expand_if_available = "cpp_module_output_file",
++                    ),
++                ],
++            ),
++        ],
++    )
++
+     features = [
+         # Marker features
+         feature(name = "archive_param_file", enabled = True),
+@@ -2394,6 +2610,9 @@
+         reproducible_linker_flag_feature,
+         layering_check_feature,
+         external_include_paths_feature,
++        cpp_modules_feature,
++        cpp_module_modmap_file_feature,
++        cpp20_module_compile_flags_feature,
+     ]
+ 
+     if (ctx.attr.cpu == "darwin_x86_64" or
+@@ -2460,6 +2679,9 @@
+         "cpu": attr.string(mandatory = True),
+         "cxx_builtin_include_directories": attr.string_list(),
+         "cxx_flags": attr.string_list(),
++        "deps_scanner": attr.label(
++            allow_single_file = True,
++        ),
+         "extra_env": attr.string_dict(),
+         "libtool": attr.label(
+             allow_single_file = True,
+diff -ruN a/crosstool/osx_cc_configure.bzl b/crosstool/osx_cc_configure.bzl
+--- a/crosstool/osx_cc_configure.bzl	2026-09-05 01:02:35.141852400 +0800
++++ b/crosstool/osx_cc_configure.bzl	2026-09-05 01:05:17.370730900 +0800
+@@ -147,6 +147,41 @@
+ def _copy_file(repository_ctx, src, dest):
+     repository_ctx.file(dest, content = repository_ctx.read(src))
+ 
++def _find_deps_scanner(repository_ctx):
++    """Finds clang-scan-deps, which drives C++20 named module dependency scanning.
++
++    Xcode's toolchain does not ship clang-scan-deps, so fall back to whatever
++    is on PATH and finally to a Homebrew LLVM install.
++
++    Args:
++      repository_ctx: The repository context.
++    Returns:
++      A path to clang-scan-deps, or the bare tool name if none was found.
++    """
++
++    override = repository_ctx.os.environ.get("BAZEL_CLANG_SCAN_DEPS")
++    if override:
++        return override
++
++    result = repository_ctx.execute(["/usr/bin/xcrun", "--find", "clang-scan-deps"])
++    if result.return_code == 0 and result.stdout.strip():
++        return result.stdout.strip()
++
++    on_path = repository_ctx.which("clang-scan-deps")
++    if on_path:
++        return str(on_path)
++
++    result = repository_ctx.execute([
++        "/bin/sh",
++        "-c",
++        "ls -1 /opt/homebrew/opt/llvm*/bin/clang-scan-deps " +
++        "/usr/local/opt/llvm*/bin/clang-scan-deps 2>/dev/null | head -n 1",
++    ])
++    if result.return_code == 0 and result.stdout.strip():
++        return result.stdout.strip()
++
++    return "clang-scan-deps"
++
+ def configure_osx_toolchain(repository_ctx):
+     """Configure C++ toolchain on macOS.
+ 
+@@ -164,6 +199,7 @@
+     xcode_locator = Label("@bazel_tools//tools/osx:xcode_locator.m")
+     cc_toolchain_config = Label("@apple_support//crosstool:cc_toolchain_config.bzl")
+     build_template = Label("@apple_support//crosstool:BUILD.tpl")
++    deps_scanner_template = Label("@apple_support//crosstool:cc_module_deps_scanner.sh.tpl")
+ 
+     xcode_toolchains = []
+     xcodeloc_err = ""
+@@ -175,6 +211,13 @@
+ 
+     _copy_file(repository_ctx, cc_toolchain_config, "cc_toolchain_config.bzl")
+ 
++    repository_ctx.template(
++        "cc_module_deps_scanner.sh",
++        deps_scanner_template,
++        {"%{deps_scanner}": _find_deps_scanner(repository_ctx)},
++        executable = True,
++    )
++
+     enable_layering_check = repository_ctx.os.environ.get("APPLE_SUPPORT_LAYERING_CHECK_BETA") != "0"
+ 
+     tool_paths = {}

@@ -22,7 +22,7 @@ def cc_test(
     test_main = []
     test_deps = [
         "@com_google_googletest//:gtest",
-        "@com_github_glog_glog//:glog",
+        "//src/common:logging",
     ]
 
     if autolink_main:

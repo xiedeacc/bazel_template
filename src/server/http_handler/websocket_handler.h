@@ -122,7 +122,8 @@ class WebSocketHandler {
 
     // Validate opcode
     if (header.opcode > 0xA) {
-      LOG(ERROR) << "Invalid opcode: " << header.opcode;
+      LOG(ERROR) << "Invalid opcode: "
+                 << static_cast<unsigned int>(header.opcode);
       return false;
     }
 
@@ -267,7 +268,8 @@ class WebSocketHandler {
           return true;
 
         default:
-          LOG(ERROR) << "Unknown control frame opcode: " << header.opcode;
+          LOG(ERROR) << "Unknown control frame opcode: "
+                     << static_cast<unsigned int>(header.opcode);
           return false;
       }
     }

@@ -7,5 +7,7 @@ cc_binary(
     name = "gen_large_json_file",
     srcs = ["gen_large_json_file.cc"],
     deps = [
-        "//src/common:logging","//src/util"],
+        "//src/util",
+        "//src/common:logging",
+    ],
 )

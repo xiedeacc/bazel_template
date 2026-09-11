@@ -3,6 +3,18 @@
 # std::move is right for a constructor or setter that stores the value and a
 # pessimisation for a read-only parameter or a type whose move is not cheap,
 # so it is a decision per call site rather than a rule.
+#
+# modernize-use-ranges is off: the rewrite is cosmetic, and MSVC's
+# std::ranges constraints reject the transforms it produces here.
+#
+# portability-template-virtual-member-function is off: it warns that MSVC
+# instantiates every virtual member of a class template while other
+# compilers do not. MSVC is one of the compilers this code is built with,
+# so the difference is exercised, not hidden; it also fires inside grpc++.
+#
+# cppcoreguidelines-pro-bounds-avoid-unchecked-container-access is off: it
+# flags every operator[] on a container, including map insertion and JSON
+# object access, where .at() would change the meaning rather than add a check.
 Checks: >
   -*,
   bugprone-*,
@@ -26,7 +38,10 @@ Checks: >
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
   -readability-magic-numbers,
-  -modernize-pass-by-value
+  -modernize-pass-by-value,
+  -modernize-use-ranges,
+  -portability-template-virtual-member-function,
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access
 # Lint is a gate: any finding in our own code fails the build. The two
 # exceptions are path-sensitive analyzer diagnostics that originate inside
 # protobuf and grpc headers -- the header filter does not apply to those, and

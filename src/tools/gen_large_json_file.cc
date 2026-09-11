@@ -3,6 +3,10 @@
  * All rights reserved.
  *******************************************************************************/
 
+// Writes a large JSON document for load tests.
+
+#include <cstddef>
+#include <exception>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -12,9 +16,12 @@
 
 namespace {
 
-constexpr size_t TARGET_SIZE = size_t{5} * 1024 * 1024;  // 200MB
-constexpr size_t CHUNK_SIZE =
-    size_t{1024} * 1024;  // 1MB chunks for progress reporting
+constexpr size_t kMegabyte = size_t{1024} * 1024;
+constexpr size_t kTargetSize = 5 * kMegabyte;
+constexpr size_t kChunkSize = kMegabyte;  // progress reporting granularity
+constexpr size_t kElementsPerChunk = 1000;
+constexpr size_t kApproximateElementSize = 25;
+constexpr int kNodeWidth = 8;
 
 void GenerateLargeJsonFile(const std::string& output_path) {
   std::ofstream out(output_path, std::ios::binary);
@@ -23,68 +30,62 @@ void GenerateLargeJsonFile(const std::string& output_path) {
     return;
   }
 
-  // Write the opening of the JSON object and array
-  out << "{\"nodes\":[";
+  out << R"({"nodes":[)";
 
   size_t total_written = 0;
   size_t count = 0;
   bool first = true;
-
-  // Keep writing until we reach the target size
-  while (total_written < TARGET_SIZE) {
-    // Write a chunk of array elements
-    for (size_t i = 0; i < 1000 && total_written < TARGET_SIZE; ++i) {
+  while (total_written < kTargetSize) {
+    for (size_t i = 0; i < kElementsPerChunk && total_written < kTargetSize;
+         ++i) {
       if (!first) {
         out << ",";
       }
       first = false;
-
-      // Write a simple object with just an 'f' field
-      out << R"({"f":")" << std::setw(8) << std::setfill('0') << count << "\"}";
-
+      out << R"({"f":")" << std::setw(kNodeWidth) << std::setfill('0') << count
+          << R"("})";
       count++;
-      total_written += 25;  // Approximate size of each element
+      total_written += kApproximateElementSize;
     }
-
-    // Report progress
-    if (total_written % CHUNK_SIZE < 1000) {  // Report roughly every MB
-      std::cout << "\rProgress: " << (total_written * 100 / TARGET_SIZE)
-                << "% (" << (total_written / (size_t{1024} * 1024)) << "MB)"
-                << std::flush;
+    if (total_written % kChunkSize < kElementsPerChunk) {
+      std::cout << "\rProgress: " << (total_written * 100 / kTargetSize)
+                << "% (" << (total_written / kMegabyte) << "MB)" << std::flush;
     }
   }
 
-  // Write the closing of the array and object
   out << "]}";
   out.close();
 
-  std::cout << "\nGenerated " << count << " nodes in " << output_path << '\n';
-  std::cout << "Total size: " << (total_written / (size_t{1024} * 1024)) << "MB"
-            << '\n';
+  std::cout << "\nGenerated " << count << " nodes in " << output_path << '\n'
+            << "Total size: " << (total_written / kMegabyte) << "MB\n";
+}
+
+// noexcept: reporting from a catch handler must not throw again, which is
+// what keeps main() exception-safe.
+void ReportFailure(const char* what) noexcept {
+  try {
+    std::cerr << "Failed" << (what == nullptr ? "" : ": ")
+              << (what == nullptr ? "" : what) << '\n';
+  } catch (...) {  // NOLINT(bugprone-empty-catch)
+  }
 }
 
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  // An exception escaping main() calls std::terminate before anything is
-  // logged, which makes a failure look like a silent crash.
   try {
-    bazel_template::logging::Initialize(argv[0]);
-
+    bazel_template::logging::Initialize(argv[0], "./log", false);
     if (argc != 2) {
-      std::cerr << "Usage: " << argv[0] << " <output_file>" << '\n';
+      std::cerr << "Usage: " << argv[0] << " <output_file>\n";
       return 1;
     }
-
     GenerateLargeJsonFile(argv[1]);
     return 0;
   } catch (const std::exception& e) {
-    ::bazel_template::logging::ReportException("gen_large_json_file failed",
-                                               e.what());
+    ReportFailure(e.what());
     return 1;
   } catch (...) {
-    ::bazel_template::logging::ReportException("gen_large_json_file failed",
-                                               nullptr);
+    ReportFailure(nullptr);
     return 1;
   }
 }

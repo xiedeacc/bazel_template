@@ -3,14 +3,22 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/util/util.h"
+module;
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
+#include <cstdint>
+#include <format>
 #include <fstream>
+#include <iterator>
+#include <string>
 
-#include "fmt/format.h"
 #include "google/protobuf/json/json.h"
+#include "google/protobuf/message.h"
+#include "openssl/evp.h"
+
+module bazel_template.util;
 
 using google::protobuf::json::ParseOptions;
 using google::protobuf::json::PrintOptions;
@@ -21,24 +29,20 @@ namespace bazel_template::util {
 void Util::ToHexStr(const string& in, string* out, const bool use_upper_case) {
   out->clear();
   out->reserve(in.size() * 2);
-  for (char i : in) {
-    if (use_upper_case) {
-      out->append(fmt::format("{:02X}", static_cast<unsigned char>(i)));
-    } else {
-      out->append(fmt::format("{:02x}", static_cast<unsigned char>(i)));
-    }
+  for (const char c : in) {
+    const auto byte = static_cast<unsigned char>(c);
+    out->append(use_upper_case ? std::format("{:02X}", byte)
+                               : std::format("{:02x}", byte));
   }
 }
 
 string Util::ToHexStr(const string& in, const bool use_upper_case) {
   string out;
   out.reserve(in.size() * 2);
-  for (char i : in) {
-    if (use_upper_case) {
-      out.append(fmt::format("{:02X}", static_cast<unsigned char>(i)));
-    } else {
-      out.append(fmt::format("{:02x}", static_cast<unsigned char>(i)));
-    }
+  for (const char c : in) {
+    const auto byte = static_cast<unsigned char>(c);
+    out.append(use_upper_case ? std::format("{:02X}", byte)
+                              : std::format("{:02x}", byte));
   }
   return out;
 }
@@ -74,7 +78,7 @@ bool Util::HashFinal(EVP_MD_CTX* context, string* out,
 
   EVP_MD_CTX_free(context);
 
-  string s(reinterpret_cast<const char*>(hash.data()), length);
+  const string s(reinterpret_cast<const char*>(hash.data()), length);
   Util::ToHexStr(s, out, use_upper_case);
   return true;
 }
@@ -93,17 +97,18 @@ bool Util::SHA256Final(EVP_MD_CTX* context, string* out,
 }
 
 bool Util::JsonToMessage(const string& json, google::protobuf::Message* msg) {
-  static ParseOptions option = {.allow_legacy_nonconformant_behavior = true,
-                                .ignore_unknown_fields = false};
+  static const ParseOptions option = {.ignore_unknown_fields = true,
+                                      .case_insensitive_enum_parsing = false};
   return JsonStringToMessage(json, msg, option).ok();
 }
 
 bool Util::MessageToJson(const google::protobuf::Message& msg, string* json) {
-  static PrintOptions option = {.allow_legacy_nonconformant_behavior = false,
-                                .add_whitespace = true,
-                                .always_print_fields_with_no_presence = true,
-                                .always_print_enums_as_ints = true,
-                                .preserve_proto_field_names = true};
+  static const PrintOptions option = {
+      .add_whitespace = true,
+      .always_print_fields_with_no_presence = true,
+      .always_print_enums_as_ints = true,
+      .preserve_proto_field_names = true,
+      .unquote_int64_if_possible = false};
   return MessageToJsonString(msg, json, option).ok();
 }
 

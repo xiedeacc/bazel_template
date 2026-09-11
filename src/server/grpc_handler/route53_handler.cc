@@ -1,0 +1,200 @@
+/*******************************************************************************
+ * Copyright (c) 2024  xiedeacc.com.
+ * All rights reserved.
+ *******************************************************************************/
+
+module;
+
+#include <exception>
+#include <memory>
+#include <string>
+#include <utility>
+
+#include "aws/core/Aws.h"
+#include "aws/core/client/ClientConfiguration.h"
+#include "aws/route53/Route53Client.h"
+#include "aws/route53/model/Change.h"
+#include "aws/route53/model/ChangeBatch.h"
+#include "aws/route53/model/ChangeResourceRecordSetsRequest.h"
+#include "aws/route53/model/ResourceRecordSet.h"
+#include "src/common/logging.h"
+#include "google/protobuf/message.h"
+#include "grpc++/grpc++.h"
+#include "grpc++/impl/codegen/proto_utils.h"
+#include "src/async_grpc/rpc_service_method_traits.h"
+#include "src/async_grpc/type_traits.h"
+#include "src/proto/service.pb.h"
+#include "src/server/grpc_handler/meta.h"
+
+module bazel_template.server.grpc_handler;
+
+namespace bazel_template::server::grpc_handler {
+
+class Route53ManagementHandler
+    : public async_grpc::RpcHandler<Route53ManagementMethod> {
+ public:
+  Route53ManagementHandler() : aws_initialized_(true) {
+    Aws::SDKOptions options;
+    Aws::InitAPI(options);
+  }
+
+  // Owns AWS SDK state; neither copyable nor movable.
+  Route53ManagementHandler(const Route53ManagementHandler&) = delete;
+  Route53ManagementHandler& operator=(const Route53ManagementHandler&) = delete;
+  Route53ManagementHandler(Route53ManagementHandler&&) = delete;
+  Route53ManagementHandler& operator=(Route53ManagementHandler&&) = delete;
+
+  ~Route53ManagementHandler() override {
+    // Cleanup AWS SDK if we initialized it
+    if (aws_initialized_) {
+      Aws::SDKOptions options;
+      Aws::ShutdownAPI(options);
+    }
+  }
+
+  void OnRequest(const proto::Route53Request& req) override {
+    auto res = std::make_unique<proto::Route53Response>();
+    res->set_domain_name(req.domain_name());
+    res->set_record_type(req.record_type());
+    res->set_new_value(req.new_value());
+
+    LOG(INFO) << "Route53 management request: " << req.op()
+              << " for domain: " << req.domain_name()
+              << " type: " << req.record_type()
+              << " value: " << req.new_value();
+
+    try {
+      // Determine the operation based on the request op code
+      switch (req.op()) {
+        case proto::OpCode::OP_ROUTE53_UPDATE_A_RECORD:
+          HandleUpdateARecord(req, res.get());
+          break;
+        case proto::OpCode::OP_ROUTE53_UPDATE_CNAME_RECORD:
+          HandleUpdateCNAMERecord(req, res.get());
+          break;
+        default:
+          res->set_err_code(proto::ErrCode::FAIL);
+          res->set_message("Invalid operation code for Route53 management");
+          LOG(ERROR) << "Invalid operation code: " << req.op();
+          break;
+      }
+    } catch (const std::exception& e) {
+      LOG(ERROR) << "Route53 management operation failed: " << e.what();
+      res->set_err_code(proto::ErrCode::FAIL);
+      res->set_message(std::string("Operation failed: ") + e.what());
+    }
+
+    Send(std::move(res));
+  }
+
+  void OnReadsDone() override { Finish(grpc::Status::OK); }
+
+ private:
+  static void HandleUpdateARecord(const proto::Route53Request& req,
+                                  proto::Route53Response* res) {
+    // Set region if specified
+    Aws::Client::ClientConfiguration config;
+    if (!req.region().empty()) {
+      config.region = req.region();
+    }
+    Aws::Route53::Route53Client route53_client(config);
+
+    // Create the resource record set
+    Aws::Route53::Model::ResourceRecordSet record_set;
+    record_set.SetName(req.domain_name());
+    record_set.SetType(Aws::Route53::Model::RRType::A);
+    record_set.SetTTL(req.ttl() > 0 ? req.ttl() : 300);
+
+    // Add the new IP address
+    Aws::Route53::Model::ResourceRecord record;
+    record.SetValue(req.new_value());
+    record_set.AddResourceRecords(record);
+
+    // Create the change
+    Aws::Route53::Model::Change change;
+    change.SetAction(Aws::Route53::Model::ChangeAction::UPSERT);
+    change.SetResourceRecordSet(record_set);
+
+    // Create the change request
+    Aws::Route53::Model::ChangeResourceRecordSetsRequest change_request;
+    change_request.SetHostedZoneId(req.hosted_zone_id());
+    Aws::Route53::Model::ChangeBatch change_batch;
+    change_batch.AddChanges(change);
+    change_request.SetChangeBatch(change_batch);
+
+    auto outcome = route53_client.ChangeResourceRecordSets(change_request);
+
+    if (outcome.IsSuccess()) {
+      res->set_err_code(proto::ErrCode::SUCCESS);
+      res->set_change_id(outcome.GetResult().GetChangeInfo().GetId());
+      res->set_message("A record updated successfully");
+      LOG(INFO) << "Successfully updated A record for domain: "
+                << req.domain_name() << " to IP: " << req.new_value();
+    } else {
+      res->set_err_code(proto::ErrCode::FAIL);
+      res->set_message("Failed to update A record: " +
+                       outcome.GetError().GetMessage());
+      LOG(ERROR) << "Failed to update A record for domain: "
+                 << req.domain_name() << " - "
+                 << outcome.GetError().GetMessage();
+    }
+  }
+
+  static void HandleUpdateCNAMERecord(const proto::Route53Request& req,
+                                      proto::Route53Response* res) {
+    // Set region if specified
+    Aws::Client::ClientConfiguration config;
+    if (!req.region().empty()) {
+      config.region = req.region();
+    }
+    Aws::Route53::Route53Client route53_client(config);
+
+    // Create the resource record set
+    Aws::Route53::Model::ResourceRecordSet record_set;
+    record_set.SetName(req.domain_name());
+    record_set.SetType(Aws::Route53::Model::RRType::CNAME);
+    record_set.SetTTL(req.ttl() > 0 ? req.ttl() : 300);
+
+    // Add the new domain name
+    Aws::Route53::Model::ResourceRecord record;
+    record.SetValue(req.new_value());
+    record_set.AddResourceRecords(record);
+
+    // Create the change
+    Aws::Route53::Model::Change change;
+    change.SetAction(Aws::Route53::Model::ChangeAction::UPSERT);
+    change.SetResourceRecordSet(record_set);
+
+    // Create the change request
+    Aws::Route53::Model::ChangeResourceRecordSetsRequest change_request;
+    change_request.SetHostedZoneId(req.hosted_zone_id());
+    Aws::Route53::Model::ChangeBatch change_batch;
+    change_batch.AddChanges(change);
+    change_request.SetChangeBatch(change_batch);
+
+    auto outcome = route53_client.ChangeResourceRecordSets(change_request);
+
+    if (outcome.IsSuccess()) {
+      res->set_err_code(proto::ErrCode::SUCCESS);
+      res->set_change_id(outcome.GetResult().GetChangeInfo().GetId());
+      res->set_message("CNAME record updated successfully");
+      LOG(INFO) << "Successfully updated CNAME record for domain: "
+                << req.domain_name() << " to: " << req.new_value();
+    } else {
+      res->set_err_code(proto::ErrCode::FAIL);
+      res->set_message("Failed to update CNAME record: " +
+                       outcome.GetError().GetMessage());
+      LOG(ERROR) << "Failed to update CNAME record for domain: "
+                 << req.domain_name() << " - "
+                 << outcome.GetError().GetMessage();
+    }
+  }
+
+  bool aws_initialized_ = false;
+};
+
+void RegisterRoute53Handler(async_grpc::Server::Builder& builder) {
+  builder.RegisterHandler<Route53ManagementHandler>();
+}
+
+}  // namespace bazel_template::server::grpc_handler

@@ -20,22 +20,22 @@ class BlockingQueue {
 
   // Destructor
   ~BlockingQueue() = default;
+
+  // Neither copyable nor movable: it owns a mutex.
+  BlockingQueue(const BlockingQueue&) = delete;
+  BlockingQueue& operator=(const BlockingQueue&) = delete;
   BlockingQueue(BlockingQueue&&) = delete;
   BlockingQueue& operator=(BlockingQueue&&) = delete;
 
-  // Prevent copying
-  BlockingQueue(const BlockingQueue&) = delete;
-  BlockingQueue& operator=(const BlockingQueue&) = delete;
-
   // Push an item to the queue
   void Push(T item) {
-    std::lock_guard<std::mutex> lock(mutex_);
+    const std::scoped_lock lock(mutex_);
     queue_.push(std::move(item));
     cv_.notify_one();
   }
 
   bool TryPop(T& item) {
-    std::lock_guard<std::mutex> lock(mutex_);
+    const std::scoped_lock lock(mutex_);
     if (queue_.empty()) {
       return false;
     }
@@ -61,20 +61,20 @@ class BlockingQueue {
 
   // Close the queue and wake up all waiting threads
   void Close() {
-    std::lock_guard<std::mutex> lock(mutex_);
+    const std::scoped_lock lock(mutex_);
     closed_ = true;
     cv_.notify_all();
   }
 
   // Check if the queue is empty
   bool Empty() const {
-    std::lock_guard<std::mutex> lock(mutex_);
+    const std::scoped_lock lock(mutex_);
     return queue_.empty();
   }
 
   // Get the current size of the queue
   size_t Size() const {
-    std::lock_guard<std::mutex> lock(mutex_);
+    const std::scoped_lock lock(mutex_);
     return queue_.size();
   }
 

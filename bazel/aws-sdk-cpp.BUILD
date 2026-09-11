@@ -3,7 +3,13 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "template_rule")
 load("@bazel_template//bazel:glob.bzl", "optional_glob")
 
-package(default_visibility = ["//visibility:public"])
+package(
+    default_visibility = ["//visibility:public"],
+    # The generated VersionConfig.h is reached through the include path
+    # rather than a declared header, which MSVC's /showIncludes parsing
+    # rejects; the SDK is not ours to restructure.
+    features = ["-parse_showincludes"],
+)
 
 COPTS_BASE = GLOBAL_COPTS + [
     "-Iexternal/aws-sdk-cpp/crt/aws-crt-cpp/crt/aws-c-auth/include",

@@ -44,14 +44,20 @@ build:asan --copt='-fno-omit-frame-pointer'
 build:asan --copt='-g'
 build:asan --linkopt='-fsanitize=address'
 #build:asan --linkopt='-static-libasan'
-build:asan --action_env=ASAN_OPTIONS=detect_leaks=1:color=always
-build:asan --action_env=LSAN_OPTIONS=suppressions=test/core/test_util/lsan_suppressions.txt:report_objects=1
-build:asan --action_env=ASAN_OPTIONS=detect_odr_violation=0  # https://github.com/google/sanitizers/issues/1017
+# One assignment per variable: a later --action_env for the same name replaces
+# the earlier one instead of merging. detect_odr_violation=0 is for
+# https://github.com/google/sanitizers/issues/1017. Do not point LSAN_OPTIONS at
+# a suppressions file that is not in this repository: LSan then fails to read
+# it and reports nothing at all.
+build:asan --action_env=ASAN_OPTIONS=detect_leaks=1:detect_odr_violation=0:color=always
+build:asan --action_env=LSAN_OPTIONS=report_objects=1
+build:asan --test_env=ASAN_OPTIONS=detect_leaks=1:detect_odr_violation=0:color=always
+build:asan --test_env=LSAN_OPTIONS=report_objects=1
 
 build:msan --strip=never
 build:msan --copt=-fsanitize=memory
 build:msan --copt=-O0
-build:asan --copt='-g'
+build:msan --copt=-g
 build:msan --copt=-fsanitize-memory-track-origins
 build:msan --copt=-fsanitize-memory-use-after-dtor
 build:msan --copt=-fno-omit-frame-pointer
@@ -113,13 +119,25 @@ build:windows --host_copt='/utf-8'
 build:windows --cxxopt='/utf-8'
 build:windows --host_cxxopt='/utf-8'
 build:windows --compiler='msvc-cl'
+# Pin the MSVC toolset to VS 2026 (MSVC 14.52) explicitly rather than letting
+# Bazel take whatever Visual Studio vswhere reports first; VS 2022 (14.44) is
+# still installed. Override on the command line with
+# --repo_env=BAZEL_VC=<other VC dir> to try another toolset. Both toolsets
+# die with C1001 when a module interface reaches google::protobuf::Message.
+build:windows --repo_env="BAZEL_VC=C:/Program Files/Microsoft Visual Studio/18/Community/VC"
 build:windows --cpu='x64_windows'
 build:windows --extra_toolchains='@openssl//:preinstalled_nmake_toolchain'
 build:windows --extra_toolchains='@openssl//:preinstalled_pkgconfig_toolchain'
 build:windows --workspace_status_command=bazel/workspace_status.bat
 build:windows --java_runtime_version="remotejdk_21"
-build:windows --features=-parse_showincludes
-
+# /showIncludes parsing stays on: Bazel only learns the inputs of a C++20
+# module interface unit from it on MSVC (no .d file there), and without that
+# the module compile action crashes the server. The toolchain pins VSLANG=1033
+# so the cl.exe output it parses is always English.
+build:windows --features=parse_showincludes
+# C++20 named modules (module_interfaces) need this on every toolchain, not
+# just MSVC: without it rules_cc rejects the attribute at analysis time.
+build --experimental_cpp_modules
 # local_config_cc enables default_cpp_std/default_c_std, which prepend
 # /std:c++17 and /std:c17 to every compile. Turn them off so the standard
 # below is the only one on the command line (silences warning D9025).
@@ -145,9 +163,18 @@ build:macos --host_cxxopt='-std=c++20'
 build:macos --conlyopt='-std=gnu17'
 build:macos --host_conlyopt='-std=gnu17'
 build:macos --dynamic_mode=off
+# apple_support's crosstool ships a module map and turns Clang's layering check
+# on; the project's targets lean on transitive includes, so keep it off.
 build:macos --workspace_status_command=bazel/workspace_status.sh
 build:macos --per_file_copt=.*src/proto/.*\\.grpc\\.pb\\.cc@-Wno-deprecated-declarations
 
+# Host (x86_64 glibc) binaries are deployed to the NAS, which runs an older
+# Ubuntu: link libstdc++ statically so a client built with gcc 16 does not
+# demand a GLIBCXX the target does not have. Bazel passes -lstdc++ explicitly,
+# so -static-libstdc++ alone is ignored; naming the archive in BAZEL_LINKLIBS
+# is the documented way. libgcc stays shared: -static-libgcc drags in
+# libgcc_eh, whose _Unwind_* symbols collide with the libunwind we link.
+build:linux --repo_env="BAZEL_LINKLIBS=-l%:libstdc++.a:-lm"
 build:linux --copt='-g'
 build:linux --copt='-O2'
 build:linux --copt='-Wall'
@@ -174,6 +201,10 @@ build:gcc_aarch64_linux_musl --extra_toolchains='@cc_toolchain_config_gcc_aarch6
 build:gcc_aarch64_linux_musl --cpu='aarch64'
 build:gcc_aarch64_linux_musl --compiler='gcc'
 build:gcc_aarch64_linux_musl --define libc=musl
+# The musl toolchain links everything with -static; a cc_test without
+# linkstatic would otherwise be assembled in dynamic mode and ld, in static
+# mode, cannot find the .so entries ("have you installed the static version").
+build:gcc_aarch64_linux_musl --dynamic_mode=off
 build:gcc_aarch64_linux_musl --java_runtime_version="remotejdk_21"
 build:gcc_aarch64_linux_musl --jobs=6
 build:gcc_aarch64_linux_musl --action_env=LD_LIBRARY_PATH=/root/src/software/toolchains/host-libs

@@ -43,7 +43,7 @@ spdlog::level::level_enum ToSpdlogLevel(Severity severity) {
 }
 
 std::shared_ptr<spdlog::logger> Logger() {
-  std::lock_guard<std::mutex> lock(g_logging_mutex);
+  const std::scoped_lock lock(g_logging_mutex);
   if (!g_logger) {
     auto sink = std::make_shared<spdlog::sinks::stderr_color_sink_mt>();
     sink->set_level(spdlog::level::info);
@@ -70,7 +70,7 @@ void Log(Severity severity, const char* file, int line,
 
 void Initialize(const std::string& program_name, const std::string& log_dir,
                 bool write_logs) {
-  std::lock_guard<std::mutex> lock(g_logging_mutex);
+  const std::scoped_lock lock(g_logging_mutex);
 
   std::string basename =
       program_name.empty()
@@ -121,7 +121,7 @@ void Initialize(const std::string& program_name, const std::string& log_dir,
 }
 
 void Shutdown() {
-  std::lock_guard<std::mutex> lock(g_logging_mutex);
+  const std::scoped_lock lock(g_logging_mutex);
   if (g_logger) {
     g_logger->flush();
   }
@@ -154,8 +154,13 @@ void ReportException(const char* context, const char* what) noexcept {
 LogMessage::LogMessage(const char* file, int line, Severity severity)
     : file_(file), line_(line), severity_(severity) {}
 
+// The destructors are where the message is emitted; they are implicitly
+// noexcept, and formatting or the sink can throw, so nothing may escape.
 LogMessage::~LogMessage() {
-  Log(severity_, file_, line_, stream_.str());
+  try {
+    Log(severity_, file_, line_, stream_.str());
+  } catch (...) {  // NOLINT(bugprone-empty-catch)
+  }
   if (severity_ == Severity::kFatal) {
     std::abort();
   }
@@ -165,7 +170,10 @@ FatalLogMessage::FatalLogMessage(const char* file, int line)
     : file_(file), line_(line) {}
 
 FatalLogMessage::~FatalLogMessage() {
-  Log(Severity::kFatal, file_, line_, stream_.str());
+  try {
+    Log(Severity::kFatal, file_, line_, stream_.str());
+  } catch (...) {  // NOLINT(bugprone-empty-catch)
+  }
   std::abort();
 }
 
@@ -181,7 +189,10 @@ CheckMessage::~CheckMessage() {
   if (!failed_) {
     return;
   }
-  Log(Severity::kFatal, file_, line_, stream_.str());
+  try {
+    Log(Severity::kFatal, file_, line_, stream_.str());
+  } catch (...) {  // NOLINT(bugprone-empty-catch)
+  }
   std::abort();
 }
 

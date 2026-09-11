@@ -1,0 +1,516 @@
+diff --git a/toolchain/cc_toolchain_config.BUILD.tpl b/toolchain/cc_toolchain_config.BUILD.tpl
+index 3d48d16..cc6fa90 100644
+--- a/toolchain/cc_toolchain_config.BUILD.tpl
++++ b/toolchain/cc_toolchain_config.BUILD.tpl
+@@ -11,13 +11,17 @@ filegroup(name = "empty")
+ 
+ filegroup(
+     name = "cc_wrapper",
+-    srcs = ["bin/cc_wrapper.sh"],
++    srcs = [
++        "bin/cc_wrapper.sh",
++        "bin/cpp_module_deps_scanner.sh",
++    ],
+ )
+ 
+ filegroup(
+     name = "all-files-%{suffix}",
+     srcs = [
+         "bin/cc_wrapper.sh",
++        "bin/cpp_module_deps_scanner.sh",
+         %{repo_all_files_label_str}
+         %{extra_compiler_files}
+     ],
+@@ -27,6 +31,7 @@ filegroup(
+     name = "archiver-files-%{suffix}",
+     srcs = [
+         "bin/cc_wrapper.sh",
++        "bin/cpp_module_deps_scanner.sh",
+     ],
+ )
+ 
+@@ -34,6 +39,7 @@ filegroup(
+     name = "assembler-files-%{suffix}",
+     srcs = [
+         "bin/cc_wrapper.sh",
++        "bin/cpp_module_deps_scanner.sh",
+     ],
+ )
+ 
+@@ -41,6 +47,7 @@ filegroup(
+     name = "compiler-files-%{suffix}",
+     srcs = [
+         "bin/cc_wrapper.sh",
++        "bin/cpp_module_deps_scanner.sh",
+         %{repo_all_files_label_str}
+     ],
+ )
+@@ -49,6 +56,7 @@ filegroup(
+     name = "linker-files-%{suffix}",
+     srcs = [
+         "bin/cc_wrapper.sh",
++        "bin/cpp_module_deps_scanner.sh",
+     ],
+ )
+ 
+@@ -56,6 +64,7 @@ filegroup(
+     name = "objcopy-files-%{suffix}",
+     srcs = [
+         "bin/cc_wrapper.sh",
++        "bin/cpp_module_deps_scanner.sh",
+     ],
+ )
+ 
+@@ -63,6 +72,7 @@ filegroup(
+     name = "strip-files-%{suffix}",
+     srcs = [
+         "bin/cc_wrapper.sh",
++        "bin/cpp_module_deps_scanner.sh",
+     ],
+ )
+ 
+diff --git a/toolchain/cc_toolchains_setup.bzl b/toolchain/cc_toolchains_setup.bzl
+index 4c268da..a8a3e49 100644
+--- a/toolchain/cc_toolchains_setup.bzl
++++ b/toolchain/cc_toolchains_setup.bzl
+@@ -549,10 +549,33 @@ def _cc_toolchain_config_impl(rctx):
+         },
+     )
+ 
++    # C++20 named modules need a p1689 dependency scanner next to the compiler.
++    compiler_path = "{}bin/{}".format(toolchain_path_prefix, rctx.attr.tool_names["gcc"])
++    if rctx.attr.compiler == "clang":
++        deps_scanner_tpl = "//toolchain:clang_deps_scanner_wrapper.sh.tpl"
++    else:
++        deps_scanner_tpl = "//toolchain:gcc_deps_scanner_wrapper.sh.tpl"
++    rctx.template(
++        "bin/cpp_module_deps_scanner.sh",
++        Label(deps_scanner_tpl),
++        {
++            "%{cc}": compiler_path,
++            "%{deps_scanner}": "{}bin/clang-scan-deps".format(toolchain_path_prefix),
++        },
++    )
++
+     tool_paths = {}
+     for k, v in rctx.attr.tool_names.items():
+         tool_paths[k] = "\"{}bin/{}\"".format(toolchain_path_prefix, v)
+ 
++    # GCC appends extra make rules to the .d file of a module interface unit,
++    # which Bazel rejects; bin/cc_wrapper.sh strips them back out again.
++    if rctx.attr.compiler != "clang":
++        tool_paths["gcc"] = "\"{}\"".format(str(rctx.path("bin/cc_wrapper.sh")))
++    tool_paths["cpp-module-deps-scanner"] = "\"{}\"".format(
++        str(rctx.path("bin/cpp_module_deps_scanner.sh")),
++    )
++
+     extra_compiler_files = _label_to_string(rctx.attr.extra_compiler_files) if rctx.attr.extra_compiler_files else ""
+     target_files = extra_compiler_files
+     if rctx.attr.sysroot_files:
+diff --git a/toolchain/cc_wrapper.sh.tpl b/toolchain/cc_wrapper.sh.tpl
+index ee8ebea..ab2a9d3 100644
+--- a/toolchain/cc_wrapper.sh.tpl
++++ b/toolchain/cc_wrapper.sh.tpl
+@@ -48,5 +48,36 @@ for ((i = 0; i <= $#; i++)); do
+   fi
+ done
+ 
++# Find the flags that decide whether the .d file needs post-processing.
++output=""
++depfile=""
++modules=""
++for ((i = 0; i < ${#cmd[@]}; i++)); do
++  case "${cmd[i]}" in
++  -o) output="${cmd[i + 1]:-}" ;;
++  -MF) depfile="${cmd[i + 1]:-}" ;;
++  -fmodules-ts | -fmodules) modules=1 ;;
++  esac
++done
++
+ # Call the C++ compiler.
+-exec "${cmd[@]}"
++"${cmd[@]}"
++
++# With modules enabled GCC names the CMI as a second target of the object's
++# rule ("x.o x.pcm: deps", the target list may wrap) and appends rules for it
++# ("x.pcm:| x.o", "name.c++-module: x.pcm", ".PHONY: ..."). Bazel treats every
++# token in the .d as an inclusion and rejects the CMI as undeclared, so keep
++# only the first rule and rewrite its target list to the object file.
++if [[ -n ${modules} && -n ${depfile} && -n ${output} && -f ${depfile} ]]; then
++  awk -v obj="${output}" '
++    !finished {
++      rule = rule $0 "\n"
++      if ($0 !~ /\\$/) {
++        finished = 1
++        sub(/^[^:]*:/, obj ":", rule)
++        printf "%s", rule
++      }
++      next
++    }
++    { exit }' "${depfile}" >"${depfile}.tmp" && mv -f "${depfile}.tmp" "${depfile}"
++fi
+diff --git a/toolchain/clang_deps_scanner_wrapper.sh.tpl b/toolchain/clang_deps_scanner_wrapper.sh.tpl
+new file mode 100644
+index 0000000..3931a84
+--- /dev/null
++++ b/toolchain/clang_deps_scanner_wrapper.sh.tpl
+@@ -0,0 +1,15 @@
++#!/usr/bin/env bash
++#
++# C++20 named module dependency scanner for Clang.
++#
++set -eu
++
++scanner="%{deps_scanner}"
++if [ ! -x "$scanner" ]; then
++  echo >&2 "ERROR: clang-scan-deps not found at \"$scanner\"."
++  echo >&2 "The Clang toolchain archive for this target does not ship"
++  echo >&2 "clang-scan-deps, so C++20 named modules cannot be scanned."
++  exit 1
++fi
++
++exec "$scanner" -format=p1689 -- "%{cc}" "$@" >"$DEPS_SCANNER_OUTPUT_FILE"
+diff --git a/toolchain/gcc_deps_scanner_wrapper.sh.tpl b/toolchain/gcc_deps_scanner_wrapper.sh.tpl
+new file mode 100644
+index 0000000..0c10344
+--- /dev/null
++++ b/toolchain/gcc_deps_scanner_wrapper.sh.tpl
+@@ -0,0 +1,32 @@
++#!/usr/bin/env bash
++#
++# C++20 named module dependency scanner for GCC.
++#
++set -eu
++
++# GCC writes the p1689 dependency JSON to -fdeps-file, not to stdout, while
++# Bazel passes "-o <ddi>" (and possibly -MD) expecting the JSON at <ddi>; hand
++# that path to -fdeps-file instead and send the preprocessed text to /dev/null.
++out=""
++args=()
++wants_dotd=0
++while [ $# -gt 0 ]; do
++  case "$1" in
++    -o) out="$2"; shift 2 ;;
++    -MD|-MMD) wants_dotd=1; args+=("$1"); shift ;;
++    *) args+=("$1"); shift ;;
++  esac
++done
++if [ -z "$out" ]; then
++  out="${DEPS_SCANNER_OUTPUT_FILE:-}"
++fi
++if [ -z "$out" ]; then
++  echo >&2 "ERROR: no -o and no DEPS_SCANNER_OUTPUT_FILE for the deps scan."
++  exit 1
++fi
++if [ "$wants_dotd" = 1 ]; then
++  args+=(-MF "$out.d")
++fi
++
++exec "%{cc}" -E -x c++ -fmodules-ts -fdeps-format=p1689r5 \
++  -fdeps-file="$out" -fdeps-target="$out" "${args[@]}" -o /dev/null
+diff --git a/toolchain/unix_cc_toolchain_config.bzl b/toolchain/unix_cc_toolchain_config.bzl
+index 3904887..68bbafe 100644
+--- a/toolchain/unix_cc_toolchain_config.bzl
++++ b/toolchain/unix_cc_toolchain_config.bzl
+@@ -150,6 +150,9 @@ all_compile_actions = [
+     ACTION_NAMES.cpp_header_parsing,
+     ACTION_NAMES.cpp_module_compile,
+     ACTION_NAMES.cpp_module_codegen,
++    ACTION_NAMES.cpp_module_deps_scanning,
++    ACTION_NAMES.cpp20_module_compile,
++    ACTION_NAMES.cpp20_module_codegen,
+     ACTION_NAMES.clif_match,
+     ACTION_NAMES.lto_backend,
+ ]
+@@ -160,6 +163,9 @@ all_cpp_compile_actions = [
+     ACTION_NAMES.cpp_header_parsing,
+     ACTION_NAMES.cpp_module_compile,
+     ACTION_NAMES.cpp_module_codegen,
++    ACTION_NAMES.cpp_module_deps_scanning,
++    ACTION_NAMES.cpp20_module_compile,
++    ACTION_NAMES.cpp20_module_codegen,
+     ACTION_NAMES.clif_match,
+ ]
+ 
+@@ -170,6 +176,8 @@ preprocessor_compile_actions = [
+     ACTION_NAMES.preprocess_assemble,
+     ACTION_NAMES.cpp_header_parsing,
+     ACTION_NAMES.cpp_module_compile,
++    ACTION_NAMES.cpp_module_deps_scanning,
++    ACTION_NAMES.cpp20_module_compile,
+     ACTION_NAMES.clif_match,
+ ]
+ 
+@@ -180,6 +188,7 @@ codegen_compile_actions = [
+     ACTION_NAMES.assemble,
+     ACTION_NAMES.preprocess_assemble,
+     ACTION_NAMES.cpp_module_codegen,
++    ACTION_NAMES.cpp20_module_codegen,
+     ACTION_NAMES.lto_backend,
+ ]
+ 
+@@ -273,6 +282,49 @@ def _impl(ctx):
+     else:
+         symbol_check = None
+ 
++    # C++20 named modules: a deps-scanning action that emits a p1689 dependency
++    # graph, and separate compile/codegen actions for module interface units.
++    deps_scanner = "cpp-module-deps-scanner_not_found"
++    if "cpp-module-deps-scanner" in ctx.attr.tool_paths:
++        deps_scanner = ctx.attr.tool_paths["cpp-module-deps-scanner"]
++    cc = ctx.attr.tool_paths.get("gcc")
++    compile_implies = [
++        # keep same with c++-compile
++        "legacy_compile_flags",
++        "user_compile_flags",
++        "sysroot",
++        "unfiltered_compile_flags",
++        "compiler_input_flags",
++        "compiler_output_flags",
++    ]
++    action_configs.append(action_config(
++        action_name = ACTION_NAMES.cpp_module_deps_scanning,
++        tools = [tool(path = deps_scanner)],
++        implies = compile_implies,
++    ))
++    action_configs.append(action_config(
++        action_name = ACTION_NAMES.cpp20_module_compile,
++        tools = [tool(path = cc)],
++        flag_sets = [
++            flag_set(
++                flag_groups = [
++                    flag_group(
++                        flags = [
++                            "-x",
++                            "c++-module" if ctx.attr.compiler == "clang" else "c++",
++                        ],
++                    ),
++                ],
++            ),
++        ],
++        implies = compile_implies,
++    ))
++    action_configs.append(action_config(
++        action_name = ACTION_NAMES.cpp20_module_codegen,
++        tools = [tool(path = cc)],
++        implies = compile_implies,
++    ))
++
+     copy_dynamic_libraries_to_binary_feature = feature(
+         name = "copy_dynamic_libraries_to_binary",
+     )
+@@ -427,6 +479,9 @@ def _impl(ctx):
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
+                     ACTION_NAMES.cpp_module_codegen,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.lto_backend,
+                     ACTION_NAMES.clif_match,
+                 ] + all_link_actions + lto_index_actions,
+@@ -454,6 +509,9 @@ def _impl(ctx):
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
+                     ACTION_NAMES.cpp_module_codegen,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                     ACTION_NAMES.lto_backend,
+@@ -482,6 +540,9 @@ def _impl(ctx):
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
+                     ACTION_NAMES.cpp_module_codegen,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                     ACTION_NAMES.lto_backend,
+@@ -502,6 +563,20 @@ def _impl(ctx):
+                 ],
+             ),
+         ],
++        env_sets = [
++            env_set(
++                actions = [
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                ],
++                env_entries = [
++                    env_entry(
++                        key = "DEPS_SCANNER_OUTPUT_FILE",
++                        value = "%{output_file}",
++                        expand_if_available = "output_file",
++                    ),
++                ],
++            ),
++        ],
+     )
+ 
+     fdo_optimize_feature = feature(
+@@ -605,6 +680,8 @@ def _impl(ctx):
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_codegen,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                 ],
+                 flag_groups = [
+                     flag_group(flags = ["-fPIC"], expand_if_available = "pic"),
+@@ -624,6 +701,7 @@ def _impl(ctx):
+                     ACTION_NAMES.c_compile,
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_codegen,
++                    ACTION_NAMES.cpp20_module_codegen,
+                 ],
+                 flag_groups = [
+                     flag_group(
+@@ -647,6 +725,9 @@ def _impl(ctx):
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.clif_match,
+                 ],
+                 flag_groups = [
+@@ -814,6 +895,9 @@ def _impl(ctx):
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_module_codegen,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                 ],
+                 flag_groups = [
+                     flag_group(
+@@ -837,6 +921,9 @@ def _impl(ctx):
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.clif_match,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+@@ -908,6 +995,9 @@ def _impl(ctx):
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.clif_match,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+@@ -941,6 +1031,9 @@ def _impl(ctx):
+                     ACTION_NAMES.cpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
+                     ACTION_NAMES.cpp_module_compile,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
+                     ACTION_NAMES.clif_match,
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+@@ -1275,6 +1368,8 @@ def _impl(ctx):
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
+                     ACTION_NAMES.clif_match,
+                 ],
+                 flag_groups = [
+@@ -1300,6 +1395,8 @@ def _impl(ctx):
+                     ACTION_NAMES.objc_compile,
+                     ACTION_NAMES.objcpp_compile,
+                     ACTION_NAMES.cpp_header_parsing,
++                    ACTION_NAMES.cpp_module_deps_scanning,
++                    ACTION_NAMES.cpp20_module_compile,
+                     ACTION_NAMES.clif_match,
+                 ],
+                 flag_groups = [
+@@ -1554,6 +1651,51 @@ def _impl(ctx):
+         enabled = False,
+     )
+ 
++    cpp_module_modmap_file_feature = feature(
++        name = "cpp_module_modmap_file",
++        flag_sets = [
++            flag_set(
++                actions = [
++                    ACTION_NAMES.cpp_compile,
++                    ACTION_NAMES.cpp20_module_compile,
++                    ACTION_NAMES.cpp20_module_codegen,
++                ],
++                flag_groups = [
++                    flag_group(
++                        # GCC only honours module imports, module units and the
++                        # mapper once modules are switched on.
++                        flags = ["@%{cpp_module_modmap_file}"] if ctx.attr.compiler == "clang" else ["-fmodules-ts", "-fmodule-mapper=%{cpp_module_modmap_file}"],
++                        expand_if_available = "cpp_module_modmap_file",
++                    ),
++                ],
++            ),
++        ],
++        enabled = True,
++    )
++
++    if ctx.attr.compiler == "clang":
++        cpp20_module_output_flag_groups = [
++            flag_group(
++                flags = ["-fmodule-output=%{cpp_module_output_file}"],
++                expand_if_available = "cpp_module_output_file",
++            ),
++        ]
++    else:
++        cpp20_module_output_flag_groups = []
++
++    cpp20_module_compile_flags_feature = feature(
++        name = "cpp20_module_compile_flags",
++        flag_sets = [
++            flag_set(
++                actions = [
++                    ACTION_NAMES.cpp20_module_compile,
++                ],
++                flag_groups = cpp20_module_output_flag_groups,
++            ),
++        ],
++        enabled = True,
++    )
++
+     # TODO(#8303): Mac crosstool should also declare every feature.
+     if ctx.attr.target_system_name == "x86_64-windows" and ctx.attr.compiler == "gcc":
+         artifact_name_patterns = [
+@@ -1571,6 +1713,8 @@ def _impl(ctx):
+         features = [
+             #windres_feature,
+             cpp_modules_feature,
++            cpp_module_modmap_file_feature,
++            cpp20_module_compile_flags_feature,
+             dependency_file_feature,
+             copy_dynamic_libraries_to_binary_feature,
+             serialized_diagnostics_file_feature,
+@@ -1634,6 +1778,8 @@ def _impl(ctx):
+         artifact_name_patterns = []
+         features = [
+             cpp_modules_feature,
++            cpp_module_modmap_file_feature,
++            cpp20_module_compile_flags_feature,
+             dependency_file_feature,
+             serialized_diagnostics_file_feature,
+             random_seed_feature,
+@@ -1705,6 +1851,8 @@ def _impl(ctx):
+         ]
+         features = [
+             cpp_modules_feature,
++            cpp_module_modmap_file_feature,
++            cpp20_module_compile_flags_feature,
+             macos_minimum_os_feature,
+             macos_default_link_flags_feature,
+             dependency_file_feature,

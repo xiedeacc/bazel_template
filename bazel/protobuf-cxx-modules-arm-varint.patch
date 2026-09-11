@@ -1,0 +1,25 @@
+# Apple clang loses internal-linkage functions declared in a header that a
+# C++20 module unit includes in its global module fragment; templates
+# instantiated at the end of the unit then fail to find them ("no matching
+# function for call to 'VarintParseSlowArm'"). External linkage is what
+# every other helper in this header has anyway.
+--- a/src/google/protobuf/parse_context.h
++++ b/src/google/protobuf/parse_context.h
+@@ -1150,7 +1150,7 @@
+ }
+ 
+ PROTOBUF_FUTURE_ADD_EARLY_NODISCARD
+-static const char* VarintParseSlowArm(const char* p, uint32_t* out,
++inline const char* VarintParseSlowArm(const char* p, uint32_t* out,
+                                       uint64_t first8) {
+   auto tmp = VarintParseSlowArm32(p, first8);
+   *out = tmp.second;
+@@ -1158,7 +1158,7 @@
+ }
+ 
+ PROTOBUF_FUTURE_ADD_EARLY_NODISCARD
+-static const char* VarintParseSlowArm(const char* p, uint64_t* out,
++inline const char* VarintParseSlowArm(const char* p, uint64_t* out,
+ 
+                                       uint64_t first8) {
+   auto tmp = VarintParseSlowArm64(p, first8);

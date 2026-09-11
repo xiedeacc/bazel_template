@@ -2,7 +2,13 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
 
-package(default_visibility = ["//visibility:public"])
+package(
+    default_visibility = ["//visibility:public"],
+    features = [
+        "cpp_modules",
+        "layering_check",
+    ],
+)
 
 COPTS = GLOBAL_COPTS + select({
     "@platforms//os:windows": [
@@ -45,24 +51,29 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
     "//conditions:default": [],
 })
 
+# bazel_template.server.http_handler; the factory is an implementation unit.
+# The two WebSocket handlers stay headers: they are proxygen/folly-based and
+# only the factory's global module fragment includes them.
 cc_library(
     name = "http_handler",
+    srcs = ["handler_factory.cc"],
     hdrs = [
-        "http_handler_factory.h",
         "websocket_handler.h",
         "websocket_upgrade_handler.h",
     ],
     copts = COPTS,
+    features = ["-layering_check"],
     linkopts = LINKOPTS,
     local_defines = LOCAL_DEFINES,
+    module_interfaces = ["http_handler.cppm"],
     deps = [
-        "//src/common:logging",
         "//src/common:defs",
-        "//src/util:config_manager",
         "@boost//:beast",
-        "@openssl//:crypto",
         "@boost//:system",
         "@boost//:url",
+        "//src/common:logging",
+        "@folly",
+        "@openssl//:crypto",
         "@proxygen",
     ],
 )

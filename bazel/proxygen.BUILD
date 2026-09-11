@@ -100,6 +100,9 @@ proxygen_cpp_gen(
     tool = ":gen_HTTPCommonHeaders_sh",
     txt_file = "proxygen/lib/http/HTTPCommonHeaders.txt",
     gperf_path = select({
+        # Absolute path on purpose: the action runs under Git bash, which cannot
+        # split the semicolon-separated Windows PATH from --action_env, so a bare
+        # "gperf" is not found.
         "@platforms//os:windows": "D:/software/gperf/bin/gperf.exe",
         "//conditions:default": "",
     }),

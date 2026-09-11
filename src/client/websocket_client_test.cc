@@ -3,8 +3,6 @@
  * All rights reserved.
  *******************************************************************************/
 
-#include "src/client/websocket_client.h"
-
 #include <chrono>
 #include <future>
 #include <memory>
@@ -19,12 +17,11 @@
 #include "proxygen/httpserver/HTTPServer.h"
 #include "proxygen/httpserver/HTTPServerOptions.h"
 #include "proxygen/httpserver/RequestHandlerFactory.h"
-#include "src/proto/service.pb.h"
-#include "src/server/http_handler/http_handler_factory.h"
-#include "src/util/util.h"
 
-namespace bazel_template {
-namespace client {
+import bazel_template.client.websocket_client;
+import bazel_template.server.http_handler;
+
+namespace bazel_template::client {
 namespace {
 
 // Brings up an in-process HTTP server carrying the real WebSocket handler, so
@@ -37,7 +34,7 @@ class WebSocketClientTest : public ::testing::Test {
     options.idleTimeout = std::chrono::milliseconds(60000);
     options.handlerFactories =
         proxygen::RequestHandlerChain()
-            .addThen<server::http_handler::HTTPHandlerFactory>()
+            .addThen(server::http_handler::CreateHandlerFactory())
             .build();
 
     server_ = std::make_unique<proxygen::HTTPServer>(std::move(options));
@@ -93,5 +90,4 @@ TEST_F(WebSocketClientTest, ConnectAndDisconnect) {
 }
 
 }  // namespace
-}  // namespace client
-}  // namespace bazel_template
+}  // namespace bazel_template::client

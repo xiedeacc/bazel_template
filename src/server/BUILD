@@ -1,8 +1,14 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_binary")
 load("@bazel_template//bazel:common.bzl", "GLOBAL_COPTS", "GLOBAL_LINKOPTS", "GLOBAL_LOCAL_DEFINES", "version_info")
 load("//bazel:build.bzl", "cc_test")
 
-package(default_visibility = ["//visibility:public"])
+package(
+    default_visibility = ["//visibility:public"],
+    features = [
+        "cpp_modules",
+        "layering_check",
+    ],
+)
 
 COPTS = GLOBAL_COPTS + select({
     "@platforms//os:windows": [
@@ -53,17 +59,6 @@ LINKOPTS = GLOBAL_LINKOPTS + select({
     "//conditions:default": [],
 })
 
-cc_library(
-    name = "server_context",
-    hdrs = ["server_context.h"],
-    local_defines = LOCAL_DEFINES,
-    deps = [
-        ":version_info",
-        "//src/util:config_manager",
-        "@fmt",
-    ],
-)
-
 version_info(
     name = "version_info_h",
     out = "version_info.h",
@@ -82,28 +77,52 @@ cc_test(
     deps = [":version_info"],
 )
 
+# bazel_template.server.context
 cc_library(
-    name = "grpc_server_impl",
-    hdrs = ["grpc_server_impl.h"],
+    name = "context",
+    srcs = ["context.cc"],
     copts = COPTS,
+    features = ["-layering_check"],
     local_defines = LOCAL_DEFINES,
+    module_interfaces = ["context.cppm"],
     deps = [
+        ":version_info",
         "//src/async_grpc",
-        "//src/proto:cc_grpc_service",
-        "//src/server:server_context",
-        "//src/server/grpc_handler",
         "//src/util:config_manager",
+        "//src/common:logging",
     ],
 )
 
+# bazel_template.server.grpc_server; grpc_server.cc registers the handlers.
 cc_library(
-    name = "http_server_impl",
-    hdrs = ["http_server_impl.h"],
+    name = "grpc_server",
+    srcs = ["grpc_server.cc"],
     copts = COPTS,
+    features = ["-layering_check"],
     local_defines = LOCAL_DEFINES,
+    module_interfaces = ["grpc_server.cppm"],
     deps = [
-        "//src/server:server_context",
+        ":context",
+        "//src/async_grpc",
+        "//src/server/grpc_handler",
         "//src/util:config_manager",
+        "@com_github_grpc_grpc//:grpc++",
+    ],
+)
+
+# bazel_template.server.http_server; http_server.cc holds the proxygen code.
+cc_library(
+    name = "http_server",
+    srcs = ["http_server.cc"],
+    copts = COPTS,
+    features = ["-layering_check"],
+    local_defines = LOCAL_DEFINES,
+    module_interfaces = ["http_server.cppm"],
+    deps = [
+        ":context",
+        "//src/server/http_handler",
+        "//src/util:config_manager",
+        "@folly",
         "@proxygen",
     ],
 )
@@ -113,18 +132,22 @@ cc_binary(
     srcs = ["server.cc"],
     copts = COPTS,
     linkopts = LINKOPTS,
+    linkstatic = True,
     local_defines = LOCAL_DEFINES,
     deps = [
+        ":context",
+        ":grpc_server",
+        ":http_server",
         "//src/common:winsock_init",
-        ":server_context",
         "//src/proto:cc_grpc_service",
-        "//src/server/http_handler",
+        "//src/util:config_manager",
+        "@boost//:url",
+        "//src/common:logging",
+        "@com_github_grpc_grpc//:grpc++",
         "@folly",
+        "@gflags",
         "@libsodium//:sodium",
         "@openssl//:crypto",
-        ":http_server_impl",
-        #"@jemalloc",
-        "@boost//:url",
         "@openssl//:ssl",
         "@xz//:lzma",
     ],

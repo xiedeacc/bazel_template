@@ -52,6 +52,18 @@ GLOBAL_COPTS = select({
         "/Zc:wchar_t",
         "/Zc:forScope",  #Enforce Standard for Loop Scope
         "/Zc:inline",  #enforces standard C++ behavior for inline functions
+        # C++20 conformance switches that /permissive- and /std:c++20 do not
+        # imply. /Zc:enumTypes is left out on purpose: it changes the size of
+        # enums without a fixed underlying type, and the external libraries
+        # are compiled without it.
+        "/Zc:__cplusplus",  #report the real language version in __cplusplus
+        "/Zc:preprocessor",  #standard-conforming preprocessor (variadic macros, __VA_OPT__)
+        "/Zc:externConstexpr",  #external linkage for extern constexpr variables
+        "/Zc:gotoScope",  #reject goto that skips initialisation, as the standard does
+        "/Zc:hiddenFriend",  #standard hidden-friend lookup rules
+        "/Zc:lambda",  #standard lambda grammar and processing
+        "/Zc:templateScope",  #reject shadowing of template parameters
+        "/Zc:checkGwOdr",  #diagnose ODR violations that /Gw would otherwise hide
         "/Gd",  #__cdecl Calling Convention
         "/Gm-",  #disables minimal rebuild
         "/diagnostics:column",

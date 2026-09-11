@@ -13,6 +13,11 @@ without clang-tidy can still build and test normally.
 
 # Visual Studio does not put its LLVM tools on PATH, so look in the usual spots.
 _WINDOWS_SEARCH_DIRS = [
+    # VS 2026 first: its LLVM 22 matches the MSVC 14.52 STL, which refuses
+    # older clangs (STL1000).
+    "C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/Llvm/x64/bin",
+    "C:/Program Files/Microsoft Visual Studio/18/Professional/VC/Tools/Llvm/x64/bin",
+    "C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Tools/Llvm/x64/bin",
     "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/Llvm/x64/bin",
     "C:/Program Files/Microsoft Visual Studio/2022/BuildTools/VC/Tools/Llvm/x64/bin",
     "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/Llvm/x64/bin",
